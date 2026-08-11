@@ -18,13 +18,19 @@ MAGENTA='\033[0;35m'
 NC='\033[0m'
 
 # --exclude-dir=security skips ./security/ and ./scripts/security/ (this tool's own
-# implementation); --exclude=security-*.md skips our own security checklists under
-# .claude/ (e.g. .claude/agents/security-auth-crypto.md, .claude/commands/security-review.md).
-# Both are meta-documentation that legitimately describes attack patterns as prose — without
-# this, the scanner flags its own pattern list and checklists as if they were the attack.
-# Any OTHER file under .claude/ (a different name, or a tampered CLAUDE.md/AGENTS.md) is
-# still fully scanned.
-EXCLUDE="--exclude-dir=.git --exclude-dir=node_modules --exclude-dir=vendor --exclude-dir=__pycache__ --exclude-dir=.venv --exclude-dir=venv --exclude-dir=dist --exclude-dir=build --exclude-dir=target --exclude-dir=security --exclude=security-*.md"
+# implementation) — meta-documentation that legitimately describes attack patterns as prose.
+# NOTE: there is deliberately no --exclude=GLOB here for the .claude/ checklists (e.g.
+# security-auth-crypto.md) — GNU grep gives --include priority over --exclude for individual
+# files, so an --exclude=security-*.md is silently ignored whenever --include="*.md" is also
+# passed (as every check below does). Those files are filtered via POST_EXCLUDE_FILES instead,
+# applied to grep's OUTPUT after the fact, which has no such precedence trap.
+EXCLUDE="--exclude-dir=.git --exclude-dir=node_modules --exclude-dir=vendor --exclude-dir=__pycache__ --exclude-dir=.venv --exclude-dir=venv --exclude-dir=dist --exclude-dir=build --exclude-dir=target --exclude-dir=security"
+
+# Strips result lines whose file is: our own .claude/ security checklists (meta-documentation
+# that describes attack phrases as prose, by design) or a package-manager lockfile (long
+# random-looking base64/hex integrity hashes routinely contain "//" or hex runs by pure
+# chance, e.g. a sha512 hash containing "//" satisfies the base64-in-a-comment heuristic).
+POST_EXCLUDE_FILES='(^|/)(package-lock\.json|yarn\.lock|pnpm-lock\.yaml|bun\.lockb|Cargo\.lock|go\.sum|composer\.lock|Gemfile\.lock|poetry\.lock|security-[^/:]+\.md):'
 
 finding() {
     local severity="$1" category="$2" file="$3" detail="$4"
@@ -124,6 +130,7 @@ results=$(grep -rniP "$COMBINED_PATTERN" "$PROJECT_ROOT" \
     --include="*.svg" --include="*.xml" --include="*.sh" --include="*.css" \
     --include="*.jsx" --include="*.tsx" --include="*.php" \
     2>/dev/null | head -50 || true)
+results=$(echo "$results" | grep -vE "$POST_EXCLUDE_FILES" || true)
 
 if [ -n "$results" ]; then
     echo "$results" | while IFS= read -r line; do
@@ -192,7 +199,7 @@ if [ -d "$PROJECT_ROOT/.claude" ]; then
 
     # Check custom commands
     for cmd in $(find "$PROJECT_ROOT/.claude/commands" -type f 2>/dev/null); do
-        if grep -qiP '(?:curl|wget|nc|eval|exec|bash -c)' "$cmd" 2>/dev/null; then
+        if grep -qiP '(?:curl|wget|\bnc\b|eval|exec|bash -c)' "$cmd" 2>/dev/null; then
             finding "HIGH" "Agent Config" "$cmd" "Custom command executes potentially dangerous operations"
         fi
     done
@@ -214,6 +221,7 @@ results=$(grep -rnP '(?://|#|/\*|\*|<!--)\s*.*(?:[A-Za-z0-9+/]{4}){15,}={0,2}' "
     --include="*.go" --include="*.java" --include="*.rs" --include="*.sh" \
     --include="*.html" --include="*.xml" --include="*.yaml" --include="*.yml" \
     2>/dev/null | head -20 || true)
+results=$(echo "$results" | grep -vE "$POST_EXCLUDE_FILES" || true)
 
 if [ -n "$results" ]; then
     echo "$results" | while IFS= read -r line; do
@@ -231,6 +239,7 @@ results=$(grep -rnP '(?://|#|/\*|\*|<!--)\s*.*(?:0x[0-9a-fA-F]{2}\s*){10,}' "$PR
     --include="*.js" --include="*.ts" --include="*.py" --include="*.rb" \
     --include="*.go" --include="*.java" --include="*.rs" \
     2>/dev/null | head -10 || true)
+results=$(echo "$results" | grep -vE "$POST_EXCLUDE_FILES" || true)
 
 if [ -n "$results" ]; then
     echo "$results" | while IFS= read -r line; do
@@ -332,7 +341,7 @@ if [ -d "$PROJECT_ROOT/.git/hooks" ]; then
         echo "  Analyzing: $hook"
 
         # Check for network access
-        if grep -qiP '(?:curl|wget|nc|ncat|fetch|http|ssh|scp|rsync)' "$hook" 2>/dev/null; then
+        if grep -qiP '(?:curl|wget|\bnc\b|ncat|fetch|http|ssh|scp|rsync)' "$hook" 2>/dev/null; then
             finding "HIGH" "Git Hook" "$hook" "Hook accesses network — verify this is intended"
         fi
 
@@ -359,7 +368,7 @@ fi
 if [ -d "$PROJECT_ROOT/.husky" ]; then
     for hook in $(find "$PROJECT_ROOT/.husky" -type f -executable 2>/dev/null | grep -v "_"); do
         echo "  Analyzing Husky hook: $hook"
-        if grep -qiP '(?:curl|wget|nc|ncat|eval|base64|exec.*\$)' "$hook" 2>/dev/null; then
+        if grep -qiP '(?:curl|wget|\bnc\b|ncat|eval|base64|exec.*\$)' "$hook" 2>/dev/null; then
             finding "HIGH" "Git Hook" "$hook" "Husky hook contains suspicious patterns"
         fi
     done
