@@ -17,26 +17,28 @@ CYAN='\033[0;36m'
 MAGENTA='\033[0;35m'
 NC='\033[0m'
 
-# --exclude-dir="./security" and "./scripts/security" skip exactly this tool's own
-# implementation (a path-anchored pattern, i.e. containing "/", matches the full relative path
-# from the search root — NOT a bare "--exclude-dir=security", which would also skip any
-# unrelated future directory merely named "security", e.g. a hypothetical src/security/).
-# NOTE: there is deliberately no --exclude=GLOB here for the .claude/ checklists (e.g.
-# security-auth-crypto.md) — GNU grep gives --include priority over --exclude for individual
-# files, so an --exclude=security-*.md is silently ignored whenever --include="*.md" is also
-# passed (as every check below does). Those files are filtered via POST_EXCLUDE_FILES instead,
-# applied to grep's OUTPUT after the fact, which has no such precedence trap.
-EXCLUDE="--exclude-dir=.git --exclude-dir=node_modules --exclude-dir=vendor --exclude-dir=__pycache__ --exclude-dir=.venv --exclude-dir=venv --exclude-dir=dist --exclude-dir=build --exclude-dir=target --exclude-dir=./security --exclude-dir=./scripts/security"
+# NOTE: path-anchored --exclude-dir (a pattern containing "/", intended to match the full
+# relative path rather than a bare directory basename) turned out to be unreliable across GNU
+# grep versions — it worked with the GNU grep 3.12 installed locally for testing (`brew install
+# grep`) but NOT on the actual GitHub Actions Ubuntu runner, which silently fell back to
+# scanning scripts/security/ anyway. A bare "--exclude-dir=security" isn't safe either (see
+# POST_EXCLUDE_FILES below — same class of bug: it would skip any unrelated future directory
+# merely named "security", e.g. a hypothetical src/security/). So none of this tool's own
+# directories/files are excluded via grep's own --exclude/--exclude-dir flags at all; everything
+# goes through POST_EXCLUDE_FILES, a plain `grep -v` on the OUTPUT, which has no such trap and
+# is directly testable against `grep -rn` output text rather than trusting an --exclude flag's
+# internal path-matching behavior to be consistent.
+EXCLUDE="--exclude-dir=.git --exclude-dir=node_modules --exclude-dir=vendor --exclude-dir=__pycache__ --exclude-dir=.venv --exclude-dir=venv --exclude-dir=dist --exclude-dir=build --exclude-dir=target"
 
-# Strips result lines whose file is: our own checklists specifically under .claude/agents/ or
-# .claude/commands/ (meta-documentation that describes attack phrases as prose, by design —
-# scoped to those two directories, NOT any file named security-*.md anywhere in the repo, so a
-# random file elsewhere using that name convention doesn't get a free pass), or a
-# package-manager lockfile (long random-looking base64/hex integrity hashes routinely contain
-# "//" or hex runs by pure chance, e.g. a sha512 hash containing "//" satisfies the
-# base64-in-a-comment heuristic — lockfiles anywhere in the repo are excluded, since they're
-# machine-generated regardless of location).
-POST_EXCLUDE_FILES='(^|/)(package-lock\.json|yarn\.lock|pnpm-lock\.yaml|bun\.lockb|Cargo\.lock|go\.sum|composer\.lock|Gemfile\.lock|poetry\.lock):|\.claude/(agents|commands)/security-[^/:]+\.md:'
+# Strips result lines whose file is: this tool's own implementation, at the exact root-level
+# ./security/ or ./scripts/security/ paths only (NOT any other directory merely named
+# "security", e.g. a hypothetical src/security/ stays fully scanned); our own checklists
+# specifically under .claude/agents/ or .claude/commands/ (NOT any file named security-*.md
+# anywhere else in the repo); or a package-manager lockfile (long random-looking base64/hex
+# integrity hashes routinely contain "//" or hex runs by pure chance, e.g. a sha512 hash
+# containing "//" satisfies the base64-in-a-comment heuristic — excluded regardless of
+# location, since lockfiles are machine-generated wherever they are).
+POST_EXCLUDE_FILES='^\./(security|scripts/security)/[^/:]+:|(^|/)(package-lock\.json|yarn\.lock|pnpm-lock\.yaml|bun\.lockb|Cargo\.lock|go\.sum|composer\.lock|Gemfile\.lock|poetry\.lock):|\.claude/(agents|commands)/security-[^/:]+\.md:'
 
 finding() {
     local severity="$1" category="$2" file="$3" detail="$4"
