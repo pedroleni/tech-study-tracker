@@ -88,10 +88,23 @@ Para cada uno:
 - P1 (este sprint): hallazgos HIGH
 - P2 (siguiente sprint): hallazgos MEDIUM
 
-## Paso 4: Siguientes pasos
+## Paso 4: Guardar el informe
 
-Tras presentar el informe:
+Escribe el informe completo (el mismo contenido del paso 3, con una sección final **Estado**
+donde cada hallazgo empieza como `- [ ] pendiente`) en
+`security/reviews/YYYY-MM-DD-<tema-corto>.md` (fecha real de hoy; `<tema-corto>` describe el
+alcance — `full-audit` para una auditoría completa, o el área si `$ARGUMENTS` acotó la revisión,
+p. ej. `auth-rls`). Sigue la convención de `security/reviews/README.md` y añade la fila
+correspondiente a su tabla de índice. No lo dejes solo en la respuesta del chat — el chat no
+queda versionado ni buscable.
+
+## Paso 5: Siguientes pasos
+
+Tras presentar el informe y guardarlo:
 1. Ofrece **arreglar automáticamente** los hallazgos CRITICAL y HIGH donde sea seguro hacerlo.
+   Si arreglas alguno, actualiza su casilla en la sección Estado del archivo guardado
+   (`- [x] arreglado, <commit/PR>`) en vez de dejarla pendiente.
 2. Recuerda que Codex puede correr la misma auditoría siguiendo `AGENTS.md` (no tiene
    subagentes de Claude, pero puede leer cada `.claude/agents/security-*.md` como checklist y
-   ejecutar los scripts de `scripts/security/` directamente).
+   ejecutar los scripts de `scripts/security/` directamente) — y que también debe guardar su
+   informe en `security/reviews/` siguiendo la misma convención.
