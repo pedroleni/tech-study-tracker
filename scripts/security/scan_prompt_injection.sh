@@ -17,7 +17,14 @@ CYAN='\033[0;36m'
 MAGENTA='\033[0;35m'
 NC='\033[0m'
 
-EXCLUDE="--exclude-dir=.git --exclude-dir=node_modules --exclude-dir=vendor --exclude-dir=__pycache__ --exclude-dir=.venv --exclude-dir=venv --exclude-dir=dist --exclude-dir=build --exclude-dir=target"
+# --exclude-dir=security skips ./security/ and ./scripts/security/ (this tool's own
+# implementation); --exclude=security-*.md skips our own security checklists under
+# .claude/ (e.g. .claude/agents/security-auth-crypto.md, .claude/commands/security-review.md).
+# Both are meta-documentation that legitimately describes attack patterns as prose — without
+# this, the scanner flags its own pattern list and checklists as if they were the attack.
+# Any OTHER file under .claude/ (a different name, or a tampered CLAUDE.md/AGENTS.md) is
+# still fully scanned.
+EXCLUDE="--exclude-dir=.git --exclude-dir=node_modules --exclude-dir=vendor --exclude-dir=__pycache__ --exclude-dir=.venv --exclude-dir=venv --exclude-dir=dist --exclude-dir=build --exclude-dir=target --exclude-dir=security --exclude=security-*.md"
 
 finding() {
     local severity="$1" category="$2" file="$3" detail="$4"
@@ -80,10 +87,16 @@ done < <(find "$PROJECT_ROOT" \( -name "*.js" -o -name "*.ts" -o -name "*.py" -o
 echo -e "\n${CYAN}── [2/7] Agent-Targeted Instructions ──${NC}"
 
 # Patterns that address AI assistants/agents directly
+# NOTE: \b (word boundary) around the trigger verb is required on the loose verb+noun
+# patterns (override/bypass/skip/disable) — without it, "skip.*check" matches inside
+# ordinary camelCase identifiers like "skipLibCheck" (a real, common TS compiler option),
+# since ".*" happily bridges across the middle of one contiguous word. \b only blocks a
+# match when the verb is glued to more letters (identifiers); real natural-language
+# instructions ("skip the validation check") keep matching normally.
 AI_DIRECTIVE_PATTERNS=(
     'ignore.*previous.*instruction'
     'ignore.*above.*instruction'
-    'override.*(?:security|safety|restriction|permission|check)'
+    '\boverride\b.*(?:security|safety|restriction|permission|check)'
     'you are now'
     'new instruction'
     'system prompt'
@@ -91,9 +104,9 @@ AI_DIRECTIVE_PATTERNS=(
     'disregard.*(?:previous|above|earlier|all)'
     'act as.*(?:admin|root|system|unrestricted)'
     'maintenance mode'
-    'bypass.*(?:check|validation|security|auth|filter)'
-    'skip.*(?:security|validation|check|auth|verification)'
-    'disable.*(?:security|validation|check|auth|logging)'
+    '\bbypass\b.*(?:check|validation|security|auth|filter)'
+    '\bskip\b.*(?:security|validation|check|auth|verification)'
+    '\bdisable\b.*(?:security|validation|check|auth|logging)'
     'do not.*(?:log|report|alert|notify|check)'
     '(?:AI|assistant|agent|model|Claude|GPT|LLM).*(?:execute|run|download|fetch|curl|send)'
     'IMPORTANT.*(?:AI|assistant|agent|model).*(?:ignore|override|skip|bypass)'
