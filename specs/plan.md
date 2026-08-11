@@ -16,8 +16,27 @@ decisiones de arquitectura y orden de construcción.
   `rehype-raw`. Renderiza a elementos React, no a HTML crudo, por lo que
   es seguro frente a XSS por defecto sin necesitar sanitizador aparte
   (cumple el requisito de la sección 9 de la spec).
-- **Modo oscuro:** clase `dark` en `<html>` vía Tailwind (`darkMode:
-  'class'`), toggle guardado en `localStorage`.
+- **Modo oscuro:** clase `dark` en `<html>`, toggle guardado en
+  `localStorage`. Tailwind v4 es CSS-first (sin `tailwind.config.ts`): el
+  variant se declara en `src/index.css` con
+  `@custom-variant dark (&:where(.dark, .dark *));` — no con la opción
+  `darkMode` de un config JS, que v4 ignora.
+- **Tailwind:** v4, vía el plugin oficial `@tailwindcss/vite` (sin
+  PostCSS). Los tokens de color (`--background`, `--border`, etc.) viven
+  como variables CSS en `:root`/`.dark` dentro de `src/index.css`, mapeadas
+  a clases de utilidad (`bg-background`, `border-border`...) mediante un
+  bloque `@theme inline { --color-*: var(--*) }` en el mismo archivo.
+- **Componentes UI:** shadcn/ui (Radix + Tailwind, accesible por defecto).
+  No es una dependencia npm normal — el CLI genera los componentes como
+  código fuente dentro de `src/components/ui/`, así que se editan
+  libremente. Alias de imports `@/*` → `./src/*` configurado en
+  `vite.config.ts` y en ambos `tsconfig*.json`.
+- **Accesibilidad:** `eslint-plugin-jsx-a11y` (lint-time) +
+  `vitest-axe` (auditoría automática con axe-core dentro de los tests de
+  Vitest/RTL ya existentes, matcher `toHaveNoViolations`). Todo componente
+  interactivo nuevo (formularios, modal de edición, badges clicables)
+  debe tener al menos un test que renderice el componente y llame a
+  `axe()` sobre el contenedor.
 
 ## 2. Estructura de carpetas
 
@@ -34,6 +53,7 @@ tech-study-tracker/
 │   │   ├── CategoryDetailPage.tsx
 │   │   └── TechnologyDetailPage.tsx
 │   ├── components/
+│   │   ├── ui/                   # shadcn/ui — generado por el CLI, editable
 │   │   ├── layout/AppShell.tsx, Navbar.tsx, DarkModeToggle.tsx
 │   │   ├── dashboard/StatsSummary.tsx, PendingList.tsx, CategoryQuickLinks.tsx
 │   │   ├── technology/TechnologyForm.tsx, TechnologyCard.tsx,
@@ -42,16 +62,19 @@ tech-study-tracker/
 │   │   ├── category/CategoryForm.tsx, CategoryList.tsx
 │   │   └── auth/AuthForm.tsx, ProtectedRoute.tsx
 │   ├── lib/
+│   │   ├── utils.ts              # cn() — generado por shadcn
 │   │   ├── supabaseClient.ts
 │   │   ├── queries/categories.ts, technologies.ts   # funciones CRUD puras
 │   │   ├── hooks/useCategories.ts, useTechnologies.ts, useAuth.ts
 │   │   └── utils/groupByCategory.ts, computeStats.ts, validateResourceUrl.ts
-│   └── types/index.ts
+│   ├── types/index.ts
+│   └── index.css                 # Tailwind v4 (@theme, tokens, dark variant)
 ├── supabase/
 │   └── migrations/0001_init.sql
 ├── .env.example
-├── vite.config.ts                # incluye config de Vitest (test: {...})
-├── tailwind.config.ts
+├── vite.config.ts                # plugins react + tailwindcss, alias @/*, Vitest
+├── eslint.config.js               # incluye eslint-plugin-jsx-a11y
+├── components.json                # config del CLI de shadcn/ui
 └── AGENTS.md, CLAUDE.md, specs/, security/   # ya creados
 ```
 
@@ -191,11 +214,14 @@ Ligado a `security/security-review-instructions.md`:
 
 ## 8. Orden de implementación
 
-1. `npm create vite@latest . -- --template react-ts`; instalar Tailwind,
-   React Router, TanStack Query, react-hook-form, zod, react-markdown,
-   supabase-js, Vitest + RTL + jsdom.
-2. Config: `tailwind.config.ts` (`darkMode: 'class'`), `vite.config.ts`
-   con bloque `test`, `.env.example` con las dos vars de Supabase.
+1. ~~`npm create vite@latest . -- --template react-ts`~~ — hecho. Igual que
+   Tailwind v4 + `@tailwindcss/vite`, React Router, TanStack Query,
+   react-hook-form, zod, react-markdown, supabase-js, Vitest + RTL + jsdom,
+   ESLint + jsx-a11y, vitest-axe, shadcn/ui (ver sección 1).
+2. ~~Config~~ — hecho: `vite.config.ts` (plugins, alias `@/*`, bloque
+   `test`), `src/index.css` (tokens + dark variant), `eslint.config.js`,
+   `components.json`. Falta `.env.example` con las vars reales de
+   Supabase cuando exista el proyecto (paso 3).
 3. Crear proyecto en Supabase (manual, por el usuario) y aplicar
    `supabase/migrations/0001_init.sql`.
 4. `types/index.ts`, `lib/supabaseClient.ts`.
@@ -203,7 +229,11 @@ Ligado a `security/security-review-instructions.md`:
 6. Data layer: `lib/queries/*.ts` (CRUD), `lib/hooks/*.ts` (React Query).
 7. Utils + sus tests: `groupByCategory`, `computeStats`,
    `validateResourceUrl`.
-8. UI base: `AppShell`, `Navbar`, `DarkModeToggle`.
+8. UI base: `AppShell`, `Navbar`, `DarkModeToggle` — usando componentes de
+   `components/ui/` (añadir con `npx shadcn@latest add <componente>`) en
+   vez de HTML a mano donde exista uno equivalente (button, dialog, select,
+   dropdown-menu...). Cada componente interactivo nuevo lleva un test con
+   `axe()` (ver sección 1, Accesibilidad).
 9. `DashboardPage` (+ `StatsSummary`, `PendingList`,
    `CategoryQuickLinks`) y sus tests.
 10. `CategoryIndexPage`, `CategoryDetailPage`, `CategoryForm`,
