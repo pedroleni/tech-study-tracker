@@ -94,7 +94,11 @@ for workflow in $(find "$PROJECT_ROOT/.github/workflows" -name "*.yml" -o -name 
     echo "  Scanning: $workflow"
 
     # Unpinned actions (using @v3 instead of @sha256:...)
-    unpinned=$(grep -P 'uses:\s+[^@]+@v\d' "$workflow" 2>/dev/null | wc -l || echo 0)
+    # NOTE: "; true" (not "|| echo 0") neutralizes grep's exit-1-on-no-match under
+    # `set -o pipefail` without duplicating output — `| wc -l || echo 0` captures BOTH
+    # wc -l's real count AND the echo fallback whenever grep finds zero matches, producing
+    # a two-line value that breaks the numeric comparison below under `set -e`.
+    unpinned=$(grep -P 'uses:\s+[^@]+@v\d' "$workflow" 2>/dev/null | wc -l; true)
     if [ "$unpinned" -gt 0 ]; then
         finding "MEDIUM" "CI/CD" "$workflow" "$unpinned actions pinned to tag instead of SHA"
     fi
@@ -238,11 +242,13 @@ fi
 echo -e "\n${CYAN}── Security Headers & CORS ──${NC}"
 
 # Wide-open CORS
+# "|| true" guards the whole pipeline: under `set -o pipefail`, grep finding zero matches
+# (its normal, non-error exit code 1) would otherwise abort the script here via `set -e`.
 grep -rnP "Access-Control-Allow-Origin.*\*|cors\(\s*\)|origin:\s*(?:true|\*|['\"]?\*)" \
     "$PROJECT_ROOT" --include="*.js" --include="*.ts" --include="*.py" \
     --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=vendor 2>/dev/null | head -10 | while IFS= read -r line; do
     finding "HIGH" "CORS" "$(echo "$line" | cut -d: -f1)" "Unrestricted CORS — allows any origin"
-done
+done || true
 
 # ═══════════════════════════════════════════════
 # SUMMARY

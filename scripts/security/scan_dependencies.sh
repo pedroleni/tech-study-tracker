@@ -84,7 +84,8 @@ echo -e "\n${CYAN}[3/6] Analyzing version pinning...${NC}"
 if [ -f "$PROJECT_ROOT/package.json" ]; then
     echo "  Node.js dependencies:"
     # Check for wildcard/loose versions
-    wildcards=$(grep -P '"[*]"|"latest"|">=\d' "$PROJECT_ROOT/package.json" 2>/dev/null | wc -l || echo 0)
+    # "; true" (not "|| echo 0") avoids double-counting when grep finds zero matches under pipefail
+    wildcards=$(grep -P '"[*]"|"latest"|">=\d' "$PROJECT_ROOT/package.json" 2>/dev/null | wc -l; true)
     if [ "$wildcards" -gt 0 ]; then
         echo -e "  ${RED}✗ HIGH:${NC} Found $wildcards wildcard/loose version ranges in package.json"
         grep -nP '"[*]"|"latest"|">=\d' "$PROJECT_ROOT/package.json" 2>/dev/null | head -10 || true
@@ -94,7 +95,7 @@ if [ -f "$PROJECT_ROOT/package.json" ]; then
     fi
 
     # Check for 0.x with caret (unstable semver)
-    unstable=$(grep -P '"\^0\.' "$PROJECT_ROOT/package.json" 2>/dev/null | wc -l || echo 0)
+    unstable=$(grep -P '"\^0\.' "$PROJECT_ROOT/package.json" 2>/dev/null | wc -l; true)
     if [ "$unstable" -gt 0 ]; then
         echo -e "  ${YELLOW}⚠ MEDIUM:${NC} Found $unstable dependencies on ^0.x (unstable semver range)"
         FINDING_COUNT=$((FINDING_COUNT + 1))
@@ -103,7 +104,7 @@ fi
 
 if [ -f "$PROJECT_ROOT/requirements.txt" ]; then
     echo "  Python dependencies:"
-    unpinned=$(grep -P '^[a-zA-Z]' "$PROJECT_ROOT/requirements.txt" | grep -vP '==\d' 2>/dev/null | wc -l || echo 0)
+    unpinned=$(grep -P '^[a-zA-Z]' "$PROJECT_ROOT/requirements.txt" | grep -vP '==\d' 2>/dev/null | wc -l; true)
     if [ "$unpinned" -gt 0 ]; then
         echo -e "  ${RED}✗ HIGH:${NC} Found $unpinned unpinned dependencies in requirements.txt"
         grep -P '^[a-zA-Z]' "$PROJECT_ROOT/requirements.txt" | grep -vP '==\d' 2>/dev/null | head -10 || true
@@ -173,7 +174,7 @@ if [ -f "$PROJECT_ROOT/.npmrc" ]; then
     fi
 elif [ -f "$PROJECT_ROOT/package.json" ]; then
     # Check if there are scoped private packages without .npmrc
-    has_private=$(grep -P '"@[a-z]+/' "$PROJECT_ROOT/package.json" 2>/dev/null | wc -l || echo 0)
+    has_private=$(grep -P '"@[a-z]+/' "$PROJECT_ROOT/package.json" 2>/dev/null | wc -l; true)
     if [ "$has_private" -gt 0 ]; then
         echo -e "  ${YELLOW}⚠ MEDIUM:${NC} Found scoped packages but no .npmrc with registry config"
         echo "    This may be fine if using public scopes, but verify for private packages"

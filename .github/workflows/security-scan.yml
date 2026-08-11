@@ -17,12 +17,18 @@ jobs:
       - name: Run security scanners
         id: scan
         run: |
+          # GitHub Actions runs `run:` blocks as `bash -eo pipefail` by default, on top of
+          # the `set -uo pipefail` below — so ANY unguarded non-zero exit anywhere in this
+          # script (including inside a scanner .sh, propagated through the pipe under
+          # pipefail) aborts the step immediately with a bare "exit code 1" and no context.
+          # The pass/fail signal here is the LOG CONTENT (grep for [CRITICAL]/[HIGH]), not
+          # each scanner's own exit code, so every scanner invocation is `|| true`-guarded.
           set -uo pipefail
           mkdir -p /tmp/security-scan
           FAIL=0
           for script in scan_secrets scan_code_patterns scan_prompt_injection scan_configs; do
             echo "::group::$script"
-            bash "scripts/security/${script}.sh" . | tee "/tmp/security-scan/${script}.log"
+            bash "scripts/security/${script}.sh" . | tee "/tmp/security-scan/${script}.log" || true
             echo "::endgroup::"
             if grep -qE '\[(CRITICAL|HIGH)\]' "/tmp/security-scan/${script}.log"; then
               FAIL=1
@@ -31,7 +37,7 @@ jobs:
 
           if [ -f package.json ]; then
             echo "::group::scan_dependencies"
-            bash scripts/security/scan_dependencies.sh . | tee /tmp/security-scan/scan_dependencies.log
+            bash scripts/security/scan_dependencies.sh . | tee /tmp/security-scan/scan_dependencies.log || true
             echo "::endgroup::"
             if grep -qE '\[(CRITICAL|HIGH)\]' /tmp/security-scan/scan_dependencies.log; then
               FAIL=1

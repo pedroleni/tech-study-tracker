@@ -124,7 +124,8 @@ done < <(grep -rnP '(?i)(?:api[_-]?key|api[_-]?secret|access[_-]?key|secret[_-]?
 # ── .env files committed ──
 while IFS= read -r envfile; do
     if [ -f "$envfile" ]; then
-        local_count=$(grep -cP '^\s*[A-Z_]+=\S+' "$envfile" 2>/dev/null || echo "0")
+        # "; true" (not "|| echo 0") avoids double-counting when grep finds zero matches under pipefail
+        local_count=$(grep -cP '^\s*[A-Z_]+=\S+' "$envfile" 2>/dev/null; true)
         if [ "$local_count" -gt 0 ]; then
             log_finding "HIGH" "$envfile" "0" ".env file with secrets" "$local_count variables found"
         fi

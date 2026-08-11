@@ -46,20 +46,23 @@ BIDI_PATTERN='[\x{200E}\x{200F}\x{202A}-\x{202E}\x{2066}-\x{2069}]'
 while IFS= read -r file; do
     [ -z "$file" ] && continue
     # Check for zero-width characters
-    # NOTE: -C enables UTF-8 decoding. Without it, perl matches raw bytes, and byte 0xAD
-    # (part of the UTF-8 encoding of many accented characters, e.g. "í" = 0xC3 0xAD) falsely
-    # triggers the U+00AD soft-hyphen check on any non-English text. Keep -C on both calls.
-    if perl -C -ne "exit 1 if /$ZWSP_PATTERN/" "$file" 2>/dev/null; then
+    # NOTE: -CSD forces UTF-8 decoding of std handles (S) and -n/-p input + open() (D),
+    # WITHOUT the locale-dependent "L" that bare "-C" implies. Bare "-C" only decodes as
+    # UTF-8 when the runtime locale is UTF-8; under LC_ALL=C/LANG=C (common on minimal CI
+    # runners) it silently falls back to byte matching, and byte 0xAD — part of the UTF-8
+    # encoding of many accented characters, e.g. "í" = 0xC3 0xAD — falsely triggers the
+    # U+00AD soft-hyphen check on any non-English text. -CSD is locale-independent.
+    if perl -CSD -ne "exit 1 if /$ZWSP_PATTERN/" "$file" 2>/dev/null; then
         : # no match
     else
-        linenum=$(perl -C -ne "print \"\$.\n\" if /$ZWSP_PATTERN/" "$file" 2>/dev/null | head -1)
+        linenum=$(perl -CSD -ne "print \"\$.\n\" if /$ZWSP_PATTERN/" "$file" 2>/dev/null | head -1)
         finding "CRITICAL" "Invisible Chars" "$file" "Zero-width characters detected at line $linenum — may hide instructions from human review"
     fi
     # Check for bidirectional override characters (Trojan Source attack)
-    if perl -C -ne "exit 1 if /$BIDI_PATTERN/" "$file" 2>/dev/null; then
+    if perl -CSD -ne "exit 1 if /$BIDI_PATTERN/" "$file" 2>/dev/null; then
         : # no match
     else
-        linenum=$(perl -C -ne "print \"\$.\n\" if /$BIDI_PATTERN/" "$file" 2>/dev/null | head -1)
+        linenum=$(perl -CSD -ne "print \"\$.\n\" if /$BIDI_PATTERN/" "$file" 2>/dev/null | head -1)
         finding "CRITICAL" "Bidi Override" "$file" "Bidirectional control characters at line $linenum — Trojan Source attack vector"
     fi
 done < <(find "$PROJECT_ROOT" \( -name "*.js" -o -name "*.ts" -o -name "*.py" -o -name "*.rb" \
