@@ -69,25 +69,32 @@ algo inseguro llegue a `main`.
 Cada feature se desarrolla en su propia rama, se prueba ahí, y solo
 después se integra en `main`:
 
-1. `git checkout main && git pull` (partir siempre de `main` actualizado).
-2. `git checkout -b feat/<nombre-corto>` (o `fix/<nombre-corto>` para
-   bugs). Una rama = una feature del `specs/plan.md` sección 8, no varias
-   mezcladas.
-3. Implementa, corre `npm run test`, `npm run build` y `npm run lint`
-   localmente — la rama debe quedar verde antes de intentar subirla.
-4. Commits normales en la rama (varios está bien, no hace falta squash).
-5. `git push -u origin feat/<nombre-corto>`. Si no tienes acceso de red
-   (p. ej. Codex en sandbox), deja la rama commiteada localmente y dilo
-   explícitamente — el push y el PR los completa quien sí tenga red.
-6. Abre PR contra `main` (`gh pr create`) en vez de hacer push directo a
-   `main`. El workflow `.github/workflows/security-scan.yml` ya corre
+1. Parte siempre de `main` actualizado, rama `feat/<nombre-corto>` (o
+   `fix/<nombre-corto>` para bugs). Una rama = una feature del
+   `specs/plan.md` sección 8, no varias mezcladas.
+2. Implementa. Corre `npm run test`, `npm run build` y `npm run lint` — la
+   rama debe quedar verde antes de darla por terminada.
+3. Commit(s) normales en la rama (varios está bien, no hace falta squash).
+4. Push de la rama y PR contra `main` (nunca push directo a `main`). El
+   workflow `.github/workflows/security-scan.yml` ya corre
    automáticamente en cada PR (trigger `pull_request`), así que el gate
    de seguridad se valida ahí antes de mergear.
-7. Solo se mergea a `main` una vez la rama está verde en CI y revisada.
+5. Solo se mergea a `main` una vez la rama está verde en CI y revisada.
 
 No crees una rama gigante que intente todo `specs/plan.md` de una vez.
 Una rama por paso (o por un grupo pequeño y cohesionado de pasos) — así
 cada feature se puede probar, revisar y revertir de forma independiente.
+
+**Restricción conocida de Codex:** el sandbox `workspace-write` de Codex
+CLI no permite escribir dentro de `.git` — ni `checkout -b`, ni `add`, ni
+`commit`, ni `push` funcionan ahí (falla con "Operation not permitted").
+En la práctica esto significa que Codex debe limitarse a **implementar
+código y tests** en el árbol de trabajo; los pasos 1, 3 y 4 de arriba
+(crear rama, commitear, hacer push/PR) los completa quien sí tenga acceso
+de escritura a `.git` — normalmente Claude Code o el propio usuario. Si
+eres Codex y no puedes crear la rama al principio, implementa igualmente
+sobre el working tree tal cual está y dilo explícitamente en tu resumen
+final para que el siguiente agente cree la rama y mueva los cambios ahí.
 
 ## Reglas generales
 
