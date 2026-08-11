@@ -1,0 +1,52 @@
+name: Security Scan
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run security scanners
+        id: scan
+        run: |
+          set -uo pipefail
+          mkdir -p /tmp/security-scan
+          FAIL=0
+          for script in scan_secrets scan_code_patterns scan_prompt_injection scan_configs; do
+            echo "::group::$script"
+            bash "scripts/security/${script}.sh" . | tee "/tmp/security-scan/${script}.log"
+            echo "::endgroup::"
+            if grep -qE '\[(CRITICAL|HIGH)\]' "/tmp/security-scan/${script}.log"; then
+              FAIL=1
+            fi
+          done
+
+          if [ -f package.json ]; then
+            echo "::group::scan_dependencies"
+            bash scripts/security/scan_dependencies.sh . | tee /tmp/security-scan/scan_dependencies.log
+            echo "::endgroup::"
+            if grep -qE '\[(CRITICAL|HIGH)\]' /tmp/security-scan/scan_dependencies.log; then
+              FAIL=1
+            fi
+          fi
+
+          if [ "$FAIL" -eq 1 ]; then
+            echo "Security scan found CRITICAL/HIGH issues — see the logs above."
+            exit 1
+          fi
+          echo "No CRITICAL/HIGH findings."
+
+      - name: Upload scan logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-scan-logs
+          path: /tmp/security-scan/

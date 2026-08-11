@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Pre-commit gate: fast secrets scan before every local commit.
+# Installed via `bash scripts/security/install_hooks.sh`.
+set -euo pipefail
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+cd "$REPO_ROOT"
+
+echo "→ Running secrets scan (pre-commit)..."
+OUTPUT="$(bash scripts/security/scan_secrets.sh . 2>&1)" || true
+echo "$OUTPUT"
+
+if echo "$OUTPUT" | grep -qE '\[(CRITICAL|HIGH)\]'; then
+    echo ""
+    echo "✗ Commit blocked: CRITICAL/HIGH secret findings above."
+    echo "  Fix them, or if it's a false positive, adjust scripts/security/scan_secrets.sh"
+    echo "  exclusions and re-run. Do not bypass with --no-verify unless you are certain."
+    exit 1
+fi
+
+echo "✓ No blocking secrets found."
