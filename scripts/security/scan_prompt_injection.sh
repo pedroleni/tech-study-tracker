@@ -17,20 +17,26 @@ CYAN='\033[0;36m'
 MAGENTA='\033[0;35m'
 NC='\033[0m'
 
-# --exclude-dir=security skips ./security/ and ./scripts/security/ (this tool's own
-# implementation) — meta-documentation that legitimately describes attack patterns as prose.
+# --exclude-dir="./security" and "./scripts/security" skip exactly this tool's own
+# implementation (a path-anchored pattern, i.e. containing "/", matches the full relative path
+# from the search root — NOT a bare "--exclude-dir=security", which would also skip any
+# unrelated future directory merely named "security", e.g. a hypothetical src/security/).
 # NOTE: there is deliberately no --exclude=GLOB here for the .claude/ checklists (e.g.
 # security-auth-crypto.md) — GNU grep gives --include priority over --exclude for individual
 # files, so an --exclude=security-*.md is silently ignored whenever --include="*.md" is also
 # passed (as every check below does). Those files are filtered via POST_EXCLUDE_FILES instead,
 # applied to grep's OUTPUT after the fact, which has no such precedence trap.
-EXCLUDE="--exclude-dir=.git --exclude-dir=node_modules --exclude-dir=vendor --exclude-dir=__pycache__ --exclude-dir=.venv --exclude-dir=venv --exclude-dir=dist --exclude-dir=build --exclude-dir=target --exclude-dir=security"
+EXCLUDE="--exclude-dir=.git --exclude-dir=node_modules --exclude-dir=vendor --exclude-dir=__pycache__ --exclude-dir=.venv --exclude-dir=venv --exclude-dir=dist --exclude-dir=build --exclude-dir=target --exclude-dir=./security --exclude-dir=./scripts/security"
 
-# Strips result lines whose file is: our own .claude/ security checklists (meta-documentation
-# that describes attack phrases as prose, by design) or a package-manager lockfile (long
-# random-looking base64/hex integrity hashes routinely contain "//" or hex runs by pure
-# chance, e.g. a sha512 hash containing "//" satisfies the base64-in-a-comment heuristic).
-POST_EXCLUDE_FILES='(^|/)(package-lock\.json|yarn\.lock|pnpm-lock\.yaml|bun\.lockb|Cargo\.lock|go\.sum|composer\.lock|Gemfile\.lock|poetry\.lock|security-[^/:]+\.md):'
+# Strips result lines whose file is: our own checklists specifically under .claude/agents/ or
+# .claude/commands/ (meta-documentation that describes attack phrases as prose, by design —
+# scoped to those two directories, NOT any file named security-*.md anywhere in the repo, so a
+# random file elsewhere using that name convention doesn't get a free pass), or a
+# package-manager lockfile (long random-looking base64/hex integrity hashes routinely contain
+# "//" or hex runs by pure chance, e.g. a sha512 hash containing "//" satisfies the
+# base64-in-a-comment heuristic — lockfiles anywhere in the repo are excluded, since they're
+# machine-generated regardless of location).
+POST_EXCLUDE_FILES='(^|/)(package-lock\.json|yarn\.lock|pnpm-lock\.yaml|bun\.lockb|Cargo\.lock|go\.sum|composer\.lock|Gemfile\.lock|poetry\.lock):|\.claude/(agents|commands)/security-[^/:]+\.md:'
 
 finding() {
     local severity="$1" category="$2" file="$3" detail="$4"
