@@ -37,8 +37,15 @@ EXCLUDE="--exclude-dir=.git --exclude-dir=node_modules --exclude-dir=vendor --ex
 # anywhere else in the repo); or a package-manager lockfile (long random-looking base64/hex
 # integrity hashes routinely contain "//" or hex runs by pure chance, e.g. a sha512 hash
 # containing "//" satisfies the base64-in-a-comment heuristic — excluded regardless of
-# location, since lockfiles are machine-generated wherever they are).
-POST_EXCLUDE_FILES='^\./(security|scripts/security)/[^/:]+:|(^|/)(package-lock\.json|yarn\.lock|pnpm-lock\.yaml|bun\.lockb|Cargo\.lock|go\.sum|composer\.lock|Gemfile\.lock|poetry\.lock):|\.claude/(agents|commands)/security-[^/:]+\.md:'
+# location, since lockfiles are machine-generated wherever they are); or the two specific
+# third-party skill directories under .agents/skills/ installed via
+# `npx skills add supabase/agent-skills` (see AGENTS.md). This is NOT a blanket exemption for
+# .agents/skills/ — a differently-named skill added later is still fully scanned until someone
+# reviews it the same way and adds it here by exact path. These two were reviewed by hand: every
+# flagged line is legitimate Postgres/RLS security documentation from Supabase's official repo
+# that happens to discuss bypass/override mechanics as its subject matter (e.g. "SECURITY
+# DEFINER functions bypass RLS"), the same false-positive class as our own security docs above.
+POST_EXCLUDE_FILES='^\./(security|scripts/security)/[^/:]+:|(^|/)(package-lock\.json|yarn\.lock|pnpm-lock\.yaml|bun\.lockb|Cargo\.lock|go\.sum|composer\.lock|Gemfile\.lock|poetry\.lock):|\.claude/(agents|commands)/security-[^/:]+\.md:|^\./\.agents/skills/(supabase|supabase-postgres-best-practices)/'
 
 finding() {
     local severity="$1" category="$2" file="$3" detail="$4"

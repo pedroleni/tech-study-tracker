@@ -12,6 +12,22 @@ frontend, Supabase (Postgres + Auth) como backend, desplegado en Vercel.
 Especificación funcional completa: `specs/spec.md`.
 Plan técnico (cuando exista): `specs/plan.md`.
 
+## Skills de Supabase
+
+`.agents/skills/supabase/` y `.agents/skills/supabase-postgres-best-practices/`
+(symlinked en `.claude/skills/`) son skills oficiales de Supabase
+(`npx skills add supabase/agent-skills`, ver `skills-lock.json` para el
+hash de integridad). Léelas antes de tocar el esquema, migraciones,
+políticas RLS, o diagnosticar queries lentas — cubren exactamente los
+gotchas de este proyecto (RLS en `categories`/`technologies`,
+`SECURITY DEFINER`, índices en foreign keys). Para actualizarlas:
+`npx skills add supabase/agent-skills` de nuevo.
+
+Estas dos carpetas están explícitamente exceptuadas del check de
+"Agent-Targeted Instructions" de `scan_prompt_injection.sh` (revisadas a
+mano, ver el comentario en el script) — cualquier otra skill que se
+añada después NO lo está hasta que alguien la revise igual.
+
 ## Seguridad — obligatorio antes de dar por terminada una tarea
 
 Este proyecto tiene una auditoría de seguridad multi-dominio (8 áreas),
