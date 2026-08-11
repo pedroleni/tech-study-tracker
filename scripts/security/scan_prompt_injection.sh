@@ -30,8 +30,9 @@ NC='\033[0m'
 # internal path-matching behavior to be consistent.
 EXCLUDE="--exclude-dir=.git --exclude-dir=node_modules --exclude-dir=vendor --exclude-dir=__pycache__ --exclude-dir=.venv --exclude-dir=venv --exclude-dir=dist --exclude-dir=build --exclude-dir=target"
 
-# Strips result lines whose file is: this tool's own implementation, at the exact root-level
-# ./security/ or ./scripts/security/ paths only (NOT any other directory merely named
+# Strips result lines whose file is: this tool's own implementation and documentation, anywhere
+# under ./security/ or ./scripts/security/ (including nested paths like security/reviews/ —
+# both trees are 100% our own authored content, not any other directory merely named
 # "security", e.g. a hypothetical src/security/ stays fully scanned); our own checklists
 # specifically under .claude/agents/ or .claude/commands/ (NOT any file named security-*.md
 # anywhere else in the repo); or a package-manager lockfile (long random-looking base64/hex
@@ -45,7 +46,7 @@ EXCLUDE="--exclude-dir=.git --exclude-dir=node_modules --exclude-dir=vendor --ex
 # flagged line is legitimate Postgres/RLS security documentation from Supabase's official repo
 # that happens to discuss bypass/override mechanics as its subject matter (e.g. "SECURITY
 # DEFINER functions bypass RLS"), the same false-positive class as our own security docs above.
-POST_EXCLUDE_FILES='^\./(security|scripts/security)/[^/:]+:|(^|/)(package-lock\.json|yarn\.lock|pnpm-lock\.yaml|bun\.lockb|Cargo\.lock|go\.sum|composer\.lock|Gemfile\.lock|poetry\.lock):|\.claude/(agents|commands)/security-[^/:]+\.md:|^\./\.agents/skills/(supabase|supabase-postgres-best-practices)/'
+POST_EXCLUDE_FILES='^\./(security|scripts/security)/|(^|/)(package-lock\.json|yarn\.lock|pnpm-lock\.yaml|bun\.lockb|Cargo\.lock|go\.sum|composer\.lock|Gemfile\.lock|poetry\.lock):|\.claude/(agents|commands)/security-[^/:]+\.md:|^\./\.agents/skills/(supabase|supabase-postgres-best-practices)/'
 
 finding() {
     local severity="$1" category="$2" file="$3" detail="$4"

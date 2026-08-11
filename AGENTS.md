@@ -64,6 +64,11 @@ salida que usa Claude Code (resumen ejecutivo + risk score
 CRITICAL×25 + HIGH×10 + MEDIUM×3 + LOW×1), sigue el formato descrito en
 `.claude/commands/security-review.md`.
 
+Guarda cada auditoría completa (no un chequeo puntual de una tarea) como
+`security/reviews/YYYY-MM-DD-<tema-corto>.md`, siguiendo
+`security/reviews/README.md`. No lo dejes solo en tu respuesta — no
+queda versionado ni buscable ahí.
+
 ## Enforcement (no es solo advisory)
 
 Esto ya no depende únicamente de que el agente se acuerde de leer este

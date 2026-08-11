@@ -1,0 +1,28 @@
+# Historial de revisiones de seguridad
+
+Cada vez que se corre una auditoría de seguridad completa (vía
+`/security-review` en Claude Code, o el equivalente manual descrito en
+`AGENTS.md` para Codex), el informe se guarda aquí — no solo se muestra
+en el chat, que no queda buscable ni versionado.
+
+## Convención
+
+- Un archivo por revisión: `YYYY-MM-DD-<tema-corto>.md`
+  (ej. `2026-08-11-full-audit.md`, `2026-08-20-auth-rls.md` si es una
+  revisión acotada a un área tras `/security-review solo RLS`).
+- Cada archivo sigue el formato de salida de
+  `.claude/commands/security-review.md`: resumen ejecutivo (nivel de
+  riesgo, risk score, top 3), hallazgos por severidad con
+  archivo/línea/descripción/recomendación, y prioridad de remediación.
+- Añade al final una sección **Estado** marcando qué hallazgos se
+  arreglaron (con el commit/PR), cuáles se aceptaron como falso positivo
+  (y por qué), y cuáles quedan pendientes.
+- No edites revisiones pasadas para "corregirlas" — si un hallazgo
+  resulta ser falso positivo, anótalo en la sección Estado de esa misma
+  revisión. El historial debe reflejar qué se sabía en cada momento.
+
+## Índice
+
+| Fecha | Archivo | Alcance | Resultado |
+|---|---|---|---|
+| 2026-08-11 | [2026-08-11-tooling-bugs.md](2026-08-11-tooling-bugs.md) | Bugs reales en los propios scripts de `scripts/security/` (no en el código de la app, que aún no existe) | 2 bugs críticos de detección arreglados, 1 clase de falso positivo mitigada |
