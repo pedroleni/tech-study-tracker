@@ -64,6 +64,31 @@ Sigue usando los checklists de abajo como guía *antes* de escribir código
 (evita retrabajo), pero el hook y el CI son los que de verdad impiden que
 algo inseguro llegue a `main`.
 
+## Flujo de ramas — obligatorio, nunca commits directos a `main`
+
+Cada feature se desarrolla en su propia rama, se prueba ahí, y solo
+después se integra en `main`:
+
+1. `git checkout main && git pull` (partir siempre de `main` actualizado).
+2. `git checkout -b feat/<nombre-corto>` (o `fix/<nombre-corto>` para
+   bugs). Una rama = una feature del `specs/plan.md` sección 8, no varias
+   mezcladas.
+3. Implementa, corre `npm run test`, `npm run build` y `npm run lint`
+   localmente — la rama debe quedar verde antes de intentar subirla.
+4. Commits normales en la rama (varios está bien, no hace falta squash).
+5. `git push -u origin feat/<nombre-corto>`. Si no tienes acceso de red
+   (p. ej. Codex en sandbox), deja la rama commiteada localmente y dilo
+   explícitamente — el push y el PR los completa quien sí tenga red.
+6. Abre PR contra `main` (`gh pr create`) en vez de hacer push directo a
+   `main`. El workflow `.github/workflows/security-scan.yml` ya corre
+   automáticamente en cada PR (trigger `pull_request`), así que el gate
+   de seguridad se valida ahí antes de mergear.
+7. Solo se mergea a `main` una vez la rama está verde en CI y revisada.
+
+No crees una rama gigante que intente todo `specs/plan.md` de una vez.
+Una rama por paso (o por un grupo pequeño y cohesionado de pasos) — así
+cada feature se puede probar, revisar y revertir de forma independiente.
+
 ## Reglas generales
 
 - No metas la `service_role key` de Supabase en código de frontend ni en
