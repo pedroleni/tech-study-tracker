@@ -30,10 +30,9 @@ gotchas de este proyecto (RLS en `categories`/`technologies`,
 — úsala al escribir o revisar cualquier componente nuevo en
 `src/components/`: accesibilidad, estados de foco, formularios,
 animación, tipografía, rendimiento, i18n. A diferencia de las skills de
-Supabase, **esta no trae las guías dentro** — su `SKILL.md` le dice al
-agente que las descargue con `WebFetch` desde
-`vercel-labs/web-interface-guidelines` en cada uso, así que no está
-fijada por hash como las demás. Revisado el contenido real (no solo el
+Supabase, **esta no trae las guías dentro** — su `SKILL.md` obtiene el
+contenido en tiempo real desde `vercel-labs/web-interface-guidelines` en
+cada uso, así que no está fijada por hash como las demás. Revisado el contenido real (no solo el
 wrapper) el 2026-08-12, ver
 `security/reviews/2026-08-12-web-design-guidelines-skill.md` — aceptado
 porque el impacto máximo de un contenido comprometido sería sugerir
