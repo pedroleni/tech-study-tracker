@@ -1,13 +1,24 @@
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
+
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
+import { AppShell } from '@/components/layout/AppShell'
+import { DashboardPage } from '@/routes/DashboardPage'
+import { LoginPage } from '@/routes/LoginPage'
+import { RegisterPage } from '@/routes/RegisterPage'
+
 function App() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-6 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold">Tech Study Tracker</h1>
-        <p className="mt-3 text-slate-600 dark:text-slate-400">
-          Proyecto preparado para empezar.
-        </p>
-      </div>
-    </main>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route element={<ProtectedRoute />}>
+          <Route element={<AppShell />}>
+            <Route index element={<DashboardPage />} />
+          </Route>
+        </Route>
+      </Routes>
+    </BrowserRouter>
   )
 }
 
