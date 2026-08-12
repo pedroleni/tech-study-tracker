@@ -11,6 +11,9 @@ frontend, Supabase (Postgres + Auth) como backend, desplegado en Vercel.
 
 Especificación funcional completa: `specs/spec.md`.
 Plan técnico (cuando exista): `specs/plan.md`.
+Design system (paleta de status/priority/difficulty, inventario de
+componentes): `specs/design-system.md` — léelo antes de crear o tocar
+cualquier componente en `src/components/`.
 
 ## Skills de Supabase
 
