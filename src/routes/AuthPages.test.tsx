@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
+import { AuthApiError } from '@supabase/supabase-js'
 import { axe } from 'vitest-axe'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -58,6 +59,40 @@ describe('auth pages', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Iniciar sesión' }))
 
     await waitFor(() => expect(screen.getByText('Credenciales inválidas')).toBeInTheDocument())
+  })
+
+  it('shows the same confirmation message for a new signup as for an already-registered email', async () => {
+    // Regression test for account enumeration via the register form: a real signup
+    // and an "already registered" error must be indistinguishable to the user.
+    const confirmationMessage =
+      'Si el email es nuevo, hemos enviado un correo de confirmación. Si ya tenías cuenta, revisa tu bandeja o inicia sesión.'
+
+    authMocks.signUp.mockResolvedValueOnce({})
+    const { unmount } = renderPage(<RegisterPage />)
+    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'new@example.com' } })
+    fireEvent.change(screen.getByLabelText('Contraseña'), { target: { value: 'secret1' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Crear cuenta' }))
+    expect(await screen.findByText(confirmationMessage)).toBeInTheDocument()
+    unmount()
+
+    authMocks.signUp.mockRejectedValueOnce(
+      new AuthApiError('User already registered', 400, 'user_already_exists'),
+    )
+    renderPage(<RegisterPage />)
+    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'existing@example.com' } })
+    fireEvent.change(screen.getByLabelText('Contraseña'), { target: { value: 'secret1' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Crear cuenta' }))
+    expect(await screen.findByText(confirmationMessage)).toBeInTheDocument()
+  })
+
+  it('still surfaces genuine (non-enumeration) registration errors', async () => {
+    authMocks.signUp.mockRejectedValue(new Error('Network request failed'))
+    renderPage(<RegisterPage />)
+    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'person@example.com' } })
+    fireEvent.change(screen.getByLabelText('Contraseña'), { target: { value: 'secret1' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Crear cuenta' }))
+
+    await waitFor(() => expect(screen.getByText('Network request failed')).toBeInTheDocument())
   })
 
   it('has no detectable accessibility violations on LoginPage', async () => {

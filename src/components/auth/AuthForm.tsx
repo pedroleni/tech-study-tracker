@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
+import { isAuthApiError } from '@supabase/supabase-js'
 import { z } from 'zod'
 
 import { Button } from '@/components/ui/button'
@@ -20,10 +21,23 @@ interface AuthFormProps {
   mode: 'login' | 'register'
 }
 
+// Supabase's "already registered" signUp error is a reliable account-enumeration
+// oracle (an attacker can probe arbitrary emails and see which ones already have
+// an account) — checked both by code and by message text, since supabase-js
+// versions haven't always populated `code` consistently.
+function isAccountEnumerationError(error: unknown): boolean {
+  if (!isAuthApiError(error)) return false
+  return error.code === 'user_already_exists' || /already registered/i.test(error.message)
+}
+
+const REGISTER_CONFIRMATION_MESSAGE =
+  'Si el email es nuevo, hemos enviado un correo de confirmación. Si ya tenías cuenta, revisa tu bandeja o inicia sesión.'
+
 export function AuthForm({ mode }: AuthFormProps) {
   const { signIn, signUp } = useAuth()
   const navigate = useNavigate()
   const [authError, setAuthError] = useState<string | null>(null)
+  const [infoMessage, setInfoMessage] = useState<string | null>(null)
   const isLogin = mode === 'login'
   const {
     register,
@@ -33,13 +47,22 @@ export function AuthForm({ mode }: AuthFormProps) {
 
   const onSubmit = async ({ email, password }: AuthFields) => {
     setAuthError(null)
+    setInfoMessage(null)
     try {
       if (isLogin) {
         await signIn(email, password)
-      } else {
-        await signUp(email, password)
+        navigate('/')
+        return
       }
-      navigate('/')
+
+      try {
+        await signUp(email, password)
+      } catch (error) {
+        if (!isAccountEnumerationError(error)) throw error
+      }
+      // Same message whether this was a genuinely new signup or an existing
+      // account — the whole point is that the two cases must look identical.
+      setInfoMessage(REGISTER_CONFIRMATION_MESSAGE)
     } catch (error) {
       setAuthError(error instanceof Error ? error.message : 'No se pudo completar la solicitud.')
     }
@@ -88,6 +111,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           </div>
           <div aria-live="polite" aria-atomic="true">
             {authError && <p className="text-sm text-destructive">{authError}</p>}
+            {infoMessage && <p className="text-sm text-muted-foreground">{infoMessage}</p>}
           </div>
           <Button className="w-full" type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Procesando…' : title}
