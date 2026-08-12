@@ -96,7 +96,10 @@ document.getElementById('path').textContent = ${JSON.stringify(path.relative(pro
 function badge(type) {
   if (type === 'command_execution') return '<span class="badge cmd">CMD</span>'
   if (type === 'agent_message') return '<span class="badge msg">MSG</span>'
-  return '<span class="badge">' + type + '</span>'
+  const span = document.createElement('span')
+  span.className = 'badge'
+  span.textContent = type
+  return span.outerHTML
 }
 
 function renderItem(evt) {
@@ -187,6 +190,6 @@ const server = http.createServer((req, res) => {
   res.end()
 })
 
-server.listen(port, () => {
+server.listen(port, '127.0.0.1', () => {
   console.log(`Codex monitor: http://localhost:${port}  (tailing ${path.relative(projectRoot, logPath)})`)
 })
