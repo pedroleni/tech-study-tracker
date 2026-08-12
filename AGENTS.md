@@ -137,6 +137,19 @@ eres Codex y no puedes crear la rama al principio, implementa igualmente
 sobre el working tree tal cual está y dilo explícitamente en tu resumen
 final para que el siguiente agente cree la rama y mueva los cambios ahí.
 
+**Cómo lanzar tareas de Codex en segundo plano:** usa
+`npm run codex:task -- "<prompt>" [reasoning_effort]` en vez de
+`codex exec "<prompt>"` a pelo — ver
+[`README.md`](README.md#ver-a-codex-trabajar-en-vivo). Sin `< /dev/null`
+para cerrar `stdin`, un `codex exec` lanzado en segundo plano puede
+quedarse colgado esperando un EOF que nunca llega (pasó de verdad, ~30
+min perdidos); `codex:task` ya lo incluye, además de `--json` para
+poder seguirlo en vivo con `npm run codex:monitor`. Elige
+`reasoning_effort` según la dificultad real de la tarea (`low` para
+mecánico/bien acotado, `medium`/`high` para algo ambiguo o sensible a
+seguridad) — no lo dejes siempre en el default para no gastar tokens de
+más en tareas simples.
+
 ## Reglas generales
 
 - No metas la `service_role key` de Supabase en código de frontend ni en
