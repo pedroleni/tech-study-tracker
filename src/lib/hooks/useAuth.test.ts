@@ -8,6 +8,10 @@ const authMocks = vi.hoisted(() => ({
   signInWithPassword: vi.fn(),
   signUp: vi.fn(),
   signOut: vi.fn(),
+  verifyOtp: vi.fn(),
+  resend: vi.fn(),
+  resetPasswordForEmail: vi.fn(),
+  updateUser: vi.fn(),
   unsubscribe: vi.fn(),
 }))
 
@@ -19,6 +23,10 @@ vi.mock('@/lib/supabaseClient', () => ({
       signInWithPassword: authMocks.signInWithPassword,
       signUp: authMocks.signUp,
       signOut: authMocks.signOut,
+      verifyOtp: authMocks.verifyOtp,
+      resend: authMocks.resend,
+      resetPasswordForEmail: authMocks.resetPasswordForEmail,
+      updateUser: authMocks.updateUser,
     },
   },
 }))
@@ -38,6 +46,10 @@ describe('useAuth', () => {
     authMocks.signInWithPassword.mockResolvedValue({ data: { session, user }, error: null })
     authMocks.signUp.mockResolvedValue({ data: { session, user }, error: null })
     authMocks.signOut.mockResolvedValue({ error: null })
+    authMocks.verifyOtp.mockResolvedValue({ data: { session, user }, error: null })
+    authMocks.resend.mockResolvedValue({ data: {}, error: null })
+    authMocks.resetPasswordForEmail.mockResolvedValue({ data: {}, error: null })
+    authMocks.updateUser.mockResolvedValue({ data: { user }, error: null })
   })
 
   it('loads the initial session and unsubscribes on unmount', async () => {
@@ -78,5 +90,75 @@ describe('useAuth', () => {
 
     authMocks.signOut.mockResolvedValue({ error: new Error('Sign out failed') })
     await expect(result.current.signOut()).rejects.toThrow('Sign out failed')
+  })
+
+  it('delegates email verification and password-recovery actions', async () => {
+    const { result } = renderHook(() => useAuth())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    await act(() => result.current.verifyOtp('person@example.com', '123456'))
+    expect(authMocks.verifyOtp).toHaveBeenCalledWith({
+      email: 'person@example.com',
+      token: '123456',
+      type: 'email',
+    })
+
+    await act(() => result.current.resendCode('person@example.com'))
+    expect(authMocks.resend).toHaveBeenCalledWith({
+      type: 'signup',
+      email: 'person@example.com',
+    })
+
+    await act(() => result.current.requestPasswordReset('person@example.com'))
+    expect(authMocks.resetPasswordForEmail).toHaveBeenCalledWith('person@example.com', {
+      redirectTo: `${window.location.origin}/nueva-password`,
+    })
+
+    await act(() => result.current.updatePassword('a new secure phrase!'))
+    expect(authMocks.updateUser).toHaveBeenCalledWith({ password: 'a new secure phrase!' })
+
+    await act(() => result.current.signOutOtherSessions())
+    expect(authMocks.signOut).toHaveBeenCalledWith({ scope: 'others' })
+  })
+
+  it('surfaces verifyOtp errors', async () => {
+    authMocks.verifyOtp.mockResolvedValue({ data: null, error: new Error('Verification failed') })
+    const { result } = renderHook(() => useAuth())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    await expect(result.current.verifyOtp('person@example.com', '123456')).rejects.toThrow(
+      'Verification failed',
+    )
+  })
+
+  it('surfaces resendCode errors', async () => {
+    authMocks.resend.mockResolvedValue({ data: null, error: new Error('Resend failed') })
+    const { result } = renderHook(() => useAuth())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    await expect(result.current.resendCode('person@example.com')).rejects.toThrow('Resend failed')
+  })
+
+  it('surfaces requestPasswordReset errors', async () => {
+    authMocks.resetPasswordForEmail.mockResolvedValue({
+      data: null,
+      error: new Error('Reset request failed'),
+    })
+    const { result } = renderHook(() => useAuth())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    await expect(result.current.requestPasswordReset('person@example.com')).rejects.toThrow(
+      'Reset request failed',
+    )
+  })
+
+  it('surfaces updatePassword errors', async () => {
+    authMocks.updateUser.mockResolvedValue({ data: null, error: new Error('Update failed') })
+    const { result } = renderHook(() => useAuth())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    await expect(result.current.updatePassword('a new secure phrase!')).rejects.toThrow(
+      'Update failed',
+    )
   })
 })

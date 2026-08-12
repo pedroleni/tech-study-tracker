@@ -38,10 +38,21 @@ cualquiera.
 - CRUD completo: crear, editar, cambiar estado, eliminar.
 
 ### 3.4 Autenticación
-- Login/registro simple vía Supabase Auth (email + password), registro
-  abierto (cualquiera con la URL puede crear cuenta).
+- Login/registro vía Supabase Auth (email + password), registro abierto
+  (cualquiera con la URL puede crear cuenta).
+- **Registro en dos pasos:** tras enviar los datos, se envía un código
+  de 6 dígitos al email y hay que introducirlo para activar la cuenta —
+  así se comprueba que la dirección existe de verdad. El formulario pide
+  la contraseña dos veces.
+- **Recuperación self-service:** quien olvide su contraseña la
+  restablece por email, sin que intervenga nadie más. No hay
+  administrador que atienda peticiones de cambio de contraseña — es un
+  anti-patrón de seguridad, razonado en
+  [`features/auth.md`](features/auth.md#sin-admin-que-gestione-contraseñas--decisión-deliberada).
 - Todas las rutas de datos protegidas; sin sesión no se accede al dashboard
   ni al índice.
+- Detalle completo de flujos, rutas y checkpoints:
+  [`features/auth.md`](features/auth.md).
 
 ### 3.5 Diseño visual
 - Identidad visual propia (no solo plantilla admin genérica): paleta de
@@ -60,6 +71,11 @@ cualquiera.
 ## 5. Modelo de datos (borrador)
 
 ```
+profiles
+  id: uuid (pk, fk -> auth.users)
+  role: text  -- 'user' | 'admin'; hoy siempre 'user'
+  created_at: timestamptz
+
 categories
   id: uuid (pk)
   user_id: uuid (fk -> auth.users)
@@ -81,7 +97,14 @@ technologies
 ```
 
 RLS en Supabase: cada fila solo visible/editable por su `user_id` (=
-`auth.uid()`).
+`auth.uid()`). `profiles` es la excepción: solo lectura del propio
+perfil, sin política de escritura — si el cliente pudiera actualizar su
+fila, podría asignarse `role = 'admin'`.
+
+`profiles` existe hoy aunque la app sea de un solo usuario: añadir la
+columna `role` más adelante obligaría a una migración con backfill,
+mientras que ahora son ~15 líneas de SQL. No hay ninguna lógica ni
+pantalla que lea el rol todavía, a propósito.
 
 ## 6. Stack técnico
 

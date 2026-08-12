@@ -9,11 +9,28 @@ App personal para organizar tecnologías en estudio: dashboard + índice por
 categorías. Stack: React + TypeScript + Vite + Tailwind CSS + Vitest en el
 frontend, Supabase (Postgres + Auth) como backend, desplegado en Vercel.
 
-Especificación funcional completa: `specs/spec.md`.
-Plan técnico (cuando exista): `specs/plan.md`.
-Design system (paleta de status/priority/difficulty, inventario de
-componentes): `specs/design-system.md` — léelo antes de crear o tocar
-cualquier componente en `src/components/`.
+### Qué documentación leer (no las leas todas)
+
+La documentación está partida por feature justamente para que no tengas
+que cargar 250 líneas de plan global para tocar una pantalla. Para
+implementar algo, lee **solo**:
+
+1. **`specs/features/<feature>.md`** — el doc de la feature que te han
+   pedido: rutas, componentes, SQL, tests y checkpoints de seguridad
+   propios de esa feature. Empieza por
+   `specs/features/README.md`, que es el índice.
+2. **`AGENTS.md`** (este archivo) — reglas del repo.
+3. **`specs/design-system.md`** — solo si tocas `src/components/`.
+
+`specs/spec.md` (el qué, a nivel producto) y `specs/plan.md`
+(decisiones transversales: stack, estructura de carpetas) **no** hacen
+falta para implementar una feature ya especificada — consúltalos solo si
+necesitas cambiar una decisión global o si no existe doc de esa feature
+todavía.
+
+Si te piden una feature que **no** tiene doc en `specs/features/`,
+dilo antes de empezar en vez de improvisar el diseño: lo normal es que
+lo escriba Claude Code primero.
 
 ## Skills de Supabase
 

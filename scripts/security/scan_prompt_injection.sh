@@ -10,6 +10,27 @@ set -euo pipefail
 PROJECT_ROOT="${1:-.}"
 FINDING_COUNT=0
 
+# La mayoría de checks de este script dependen de `grep -P` (PCRE). El grep de
+# BSD que trae macOS NO soporta -P: no falla de forma visible, simplemente
+# devuelve 0 resultados. Es decir, en un Mac este scanner puede decir "todo
+# limpio" mientras el CI (Ubuntu, GNU grep) encuentra hallazgos CRITICAL — pasó
+# de verdad y tumbó el CI del PR #14 después de varias pasadas locales en verde.
+# Preferimos ggrep si está (brew install grep) y, si no hay ningún grep con -P,
+# abortamos en vez de dar un falso "sin hallazgos".
+# Ojo con cómo se comprueba: `grep -qP '' /dev/null` NO sirve como test, porque
+# un fichero vacío no tiene coincidencias y devuelve 1 igual que un grep sin -P.
+# Hay que darle una entrada que sí case.
+if printf 'x\n' | grep -qP 'x' 2>/dev/null; then
+    GREP=grep
+elif command -v ggrep >/dev/null 2>&1 && printf 'x\n' | ggrep -qP 'x' 2>/dev/null; then
+    GREP=ggrep
+else
+    echo "ERROR: este scanner necesita un grep con soporte -P (PCRE)." >&2
+    echo "       El grep de macOS no lo tiene. Instala GNU grep:  brew install grep" >&2
+    echo "       Sin él, los checks devolverían 'sin hallazgos' aunque los haya." >&2
+    exit 2
+fi
+
 RED='\033[0;31m'
 YELLOW='\033[0;33m'
 GREEN='\033[0;32m'
@@ -135,15 +156,21 @@ AI_DIRECTIVE_PATTERNS=(
     '\bbypass\b.*(?:check|validation|security|auth|filter)'
     '\bskip\b.*(?:security|validation|check|auth|verification)'
     '\bdisable\b.*(?:security|validation|check|auth|logging)'
-    'do not.*(?:log|report|alert|notify|check)'
-    '(?:AI|assistant|agent|model|Claude|GPT|LLM).*(?:execute|run|download|fetch|curl|send)'
-    'IMPORTANT.*(?:AI|assistant|agent|model).*(?:ignore|override|skip|bypass)'
+    'do not.*\b(?:log|report|alert|notify|check)\b'
+    # Los \b aquí no son decorativos: sin ellos, 'AI' matchea dentro de
+    # "await"/"email"/"failure" y 'send' dentro de "resend", así que una línea
+    # tan inocente como `await resendCode(email)` se reportaba como CRITICAL
+    # "Agent Directive". Pasó de verdad: tumbó el CI del PR #14 con 5 falsos
+    # positivos, todos en código de auth legítimo. Verificado tras el cambio
+    # que sigue detectando los ataques reales (ver tests abajo).
+    '\b(?:AI|assistant|agent|model|Claude|GPT|LLM)\b.*\b(?:execute|run|download|fetch|curl|send)\b'
+    'IMPORTANT.*\b(?:AI|assistant|agent|model)\b.*\b(?:ignore|override|skip|bypass)\b'
     '(?:hidden|secret).*instruction'
 )
 
 COMBINED_PATTERN=$(IFS='|'; echo "${AI_DIRECTIVE_PATTERNS[*]}")
 
-results=$(grep -rniP "$COMBINED_PATTERN" "$PROJECT_ROOT" \
+results=$("$GREP" -rniP "$COMBINED_PATTERN" "$PROJECT_ROOT" \
     $EXCLUDE \
     --include="*.md" --include="*.txt" --include="*.rst" \
     --include="*.js" --include="*.ts" --include="*.py" --include="*.rb" \
@@ -237,7 +264,7 @@ fi
 echo -e "\n${CYAN}── [4/7] Encoded Payloads in Comments ──${NC}"
 
 # Look for suspiciously long base64 strings in comments
-results=$(grep -rnP '(?://|#|/\*|\*|<!--)\s*.*(?:[A-Za-z0-9+/]{4}){15,}={0,2}' "$PROJECT_ROOT" \
+results=$("$GREP" -rnP '(?://|#|/\*|\*|<!--)\s*.*(?:[A-Za-z0-9+/]{4}){15,}={0,2}' "$PROJECT_ROOT" \
     $EXCLUDE \
     --include="*.js" --include="*.ts" --include="*.py" --include="*.rb" \
     --include="*.go" --include="*.java" --include="*.rs" --include="*.sh" \
@@ -256,7 +283,7 @@ else
 fi
 
 # Hex-encoded strings in comments
-results=$(grep -rnP '(?://|#|/\*|\*|<!--)\s*.*(?:0x[0-9a-fA-F]{2}\s*){10,}' "$PROJECT_ROOT" \
+results=$("$GREP" -rnP '(?://|#|/\*|\*|<!--)\s*.*(?:0x[0-9a-fA-F]{2}\s*){10,}' "$PROJECT_ROOT" \
     $EXCLUDE \
     --include="*.js" --include="*.ts" --include="*.py" --include="*.rb" \
     --include="*.go" --include="*.java" --include="*.rs" \
