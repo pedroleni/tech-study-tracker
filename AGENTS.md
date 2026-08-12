@@ -23,7 +23,24 @@ gotchas de este proyecto (RLS en `categories`/`technologies`,
 `SECURITY DEFINER`, índices en foreign keys). Para actualizarlas:
 `npx skills add supabase/agent-skills` de nuevo.
 
-Estas dos carpetas están explícitamente exceptuadas del check de
+## Skill de diseño UI/UX
+
+`.agents/skills/web-design-guidelines/` (oficial de Vercel,
+`npx skills add vercel-labs/agent-skills --skill web-design-guidelines`)
+— úsala al escribir o revisar cualquier componente nuevo en
+`src/components/`: accesibilidad, estados de foco, formularios,
+animación, tipografía, rendimiento, i18n. A diferencia de las skills de
+Supabase, **esta no trae las guías dentro** — su `SKILL.md` obtiene el
+contenido en tiempo real desde `vercel-labs/web-interface-guidelines` en
+cada uso, así que no está fijada por hash como las demás. Revisado el contenido real (no solo el
+wrapper) el 2026-08-12, ver
+`security/reviews/2026-08-12-web-design-guidelines-skill.md` — aceptado
+porque el impacto máximo de un contenido comprometido sería sugerir
+CSS/HTML incorrecto, no ejecución de comandos, y de todas formas pasa
+por revisión humana antes de mergear.
+
+Estas tres carpetas (`supabase`, `supabase-postgres-best-practices`,
+`web-design-guidelines`) están explícitamente exceptuadas del check de
 "Agent-Targeted Instructions" de `scan_prompt_injection.sh` (revisadas a
 mano, ver el comentario en el script) — cualquier otra skill que se
 añada después NO lo está hasta que alguien la revise igual.

@@ -25,5 +25,6 @@ en el chat, que no queda buscable ni versionado.
 
 | Fecha | Archivo | Alcance | Resultado |
 |---|---|---|---|
+| 2026-08-12 | [2026-08-12-web-design-guidelines-skill.md](2026-08-12-web-design-guidelines-skill.md) | Skill de terceros `web-design-guidelines` (Vercel) antes de usarla | Aceptada con nota — contenido no fijado por hash, fetch dinámico documentado |
 | 2026-08-12 | [2026-08-12-supabase-auth.md](2026-08-12-supabase-auth.md) | Migración inicial (RLS) + cliente Supabase/auth, antes de mergear | 1 hallazgo MEDIUM (enumeración de cuentas) arreglado antes de mergear |
 | 2026-08-11 | [2026-08-11-tooling-bugs.md](2026-08-11-tooling-bugs.md) | Bugs reales en los propios scripts de `scripts/security/` (no en el código de la app, que aún no existe) | 2 bugs críticos de detección arreglados, 1 clase de falso positivo mitigada |
