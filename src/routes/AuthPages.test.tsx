@@ -34,11 +34,10 @@ describe('auth pages', () => {
   it('shows login validation errors and does not submit invalid values', async () => {
     renderPage(<LoginPage />)
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'invalid' } })
-    fireEvent.change(screen.getByLabelText('Contraseña'), { target: { value: '123' } })
     fireEvent.click(screen.getByRole('button', { name: 'Iniciar sesión' }))
 
     expect(await screen.findByText('Introduce un email válido.')).toBeInTheDocument()
-    expect(screen.getByText('La contraseña debe tener al menos 6 caracteres.')).toBeInTheDocument()
+    expect(screen.getByText('Introduce tu contraseña.')).toBeInTheDocument()
     expect(authMocks.signIn).not.toHaveBeenCalled()
   })
 
@@ -47,8 +46,32 @@ describe('auth pages', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Crear cuenta' }))
 
     expect(await screen.findByText('Introduce un email válido.')).toBeInTheDocument()
-    expect(screen.getByText('La contraseña debe tener al menos 6 caracteres.')).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        'La contraseña debe tener al menos 15 caracteres — puedes usar una frase en vez de una palabra con símbolos.',
+      ),
+    ).toBeInTheDocument()
     expect(authMocks.signUp).not.toHaveBeenCalled()
+  })
+
+  it('shows and hides the password without submitting the form', () => {
+    renderPage(<LoginPage />)
+    const passwordInput = screen.getByLabelText('Contraseña')
+    const showPasswordButton = screen.getByRole('button', { name: 'Mostrar contraseña' })
+
+    expect(passwordInput).toHaveAttribute('type', 'password')
+    expect(showPasswordButton).toHaveAttribute('type', 'button')
+
+    fireEvent.click(showPasswordButton)
+
+    expect(passwordInput).toHaveAttribute('type', 'text')
+    expect(screen.getByRole('button', { name: 'Ocultar contraseña' })).toBeInTheDocument()
+    expect(authMocks.signIn).not.toHaveBeenCalled()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Ocultar contraseña' }))
+
+    expect(passwordInput).toHaveAttribute('type', 'password')
+    expect(screen.getByRole('button', { name: 'Mostrar contraseña' })).toBeInTheDocument()
   })
 
   it('announces Supabase authentication errors', async () => {
@@ -70,7 +93,7 @@ describe('auth pages', () => {
     authMocks.signUp.mockResolvedValueOnce({})
     const { unmount } = renderPage(<RegisterPage />)
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'new@example.com' } })
-    fireEvent.change(screen.getByLabelText('Contraseña'), { target: { value: 'secret1' } })
+    fireEvent.change(screen.getByLabelText('Contraseña'), { target: { value: 'a secure phrase!' } })
     fireEvent.click(screen.getByRole('button', { name: 'Crear cuenta' }))
     expect(await screen.findByText(confirmationMessage)).toBeInTheDocument()
     unmount()
@@ -80,7 +103,7 @@ describe('auth pages', () => {
     )
     renderPage(<RegisterPage />)
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'existing@example.com' } })
-    fireEvent.change(screen.getByLabelText('Contraseña'), { target: { value: 'secret1' } })
+    fireEvent.change(screen.getByLabelText('Contraseña'), { target: { value: 'a secure phrase!' } })
     fireEvent.click(screen.getByRole('button', { name: 'Crear cuenta' }))
     expect(await screen.findByText(confirmationMessage)).toBeInTheDocument()
   })
@@ -89,7 +112,7 @@ describe('auth pages', () => {
     authMocks.signUp.mockRejectedValue(new Error('Network request failed'))
     renderPage(<RegisterPage />)
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'person@example.com' } })
-    fireEvent.change(screen.getByLabelText('Contraseña'), { target: { value: 'secret1' } })
+    fireEvent.change(screen.getByLabelText('Contraseña'), { target: { value: 'a secure phrase!' } })
     fireEvent.click(screen.getByRole('button', { name: 'Crear cuenta' }))
 
     await waitFor(() => expect(screen.getByText('Network request failed')).toBeInTheDocument())
