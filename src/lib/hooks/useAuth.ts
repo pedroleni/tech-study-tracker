@@ -48,6 +48,37 @@ export function useAuth() {
     return data
   }, [])
 
+  const verifyOtp = useCallback(async (email: string, token: string) => {
+    const { data, error } = await supabase.auth.verifyOtp({ email, token, type: 'email' })
+    if (error) throw error
+    return data
+  }, [])
+
+  const resendCode = useCallback(async (email: string) => {
+    const { data, error } = await supabase.auth.resend({ type: 'signup', email })
+    if (error) throw error
+    return data
+  }, [])
+
+  const requestPasswordReset = useCallback(async (email: string) => {
+    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/nueva-password`,
+    })
+    if (error) throw error
+    return data
+  }, [])
+
+  const updatePassword = useCallback(async (password: string) => {
+    const { data, error } = await supabase.auth.updateUser({ password })
+    if (error) throw error
+    return data
+  }, [])
+
+  const signOutOtherSessions = useCallback(async () => {
+    const { error } = await supabase.auth.signOut({ scope: 'others' })
+    if (error) throw error
+  }, [])
+
   const signOut = useCallback(async () => {
     const { error } = await supabase.auth.signOut()
     if (error) throw error
@@ -55,5 +86,17 @@ export function useAuth() {
 
   const user: User | null = session?.user ?? null
 
-  return { user, session, loading, signIn, signUp, signOut }
+  return {
+    user,
+    session,
+    loading,
+    signIn,
+    signUp,
+    signOut,
+    verifyOtp,
+    resendCode,
+    requestPasswordReset,
+    updatePassword,
+    signOutOtherSessions,
+  }
 }

@@ -30,6 +30,17 @@ funciona aunque el código esté bien.
 3. **Authentication → URL Configuration → Redirect URLs**: añadir
    `http://localhost:5173/nueva-password` y la URL equivalente de
    producción en Vercel. Sin esto, el enlace de recuperación rebota.
+   Usa **URLs exactas**, no comodines tipo `https://*.vercel.app/**`:
+   `redirectTo` se construye desde `window.location.origin`, así que un
+   patrón amplio es la única vía por la que el enlace de recuperación
+   podría acabar en otro dominio.
+4. **Authentication → Providers → Email → "Secure password change"**:
+   activado. Sin esto, cualquiera con una sesión válida abierta (portátil
+   desbloqueado, navegador compartido) puede entrar a `/nueva-password` y
+   fijar una contraseña nueva **sin conocer la actual** — CWE-620,
+   hallazgo 4 de `security/reviews/2026-08-12-auth-flows.md`. Es la
+   mitigación real: distinguir en el cliente una sesión de recuperación
+   de una normal es frágil y no se implementa.
 
 ---
 
