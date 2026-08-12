@@ -38,15 +38,21 @@ EXCLUDE="--exclude-dir=.git --exclude-dir=node_modules --exclude-dir=vendor --ex
 # anywhere else in the repo); or a package-manager lockfile (long random-looking base64/hex
 # integrity hashes routinely contain "//" or hex runs by pure chance, e.g. a sha512 hash
 # containing "//" satisfies the base64-in-a-comment heuristic — excluded regardless of
-# location, since lockfiles are machine-generated wherever they are); or the two specific
-# third-party skill directories under .agents/skills/ installed via
-# `npx skills add supabase/agent-skills` (see AGENTS.md). This is NOT a blanket exemption for
-# .agents/skills/ — a differently-named skill added later is still fully scanned until someone
-# reviews it the same way and adds it here by exact path. These two were reviewed by hand: every
-# flagged line is legitimate Postgres/RLS security documentation from Supabase's official repo
-# that happens to discuss bypass/override mechanics as its subject matter (e.g. "SECURITY
-# DEFINER functions bypass RLS"), the same false-positive class as our own security docs above.
-POST_EXCLUDE_FILES='^\./(security|scripts/security)/|(^|/)(package-lock\.json|yarn\.lock|pnpm-lock\.yaml|bun\.lockb|Cargo\.lock|go\.sum|composer\.lock|Gemfile\.lock|poetry\.lock):|\.claude/(agents|commands)/security-[^/:]+\.md:|^\./\.agents/skills/(supabase|supabase-postgres-best-practices)/'
+# location, since lockfiles are machine-generated wherever they are); or the specific
+# third-party skill directories under .agents/skills/ installed via `npx skills add` (see
+# AGENTS.md). This is NOT a blanket exemption for .agents/skills/ — a differently-named skill
+# added later is still fully scanned until someone reviews it the same way and adds it here by
+# exact path. Each one listed was reviewed by hand:
+# - supabase, supabase-postgres-best-practices: every flagged line is legitimate Postgres/RLS
+#   security documentation from Supabase's official repo that happens to discuss bypass/override
+#   mechanics as its subject matter (e.g. "SECURITY DEFINER functions bypass RLS"), the same
+#   false-positive class as our own security docs above.
+# - web-design-guidelines: flags on its own description of fetching UI guidelines from a URL at
+#   review time (WebFetch) — legitimate design/a11y/perf checklist fetched fresh from Vercel's
+#   public repo each use, not a hidden instruction. Note this one is NOT hash-pinned like the
+#   Supabase skills (its content changes upstream between reviews by design), so "reviewed" here
+#   means the SKILL.md wrapper, not a guarantee about whatever the fetched guidelines currently say.
+POST_EXCLUDE_FILES='^\./(security|scripts/security)/|(^|/)(package-lock\.json|yarn\.lock|pnpm-lock\.yaml|bun\.lockb|Cargo\.lock|go\.sum|composer\.lock|Gemfile\.lock|poetry\.lock):|\.claude/(agents|commands)/security-[^/:]+\.md:|^\./\.agents/skills/(supabase|supabase-postgres-best-practices|web-design-guidelines)/'
 
 finding() {
     local severity="$1" category="$2" file="$3" detail="$4"
