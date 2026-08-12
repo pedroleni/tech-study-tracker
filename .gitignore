@@ -14,6 +14,8 @@ pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+.codex-logs/
+
 .DS_Store
 *.pem
 

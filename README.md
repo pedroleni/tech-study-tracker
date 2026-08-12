@@ -131,6 +131,36 @@ se puede tener en `.env` local — la `service_role key` nunca debe
 aparecer en este proyecto, ver
 [`security/security-review-instructions.md`](security/security-review-instructions.md).
 
+## Ver a Codex trabajar en vivo
+
+`codex exec` por defecto no imprime nada hasta que termina — para una
+tarea de varios minutos, eso es no tener ninguna visibilidad de qué está
+pasando. `scripts/dev/` da dos herramientas para lanzar tareas de Codex
+con streaming en tiempo real, en vez de tener que esperar a ciegas:
+
+```bash
+# Terminal 1: lanza la tarea (queda logueada en .codex-logs/, gitignored)
+npm run codex:task -- "Implementa X en src/lib/utils, con tests" low
+
+# Terminal 2: panel en vivo — se abre solo en http://localhost:4545,
+# auto-detecta el log más reciente si no le pasas uno
+npm run codex:monitor
+```
+
+`codex:task` acepta `[reasoning_effort] [model]` como segundo y tercer
+argumento (por defecto `medium`, sin modelo explícito = el default de
+Codex) — usa `low` para tareas mecánicas/bien acotadas y `high` para
+algo ambiguo o sensible a seguridad, en vez de dejarlo siempre en
+default (ver `AGENTS.md`).
+
+**Por qué existen estos scripts y no solo `codex exec "..."` a pelo:**
+lanzar `codex exec` en segundo plano sin cerrar `stdin` puede dejarlo
+colgado indefinidamente esperando un EOF que nunca llega — pasó de
+verdad durante el desarrollo de este proyecto (~30 minutos perdidos
+hasta diagnosticarlo). `codex-task.sh` ya incluye `< /dev/null` y
+`--json` (necesario para que haya algo que el monitor pueda ir leyendo
+en caliente) para que nadie tenga que volver a pisar esa misma piedra.
+
 ## Estructura
 
 ```
