@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
 import { isAuthApiError } from '@supabase/supabase-js'
+import { Eye, EyeOff } from 'lucide-react'
 import { z } from 'zod'
 
 import { Button } from '@/components/ui/button'
@@ -10,12 +11,25 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/lib/hooks/useAuth'
 
-const authSchema = z.object({
-  email: z.email('Introduce un email válido.'),
-  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres.'),
+const emailSchema = z.email('Introduce un email válido.')
+
+const loginSchema = z.object({
+  email: emailSchema,
+  password: z.string().min(1, 'Introduce tu contraseña.'),
 })
 
-type AuthFields = z.infer<typeof authSchema>
+const registerSchema = z.object({
+  email: emailSchema,
+  password: z
+    .string()
+    .min(
+      15,
+      'La contraseña debe tener al menos 15 caracteres — puedes usar una frase en vez de una palabra con símbolos.',
+    )
+    .max(128, 'La contraseña no puede superar los 128 caracteres.'),
+})
+
+type AuthFields = z.infer<typeof loginSchema>
 
 interface AuthFormProps {
   mode: 'login' | 'register'
@@ -38,7 +52,9 @@ export function AuthForm({ mode }: AuthFormProps) {
   const navigate = useNavigate()
   const [authError, setAuthError] = useState<string | null>(null)
   const [infoMessage, setInfoMessage] = useState<string | null>(null)
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false)
   const isLogin = mode === 'login'
+  const authSchema = isLogin ? loginSchema : registerSchema
   const {
     register,
     handleSubmit,
@@ -94,19 +110,32 @@ export function AuthForm({ mode }: AuthFormProps) {
           </div>
           <div className="space-y-2">
             <Label htmlFor={`${mode}-password`}>Contraseña</Label>
-            <Input
-              id={`${mode}-password`}
-              type="password"
-              autoComplete={isLogin ? 'current-password' : 'new-password'}
-              aria-invalid={Boolean(errors.password)}
-              aria-describedby={errors.password ? `${mode}-password-error` : undefined}
-              {...register('password', {
-                validate: (value) => {
-                  const result = authSchema.shape.password.safeParse(value)
-                  return result.success || result.error.issues[0].message
-                },
-              })}
-            />
+            <div className="relative">
+              <Input
+                id={`${mode}-password`}
+                className="pr-10"
+                type={isPasswordVisible ? 'text' : 'password'}
+                autoComplete={isLogin ? 'current-password' : 'new-password'}
+                aria-invalid={Boolean(errors.password)}
+                aria-describedby={errors.password ? `${mode}-password-error` : undefined}
+                {...register('password', {
+                  validate: (value) => {
+                    const result = authSchema.shape.password.safeParse(value)
+                    return result.success || result.error.issues[0].message
+                  },
+                })}
+              />
+              <Button
+                className="absolute top-0 right-0"
+                type="button"
+                variant="ghost"
+                size="icon-lg"
+                aria-label={isPasswordVisible ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                onClick={() => setIsPasswordVisible((visible) => !visible)}
+              >
+                {isPasswordVisible ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
+              </Button>
+            </div>
             {errors.password && <p id={`${mode}-password-error`} className="text-sm text-destructive">{errors.password.message}</p>}
           </div>
           <div aria-live="polite" aria-atomic="true">

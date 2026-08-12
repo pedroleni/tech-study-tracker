@@ -80,6 +80,48 @@ conocidos, así que el mapeo va hardcodeado dentro del propio componente.
 | `Select` (categoría, status, priority, difficulty en el form) | ⏳ pendiente | `npx shadcn add select` si hay red |
 | `DropdownMenu` (acciones de card: editar/borrar) | ⏳ pendiente | `npx shadcn add dropdown-menu` si hay red |
 
+## Política de contraseña (registro/login)
+
+**Decisión:** longitud mínima alta, sin reglas de composición — no el
+patrón clásico de "mayúscula + minúscula + número + símbolo".
+
+**Por qué (no solo "porque sí"):** el
+[OWASP Authentication Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html)
+dice explícitamente: *"There should be no password composition rules
+limiting the type of characters permitted. There should be no
+requirement for upper or lower case or numbers or special characters."*
+Las reglas de composición clásicas empujan a los usuarios hacia
+patrones predecibles (`Passw0rd!`) y no mejoran la resistencia real
+frente a fuerza bruta tanto como la longitud. La misma guía fija el
+umbral de longitud según si hay MFA:
+
+> "If MFA is enabled passwords shorter than 8 characters are considered
+> to be weak" / "If MFA is not enabled passwords shorter than 15
+> characters are considered to be weak"
+
+Esta app **no tiene MFA** (fuera de alcance, ver `specs/spec.md`), así
+que el mínimo aplicable es **15 caracteres**, no 8. Sin longitud máxima
+artificialmente baja (OWASP recomienda soportar al menos 64; aquí se
+permite hasta 128 para no bloquear passphrases largas).
+
+**Reglas concretas a implementar:**
+- `password`: mínimo 15 caracteres, máximo 128, cualquier carácter
+  permitido (sin regex de composición).
+- Mensaje de validación explica el porqué en una frase corta, no solo
+  "muy corta" — ayuda a que el usuario entienda que puede usar una
+  frase en vez de un password "complejo".
+- Botón de mostrar/ocultar contraseña (icono ojo) en vez de un segundo
+  campo de "confirmar contraseña" — reduce errores de tecleo sin
+  necesidad de escribirla dos veces. (Esto es una convención de UX
+  extendida, no una recomendación explícita de OWASP — el cheat sheet
+  no cubre este punto.)
+- **Pendiente, no implementable hoy:** comprobar la contraseña contra
+  la base de datos de HaveIBeenPwned vía la integración nativa de
+  Supabase Auth — existe, pero
+  [solo está disponible en el plan Pro de Supabase](https://supabase.com/docs/guides/auth/password-security),
+  no en el gratuito que usa este proyecto. Revisar si se activa el día
+  que se pase a Pro.
+
 ## Tipografía y espaciado
 
 Sin overrides propios más allá de lo ya en `src/index.css`
