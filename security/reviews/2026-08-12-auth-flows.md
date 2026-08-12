@@ -209,6 +209,38 @@ limiter, idioma), no por enumeración.
 - **Redirect URLs sin comodines:** al configurar el paso manual 3, usar
   URLs exactas y no patrones tipo `https://*.vercel.app/**`.
 
+## Hallazgo de tooling descubierto por el camino
+
+El CI de este PR falló con **5 hallazgos CRITICAL "Agent Directive"** en
+código de auth perfectamente legítimo, después de que el scanner pasara
+en verde varias veces en local. Dos bugs distintos, encadenados:
+
+1. **Falsos positivos por falta de límites de palabra.** El patrón
+   `(?:AI|assistant|agent|…).*(?:execute|run|…|send)` no usaba `\b`, así
+   que `AI` casaba dentro de "aw**ai**t", "em**ai**l" y "f**ai**lure", y
+   `send` dentro de "re**send**". Una línea tan inocua como
+   `await resendCode(email)` se reportaba como CRITICAL. Arreglado con
+   `\b`; verificado que sigue detectando 7/7 ataques reales de prueba y
+   que baja de 5 a 0 los falsos positivos sobre `src/`.
+
+2. **El scanner era ciego en macOS, y no lo decía.** Casi todos sus
+   checks usan `grep -P` (PCRE), que el grep de BSD de macOS **no
+   soporta**: no da error visible, simplemente devuelve 0 resultados. O
+   sea, todas las pasadas locales de este scanner durante la sesión
+   fueron un falso "sin hallazgos" — el CI (Ubuntu, GNU grep) era el
+   único sitio donde de verdad se estaba escaneando. Arreglado: el script
+   ahora detecta si `grep` soporta `-P`, cae a `ggrep` si está instalado,
+   y **aborta con exit 2** si no hay ninguno, en vez de dar un verde
+   falso. Verificado en macOS: antes detectaba 0 de 7 ataques de prueba,
+   ahora detecta 7 de 7.
+
+**Lección aplicable más allá de este scanner:** una herramienta de
+seguridad que falla en silencio es peor que no tenerla, porque produce
+confianza injustificada. Este es el segundo bug de esta clase en el mismo
+fichero (ver `2026-08-11-tooling-bugs.md`): conviene que cualquier
+scanner nuevo verifique sus propias dependencias antes de reportar
+"limpio".
+
 ## Estado
 
 - [x] Hallazgos 1-7 → corregidos antes de abrir el PR.
