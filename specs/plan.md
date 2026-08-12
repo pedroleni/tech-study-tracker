@@ -1,8 +1,14 @@
 # Plan técnico: Tech Study Tracker
 
-Deriva de [`spec.md`](spec.md). Este documento es la entrada para la
-implementación (Codex u otro agente): estructura, esquema de datos,
-decisiones de arquitectura y orden de construcción.
+Deriva de [`spec.md`](spec.md). Contiene las decisiones **transversales**
+(stack, estructura de carpetas, convenciones) y el orden de construcción.
+
+> **Para implementar una feature no leas este documento entero.** Cada
+> feature tiene su propio doc autocontenido en
+> [`specs/features/`](features/) con sus rutas, componentes, SQL, tests
+> y checkpoints de seguridad. Empieza por
+> [`features/README.md`](features/README.md), que dice qué leer para
+> cada caso. Este `plan.md` se consulta solo para decisiones globales.
 
 ## 1. Decisiones de arquitectura (no cubiertas por la spec)
 
@@ -225,7 +231,10 @@ Ligado a `security/security-review-instructions.md`:
 3. Crear proyecto en Supabase (manual, por el usuario) y aplicar
    `supabase/migrations/0001_init.sql`.
 4. `types/index.ts`, `lib/supabaseClient.ts`.
-5. Auth: `useAuth`, `ProtectedRoute`, `LoginPage`, `RegisterPage`.
+5. ~~Auth básica: `useAuth`, `ProtectedRoute`, `LoginPage`,
+   `RegisterPage`~~ — hecho (PR #6). Ampliación a auth completa
+   (confirmar contraseña, verificación por código, recuperación, tabla
+   `profiles`): ver [`features/auth.md`](features/auth.md).
 6. Data layer: `lib/queries/*.ts` (CRUD), `lib/hooks/*.ts` (React Query).
 7. Utils + sus tests: `groupByCategory`, `computeStats`,
    `validateResourceUrl`.
