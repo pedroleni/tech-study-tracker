@@ -1,20 +1,14 @@
 # Feature: Documentación pública, comentarios y favoritos
 
-**Estado:** 🚧 implementada localmente — revisada por 3 agentes
-adversariales y por Codex contra las guías vigentes de Supabase — 5 hallazgos
-[BLOQUEANTE] corregidos (una función `security definer` que faltaba
-habría dejado el índice público vacío para todo el mundo salvo el
-admin; un `PATCH` directo podía mover comentarios hacia borradores;
-favoritos permitía inferir fichas en borrador; el helper privilegiado
-vivía en el esquema expuesto `public`; y faltaban los `GRANT` requeridos
-por el cambio del Data API de mayo de 2026) + 13 revisiones más aplicadas.
-El código, las rutas y los tests están terminados localmente. El inventario
-remoto del 2026-08-13 confirmó `0002` completa y `0003` aplicada
-estructuralmente: helpers en `private`, tablas nuevas y las 16 políticas
-esperadas. No hay contenido previo que migrar (`categories` y `technologies`
-tienen 0 filas). Queda comparar permisos por columna, definiciones de
-funciones e índices con la versión endurecida local, convertir una cuenta en
-admin y ejecutar las pruebas reales — ver "Configuración manual requerida".
+**Estado:** ✅ implementada y mergeada — PR #16. Migración `0003`
+aplicada en remoto y verificada (auditoría de catálogo + curl real con
+la anon key, ver `security/reviews/2026-08-13-public-docs.md`). Cuenta
+admin promocionada, probado en vivo con las 3 identidades reales
+(admin, usuario registrado, visitante anónimo) — todas se comportan
+como especifica este documento. Dos fixes adicionales encontrados
+durante esas pruebas, en la misma rama: un callejón sin salida en la
+pantalla de verificación de código para cuentas ya confirmadas, y el
+monitor de Codex mostrando modelo/`reasoning_effort`.
 
 Pivote de alcance: de "tracker privado de un solo usuario" a "documentación
 pública curada por un administrador, con comentarios y favoritos de
