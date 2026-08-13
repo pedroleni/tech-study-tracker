@@ -56,4 +56,7 @@ echo "Log: $LOGFILE"
 echo "Monitor: npm run codex:monitor"
 echo
 
-codex "${CODEX_ARGS[@]}" < /dev/null | tee "$LOGFILE"
+node -e 'process.stdout.write(JSON.stringify({ type: "task_meta", effort: process.argv[1], model: process.argv[2], prompt: process.argv[3] }) + "\n")' \
+  "$EFFORT" "${3:-default}" "$PROMPT" > "$LOGFILE"
+
+codex "${CODEX_ARGS[@]}" < /dev/null | tee -a "$LOGFILE"

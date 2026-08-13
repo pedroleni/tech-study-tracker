@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { useAuth } from '@/lib/hooks/useAuth'
+import { useProfile } from '@/lib/hooks/useProfile'
 import {
   createCategory,
   deleteCategory,
@@ -15,10 +16,12 @@ export function useCategories() {
 
 export function useCreateCategory() {
   const { user } = useAuth()
+  const { isAdmin } = useProfile()
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (name: string) => {
       if (!user) throw new Error('No hay sesión activa.')
+      if (!isAdmin) throw new Error('Solo el administrador puede gestionar contenido.')
       return createCategory(user.id, name)
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.categories }),
@@ -26,17 +29,34 @@ export function useCreateCategory() {
 }
 
 export function useRenameCategory() {
+  const { user } = useAuth()
+  const { isAdmin } = useProfile()
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, name }: { id: string; name: string }) => renameCategory(id, name),
+    mutationFn: ({ id, name }: { id: string; name: string }) => {
+      if (!user) throw new Error('No hay sesión activa.')
+      if (!isAdmin) throw new Error('Solo el administrador puede gestionar contenido.')
+      return renameCategory(id, name)
+    },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.categories }),
   })
 }
 
 export function useDeleteCategory() {
+  const { user } = useAuth()
+  const { isAdmin } = useProfile()
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (id: string) => deleteCategory(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.categories }),
+    mutationFn: (id: string) => {
+      if (!user) throw new Error('No hay sesión activa.')
+      if (!isAdmin) throw new Error('Solo el administrador puede gestionar contenido.')
+      return deleteCategory(id)
+    },
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.categories }),
+        // Technologies are deleted by the category FK cascade.
+        queryClient.invalidateQueries({ queryKey: queryKeys.technologies }),
+      ]),
   })
 }

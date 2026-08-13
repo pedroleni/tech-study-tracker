@@ -10,6 +10,12 @@ Deriva de [`spec.md`](spec.md). Contiene las decisiones **transversales**
 > [`features/README.md`](features/README.md), que dice qué leer para
 > cada caso. Este `plan.md` se consulta solo para decisiones globales.
 
+> **Actualización de alcance (2026-08):** la app dejó de ser privada y pasó
+> a documentación pública curada por un administrador. Las rutas, RLS y el
+> orden de UI originales de este documento quedan sustituidos por
+> [`features/public-docs.md`](features/public-docs.md). Las decisiones de
+> stack, estructura y testing de las secciones 1, 2 y 6 siguen vigentes.
+
 ## 1. Decisiones de arquitectura (no cubiertas por la spec)
 
 - **Data fetching/cache:** TanStack Query (`@tanstack/react-query`) sobre
@@ -89,19 +95,28 @@ tech-study-tracker/
 
 | Ruta | Página | Protegida |
 |---|---|---|
-| `/login` | LoginPage | No |
-| `/register` | RegisterPage | No |
-| `/` | DashboardPage | Sí |
-| `/categorias` | CategoryIndexPage | Sí |
-| `/categorias/:categoryId` | CategoryDetailPage | Sí |
-| `/tecnologias/:id` | TechnologyDetailPage (edición) | Sí |
-| `/tecnologias/nueva` | TechnologyDetailPage (creación) | Sí |
+| `/` | PublicHomePage | No |
+| `/categorias/:id` | CategoryPage | No |
+| `/tecnologias/:id` | TechnologyPage (lectura) | No |
+| `/login`, `/register` | LoginPage / RegisterPage | No |
+| `/recuperar-password`, `/nueva-password` | Recuperación de contraseña | No |
+| `/favoritos` | FavoritesPage | Sesión |
+| `/admin` | AdminDashboardPage | Admin |
+| `/admin/categorias` | AdminCategoriesPage | Admin |
+| `/admin/tecnologias/nueva` | AdminTechnologyFormPage | Admin |
+| `/admin/tecnologias/:id/editar` | AdminTechnologyFormPage | Admin |
 
 `ProtectedRoute` redirige a `/login` si `useAuth()` no tiene sesión activa.
+`AdminRoute`, anidado dentro, comprueba además `profiles.role = 'admin'`.
+Ambos son guards de UX; RLS sigue siendo la autorización real.
 
 ## 4. Esquema de datos (Supabase)
 
-`supabase/migrations/0001_init.sql`:
+El historial empieza en `0001_init.sql` (esquema privado owner-only), añade
+`profiles` en `0002_profiles.sql` y pivota al modelo público de tres niveles
+en `0003_public_docs.sql`. La definición vigente y los checkpoints están en
+[`features/public-docs.md`](features/public-docs.md); el bloque histórico de
+abajo documenta únicamente el punto de partida de `0001`.
 
 ```sql
 create table categories (
@@ -227,31 +242,34 @@ Ligado a `security/security-review-instructions.md`:
    ESLint + jsx-a11y, vitest-axe, shadcn/ui (ver sección 1).
 2. ~~Config~~ — hecho: `vite.config.ts` (plugins, alias `@/*`, bloque
    `test`), `src/index.css` (tokens + dark variant), `eslint.config.js`,
-   `components.json`. Falta `.env.example` con las vars reales de
-   Supabase cuando exista el proyecto (paso 3).
-3. Crear proyecto en Supabase (manual, por el usuario) y aplicar
-   `supabase/migrations/0001_init.sql`.
-4. `types/index.ts`, `lib/supabaseClient.ts`.
+   `components.json` y `.env.example` sin credenciales reales.
+3. Proyecto Supabase creado. Las migraciones remotas se validan en cada
+   feature con sus checkpoints. El inventario del 2026-08-13 confirmó `0002`
+   completa y `0003` aplicada estructuralmente; queda comparar el
+   endurecimiento fino del catálogo antes de las pruebas por identidad.
+4. ~~`types/index.ts`, `lib/supabaseClient.ts`.~~ Hecho.
 5. ~~Auth básica: `useAuth`, `ProtectedRoute`, `LoginPage`,
    `RegisterPage`~~ — hecho (PR #6). Ampliación a auth completa
    (confirmar contraseña, verificación por código, recuperación, tabla
    `profiles`): ver [`features/auth.md`](features/auth.md).
-6. Data layer: `lib/queries/*.ts` (CRUD), `lib/hooks/*.ts` (React Query).
-7. Utils + sus tests: `groupByCategory`, `computeStats`,
-   `validateResourceUrl`.
-8. UI base: `AppShell`, `Navbar`, `DarkModeToggle` — usando componentes de
+6. ~~Data layer: `lib/queries/*.ts` (CRUD), `lib/hooks/*.ts` (React Query).~~
+   Hecho en PR #15; la ampliación pública vive en `features/public-docs.md`.
+7. ~~Utils + sus tests: `groupByCategory`, `computeStats`,
+   `validateResourceUrl`.~~ Hecho.
+8. ~~UI base: `AppShell`, `Navbar`, `DarkModeToggle`~~ — usando componentes de
    `components/ui/` (añadir con `npx shadcn@latest add <componente>`) en
    vez de HTML a mano donde exista uno equivalente (button, dialog, select,
    dropdown-menu...). Cada componente interactivo nuevo lleva un test con
    `axe()` (ver sección 1, Accesibilidad).
-9. `DashboardPage` (+ `StatsSummary`, `PendingList`,
-   `CategoryQuickLinks`) y sus tests.
-10. `CategoryIndexPage`, `CategoryDetailPage`, `CategoryForm`,
-    `CategoryList`.
-11. `TechnologyDetailPage`, `TechnologyForm` (con `ResourceListEditor` y
-    validación de URL), `TechnologyCard`, badges, y sus tests.
-12. Checkpoint de seguridad (sección 7) + `/security-review`.
-13. Deploy: proyecto en Vercel apuntando al repo, variables de entorno
+9. 🚧 `features/public-docs.md` implementada localmente: migración,
+   infraestructura, rutas públicas, favoritos/comentarios y panel de
+   administración. `0002` y la estructura de `0003` están verificadas en
+   remoto; categorías/tecnologías estaban vacías. Pendiente contrastar grants,
+   funciones e índices, aplicar una `0004` forward-only solo si hay drift,
+   designar al admin y probar las tres identidades.
+10. Checkpoint de seguridad completo + pruebas reales con visitante,
+    usuario y admin.
+11. Deploy: proyecto en Vercel apuntando al repo, variables de entorno
     `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY` configuradas en Vercel.
 
 ## 9. Fuera de este plan

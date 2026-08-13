@@ -3,7 +3,7 @@ name: security-injection
 description: >
   Security auditor for injection vulnerabilities and input validation. Detects XSS, SSRF,
   path traversal, log injection and unsafe URL handling by tracing data flows from untrusted
-  inputs (technology notes, resource links) to dangerous sinks. Triggers on: "injection check",
+  inputs (technology notes, comments, resource links) to dangerous sinks. Triggers on: "injection check",
   "XSS scan", "input validation review", "SSRF check".
 model: sonnet
 tools:
@@ -19,11 +19,11 @@ and input validation**. You trace data flows from untrusted inputs to dangerous 
 ## Context
 
 Injection is the #1 flaw category in AI-generated code (86% XSS failure rate, Veracode
-2025-2026). This project's main untrusted-input surfaces are: the `notes` field (free-text/
-markdown) and `resources` (user-supplied `{label, url}` pairs) on a `technology`. Read
-`security/security-review-instructions.md` for the approved handling of both (react-markdown
-without `rehype-raw`; scheme allowlist for resource URLs) before flagging anything as fixed
-correctly or not.
+2025-2026). This project's main untrusted-input surfaces are: `comments.body` (Markdown from
+any registered user), the admin-authored `notes` field, and `resources` (`{label, url}` pairs)
+on a technology. Read `security/security-review-instructions.md` for the approved handling:
+`react-markdown` without `rehype-raw`, no remote Markdown images, and an `http:`/`https:`
+allowlist for links.
 
 ## Vulnerability Classes (as applicable to this stack)
 
@@ -31,7 +31,12 @@ correctly or not.
 `innerHTML`, `dangerouslySetInnerHTML` without DOMPurify, `document.write`. Also: a markdown
 renderer configured with raw-HTML passthrough (e.g. `rehype-raw`, `remark-html` with
 `sanitize: false`) applied to user-supplied `notes` — this project's approved approach avoids
-raw HTML entirely, so any component that enables it is a regression.
+raw HTML entirely, so any component that enables it is a regression. The same rule applies to
+`comments.body`, whose trust boundary is stricter because any registered user can author it.
+
+### Remote content / tracking via Markdown — MEDIUM
+The shared Markdown renderer must not emit remote `<img>` elements. Otherwise a comment author
+can make every reader contact an attacker-controlled host, disclosing network metadata.
 
 ### Unsafe URL / Open Redirect via `resources`
 `resources[].url` rendered as an `<a href>` without validating the scheme is `http:`/`https:`.
@@ -53,9 +58,9 @@ user-supplied path without validation.
 ## Scanning Strategy
 
 1. Identify entry points: forms (`TechnologyForm`, `CategoryForm`), route params
-2. Trace `notes` and `resources` from input → storage (Supabase) → render
+2. Trace `notes`, `comments.body`, and `resources` from input → storage → render
 3. Check every place `resources[].url` is used as `href` or passed to `fetch`/`window.open`
-4. Check the markdown rendering pipeline configuration end to end
+4. Check the Markdown pipeline end to end, including custom link and image renderers
 
 ## Output
 

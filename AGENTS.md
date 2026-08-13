@@ -5,9 +5,10 @@ que trabaje en este repo.
 
 ## Proyecto
 
-App personal para organizar tecnologías en estudio: dashboard + índice por
-categorías. Stack: React + TypeScript + Vite + Tailwind CSS + Vitest en el
-frontend, Supabase (Postgres + Auth) como backend, desplegado en Vercel.
+Documentación técnica pública curada por administradores, con comentarios y
+favoritos para usuarios registrados. Stack: React + TypeScript + Vite +
+Tailwind CSS + Vitest en el frontend, Supabase (Postgres + Auth) como backend,
+desplegado en Vercel.
 
 ### Qué documentación leer (no las leas todas)
 
@@ -69,18 +70,16 @@ añada después NO lo está hasta que alguien la revise igual.
 
 Este proyecto tiene una auditoría de seguridad multi-dominio (8 áreas),
 pensada originalmente como 8 subagentes de Claude Code
-(`.claude/agents/security-*.md`) orquestados por `/security-review`. Tú
-(Codex) no tienes ese mecanismo de subagentes, pero puedes seguir la misma
-auditoría de forma secuencial: cada archivo `.claude/agents/security-*.md`
-es un checklist de dominio autocontenido, escrito para ser leído por
-cualquier agente, no solo por Claude Code.
+(`.claude/agents/security-*.md`) orquestados por `/security-review`. Si el
+agente o el entorno activo no permite delegarlos, recorre los ocho checklists
+de forma secuencial: cada archivo es autocontenido y no depende de Claude.
 
 Antes de considerar terminada cualquier tarea que toque:
 - autenticación o sesiones (Supabase Auth) o políticas RLS →
   `.claude/agents/security-auth-crypto.md`,
 - claves/variables de entorno →
   `.claude/agents/security-secrets.md`,
-- renderizado de contenido de usuario (`notes`, `resources`) →
+- renderizado de contenido (`notes`, `resources`, `comments.body`) →
   `.claude/agents/security-injection.md`,
 - dependencias nuevas (`npm install ...`) →
   `.claude/agents/security-supply-chain.md`,
@@ -143,16 +142,10 @@ No crees una rama gigante que intente todo `specs/plan.md` de una vez.
 Una rama por paso (o por un grupo pequeño y cohesionado de pasos) — así
 cada feature se puede probar, revisar y revertir de forma independiente.
 
-**Restricción conocida de Codex:** el sandbox `workspace-write` de Codex
-CLI no permite escribir dentro de `.git` — ni `checkout -b`, ni `add`, ni
-`commit`, ni `push` funcionan ahí (falla con "Operation not permitted").
-En la práctica esto significa que Codex debe limitarse a **implementar
-código y tests** en el árbol de trabajo; los pasos 1, 3 y 4 de arriba
-(crear rama, commitear, hacer push/PR) los completa quien sí tenga acceso
-de escritura a `.git` — normalmente Claude Code o el propio usuario. Si
-eres Codex y no puedes crear la rama al principio, implementa igualmente
-sobre el working tree tal cual está y dilo explícitamente en tu resumen
-final para que el siguiente agente cree la rama y mueva los cambios ahí.
+**Sandboxes de agentes:** algunos entornos bloquean por defecto la escritura
+en `.git`. Solicita el permiso acotado necesario para crear la rama o el
+commit; si se deniega, limita los cambios al árbol de trabajo y deja el paso
+manual indicado de forma explícita en el resumen final.
 
 **Cómo lanzar tareas de Codex en segundo plano:** usa
 `npm run codex:task -- "<prompt>" [reasoning_effort]` en vez de

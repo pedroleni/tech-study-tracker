@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 const mocks = vi.hoisted(() => ({
   from: vi.fn(),
   user: { id: 'session-user' } as { id: string } | null,
+  isAdmin: true,
 }))
 
 vi.mock('@/lib/supabaseClient', () => ({
@@ -14,6 +15,10 @@ vi.mock('@/lib/supabaseClient', () => ({
 
 vi.mock('@/lib/hooks/useAuth', () => ({
   useAuth: () => ({ user: mocks.user }),
+}))
+
+vi.mock('@/lib/hooks/useProfile', () => ({
+  useProfile: () => ({ isAdmin: mocks.isAdmin }),
 }))
 
 import {
@@ -119,6 +124,7 @@ describe('data hooks', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mocks.user = { id: 'session-user' }
+    mocks.isAdmin = true
   })
 
   it('useCategories and useTechnologies expose mapped query data', async () => {
@@ -143,6 +149,9 @@ describe('data hooks', () => {
       categoryId: 'category-1',
       updatedAt: '2026-08-13T09:00:00.000Z',
     })
+    expect(
+      client.getQueryState(queryKeys.technologiesForViewer('session-user')),
+    ).toBeDefined()
   })
 
   it('useTechnology uses the id-specific query and exposes mapped data', async () => {
@@ -160,6 +169,9 @@ describe('data hooks', () => {
       id: 'technology-1',
       categoryId: 'category-1',
     })
+    expect(
+      client.getQueryState(queryKeys.technology('session-user', 'technology-1')),
+    ).toBeDefined()
   })
 
   it('create hooks pass exactly the active session user id to Supabase', async () => {
@@ -201,6 +213,22 @@ describe('data hooks', () => {
     expect(mocks.from).not.toHaveBeenCalled()
   })
 
+  it('admin mutations reject a non-admin before calling Supabase', async () => {
+    mocks.isAdmin = false
+    const client = createTestClient()
+    const wrapper = wrapperFor(client)
+    const categoryHook = renderHook(() => useCreateCategory(), { wrapper })
+    const technologyHook = renderHook(() => useCreateTechnology(), { wrapper })
+
+    await expect(categoryHook.result.current.mutateAsync('Frontend')).rejects.toThrow(
+      'Solo el administrador puede gestionar contenido.',
+    )
+    await expect(technologyHook.result.current.mutateAsync(newTechnology)).rejects.toThrow(
+      'Solo el administrador puede gestionar contenido.',
+    )
+    expect(mocks.from).not.toHaveBeenCalled()
+  })
+
   it.each([
     ['useCreateCategory', useCreateCategory, 'categories', 'Frontend'],
     [
@@ -209,7 +237,6 @@ describe('data hooks', () => {
       'categories',
       { id: 'category-1', name: 'Web' },
     ],
-    ['useDeleteCategory', useDeleteCategory, 'categories', 'category-1'],
     ['useCreateTechnology', useCreateTechnology, 'technologies', newTechnology],
     [
       'useUpdateTechnology',
@@ -237,6 +264,21 @@ describe('data hooks', () => {
       expect(client.getQueryState(otherKey)?.isInvalidated).toBe(false)
     },
   )
+
+  it('useDeleteCategory invalidates categories and cascade-deleted technologies', async () => {
+    setupSupabaseMocks()
+    const client = createTestClient()
+    client.setQueryData(queryKeys.categories, [])
+    client.setQueryData(queryKeys.technologies, [])
+    const { result } = renderHook(() => useDeleteCategory(), {
+      wrapper: wrapperFor(client),
+    })
+
+    await act(() => result.current.mutateAsync('category-1'))
+
+    expect(client.getQueryState(queryKeys.categories)?.isInvalidated).toBe(true)
+    expect(client.getQueryState(queryKeys.technologies)?.isInvalidated).toBe(true)
+  })
 
   it.each([
     ['useCreateCategory', useCreateCategory, 'categories', 'Frontend'],

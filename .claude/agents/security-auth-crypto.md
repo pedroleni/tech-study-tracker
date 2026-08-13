@@ -2,8 +2,8 @@
 name: security-auth-crypto
 description: >
   Security auditor for authentication, authorization, and Supabase Row Level Security (RLS).
-  Checks Supabase Auth session handling, RLS policies on every table, ownership checks on
-  foreign keys, and general crypto/session hygiene. Triggers on: "auth review",
+  Checks Supabase Auth session handling, public/admin/owner policies, foreign-key boundaries,
+  and general crypto/session hygiene. Triggers on: "auth review",
   "authentication security", "RLS audit", "is my auth secure", "authorization review".
 model: sonnet
 tools:
@@ -24,18 +24,23 @@ reporting anything.
 ## What to Audit
 
 ### Row Level Security (highest priority)
-- Every table with user data (`categories`, `technologies`, and any new table) MUST have
-  `alter table ... enable row level security;` and explicit policies.
-- A policy must scope `select/insert/update/delete` to `user_id = auth.uid()`. A missing
-  policy on any of the four operations is CRITICAL (defaults to fully open once RLS is
-  enabled with no policy = fully closed, but a table with RLS **disabled** is fully open —
-  check both).
+- Every exposed table (`profiles`, `categories`, `technologies`, `comments`, `favorites`, and
+  any new table) MUST have `alter table ... enable row level security;`, explicit policies,
+  and explicit least-privilege Data API grants.
+- Check the operation matrix in `security/security-review-instructions.md`; this app no
+  longer uses owner-only SELECT everywhere. Categories and published technologies are public,
+  content writes are admin-only, comments are public-readable/author-writable with admin
+  deletion, and favorites are owner-only with no UPDATE.
+- RLS enabled with no applicable policy is closed, while RLS disabled on an exposed table can
+  be open. Do not invent a required policy for an intentionally denied operation.
 - Any client-side query that filters by `user_id` (e.g. `.eq('user_id', user.id)`) is not a
   substitute for RLS — flag as HIGH/IDOR if the matching table-level policy doesn't exist,
   since a malicious client can call the Supabase REST/JS API directly bypassing app code.
 - Foreign keys across ownership boundaries (e.g. `technologies.category_id` →
   `categories.id`) must be constrained so a row can't reference another user's parent row —
   via policy, check constraint, or trigger. Flag if missing.
+- Privileged RLS helpers must use the approved private-schema `security definer` pattern;
+  confirm they are not callable as exposed Data API RPCs.
 
 ### Supabase Auth / Sessions
 - Session handling must go through `supabase-js` (`supabase.auth.onAuthStateChange`,

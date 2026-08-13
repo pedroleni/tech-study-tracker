@@ -2,6 +2,7 @@ import type { Session, User } from '@supabase/supabase-js'
 import { useCallback, useEffect, useState } from 'react'
 
 import { supabase } from '@/lib/supabaseClient'
+import { queryClient } from '@/lib/queryClient'
 
 export function useAuth() {
   const [session, setSession] = useState<Session | null>(null)
@@ -11,7 +12,10 @@ export function useAuth() {
     let active = true
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, nextSession) => {
+      (event, nextSession) => {
+        // Draft technologies are visible to admins. Remove every cached copy when
+        // Supabase ends the session, including expiry/revocation outside our button.
+        if (event === 'SIGNED_OUT') queryClient.clear()
         if (active) {
           setSession(nextSession)
           setLoading(false)
@@ -82,6 +86,7 @@ export function useAuth() {
   const signOut = useCallback(async () => {
     const { error } = await supabase.auth.signOut()
     if (error) throw error
+    queryClient.clear()
   }, [])
 
   const user: User | null = session?.user ?? null

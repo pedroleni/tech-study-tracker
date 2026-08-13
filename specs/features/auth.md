@@ -1,7 +1,11 @@
 # Feature: Autenticación completa
 
-**Estado:** ✅ implementada en PR #14 (más el fix de seguridad de tooling
-en el mismo PR — ver `security/reviews/2026-08-12-auth-flows.md`)
+**Estado:** ✅ código implementado en PR #14 (más el fix de seguridad de
+tooling en el mismo PR); ✅ `0002_profiles.sql` verificada en remoto el
+2026-08-13: 2 perfiles para 2 usuarios, ninguna cuenta sin perfil, RLS/PK/FK/
+`CHECK` y trigger de alta presentes. Tras `0003`, el trigger apunta
+correctamente a `private.handle_new_user()`; por eso buscar esa función solo
+en `public` produce un falso negativo.
 
 Amplía la autenticación mínima ya existente (login/registro básicos, PR
 #6) con: confirmación de contraseña, verificación de email por código de
@@ -15,10 +19,27 @@ preparada para un futuro multiusuario.
 
 ## Configuración manual requerida (no la puede hacer un agente)
 
-Codex no tiene red: estos tres pasos los hace **el usuario** en el
+Codex no tiene acceso administrativo al proyecto remoto: estos pasos los hace **el usuario** en el
 dashboard de Supabase, y sin ellos el flujo de código por email no
 funciona aunque el código esté bien.
 
+0. **`supabase/migrations/0002_profiles.sql`, ya verificada.** No volver a
+   ejecutarla. La comprobación inicial miraba únicamente `public` y no tuvo en
+   cuenta que `0003` mueve el helper al esquema interno `private`. La
+   comprobación correcta y resistente al cambio de esquema es:
+   ```sql
+   select
+     to_regclass('public.profiles') is not null as profiles_exists,
+     p.pronamespace::regnamespace::text || '.' || p.proname || '()'
+       as signup_trigger_function
+    from pg_trigger t
+    join pg_proc p on p.oid = t.tgfoid
+    where t.tgname = 'on_auth_user_created'
+      and not t.tgisinternal;
+   ```
+   El remoto devuelve `profiles_exists = true` y
+   `signup_trigger_function = private.handle_new_user()`; además hay 2 filas
+   de perfil y 0 usuarios sin perfil.
 1. **Authentication → Email Templates → "Confirm signup"**: sustituir el
    cuerpo por uno que use `{{ .Token }}` en vez de
    `{{ .ConfirmationURL }}`. Ejemplo mínimo:
