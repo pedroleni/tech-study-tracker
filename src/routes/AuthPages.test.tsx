@@ -158,6 +158,26 @@ describe('auth pages', () => {
     expect(screen.getByLabelText('Código de 6 dígitos')).toBeInTheDocument()
   })
 
+  it('always offers the same login exit from the verification step', async () => {
+    const expectedText = '¿Ya tienes cuenta? Inicia sesión'
+
+    const newAccount = renderPage(<RegisterPage />)
+    await advanceToCodeStep()
+    const newAccountLink = screen.getByRole('link', { name: 'Inicia sesión' })
+    expect(newAccountLink).toHaveAttribute('href', '/login')
+    expect(newAccountLink.parentElement).toHaveTextContent(expectedText)
+    newAccount.unmount()
+
+    authMocks.signUp.mockRejectedValueOnce(
+      new AuthApiError('User already registered', 400, 'user_already_exists'),
+    )
+    renderPage(<RegisterPage />)
+    await advanceToCodeStep()
+    const existingAccountLink = screen.getByRole('link', { name: 'Inicia sesión' })
+    expect(existingAccountLink).toHaveAttribute('href', '/login')
+    expect(existingAccountLink.parentElement).toHaveTextContent(expectedText)
+  })
+
   it('uses one generic message for every invalid or expired code', async () => {
     authMocks.verifyOtp.mockRejectedValue(new Error('No signup request found for this email'))
     renderPage(<RegisterPage />)

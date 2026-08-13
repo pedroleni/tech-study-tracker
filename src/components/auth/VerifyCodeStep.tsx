@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 
 import { Button } from '@/components/ui/button'
@@ -116,6 +116,13 @@ export function VerifyCodeStep({ email }: VerifyCodeStepProps) {
             {isResending ? 'Reenviando…' : 'Reenviar código'}
           </Button>
         </form>
+
+        <p className="mt-4 text-sm text-muted-foreground">
+          ¿Ya tienes cuenta?{' '}
+          <Link className="text-primary underline underline-offset-4" to="/login">
+            Inicia sesión
+          </Link>
+        </p>
       </Card>
     </main>
   )
