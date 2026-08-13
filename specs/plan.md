@@ -69,8 +69,9 @@ tech-study-tracker/
 │   │   └── auth/AuthForm.tsx, ProtectedRoute.tsx
 │   ├── lib/
 │   │   ├── utils.ts              # cn() — generado por shadcn
-│   │   ├── supabaseClient.ts
+│   │   ├── supabaseClient.ts, queryClient.ts
 │   │   ├── queries/categories.ts, technologies.ts   # funciones CRUD puras
+│   │   ├── queries/mappers.ts, queryKeys.ts          # ver specs/features/data-layer.md
 │   │   ├── hooks/useCategories.ts, useTechnologies.ts, useAuth.ts
 │   │   └── utils/groupByCategory.ts, computeStats.ts, validateResourceUrl.ts
 │   ├── types/index.ts
