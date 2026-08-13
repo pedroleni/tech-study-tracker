@@ -44,8 +44,8 @@ una decisión global.
 |---|---|---|
 | Autenticación completa (registro con verificación por código, login, recuperación de contraseña, tabla `profiles`) | [auth.md](auth.md) | ✅ código en PR #14; `0002` verificada completa en remoto |
 | Capa de datos (`queries/`, hooks de React Query) | [data-layer.md](data-layer.md) | ✅ implementada en PR #15 |
-| Dashboard (stats, lista de pendientes) | [public-docs.md](public-docs.md) | 🚧 absorbida por el pivote; implementada localmente |
-| Categorías (índice + CRUD) | [public-docs.md](public-docs.md) | 🚧 implementada localmente; validación remota pendiente |
-| Tecnologías (ficha, formulario, badges) | [public-docs.md](public-docs.md) | 🚧 implementada localmente; validación remota pendiente |
-| Documentación pública, comentarios y favoritos (pivote de alcance) | [public-docs.md](public-docs.md) | 🚧 `0003` aplicada estructuralmente; pendiente auditoría fina, admin y pruebas reales |
+| Dashboard (stats, lista de pendientes) | [public-docs.md](public-docs.md) | ✅ absorbida por el pivote, como panel admin — PR #16 |
+| Categorías (índice + CRUD) | [public-docs.md](public-docs.md) | ✅ implementada en PR #16 |
+| Tecnologías (ficha, formulario, badges) | [public-docs.md](public-docs.md) | ✅ implementada en PR #16 |
+| Documentación pública, comentarios y favoritos (pivote de alcance) | [public-docs.md](public-docs.md) | ✅ implementada en PR #16 — migración `0003` aplicada y verificada en remoto, probado en vivo con 3 identidades reales |
 | 2FA con TOTP (segundo factor opcional en login) | _pendiente de escribir_ | ⏳ aplazada a propósito, ver [auth.md](auth.md#fuera-de-alcance-de-esta-feature) |
