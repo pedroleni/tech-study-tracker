@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import { axe } from 'vitest-axe'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -14,7 +15,19 @@ vi.mock('@/lib/hooks/useAuth', () => ({
   }),
 }))
 
+vi.mock('@/lib/hooks/useProfile', () => ({
+  useProfile: () => ({ isAdmin: false, loading: false }),
+}))
+
 import { Navbar } from './Navbar'
+
+function renderNavbar() {
+  return render(
+    <MemoryRouter>
+      <Navbar />
+    </MemoryRouter>,
+  )
+}
 
 describe('Navbar', () => {
   beforeEach(() => {
@@ -26,7 +39,7 @@ describe('Navbar', () => {
   })
 
   it('hides logout without an active session', () => {
-    render(<Navbar />)
+    renderNavbar()
 
     expect(screen.getByText('Tech Study Tracker')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Cerrar sesión' })).not.toBeInTheDocument()
@@ -34,7 +47,7 @@ describe('Navbar', () => {
 
   it('shows logout with an active session and calls signOut', () => {
     authState.session = { user: { id: 'user-1' } }
-    render(<Navbar />)
+    renderNavbar()
 
     fireEvent.click(screen.getByRole('button', { name: 'Cerrar sesión' }))
 
@@ -43,7 +56,7 @@ describe('Navbar', () => {
 
   it('has no detectable accessibility violations', async () => {
     authState.session = { user: { id: 'user-1' } }
-    const { container } = render(<Navbar />)
+    const { container } = renderNavbar()
 
     const results = await axe(container, {
       rules: { 'color-contrast': { enabled: false } },

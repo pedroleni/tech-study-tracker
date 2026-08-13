@@ -32,6 +32,8 @@ vi.mock('@/lib/supabaseClient', () => ({
 }))
 
 import { useAuth } from './useAuth'
+import { queryClient } from '@/lib/queryClient'
+import { queryKeys } from '@/lib/queries/queryKeys'
 
 const user = { id: 'user-1', email: 'person@example.com' }
 const session = { access_token: 'managed-by-supabase', user } as Session
@@ -39,6 +41,7 @@ const session = { access_token: 'managed-by-supabase', user } as Session
 describe('useAuth', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    queryClient.clear()
     authMocks.getSession.mockResolvedValue({ data: { session }, error: null })
     authMocks.onAuthStateChange.mockReturnValue({
       data: { subscription: { unsubscribe: authMocks.unsubscribe } },
@@ -76,6 +79,22 @@ describe('useAuth', () => {
 
     act(() => listener('SIGNED_IN', session))
     expect(result.current.session).toBe(session)
+  })
+
+  it('clears cached private data when Supabase emits SIGNED_OUT', async () => {
+    let listener: (_event: string, session: Session | null) => void = () => undefined
+    authMocks.onAuthStateChange.mockImplementation((callback) => {
+      listener = callback
+      return { data: { subscription: { unsubscribe: authMocks.unsubscribe } } }
+    })
+    queryClient.setQueryData(queryKeys.technologiesForViewer('user-1'), ['draft'])
+    const { result } = renderHook(() => useAuth())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    act(() => listener('SIGNED_OUT', null))
+
+    expect(queryClient.getQueryData(queryKeys.technologiesForViewer('user-1'))).toBeUndefined()
+    expect(result.current.session).toBeNull()
   })
 
   it('delegates password auth actions and surfaces errors', async () => {

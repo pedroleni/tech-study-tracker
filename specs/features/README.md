@@ -42,9 +42,10 @@ una decisión global.
 
 | Feature | Doc | Estado |
 |---|---|---|
-| Autenticación completa (registro con verificación por código, login, recuperación de contraseña, tabla `profiles`) | [auth.md](auth.md) | ✅ implementada en PR #14 |
+| Autenticación completa (registro con verificación por código, login, recuperación de contraseña, tabla `profiles`) | [auth.md](auth.md) | ✅ código en PR #14; `0002` verificada completa en remoto |
 | Capa de datos (`queries/`, hooks de React Query) | [data-layer.md](data-layer.md) | ✅ implementada en PR #15 |
-| Dashboard (stats, lista de pendientes) | _pendiente de escribir_ | ⏳ |
-| Categorías (índice + CRUD) | _pendiente de escribir_ | ⏳ |
-| Tecnologías (ficha, formulario, badges) | _pendiente de escribir_ | ⏳ |
+| Dashboard (stats, lista de pendientes) | [public-docs.md](public-docs.md) | 🚧 absorbida por el pivote; implementada localmente |
+| Categorías (índice + CRUD) | [public-docs.md](public-docs.md) | 🚧 implementada localmente; validación remota pendiente |
+| Tecnologías (ficha, formulario, badges) | [public-docs.md](public-docs.md) | 🚧 implementada localmente; validación remota pendiente |
+| Documentación pública, comentarios y favoritos (pivote de alcance) | [public-docs.md](public-docs.md) | 🚧 `0003` aplicada estructuralmente; pendiente auditoría fina, admin y pruebas reales |
 | 2FA con TOTP (segundo factor opcional en login) | _pendiente de escribir_ | ⏳ aplazada a propósito, ver [auth.md](auth.md#fuera-de-alcance-de-esta-feature) |

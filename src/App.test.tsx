@@ -27,19 +27,36 @@ describe('App routes', () => {
     window.history.pushState({}, '', '/')
   })
 
-  it('redirects an unauthenticated visitor from / to /login', async () => {
+  it('shows the public home without redirecting an unauthenticated visitor', () => {
     render(<App />)
 
-    expect(await screen.findByRole('heading', { name: 'Iniciar sesión' })).toBeInTheDocument()
-    await waitFor(() => expect(window.location.pathname).toBe('/login'))
+    expect(
+      screen.getByRole('heading', {
+        name: 'Apuntes prácticos para aprender tecnología con contexto',
+      }),
+    ).toBeInTheDocument()
+    expect(window.location.pathname).toBe('/')
   })
 
-  it('shows the dashboard at / for an authenticated visitor', () => {
+  it('shows the same public home at / for an authenticated visitor', () => {
     authState.session = { user: { id: 'user-1' } }
 
     render(<App />)
 
-    expect(screen.getByRole('heading', { name: 'Dashboard' })).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', {
+        name: 'Apuntes prácticos para aprender tecnología con contexto',
+      }),
+    ).toBeInTheDocument()
     expect(window.location.pathname).toBe('/')
+  })
+
+  it('redirects an unauthenticated visitor from favorites to login', async () => {
+    window.history.pushState({}, '', '/favoritos')
+
+    render(<App />)
+
+    expect(await screen.findByRole('heading', { name: 'Iniciar sesión' })).toBeInTheDocument()
+    await waitFor(() => expect(window.location.pathname).toBe('/login'))
   })
 })

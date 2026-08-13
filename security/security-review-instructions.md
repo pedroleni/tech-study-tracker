@@ -32,9 +32,22 @@ problemas de seguridad preexistentes salvo que el diff los toque.
 
 **Row Level Security (RLS) — la capa de autorización principal del
 proyecto, ya que no hay backend propio:**
-- Toda tabla de Supabase (`categories`, `technologies`) debe tener RLS
-  habilitado con políticas que restrinjan `select/insert/update/delete` a
-  filas donde `user_id = auth.uid()`.
+- Toda tabla expuesta de Supabase (`profiles`, `categories`, `technologies`,
+  `comments`, `favorites`) debe tener RLS habilitado y privilegios del Data
+  API explícitos. RLS y `GRANT` son controles distintos; hacen falta ambos.
+  Para escritura, concede solo las columnas que el cliente puede gestionar;
+  IDs y timestamps generados por el servidor no deben quedar escribibles.
+- El modelo vigente tiene tres niveles: lectura pública de categorías del
+  admin y tecnologías completadas del admin; escritura de contenido solo por
+  su admin propietario; comentarios sobre contenido publicado para usuarios
+  autenticados; favoritos estrictamente propios. La definición exacta vive en
+  `specs/features/public-docs.md` y `supabase/migrations/0003_public_docs.sql`.
+- `profiles` solo permite a cada usuario leer su propia fila. Cualquier helper
+  `security definer` usado por RLS debe vivir en `private`, fijar
+  `search_path = ''`, usar nombres cualificados y exponer el privilegio mínimo.
+- La identidad y relaciones inmutables de comentarios (`id`, `user_id`,
+  `technology_id`, `parent_comment_id`, `created_at`) deben reforzarse en
+  Postgres, no solo en el cliente.
 - Cualquier query que dependa solo de un filtro `.eq('user_id', ...)` en el
   cliente, sin política RLS equivalente en el servidor, es un hallazgo
   HIGH (IDOR: un cliente malicioso puede llamar a la API de Supabase
@@ -49,13 +62,23 @@ proyecto, ya que no hay backend propio:**
 - La `service_role key` NUNCA debe aparecer en código de frontend, en
   variables `VITE_*`, ni en el bundle compilado — solo en entornos server-side
   de confianza. Si aparece, es HIGH.
-- Con registro abierto, cualquier usuario autenticado puede crear datos:
-  confirma que ninguna ruta permite leer/modificar datos sin sesión válida.
+- El registro es abierto. Un usuario normal solo puede comentar contenido
+  publicado y gestionar sus favoritos; crear o mutar categorías/tecnologías
+  exige rol admin en RLS.
+- Las rutas de lectura son públicas a propósito. `/favoritos` requiere sesión
+  y `/admin/*` requiere sesión + rol, aunque esos guards sean solo UX y la
+  autorización real siga en RLS.
+- La caché de tecnologías debe estar separada por identidad y vaciarse ante
+  `SIGNED_OUT`: el admin recibe borradores que nunca pueden reutilizarse en la
+  vista pública después de una expiración o revocación de sesión.
 
 **XSS / Renderizado de contenido de usuario:**
-- El campo `notes` admite texto libre/markdown. Si se renderiza como HTML
+- Los campos `notes` y `comments.body` admiten texto libre/markdown. Si se
+  renderizan como HTML
   (librería de markdown + `dangerouslySetInnerHTML` o equivalente) sin
   sanitizar (p. ej. con DOMPurify), es un hallazgo HIGH de XSS almacenado.
+- Las imágenes Markdown remotas se omiten: un comentario no debe poder hacer
+  que el navegador de cada lector contacte un host de tracking arbitrario.
 - El campo `resources` (lista de `{label, url}`) se renderiza como enlaces:
   valida que solo se acepten esquemas `http:`/`https:` antes de usarlos en
   `href`, para evitar `javascript:` URIs.
@@ -77,9 +100,9 @@ proyecto, ya que no hay backend propio:**
   no es una vulnerabilidad por sí sola: la responsabilidad de validar y
   autorizar recae en RLS/Supabase server-side. Solo reporta si falta la
   política RLS equivalente en el servidor.
-- React es seguro frente a XSS por defecto (auto-escaping en JSX). Solo
-  reporta XSS si hay `dangerouslySetInnerHTML` o un renderer de markdown
-  sin sanitizar.
+- React es seguro frente a XSS por defecto (auto-escaping en JSX). En Markdown,
+  el patrón aprobado es `react-markdown` sin `rehype-raw`, enlaces limitados a
+  `http:`/`https:` e imágenes omitidas.
 - Los UUID generados por Supabase se asumen no adivinables; no hace falta
   validarlos como si fueran predecibles.
 - Vulnerabilidades en dependencias de terceros (npm audit) se gestionan
@@ -122,7 +145,7 @@ síntesis con risk score) vive en:
 - `.claude/agents/security-secrets.md` — claves hardcodeadas (`service_role` incluida)
 - `.claude/agents/security-code-vulns.md` — OWASP Top 10 / React-TS
 - `.claude/agents/security-supply-chain.md` — dependencias npm
-- `.claude/agents/security-injection.md` — XSS en `notes`, URLs en `resources`
+- `.claude/agents/security-injection.md` — XSS en `notes`/comentarios, URLs y tracking remoto
 - `.claude/agents/security-auth-crypto.md` — Supabase Auth y **RLS**
 - `.claude/agents/security-infrastructure.md` — Vercel, migraciones, CI/CD
 - `.claude/agents/security-prompt-injection.md` — instrucciones ocultas para agentes IA
