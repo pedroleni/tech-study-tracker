@@ -43,7 +43,7 @@ una decisión global.
 | Feature | Doc | Estado |
 |---|---|---|
 | Autenticación completa (registro con verificación por código, login, recuperación de contraseña, tabla `profiles`) | [auth.md](auth.md) | ✅ implementada en PR #14 |
-| Capa de datos (`queries/`, hooks de React Query) | [data-layer.md](data-layer.md) | 🚧 en curso |
+| Capa de datos (`queries/`, hooks de React Query) | [data-layer.md](data-layer.md) | ✅ implementada en PR #15 |
 | Dashboard (stats, lista de pendientes) | _pendiente de escribir_ | ⏳ |
 | Categorías (índice + CRUD) | _pendiente de escribir_ | ⏳ |
 | Tecnologías (ficha, formulario, badges) | _pendiente de escribir_ | ⏳ |
