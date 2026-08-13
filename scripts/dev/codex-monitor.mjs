@@ -60,6 +60,7 @@ const HTML = `<!doctype html>
   header .dot.done { background: #64748b; }
   header .title { font-weight: 600; color: #f1f5f9; }
   header .path { color: #64748b; font-size: 11px; }
+  header .meta { color: #94a3b8; font-size: 11px; }
   main { padding: 16px; max-width: 980px; margin: 0 auto; }
   .item { margin-bottom: 10px; border-radius: 8px; overflow: hidden; border: 1px solid #23262e; }
   .item .head {
@@ -84,6 +85,7 @@ const HTML = `<!doctype html>
   <span class="dot" id="dot"></span>
   <span class="title">Codex monitor</span>
   <span class="path" id="path"></span>
+  <span class="meta" id="meta"></span>
 </header>
 <main id="feed"></main>
 <footer>actualiza cada 1s · dev tool local, no forma parte de la app</footer>
@@ -91,6 +93,7 @@ const HTML = `<!doctype html>
 let offset = 0
 const feed = document.getElementById('feed')
 const dot = document.getElementById('dot')
+const meta = document.getElementById('meta')
 document.getElementById('path').textContent = ${JSON.stringify(path.relative(projectRoot, logPath))}
 
 function badge(type) {
@@ -145,7 +148,9 @@ async function poll() {
     for (const line of data.lines) {
       try {
         const evt = JSON.parse(line)
-        if (evt.type === 'item.completed') renderItem(evt)
+        if (evt.type === 'task_meta') {
+          meta.textContent = 'model: ' + (evt.model || 'default') + ' · effort: ' + (evt.effort || '?')
+        } else if (evt.type === 'item.completed') renderItem(evt)
         else if (evt.type === 'turn.completed') renderUsage(evt)
       } catch {}
     }
