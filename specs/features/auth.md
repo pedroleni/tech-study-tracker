@@ -1,6 +1,7 @@
 # Feature: Autenticación completa
 
-**Estado:** 🚧 en curso
+**Estado:** ✅ implementada en PR #14 (más el fix de seguridad de tooling
+en el mismo PR — ver `security/reviews/2026-08-12-auth-flows.md`)
 
 Amplía la autenticación mínima ya existente (login/registro básicos, PR
 #6) con: confirmación de contraseña, verificación de email por código de
