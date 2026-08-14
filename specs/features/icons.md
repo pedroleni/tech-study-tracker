@@ -181,6 +181,89 @@ uno, y a cualquier tecnología nueva antes de su primera edición.
       para este campo) — sin superficie nueva de HTML/texto libre que
       sanear.
 
+## Orden de implementación
+
+Un solo commit lógico, en este orden — cada paso deja el árbol en un
+estado que compila:
+
+1. **`supabase/migrations/0005_icons.sql`** — el SQL de la sección
+   "Modelo de datos" de arriba, literal.
+2. **`package.json`** — añade `"react-icons"` a `dependencies` con
+   versión exacta, sin `^`/`~` (mismo criterio que el resto de
+   dependencias de este `package.json`, p. ej. `"lucide-react":
+   "1.31.0"`).
+3. **`src/types/index.ts`** — añade `icon: string | null` a
+   `Category` (línea 11-15) y a `Technology` (línea 17-29). Como
+   `NewTechnologyInput`/`TechnologyPatch` (`src/lib/queries/mappers.ts:93-97`)
+   se derivan de `Technology` vía `Omit<...>`, heredan `icon`
+   automáticamente — no hay que tocarlos aparte.
+4. **`src/lib/queries/mappers.ts`** — añade `icon: string | null` a
+   `CategoryRow` (línea 4-8) y `TechnologyRow` (línea 10-20), y a los
+   `map...` que las convierten a `Category`/`Technology`.
+5. **`src/lib/icons/categoryIcons.ts`** (nuevo) — `Record<string, {
+   label: string; Icon: ComponentType<{ className?: string }> }>` con
+   ~15-20 entradas de `lucide-react` para conceptos genéricos (código,
+   servidor, terminal, base de datos, nube, móvil, web, capas,
+   paquete, chip, control de versiones, seguridad). Confirma los
+   nombres de export exactos contra la versión instalada
+   (`lucide-react@1.31.0`) antes de usarlos — no asumas que un nombre
+   "obvio" existe tal cual.
+6. **`src/lib/icons/technologyIcons.ts`** (nuevo) — mismo shape,
+   ~60-80 entradas de `react-icons/si` cubriendo como mínimo JS, TS,
+   HTML5, CSS3, React, Vue, Angular, Node, Python, Docker, Git,
+   GitHub, PostgreSQL, MongoDB, Tailwind, Next.js. Para conceptos sin
+   logo de marca (p. ej. `terminal`), usa un icono de `lucide-react`
+   en la misma entrada — el shape es idéntico, el picker no distingue
+   el origen.
+7. **`src/components/ui/icon-picker.tsx`** (nuevo) — componente
+   `IconPicker({ icons, value, onChange }: { icons: typeof
+   categoryIcons; value: string | null; onChange: (key: string |
+   null) => void })`. Popover (`radix-ui`) con un `<input>` de filtro
+   y una lista de botones (icono + `label`), filtrada en cliente por
+   substring case-insensitive sobre `label`. El trigger muestra el
+   icono de `value` (o un icono de fallback genérico si `value` es
+   `null`) más texto "Cambiar icono". Al elegir una entrada, llama
+   `onChange(key)` y cierra el popover. Un botón "Quitar icono" llama
+   `onChange(null)`.
+8. **`src/lib/queries/categories.ts`** — `createCategory(userId:
+   string, name: string, icon?: string | null)` y `renameCategory(id:
+   string, name: string, icon?: string | null)` añaden `icon: icon ??
+   null` al payload de `insert`/`update`. `listCategories` no cambia
+   (`select()` sin columnas trae `*`).
+9. **`src/lib/queries/technologies.ts`** — `toTechnologyPayload`
+   (línea 7-16) añade la línea `...(input.icon !== undefined &&
+   { icon: input.icon }),`, siguiendo el mismo patrón que las demás
+   propiedades opcionales de esa función.
+10. **`src/lib/hooks/useCategories.ts`** — `useCreateCategory`
+    (`mutationFn`) y `useRenameCategory` pasan `icon` desde su
+    argumento a `createCategory`/`renameCategory`. Cambia las firmas
+    de `mutationFn` a recibir `{ name, icon }` /
+    `{ id, name, icon }` en vez de solo `name` — actualiza también
+    los sitios que llaman a estos hooks (`CategoryForm` y quien lo use).
+11. **`src/components/category/CategoryForm.tsx`** y
+    **`src/components/technology/TechnologyForm.tsx`** — añaden
+    `IconPicker` (con `categoryIcons`/`technologyIcons`
+    respectivamente) como campo opcional del formulario, con su
+    propio estado controlado por `react-hook-form` (`icon: string |
+    null`, default `initialIcon ?? null`). Los tests existentes que
+    rellenan estos forms sin tocar el icono deben seguir pasando sin
+    cambios — el campo es opcional, no bloquea el submit.
+12. **Renderizado del icono ya guardado**, con fallback si es `null`:
+    `src/routes/PublicHomePage.tsx`, `src/routes/CategoryPage.tsx`,
+    `src/routes/AdminCategoriesPage.tsx`,
+    `src/components/technology/TechnologyCard.tsx`,
+    `src/routes/TechnologyPage.tsx`, y el listado de tecnologías del
+    admin.
+13. **Tests nuevos:** `src/components/ui/icon-picker.test.tsx`
+    (filtrado, selección, "quitar icono"). **Tests a actualizar:**
+    los que ya cubren `CategoryForm`/`TechnologyForm` en
+    `src/routes/AdminPages.test.tsx` deben seguir en verde tal cual
+    están; añade un test nuevo para "elige un icono y se guarda" en
+    vez de modificar los existentes.
+14. `npm run test && npm run build && npm run lint` en verde antes de
+    considerar la tarea terminada — el CI de este repo no los corre
+    (ver `README.md`).
+
 ## Fuera de alcance de esta feature
 
 - Subir un icono/imagen propia (SVG/PNG) — solo librerías curadas, sin
