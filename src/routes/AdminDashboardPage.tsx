@@ -1,9 +1,11 @@
+import { CircleHelp } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import { StatusBadge } from '@/components/technology/StatusBadge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { useTechnologies } from '@/lib/hooks/useTechnologies'
+import { technologyIcons } from '@/lib/icons/technologyIcons'
 import { computeStats } from '@/lib/utils/computeStats'
 
 export function AdminDashboardPage() {
@@ -72,17 +74,31 @@ export function AdminDashboardPage() {
               </Card>
             ) : (
               <ul className="divide-y rounded-xl border bg-card">
-                {drafts.map((technology) => (
-                  <li key={technology.id} className="flex flex-wrap items-center justify-between gap-3 p-4">
-                    <div className="min-w-0">
-                      <p className="truncate font-medium">{technology.name}</p>
-                      <StatusBadge status={technology.status} className="mt-2" />
-                    </div>
-                    <Button asChild variant="outline" size="sm">
-                      <Link to={`/admin/tecnologias/${technology.id}/editar`}>Editar ficha</Link>
-                    </Button>
-                  </li>
-                ))}
+                {drafts.map((technology) => {
+                  const TechnologyIcon =
+                    technologyIcons[technology.icon ?? '']?.Icon ?? CircleHelp
+                  return (
+                    <li
+                      key={technology.id}
+                      className="flex flex-wrap items-center justify-between gap-3 p-4"
+                    >
+                      <div className="flex min-w-0 items-start gap-3">
+                        <span aria-hidden="true" className="mt-0.5 text-muted-foreground">
+                          <TechnologyIcon className="size-5" />
+                        </span>
+                        <div className="min-w-0">
+                          <p className="truncate font-medium">{technology.name}</p>
+                          <StatusBadge status={technology.status} className="mt-2" />
+                        </div>
+                      </div>
+                      <Button asChild variant="outline" size="sm">
+                        <Link to={`/admin/tecnologias/${technology.id}/editar`}>
+                          Editar ficha
+                        </Link>
+                      </Button>
+                    </li>
+                  )
+                })}
               </ul>
             )}
           </section>

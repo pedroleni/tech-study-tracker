@@ -1,4 +1,4 @@
-import { ArrowLeft, Bookmark, BookmarkCheck, ExternalLink } from 'lucide-react'
+import { ArrowLeft, Bookmark, BookmarkCheck, CircleHelp, ExternalLink } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
@@ -13,6 +13,7 @@ import { useAuth } from '@/lib/hooks/useAuth'
 import { useAddFavorite, useFavorites, useRemoveFavorite } from '@/lib/hooks/useFavorites'
 import { useTechnology } from '@/lib/hooks/useTechnologies'
 import { useProfile } from '@/lib/hooks/useProfile'
+import { technologyIcons } from '@/lib/icons/technologyIcons'
 import { validateResourceUrl } from '@/lib/utils/validateResourceUrl'
 
 function FavoriteControl({ technologyId }: { technologyId: string }) {
@@ -93,6 +94,7 @@ export function TechnologyPage() {
     validateResourceUrl(resource.url),
   )
   const isPublished = technology.status === 'completado'
+  const TechnologyIcon = technologyIcons[technology.icon ?? '']?.Icon ?? CircleHelp
 
   return (
     <div className="space-y-10">
@@ -107,9 +109,14 @@ export function TechnologyPage() {
           </Link>
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="min-w-0 space-y-3">
-              <h1 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
-                {technology.name}
-              </h1>
+              <div className="flex items-center gap-3">
+                <span aria-hidden="true" className="rounded-xl bg-muted p-2 text-muted-foreground">
+                  <TechnologyIcon className="size-7" />
+                </span>
+                <h1 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
+                  {technology.name}
+                </h1>
+              </div>
               <div className="flex flex-wrap gap-2">
                 <StatusBadge status={technology.status} />
                 <DifficultyBadge difficulty={technology.difficulty} />

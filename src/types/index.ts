@@ -11,6 +11,7 @@ export interface Resource {
 export interface Category {
   id: string
   name: string
+  icon: string | null
   createdAt: string
 }
 
@@ -18,6 +19,7 @@ export interface Technology {
   id: string
   categoryId: string
   name: string
+  icon: string | null
   /** `completado` also means the technology is publicly visible. */
   status: Status
   priority: Priority

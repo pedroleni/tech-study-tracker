@@ -1,3 +1,4 @@
+import { CircleHelp } from 'lucide-react'
 import { useState } from 'react'
 
 import { CategoryForm } from '@/components/category/CategoryForm'
@@ -9,6 +10,7 @@ import {
   useDeleteCategory,
   useRenameCategory,
 } from '@/lib/hooks/useCategories'
+import { categoryIcons } from '@/lib/icons/categoryIcons'
 
 export function AdminCategoriesPage() {
   const categoriesQuery = useCategories()
@@ -43,7 +45,7 @@ export function AdminCategoriesPage() {
           id="new-category-name"
           submitLabel="Crear categoría"
           pending={createMutation.isPending}
-          onSubmit={(name) => createMutation.mutateAsync(name).then(() => undefined)}
+          onSubmit={(input) => createMutation.mutateAsync(input).then(() => undefined)}
         />
       </Card>
 
@@ -58,41 +60,55 @@ export function AdminCategoriesPage() {
       </p>
 
       <ul className="divide-y rounded-xl border bg-card">
-        {categoriesQuery.data?.map((category) => (
-          <li key={category.id} className="p-4">
-            {editingId === category.id ? (
-              <CategoryForm
-                id={`category-${category.id}`}
-                initialName={category.name}
-                submitLabel="Guardar nombre"
-                pending={renameMutation.isPending}
-                onCancel={() => setEditingId(null)}
-                onSubmit={async (name) => {
-                  await renameMutation.mutateAsync({ id: category.id, name })
-                  setEditingId(null)
-                }}
-              />
-            ) : (
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <span className="min-w-0 break-words font-medium">{category.name}</span>
-                <div className="flex gap-2">
-                  <Button type="button" size="sm" variant="outline" onClick={() => setEditingId(category.id)}>
-                    Renombrar
-                  </Button>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="destructive"
-                    disabled={deleteMutation.isPending}
-                    onClick={() => void handleDelete(category.id)}
-                  >
-                    Borrar
-                  </Button>
+        {categoriesQuery.data?.map((category) => {
+          const CategoryIcon = categoryIcons[category.icon ?? '']?.Icon ?? CircleHelp
+          return (
+            <li key={category.id} className="p-4">
+              {editingId === category.id ? (
+                <CategoryForm
+                  id={`category-${category.id}`}
+                  initialName={category.name}
+                  initialIcon={category.icon}
+                  submitLabel="Guardar nombre"
+                  pending={renameMutation.isPending}
+                  onCancel={() => setEditingId(null)}
+                  onSubmit={async ({ name, icon }) => {
+                    await renameMutation.mutateAsync({ id: category.id, name, icon })
+                    setEditingId(null)
+                  }}
+                />
+              ) : (
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <span aria-hidden="true" className="text-muted-foreground">
+                      <CategoryIcon className="size-5" />
+                    </span>
+                    <span className="min-w-0 break-words font-medium">{category.name}</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setEditingId(category.id)}
+                    >
+                      Renombrar
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="destructive"
+                      disabled={deleteMutation.isPending}
+                      onClick={() => void handleDelete(category.id)}
+                    >
+                      Borrar
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            )}
-          </li>
-        ))}
+              )}
+            </li>
+          )
+        })}
       </ul>
     </section>
   )

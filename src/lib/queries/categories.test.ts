@@ -16,12 +16,14 @@ import {
 const categoryRow = {
   id: 'category-1',
   name: 'Frontend',
+  icon: null,
   created_at: '2026-08-13T08:00:00.000Z',
 }
 
 const category = {
   id: 'category-1',
   name: 'Frontend',
+  icon: null,
   createdAt: '2026-08-13T08:00:00.000Z',
 }
 
@@ -44,7 +46,7 @@ describe('category queries', () => {
     supabaseMock.from.mockReturnValue({ insert })
 
     await expect(createCategory('user-1', 'Frontend')).resolves.toEqual(category)
-    expect(insert).toHaveBeenCalledWith({ user_id: 'user-1', name: 'Frontend' })
+    expect(insert).toHaveBeenCalledWith({ user_id: 'user-1', name: 'Frontend', icon: null })
     expect(select).toHaveBeenCalledWith()
     expect(single).toHaveBeenCalledWith()
   })
@@ -61,7 +63,7 @@ describe('category queries', () => {
       ...category,
       name: 'Web',
     })
-    expect(update).toHaveBeenCalledWith({ name: 'Web' })
+    expect(update).toHaveBeenCalledWith({ name: 'Web', icon: null })
     expect(eq).toHaveBeenCalledWith('id', 'category-1')
     expect(select).toHaveBeenCalledWith()
     expect(single).toHaveBeenCalledWith()

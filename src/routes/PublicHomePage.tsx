@@ -1,9 +1,10 @@
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, CircleHelp } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import { Card } from '@/components/ui/card'
 import { useCategories } from '@/lib/hooks/useCategories'
 import { useTechnologies } from '@/lib/hooks/useTechnologies'
+import { categoryIcons } from '@/lib/icons/categoryIcons'
 import { groupByCategory } from '@/lib/utils/groupByCategory'
 
 export function PublicHomePage() {
@@ -55,6 +56,7 @@ export function PublicHomePage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {categoriesQuery.data?.map((category) => {
             const count = grouped[category.id]?.length ?? 0
+            const CategoryIcon = categoryIcons[category.icon ?? '']?.Icon ?? CircleHelp
             return (
               <Link
                 key={category.id}
@@ -62,11 +64,17 @@ export function PublicHomePage() {
                 className="group rounded-xl focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
               >
                 <Card className="flex h-full items-center justify-between gap-4 transition-shadow group-hover:shadow-md">
-                  <div className="min-w-0">
-                    <h3 className="truncate font-semibold">{category.name}</h3>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {new Intl.NumberFormat('es-ES').format(count)} {count === 1 ? 'ficha' : 'fichas'}
-                    </p>
+                  <div className="flex min-w-0 items-center gap-3">
+                    <span aria-hidden="true" className="rounded-lg bg-muted p-2 text-muted-foreground">
+                      <CategoryIcon className="size-5" />
+                    </span>
+                    <div className="min-w-0">
+                      <h3 className="truncate font-semibold">{category.name}</h3>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {new Intl.NumberFormat('es-ES').format(count)}{' '}
+                        {count === 1 ? 'ficha' : 'fichas'}
+                      </p>
+                    </div>
                   </div>
                   <ArrowRight aria-hidden="true" className="size-5 shrink-0 text-muted-foreground" />
                 </Card>

@@ -19,10 +19,10 @@ export function useCreateCategory() {
   const { isAdmin } = useProfile()
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (name: string) => {
+    mutationFn: ({ name, icon }: { name: string; icon: string | null }) => {
       if (!user) throw new Error('No hay sesión activa.')
       if (!isAdmin) throw new Error('Solo el administrador puede gestionar contenido.')
-      return createCategory(user.id, name)
+      return createCategory(user.id, name, icon)
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.categories }),
   })
@@ -33,10 +33,10 @@ export function useRenameCategory() {
   const { isAdmin } = useProfile()
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, name }: { id: string; name: string }) => {
+    mutationFn: ({ id, name, icon }: { id: string; name: string; icon: string | null }) => {
       if (!user) throw new Error('No hay sesión activa.')
       if (!isAdmin) throw new Error('Solo el administrador puede gestionar contenido.')
-      return renameCategory(id, name)
+      return renameCategory(id, name, icon)
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.categories }),
   })
