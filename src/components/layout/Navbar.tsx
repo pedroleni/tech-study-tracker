@@ -4,6 +4,7 @@ import { useProfile } from '@/lib/hooks/useProfile'
 import { Link } from 'react-router-dom'
 
 import { DarkModeToggle } from './DarkModeToggle'
+import { Logo } from './Logo'
 
 export function Navbar() {
   const { session, signOut } = useAuth()
@@ -14,8 +15,9 @@ export function Navbar() {
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
         <Link
           to="/"
-          className="rounded-sm font-semibold hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="flex items-center gap-2 rounded-sm font-semibold hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
+          <Logo aria-hidden="true" className="size-5" />
           Tech Study Tracker
         </Link>
         <div className="flex flex-wrap items-center justify-end gap-2">
