@@ -48,15 +48,15 @@ flowchart TD
     A["Usuario pide una feature"] --> B["Claude: brainstorming + spec<br/>specs/features/&lt;feature&gt;.md"]
     B --> C["Claude: rama feat/&lt;nombre&gt; desde main<br/>(nunca se implementa sobre main)"]
     C --> D["Claude: plan de implementación"]
-    D --> E["Claude lanza a Codex:<br/>npm run codex:task -- prompt effort<br/>+ npm run codex:monitor (localhost:4545)"]
+    D --> E["Se delega en Codex:<br/>script codex-task.sh (prompt, effort)<br/>+ panel codex-monitor en localhost:4545"]
     E --> F["Codex implementa en el working tree<br/>sandbox workspace-write: sin red, sin tocar .git"]
-    F --> G["Codex corre sus propios tests/build<br/>y reporta qué hizo (y qué NO pudo hacer)"]
+    F --> G["Codex prueba y compila por su cuenta<br/>y reporta qué hizo (y qué NO pudo hacer)"]
     G --> H["Claude revisa el diff de verdad<br/>nunca se da por buena la palabra de Codex"]
     H -->|insuficiente| E
-    H -->|ok| I["Claude corre npm run test / build / lint<br/>⚠️ el CI de este repo NO los corre, solo seguridad"]
+    H -->|ok| I["Verificación local obligatoria:<br/>tests, build y lint del proyecto<br/>⚠️ el CI de este repo NO los verifica, solo seguridad"]
     I --> J{"¿Toca RLS, auth o datos sensibles?"}
     J -->|sí| K["Migración manual en Supabase SQL Editor<br/>(Codex y el sandbox no tienen red)"]
-    K --> L["Claude verifica con curl real<br/>anónimo / registrado / admin, contra Supabase real"]
+    K --> L["Verificación real contra Supabase<br/>anónimo / registrado / admin, peticiones HTTP directas"]
     J -->|no| M
     L --> M["Claude: revisión de seguridad<br/>/security-review (8 dominios) o fallback secuencial<br/>guardada en security/reviews/"]
     M --> N["Claude: commit + push + PR contra main"]
