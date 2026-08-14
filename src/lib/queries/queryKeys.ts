@@ -5,7 +5,14 @@ export const queryKeys = {
     ['technologies', viewerId ?? 'public'] as const,
   technology: (viewerId: string | null, technologyId: string) =>
     ['technologies', viewerId ?? 'public', technologyId] as const,
+  lecciones: ['lecciones'] as const,
+  leccionesForTechnology: (viewerId: string | null, technologyId: string) =>
+    ['lecciones', viewerId ?? 'public', 'technology', technologyId] as const,
+  leccionById: (viewerId: string | null, leccionId: string) =>
+    ['lecciones', viewerId ?? 'public', 'id', leccionId] as const,
+  leccionBySlug: (viewerId: string | null, technologyId: string, slug: string) =>
+    ['lecciones', viewerId ?? 'public', 'slug', technologyId, slug] as const,
   profile: ['profile'] as const,
-  comments: (technologyId: string) => ['comments', technologyId] as const,
+  comments: (leccionId: string) => ['comments', leccionId] as const,
   favorites: ['favorites'] as const,
 }

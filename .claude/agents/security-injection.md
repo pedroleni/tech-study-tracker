@@ -20,7 +20,7 @@ and input validation**. You trace data flows from untrusted inputs to dangerous 
 
 Injection is the #1 flaw category in AI-generated code (86% XSS failure rate, Veracode
 2025-2026). This project's main untrusted-input surfaces are: `comments.body` (Markdown from
-any registered user), the admin-authored `notes` field, and `resources` (`{label, url}` pairs)
+any registered user), the admin-authored `notes` and `lecciones.contenido` fields, and `resources` (`{label, url}` pairs)
 on a technology. Read `security/security-review-instructions.md` for the approved handling:
 `react-markdown` without `rehype-raw`, no remote Markdown images, and an `http:`/`https:`
 allowlist for links.
@@ -57,8 +57,8 @@ user-supplied path without validation.
 
 ## Scanning Strategy
 
-1. Identify entry points: forms (`TechnologyForm`, `CategoryForm`), route params
-2. Trace `notes`, `comments.body`, and `resources` from input → storage → render
+1. Identify entry points: forms (`TechnologyForm`, `LeccionForm`, `CategoryForm`), route params
+2. Trace `notes`, `lecciones.contenido`, `comments.body`, and `resources` from input → storage → render
 3. Check every place `resources[].url` is used as `href` or passed to `fetch`/`window.open`
 4. Check the Markdown pipeline end to end, including custom link and image renderers
 

@@ -24,13 +24,14 @@ reporting anything.
 ## What to Audit
 
 ### Row Level Security (highest priority)
-- Every exposed table (`profiles`, `categories`, `technologies`, `comments`, `favorites`, and
+- Every exposed table (`profiles`, `categories`, `technologies`, `lecciones`, `comments`, `favorites`, and
   any new table) MUST have `alter table ... enable row level security;`, explicit policies,
   and explicit least-privilege Data API grants.
 - Check the operation matrix in `security/security-review-instructions.md`; this app no
   longer uses owner-only SELECT everywhere. Categories and published technologies are public,
-  content writes are admin-only, comments are public-readable/author-writable with admin
-  deletion, and favorites are owner-only with no UPDATE.
+  content writes are admin-only, lessons require both their own published status and a
+  published parent technology for public access, comments are public-readable/author-writable
+  on published lessons with admin deletion, and favorites are owner-only with no UPDATE.
 - RLS enabled with no applicable policy is closed, while RLS disabled on an exposed table can
   be open. Do not invent a required policy for an intentionally denied operation.
 - Any client-side query that filters by `user_id` (e.g. `.eq('user_id', user.id)`) is not a

@@ -99,14 +99,14 @@ function CommentComposer({
 
 function CommentItem({
   comment,
-  technologyId,
+  leccionId,
   canReply,
   canEdit,
   isAdmin,
   currentUserId,
 }: {
   comment: Comment
-  technologyId: string
+  leccionId: string
   canReply: boolean
   canEdit: boolean
   isAdmin: boolean
@@ -127,7 +127,7 @@ function CommentItem({
     }
     setActionError('')
     try {
-      await deleteMutation.mutateAsync({ id: comment.id, technologyId })
+      await deleteMutation.mutateAsync({ id: comment.id, leccionId })
     } catch {
       setActionError('No se pudo borrar el comentario. Inténtalo de nuevo.')
     }
@@ -148,7 +148,7 @@ function CommentItem({
           pending={updateMutation.isPending}
           onCancel={() => setEditing(false)}
           onSubmit={async (body) => {
-            await updateMutation.mutateAsync({ id: comment.id, body, technologyId })
+            await updateMutation.mutateAsync({ id: comment.id, body, leccionId })
             setEditing(false)
           }}
         />
@@ -195,7 +195,7 @@ function CommentItem({
             onCancel={() => setReplying(false)}
             onSubmit={async (body) => {
               await createMutation.mutateAsync({
-                technologyId,
+                leccionId,
                 parentCommentId: comment.id,
                 body,
               })
@@ -209,15 +209,15 @@ function CommentItem({
 }
 
 export function CommentsSection({
-  technologyId,
+  leccionId,
   writable = true,
 }: {
-  technologyId: string
+  leccionId: string
   writable?: boolean
 }) {
   const { user } = useAuth()
   const { isAdmin } = useProfile()
-  const commentsQuery = useComments(technologyId)
+  const commentsQuery = useComments(leccionId)
   const createMutation = useCreateComment()
   const threads = groupComments(commentsQuery.data ?? [])
 
@@ -234,7 +234,7 @@ export function CommentsSection({
 
       {!writable ? (
         <p className="rounded-lg border bg-muted/40 p-4 text-sm text-muted-foreground">
-          Los comentarios se habilitarán cuando se publique la ficha.
+          Los comentarios se habilitarán cuando se publique la lección.
         </p>
       ) : user ? (
         <Card>
@@ -242,7 +242,9 @@ export function CommentsSection({
             id="new-comment"
             submitLabel="Publicar comentario"
             pending={createMutation.isPending}
-            onSubmit={(body) => createMutation.mutateAsync({ technologyId, body }).then(() => undefined)}
+            onSubmit={(body) =>
+              createMutation.mutateAsync({ leccionId, body }).then(() => undefined)
+            }
           />
         </Card>
       ) : (
@@ -269,8 +271,8 @@ export function CommentsSection({
           <div key={comment.id} className="space-y-3">
             <CommentItem
               comment={comment}
-              technologyId={technologyId}
-              canReply={Boolean(user)}
+              leccionId={leccionId}
+              canReply={Boolean(user && writable)}
               canEdit={Boolean(user && user.id === comment.userId && writable)}
               isAdmin={isAdmin}
               currentUserId={user?.id}
@@ -281,7 +283,7 @@ export function CommentsSection({
                   <CommentItem
                     key={reply.id}
                     comment={reply}
-                    technologyId={technologyId}
+                    leccionId={leccionId}
                     canReply={false}
                     canEdit={Boolean(user && user.id === reply.userId && writable)}
                     isAdmin={isAdmin}

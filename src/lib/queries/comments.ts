@@ -11,11 +11,11 @@ function validateCommentBody(body: string) {
   }
 }
 
-export async function listComments(technologyId: string): Promise<Comment[]> {
+export async function listComments(leccionId: string): Promise<Comment[]> {
   const { data, error } = await supabase
     .from('comments')
     .select()
-    .eq('technology_id', technologyId)
+    .eq('leccion_id', leccionId)
     .order('created_at', { ascending: true })
   if (error) throw error
   return data.map(mapComment)
@@ -29,7 +29,7 @@ export async function createComment(
   const { data, error } = await supabase
     .from('comments')
     .insert({
-      technology_id: input.technologyId,
+      leccion_id: input.leccionId,
       user_id: userId,
       parent_comment_id: input.parentCommentId ?? null,
       body: input.body,
