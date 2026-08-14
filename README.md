@@ -187,6 +187,9 @@ Codex) — usa `low` para tareas mecánicas/bien acotadas y `high` para
 algo ambiguo o sensible a seguridad, en vez de dejarlo siempre en
 default (ver `AGENTS.md`).
 
+<img width="3022" height="1724" alt="image" src="https://github.com/user-attachments/assets/04edf083-dd82-40d2-ad68-95096d1ea8f8" />
+
+
 **Por qué existen estos scripts y no solo `codex exec "..."` a pelo:**
 lanzar `codex exec` en segundo plano sin cerrar `stdin` puede dejarlo
 colgado indefinidamente esperando un EOF que nunca llega — pasó de
