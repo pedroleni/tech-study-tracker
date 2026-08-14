@@ -1,4 +1,4 @@
-import type { Category, Comment, Favorite, Profile, Technology } from '@/types'
+import type { Category, Comment, Favorite, Leccion, Profile, Technology } from '@/types'
 
 // Fila cruda tal como la devuelve Supabase (snake_case, sin validar).
 interface CategoryRow {
@@ -20,6 +20,20 @@ interface TechnologyRow {
   updated_at: string
 }
 
+interface LeccionRow {
+  id: string
+  technology_id: string
+  slug: string
+  modulo: string | null
+  titulo: string
+  resumen: string
+  contenido: string
+  orden: number
+  status: Leccion['status']
+  created_at: string
+  updated_at: string
+}
+
 interface ProfileRow {
   id: string
   role: Profile['role']
@@ -28,7 +42,7 @@ interface ProfileRow {
 
 interface CommentRow {
   id: string
-  technology_id: string
+  leccion_id: string
   user_id: string
   parent_comment_id: string | null
   body: string
@@ -62,6 +76,22 @@ export function mapTechnology(row: TechnologyRow): Technology {
   }
 }
 
+export function mapLeccion(row: LeccionRow): Leccion {
+  return {
+    id: row.id,
+    technologyId: row.technology_id,
+    slug: row.slug,
+    modulo: row.modulo,
+    titulo: row.titulo,
+    resumen: row.resumen,
+    contenido: row.contenido,
+    orden: row.orden,
+    status: row.status,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  }
+}
+
 export function mapProfile(row: ProfileRow): Profile {
   return { id: row.id, role: row.role, createdAt: row.created_at }
 }
@@ -69,7 +99,7 @@ export function mapProfile(row: ProfileRow): Profile {
 export function mapComment(row: CommentRow): Comment {
   return {
     id: row.id,
-    technologyId: row.technology_id,
+    leccionId: row.leccion_id,
     userId: row.user_id,
     parentCommentId: row.parent_comment_id,
     body: row.body,
@@ -96,8 +126,17 @@ export type TechnologyPatch = Partial<
   Omit<Technology, 'id' | 'createdAt' | 'updatedAt'>
 >
 
+export type NewLeccionInput = Pick<
+  Leccion,
+  'technologyId' | 'slug' | 'modulo' | 'titulo' | 'resumen' | 'contenido' | 'orden'
+>
+
+export type LeccionPatch = Partial<
+  Pick<Leccion, 'slug' | 'modulo' | 'titulo' | 'resumen' | 'contenido' | 'orden' | 'status'>
+>
+
 export interface NewCommentInput {
-  technologyId: string
+  leccionId: string
   parentCommentId?: string | null
   body: string
 }

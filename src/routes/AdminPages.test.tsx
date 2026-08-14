@@ -21,6 +21,7 @@ vi.mock('@/lib/hooks/useTechnologies', () => ({
 }))
 
 import { TechnologyForm } from '@/components/technology/TechnologyForm'
+import { LeccionForm } from '@/components/leccion/LeccionForm'
 
 import { AdminDashboardPage } from './AdminDashboardPage'
 
@@ -66,5 +67,59 @@ describe('admin pages', () => {
       rules: { 'color-contrast': { enabled: false } },
     })
     expect(results.violations).toEqual([])
+  })
+
+  it('derives a lesson slug, forces draft creation, and remains accessible', async () => {
+    const onSubmit = vi.fn().mockResolvedValue(undefined)
+    const { container } = render(<LeccionForm pending={false} onSubmit={onSubmit} />)
+
+    fireEvent.change(screen.getByLabelText('Título'), {
+      target: { value: 'Árbol del DOM' },
+    })
+
+    expect(screen.getByLabelText('Slug')).toHaveValue('arbol-del-dom')
+    expect(screen.getByLabelText('Estado')).toBeDisabled()
+    fireEvent.click(screen.getByRole('button', { name: 'Crear borrador' }))
+    await waitFor(() =>
+      expect(onSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          slug: 'arbol-del-dom',
+          titulo: 'Árbol del DOM',
+          status: 'borrador',
+        }),
+      ),
+    )
+    const results = await axe(container, {
+      rules: { 'color-contrast': { enabled: false } },
+    })
+    expect(results.violations).toEqual([])
+  })
+
+  it('freezes an existing lesson slug when its title changes', () => {
+    render(
+      <LeccionForm
+        leccion={{
+          id: 'leccion-1',
+          technologyId: 'technology-1',
+          slug: 'enlace-estable',
+          modulo: null,
+          titulo: 'Título anterior',
+          resumen: '',
+          contenido: '',
+          orden: 10,
+          status: 'borrador',
+          createdAt: '2026-08-14T10:00:00.000Z',
+          updatedAt: '2026-08-14T10:00:00.000Z',
+        }}
+        pending={false}
+        onSubmit={vi.fn().mockResolvedValue(undefined)}
+      />,
+    )
+
+    fireEvent.change(screen.getByLabelText('Título'), {
+      target: { value: 'Título nuevo' },
+    })
+    expect(screen.getByLabelText('Slug')).toHaveValue('enlace-estable')
+    expect(screen.getByLabelText('Estado')).toBeEnabled()
   })
 })

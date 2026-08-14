@@ -7,7 +7,7 @@ import { groupComments } from './groupComments'
 function comment(id: string, parentCommentId: string | null): Comment {
   return {
     id,
-    technologyId: 'technology-1',
+    leccionId: 'leccion-1',
     userId: `user-${id}`,
     parentCommentId,
     body: id,

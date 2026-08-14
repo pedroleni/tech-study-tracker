@@ -8,10 +8,12 @@ import { queryClient } from '@/lib/queryClient'
 import { AdminDashboardPage } from '@/routes/AdminDashboardPage'
 import { AdminCategoriesPage } from '@/routes/AdminCategoriesPage'
 import { AdminTechnologyFormPage } from '@/routes/AdminTechnologyFormPage'
+import { AdminLeccionFormPage } from '@/routes/AdminLeccionFormPage'
 import { CategoryPage } from '@/routes/CategoryPage'
 import { FavoritesPage } from '@/routes/FavoritesPage'
 import { ForgotPasswordPage } from '@/routes/ForgotPasswordPage'
 import { LoginPage } from '@/routes/LoginPage'
+import { LeccionPage } from '@/routes/LeccionPage'
 import { PublicHomePage } from '@/routes/PublicHomePage'
 import { RegisterPage } from '@/routes/RegisterPage'
 import { ResetPasswordPage } from '@/routes/ResetPasswordPage'
@@ -26,6 +28,7 @@ function App() {
             <Route index element={<PublicHomePage />} />
             <Route path="/categorias/:id" element={<CategoryPage />} />
             <Route path="/tecnologias/:id" element={<TechnologyPage />} />
+            <Route path="/tecnologias/:id/:leccionSlug" element={<LeccionPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/recuperar-password" element={<ForgotPasswordPage />} />
@@ -39,6 +42,14 @@ function App() {
                 <Route
                   path="/admin/tecnologias/:id/editar"
                   element={<AdminTechnologyFormPage />}
+                />
+                <Route
+                  path="/admin/tecnologias/:id/lecciones/nueva"
+                  element={<AdminLeccionFormPage />}
+                />
+                <Route
+                  path="/admin/tecnologias/:id/lecciones/:leccionId/editar"
+                  element={<AdminLeccionFormPage />}
                 />
               </Route>
             </Route>

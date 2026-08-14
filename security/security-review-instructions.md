@@ -33,20 +33,22 @@ problemas de seguridad preexistentes salvo que el diff los toque.
 **Row Level Security (RLS) — la capa de autorización principal del
 proyecto, ya que no hay backend propio:**
 - Toda tabla expuesta de Supabase (`profiles`, `categories`, `technologies`,
-  `comments`, `favorites`) debe tener RLS habilitado y privilegios del Data
+  `lecciones`, `comments`, `favorites`) debe tener RLS habilitado y privilegios del Data
   API explícitos. RLS y `GRANT` son controles distintos; hacen falta ambos.
   Para escritura, concede solo las columnas que el cliente puede gestionar;
   IDs y timestamps generados por el servidor no deben quedar escribibles.
 - El modelo vigente tiene tres niveles: lectura pública de categorías del
-  admin y tecnologías completadas del admin; escritura de contenido solo por
-  su admin propietario; comentarios sobre contenido publicado para usuarios
-  autenticados; favoritos estrictamente propios. La definición exacta vive en
-  `specs/features/public-docs.md` y `supabase/migrations/0003_public_docs.sql`.
+  admin, tecnologías completadas del admin y lecciones publicadas dentro de
+  esas tecnologías; escritura de contenido solo por su admin propietario;
+  comentarios sobre lecciones publicadas para usuarios autenticados;
+  favoritos de tecnologías estrictamente propios. La definición exacta vive
+  en `specs/features/public-docs.md`, `specs/features/lecciones.md` y las
+  migraciones `0003_public_docs.sql`/`0004_lecciones.sql`.
 - `profiles` solo permite a cada usuario leer su propia fila. Cualquier helper
   `security definer` usado por RLS debe vivir en `private`, fijar
   `search_path = ''`, usar nombres cualificados y exponer el privilegio mínimo.
 - La identidad y relaciones inmutables de comentarios (`id`, `user_id`,
-  `technology_id`, `parent_comment_id`, `created_at`) deben reforzarse en
+  `leccion_id`, `parent_comment_id`, `created_at`) deben reforzarse en
   Postgres, no solo en el cliente.
 - Cualquier query que dependa solo de un filtro `.eq('user_id', ...)` en el
   cliente, sin política RLS equivalente en el servidor, es un hallazgo
@@ -62,18 +64,20 @@ proyecto, ya que no hay backend propio:**
 - La `service_role key` NUNCA debe aparecer en código de frontend, en
   variables `VITE_*`, ni en el bundle compilado — solo en entornos server-side
   de confianza. Si aparece, es HIGH.
-- El registro es abierto. Un usuario normal solo puede comentar contenido
-  publicado y gestionar sus favoritos; crear o mutar categorías/tecnologías
-  exige rol admin en RLS.
+- El registro es abierto. Un usuario normal solo puede comentar lecciones
+  publicadas y gestionar sus favoritos; crear o mutar categorías,
+  tecnologías o lecciones exige rol admin en RLS.
 - Las rutas de lectura son públicas a propósito. `/favoritos` requiere sesión
   y `/admin/*` requiere sesión + rol, aunque esos guards sean solo UX y la
   autorización real siga en RLS.
-- La caché de tecnologías debe estar separada por identidad y vaciarse ante
-  `SIGNED_OUT`: el admin recibe borradores que nunca pueden reutilizarse en la
-  vista pública después de una expiración o revocación de sesión.
+- La caché de tecnologías y lecciones debe estar separada por identidad y
+  vaciarse ante `SIGNED_OUT`: el admin recibe borradores que nunca pueden
+  reutilizarse en la vista pública después de una expiración o revocación de
+  sesión.
 
 **XSS / Renderizado de contenido de usuario:**
-- Los campos `notes` y `comments.body` admiten texto libre/markdown. Si se
+- Los campos `notes`, `lecciones.contenido` y `comments.body` admiten texto
+  libre/markdown. Si se
   renderizan como HTML
   (librería de markdown + `dangerouslySetInnerHTML` o equivalente) sin
   sanitizar (p. ej. con DOMPurify), es un hallazgo HIGH de XSS almacenado.
