@@ -1,7 +1,8 @@
-import { ArrowUpRight } from 'lucide-react'
+import { ArrowUpRight, CircleHelp } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import { Card } from '@/components/ui/card'
+import { technologyIcons } from '@/lib/icons/technologyIcons'
 import type { Technology } from '@/types'
 
 import { DifficultyBadge } from './DifficultyBadge'
@@ -15,6 +16,8 @@ export function TechnologyCard({
   technology: Technology
   showStatus?: boolean
 }) {
+  const TechnologyIcon = technologyIcons[technology.icon ?? '']?.Icon ?? CircleHelp
+
   return (
     <Card className="flex h-full min-w-0 flex-col gap-4 transition-shadow hover:shadow-md">
       <div className="flex flex-wrap gap-2">
@@ -23,14 +26,19 @@ export function TechnologyCard({
         <PriorityBadge priority={technology.priority} />
       </div>
       <div className="min-w-0 flex-1">
-        <h3 className="text-lg font-semibold text-balance">
-          <Link
-            to={`/tecnologias/${technology.id}`}
-            className="rounded-sm hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            {technology.name}
-          </Link>
-        </h3>
+        <div className="flex items-center gap-2">
+          <span aria-hidden="true" className="shrink-0 text-muted-foreground">
+            <TechnologyIcon className="size-5" />
+          </span>
+          <h3 className="min-w-0 text-lg font-semibold text-balance">
+            <Link
+              to={`/tecnologias/${technology.id}`}
+              className="rounded-sm hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              {technology.name}
+            </Link>
+          </h3>
+        </div>
         <p className="mt-2 line-clamp-3 break-words text-sm text-muted-foreground">
           {technology.notes.trim() || 'Esta ficha todavía no tiene resumen.'}
         </p>

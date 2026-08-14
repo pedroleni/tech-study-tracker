@@ -9,6 +9,7 @@ const createTechnology = (
   id,
   categoryId,
   name: `Technology ${id}`,
+  icon: null,
   status: 'pendiente',
   priority: 'media',
   difficulty: 'media',

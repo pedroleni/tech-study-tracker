@@ -6,6 +6,7 @@ const createTechnology = (id: string, status: Status): Technology => ({
   id,
   categoryId: 'category',
   name: `Technology ${id}`,
+  icon: null,
   status,
   priority: 'media',
   difficulty: 'media',

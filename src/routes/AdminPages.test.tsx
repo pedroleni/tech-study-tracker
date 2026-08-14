@@ -69,6 +69,29 @@ describe('admin pages', () => {
     expect(results.violations).toEqual([])
   })
 
+  it('saves the icon selected for a technology', async () => {
+    const onSubmit = vi.fn().mockResolvedValue(undefined)
+    render(
+      <TechnologyForm
+        categories={[{ id: 'category-1', name: 'Frontend', createdAt: '2026-08-13' }]}
+        pending={false}
+        onSubmit={onSubmit}
+      />,
+    )
+
+    fireEvent.change(screen.getByLabelText('Nombre'), { target: { value: 'React' } })
+    fireEvent.change(screen.getByLabelText('Categoría'), {
+      target: { value: 'category-1' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Cambiar icono' }))
+    fireEvent.click(screen.getByRole('button', { name: 'React' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Crear ficha' }))
+
+    await waitFor(() =>
+      expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ icon: 'react' })),
+    )
+  })
+
   it('derives a lesson slug, forces draft creation, and remains accessible', async () => {
     const onSubmit = vi.fn().mockResolvedValue(undefined)
     const { container } = render(<LeccionForm pending={false} onSubmit={onSubmit} />)

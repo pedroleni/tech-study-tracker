@@ -4,6 +4,7 @@ import type { Category, Comment, Favorite, Leccion, Profile, Technology } from '
 interface CategoryRow {
   id: string
   name: string
+  icon: string | null
   created_at: string
 }
 
@@ -11,6 +12,7 @@ interface TechnologyRow {
   id: string
   category_id: string
   name: string
+  icon: string | null
   status: Technology['status']
   priority: Technology['priority']
   difficulty: Technology['difficulty']
@@ -58,7 +60,7 @@ interface FavoriteRow {
 }
 
 export function mapCategory(row: CategoryRow): Category {
-  return { id: row.id, name: row.name, createdAt: row.created_at }
+  return { id: row.id, name: row.name, icon: row.icon, createdAt: row.created_at }
 }
 
 export function mapTechnology(row: TechnologyRow): Technology {
@@ -66,6 +68,7 @@ export function mapTechnology(row: TechnologyRow): Technology {
     id: row.id,
     categoryId: row.category_id,
     name: row.name,
+    icon: row.icon,
     status: row.status,
     priority: row.priority,
     difficulty: row.difficulty,

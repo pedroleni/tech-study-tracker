@@ -49,3 +49,4 @@ una decisión global.
 | Tecnologías (ficha, formulario, badges) | [public-docs.md](public-docs.md) | ✅ implementada en PR #16 |
 | Documentación pública, comentarios y favoritos (pivote de alcance) | [public-docs.md](public-docs.md) | ✅ implementada en PR #16 — migración `0003` aplicada y verificada en remoto, probado en vivo con 3 identidades reales |
 | 2FA con TOTP (segundo factor opcional en login) | _pendiente de escribir_ | ⏳ aplazada a propósito, ver [auth.md](auth.md#fuera-de-alcance-de-esta-feature) |
+| Iconos de categoría y tecnología (`IconPicker`, lucide-react + react-icons/si) | [icons.md](icons.md) | 🚧 en spec, sin implementar |

@@ -1,10 +1,11 @@
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, CircleHelp } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
 
 import { TechnologyCard } from '@/components/technology/TechnologyCard'
 import { Card } from '@/components/ui/card'
 import { useCategories } from '@/lib/hooks/useCategories'
 import { useTechnologies } from '@/lib/hooks/useTechnologies'
+import { categoryIcons } from '@/lib/icons/categoryIcons'
 
 export function CategoryPage() {
   const { id = '' } = useParams()
@@ -39,6 +40,7 @@ export function CategoryPage() {
       </Card>
     )
   }
+  const CategoryIcon = categoryIcons[category.icon ?? '']?.Icon ?? CircleHelp
 
   return (
     <div className="space-y-8">
@@ -50,7 +52,14 @@ export function CategoryPage() {
           <ArrowLeft aria-hidden="true" className="size-4" />
           Todas las categorías
         </Link>
-        <h1 className="text-3xl font-semibold tracking-tight text-balance">{category.name}</h1>
+        <div className="flex items-center gap-3">
+          <span aria-hidden="true" className="rounded-xl bg-muted p-2 text-muted-foreground">
+            <CategoryIcon className="size-7" />
+          </span>
+          <h1 className="text-3xl font-semibold tracking-tight text-balance">
+            {category.name}
+          </h1>
+        </div>
         <p className="text-sm text-muted-foreground">
           {new Intl.NumberFormat('es-ES').format(technologies.length)}{' '}
           {technologies.length === 1 ? 'ficha publicada' : 'fichas publicadas'}

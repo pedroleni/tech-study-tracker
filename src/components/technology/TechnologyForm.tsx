@@ -1,11 +1,13 @@
 import { Plus, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { useFieldArray, useForm } from 'react-hook-form'
+import { Controller, useFieldArray, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
 import { Button } from '@/components/ui/button'
+import { IconPicker } from '@/components/ui/icon-picker'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { technologyIcons } from '@/lib/icons/technologyIcons'
 import { validateResourceUrl } from '@/lib/utils/validateResourceUrl'
 import type { Category, Technology } from '@/types'
 import type { NewTechnologyInput } from '@/lib/queries/mappers'
@@ -13,6 +15,10 @@ import type { NewTechnologyInput } from '@/lib/queries/mappers'
 const technologySchema = z.object({
   categoryId: z.string().min(1, 'Selecciona una categoría.'),
   name: z.string().trim().min(1, 'Escribe un nombre.').max(120),
+  icon: z
+    .string()
+    .refine((key) => key in technologyIcons, 'Selecciona un icono de la lista.')
+    .nullable(),
   status: z.enum(['pendiente', 'en_progreso', 'completado']),
   priority: z.enum(['alta', 'media', 'baja']),
   difficulty: z.enum(['facil', 'media', 'dificil']),
@@ -30,6 +36,7 @@ function defaults(technology?: Technology): NewTechnologyInput {
     ? {
         categoryId: technology.categoryId,
         name: technology.name,
+        icon: technology.icon ?? null,
         status: technology.status,
         priority: technology.priority,
         difficulty: technology.difficulty,
@@ -39,6 +46,7 @@ function defaults(technology?: Technology): NewTechnologyInput {
     : {
         categoryId: '',
         name: '',
+        icon: null,
         status: 'pendiente',
         priority: 'media',
         difficulty: 'media',
@@ -53,7 +61,7 @@ export function TechnologyForm({
   pending,
   onSubmit,
 }: {
-  categories: Category[]
+  categories: Pick<Category, 'id' | 'name' | 'createdAt'>[]
   technology?: Technology
   pending: boolean
   onSubmit: (input: NewTechnologyInput) => Promise<void>
@@ -127,6 +135,21 @@ export function TechnologyForm({
             ))}
           </select>
           <p className="text-sm text-destructive">{formState.errors.categoryId?.message}</p>
+        </div>
+
+        <div className="space-y-2 sm:col-span-2">
+          <p className="text-sm font-medium">Icono (opcional)</p>
+          <Controller
+            control={control}
+            name="icon"
+            render={({ field }) => (
+              <IconPicker
+                icons={technologyIcons}
+                value={field.value}
+                onChange={field.onChange}
+              />
+            )}
+          />
         </div>
 
         {[

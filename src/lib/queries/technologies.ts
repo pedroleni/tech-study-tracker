@@ -8,6 +8,7 @@ function toTechnologyPayload(input: NewTechnologyInput | TechnologyPatch) {
   return {
     ...(input.categoryId !== undefined && { category_id: input.categoryId }),
     ...(input.name !== undefined && { name: input.name }),
+    ...(input.icon !== undefined && { icon: input.icon }),
     ...(input.status !== undefined && { status: input.status }),
     ...(input.priority !== undefined && { priority: input.priority }),
     ...(input.difficulty !== undefined && { difficulty: input.difficulty }),

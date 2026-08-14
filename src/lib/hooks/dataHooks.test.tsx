@@ -40,6 +40,7 @@ import { queryKeys } from '../queries/queryKeys'
 const categoryRow = {
   id: 'category-1',
   name: 'Frontend',
+  icon: null,
   created_at: '2026-08-13T08:00:00.000Z',
 }
 
@@ -47,6 +48,7 @@ const technologyRow = {
   id: 'technology-1',
   category_id: 'category-1',
   name: 'React',
+  icon: null,
   status: 'en_progreso' as const,
   priority: 'alta' as const,
   difficulty: 'media' as const,
@@ -59,6 +61,7 @@ const technologyRow = {
 const newTechnology: NewTechnologyInput = {
   categoryId: 'category-1',
   name: 'React',
+  icon: null,
   status: 'en_progreso',
   priority: 'alta',
   difficulty: 'media',
@@ -141,6 +144,7 @@ describe('data hooks', () => {
       {
         id: 'category-1',
         name: 'Frontend',
+        icon: null,
         createdAt: '2026-08-13T08:00:00.000Z',
       },
     ])
@@ -181,12 +185,15 @@ describe('data hooks', () => {
     const categoryHook = renderHook(() => useCreateCategory(), { wrapper })
     const technologyHook = renderHook(() => useCreateTechnology(), { wrapper })
 
-    await act(() => categoryHook.result.current.mutateAsync('Frontend'))
+    await act(() =>
+      categoryHook.result.current.mutateAsync({ name: 'Frontend', icon: null }),
+    )
     await act(() => technologyHook.result.current.mutateAsync(newTechnology))
 
     expect(categories.insert).toHaveBeenCalledWith({
       user_id: 'session-user',
       name: 'Frontend',
+      icon: null,
     })
     expect(technologies.insert).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -204,9 +211,9 @@ describe('data hooks', () => {
     const categoryHook = renderHook(() => useCreateCategory(), { wrapper })
     const technologyHook = renderHook(() => useCreateTechnology(), { wrapper })
 
-    await expect(categoryHook.result.current.mutateAsync('Frontend')).rejects.toThrow(
-      'No hay sesión activa.',
-    )
+    await expect(
+      categoryHook.result.current.mutateAsync({ name: 'Frontend', icon: null }),
+    ).rejects.toThrow('No hay sesión activa.')
     await expect(technologyHook.result.current.mutateAsync(newTechnology)).rejects.toThrow(
       'No hay sesión activa.',
     )
@@ -220,9 +227,9 @@ describe('data hooks', () => {
     const categoryHook = renderHook(() => useCreateCategory(), { wrapper })
     const technologyHook = renderHook(() => useCreateTechnology(), { wrapper })
 
-    await expect(categoryHook.result.current.mutateAsync('Frontend')).rejects.toThrow(
-      'Solo el administrador puede gestionar contenido.',
-    )
+    await expect(
+      categoryHook.result.current.mutateAsync({ name: 'Frontend', icon: null }),
+    ).rejects.toThrow('Solo el administrador puede gestionar contenido.')
     await expect(technologyHook.result.current.mutateAsync(newTechnology)).rejects.toThrow(
       'Solo el administrador puede gestionar contenido.',
     )
@@ -230,12 +237,17 @@ describe('data hooks', () => {
   })
 
   it.each([
-    ['useCreateCategory', useCreateCategory, 'categories', 'Frontend'],
+    [
+      'useCreateCategory',
+      useCreateCategory,
+      'categories',
+      { name: 'Frontend', icon: null },
+    ],
     [
       'useRenameCategory',
       useRenameCategory,
       'categories',
-      { id: 'category-1', name: 'Web' },
+      { id: 'category-1', name: 'Web', icon: null },
     ],
     ['useCreateTechnology', useCreateTechnology, 'technologies', newTechnology],
     [
@@ -281,12 +293,17 @@ describe('data hooks', () => {
   })
 
   it.each([
-    ['useCreateCategory', useCreateCategory, 'categories', 'Frontend'],
+    [
+      'useCreateCategory',
+      useCreateCategory,
+      'categories',
+      { name: 'Frontend', icon: null },
+    ],
     [
       'useRenameCategory',
       useRenameCategory,
       'categories',
-      { id: 'category-1', name: 'Web' },
+      { id: 'category-1', name: 'Web', icon: null },
     ],
     ['useDeleteCategory', useDeleteCategory, 'categories', 'category-1'],
     ['useCreateTechnology', useCreateTechnology, 'technologies', newTechnology],
