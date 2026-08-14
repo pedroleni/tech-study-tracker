@@ -25,8 +25,8 @@ export function PublicHomePage() {
             Apuntes prácticos para aprender tecnología con contexto
           </h1>
           <p className="max-w-2xl text-lg leading-8 text-pretty text-muted-foreground">
-            Documentación técnica organizada, visual y con ejemplos reales para aprender
-            entendiendo, no memorizando.
+            Documentación técnica estructurada y visual, con ejemplos reales orientados a la
+            comprensión, no a la memorización.
           </p>
         </div>
         <img
