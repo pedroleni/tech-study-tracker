@@ -18,15 +18,22 @@ export function PublicHomePage() {
 
   return (
     <div className="space-y-12">
-      <section className="max-w-3xl space-y-4 py-8" aria-labelledby="home-title">
-        <p className="text-sm font-medium text-muted-foreground">Biblioteca técnica</p>
-        <h1 id="home-title" className="text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
-          Apuntes prácticos para aprender tecnología con contexto
-        </h1>
-        <p className="max-w-2xl text-lg leading-8 text-pretty text-muted-foreground">
-          Fichas curadas, recursos útiles y conversaciones abiertas para avanzar sin perder
-          el hilo.
-        </p>
+      <section className="grid gap-8 py-8 lg:grid-cols-2 lg:items-center" aria-labelledby="home-title">
+        <div className="max-w-3xl space-y-4">
+          <p className="text-sm font-medium text-muted-foreground">Biblioteca técnica</p>
+          <h1 id="home-title" className="text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
+            Apuntes prácticos para aprender tecnología con contexto
+          </h1>
+          <p className="max-w-2xl text-lg leading-8 text-pretty text-muted-foreground">
+            Fichas curadas, recursos útiles y conversaciones abiertas para avanzar sin perder
+            el hilo.
+          </p>
+        </div>
+        <img
+          src="/hero.png"
+          alt="Ilustración de un desarrollador estudiando con portátil, código, documentación y una mascota robot"
+          className="h-auto w-full rounded-xl"
+        />
       </section>
 
       <section id="categorias" className="scroll-mt-20 space-y-5" aria-labelledby="categories-title">

@@ -1,0 +1,19 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="120"
+  height="120"
+  viewBox="0 0 120 120"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="5"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M60 35c-8-8-18-12-30-12H17v58h13c12 0 22 4 30 12Z" />
+  <path d="M60 35c8-8 18-12 30-12h13v58H90c-12 0-22 4-30 12Z" />
+  <path d="M60 35v58" />
+  <circle cx="43" cy="54" r="3.5" fill="currentColor" stroke="none" />
+  <circle cx="77" cy="54" r="3.5" fill="currentColor" stroke="none" />
+  <path d="M51 68c3 3 6 5 9 5s6-2 9-5" />
+  <path d="M43 88v14l-8 8M77 88v14l8 8" />
+</svg>
