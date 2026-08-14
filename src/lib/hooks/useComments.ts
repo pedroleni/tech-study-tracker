@@ -10,11 +10,11 @@ import {
 import type { NewCommentInput } from '@/lib/queries/mappers'
 import { queryKeys } from '@/lib/queries/queryKeys'
 
-export function useComments(technologyId: string) {
+export function useComments(leccionId: string) {
   return useQuery({
-    queryKey: queryKeys.comments(technologyId),
-    queryFn: () => listComments(technologyId),
-    enabled: Boolean(technologyId),
+    queryKey: queryKeys.comments(leccionId),
+    queryFn: () => listComments(leccionId),
+    enabled: Boolean(leccionId),
   })
 }
 
@@ -28,7 +28,7 @@ export function useCreateComment() {
       return createComment(user.id, input)
     },
     onSuccess: (comment) =>
-      queryClient.invalidateQueries({ queryKey: queryKeys.comments(comment.technologyId) }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.comments(comment.leccionId) }),
   })
 }
 
@@ -37,12 +37,12 @@ export function useUpdateComment() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ id, body }: { id: string; body: string; technologyId: string }) => {
+    mutationFn: ({ id, body }: { id: string; body: string; leccionId: string }) => {
       if (!user) throw new Error('Inicia sesión para editar el comentario.')
       return updateComment(id, body)
     },
     onSuccess: (comment) =>
-      queryClient.invalidateQueries({ queryKey: queryKeys.comments(comment.technologyId) }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.comments(comment.leccionId) }),
   })
 }
 
@@ -51,11 +51,11 @@ export function useDeleteComment() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ id }: { id: string; technologyId: string }) => {
+    mutationFn: ({ id }: { id: string; leccionId: string }) => {
       if (!user) throw new Error('Inicia sesión para borrar el comentario.')
       return deleteComment(id)
     },
     onSuccess: (comment) =>
-      queryClient.invalidateQueries({ queryKey: queryKeys.comments(comment.technologyId) }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.comments(comment.leccionId) }),
   })
 }

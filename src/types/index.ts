@@ -2,6 +2,7 @@ export type Status = 'pendiente' | 'en_progreso' | 'completado'
 export type Priority = 'alta' | 'media' | 'baja'
 export type Difficulty = 'facil' | 'media' | 'dificil'
 export type ProfileRole = 'user' | 'admin'
+export type LeccionStatus = 'borrador' | 'publicado'
 
 export interface Resource {
   label: string
@@ -28,6 +29,20 @@ export interface Technology {
   updatedAt: string
 }
 
+export interface Leccion {
+  id: string
+  technologyId: string
+  slug: string
+  modulo: string | null
+  titulo: string
+  resumen: string
+  contenido: string
+  orden: number
+  status: LeccionStatus
+  createdAt: string
+  updatedAt: string
+}
+
 export interface Profile {
   id: string
   role: ProfileRole
@@ -36,7 +51,7 @@ export interface Profile {
 
 export interface Comment {
   id: string
-  technologyId: string
+  leccionId: string
   userId: string
   parentCommentId: string | null
   body: string

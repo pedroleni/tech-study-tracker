@@ -15,7 +15,7 @@ import {
 
 const row = {
   id: 'comment-1',
-  technology_id: 'technology-1',
+  leccion_id: 'leccion-1',
   user_id: 'user-1',
   parent_comment_id: null,
   body: 'Buen resumen',
@@ -42,13 +42,13 @@ function setup(error: Error | null = null) {
 describe('comment queries', () => {
   beforeEach(() => vi.clearAllMocks())
 
-  it('lists only the requested technology and maps rows', async () => {
+  it('lists only the requested lesson and maps rows', async () => {
     const chain = setup()
 
-    await expect(listComments('technology-1')).resolves.toEqual([
+    await expect(listComments('leccion-1')).resolves.toEqual([
       {
         id: 'comment-1',
-        technologyId: 'technology-1',
+        leccionId: 'leccion-1',
         userId: 'user-1',
         parentCommentId: null,
         body: 'Buen resumen',
@@ -57,7 +57,7 @@ describe('comment queries', () => {
       },
     ])
     expect(mocks.from).toHaveBeenCalledWith('comments')
-    expect(chain.listEq).toHaveBeenCalledWith('technology_id', 'technology-1')
+    expect(chain.listEq).toHaveBeenCalledWith('leccion_id', 'leccion-1')
     expect(chain.order).toHaveBeenCalledWith('created_at', { ascending: true })
   })
 
@@ -65,13 +65,13 @@ describe('comment queries', () => {
     const chain = setup()
 
     await createComment('user-1', {
-      technologyId: 'technology-1',
+      leccionId: 'leccion-1',
       parentCommentId: 'parent-1',
       body: 'Respuesta',
     })
 
     expect(chain.insert).toHaveBeenCalledWith({
-      technology_id: 'technology-1',
+      leccion_id: 'leccion-1',
       user_id: 'user-1',
       parent_comment_id: 'parent-1',
       body: 'Respuesta',
@@ -96,7 +96,7 @@ describe('comment queries', () => {
 
     await expect(
       createComment('user-1', {
-        technologyId: 'technology-1',
+        leccionId: 'leccion-1',
         parentCommentId: 'reply-1',
         body: 'Tercer nivel',
       }),
@@ -105,7 +105,7 @@ describe('comment queries', () => {
 
   it('rejects an empty or oversized body before calling Supabase', async () => {
     await expect(
-      createComment('user-1', { technologyId: 'technology-1', body: '   ' }),
+      createComment('user-1', { leccionId: 'leccion-1', body: '   ' }),
     ).rejects.toThrow('El comentario debe tener entre 1 y 2000 caracteres.')
     await expect(updateComment('comment-1', 'x'.repeat(2001))).rejects.toThrow(
       'El comentario debe tener entre 1 y 2000 caracteres.',

@@ -7,6 +7,7 @@ const state = vi.hoisted(() => ({
   user: null as { id: string } | null,
   isAdmin: false,
   status: 'completado' as 'pendiente' | 'en_progreso' | 'completado',
+  leccionStatus: 'publicado' as 'borrador' | 'publicado',
 }))
 
 const technology = {
@@ -24,6 +25,21 @@ const technology = {
   ],
   createdAt: '2026-08-13T10:00:00.000Z',
   updatedAt: '2026-08-13T10:00:00.000Z',
+}
+
+const leccion = {
+  id: 'leccion-1',
+  technologyId: 'technology-1',
+  slug: 'hooks',
+  modulo: 'Fundamentos',
+  titulo: 'Hooks',
+  resumen: 'Estado y efectos en componentes.',
+  contenido:
+    '# Efectos\n\nTexto seguro <script>alert(1)</script>\n\n![Píxel remoto](https://tracker.example/pixel.gif)',
+  orden: 10,
+  status: 'publicado' as const,
+  createdAt: '2026-08-14T10:00:00.000Z',
+  updatedAt: '2026-08-14T10:00:00.000Z',
 }
 
 vi.mock('@/lib/hooks/useAuth', () => ({
@@ -54,6 +70,20 @@ vi.mock('@/lib/hooks/useTechnologies', () => ({
     isError: false,
   }),
 }))
+vi.mock('@/lib/hooks/useLecciones', () => ({
+  useLecciones: () => ({
+    data: [{ ...leccion, status: state.leccionStatus }],
+    isLoading: false,
+    isError: false,
+  }),
+}))
+vi.mock('@/lib/hooks/useLeccion', () => ({
+  useLeccion: () => ({
+    data: { ...leccion, status: state.leccionStatus },
+    isLoading: false,
+    isError: false,
+  }),
+}))
 vi.mock('@/lib/hooks/useComments', () => ({
   useComments: () => ({ data: [], isLoading: false, isError: false }),
   useCreateComment: () => ({ isPending: false, mutateAsync: vi.fn() }),
@@ -68,6 +98,7 @@ vi.mock('@/lib/hooks/useFavorites', () => ({
 
 import { FavoritesPage } from './FavoritesPage'
 import { CategoryPage } from './CategoryPage'
+import { LeccionPage } from './LeccionPage'
 import { TechnologyPage } from './TechnologyPage'
 
 describe('public and account pages', () => {
@@ -75,6 +106,7 @@ describe('public and account pages', () => {
     state.user = null
     state.isAdmin = false
     state.status = 'completado'
+    state.leccionStatus = 'publicado'
   })
 
   it('does not mix admin drafts into the public category view', () => {
@@ -94,6 +126,7 @@ describe('public and account pages', () => {
     state.user = { id: 'admin-1' }
     state.isAdmin = true
     state.status = 'pendiente'
+    state.leccionStatus = 'borrador'
 
     render(
       <MemoryRouter initialEntries={['/tecnologias/technology-1']}>
@@ -103,14 +136,33 @@ describe('public and account pages', () => {
       </MemoryRouter>,
     )
 
-    expect(screen.getByRole('link', { name: 'Editar ficha' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Editar tecnología' })).toHaveAttribute(
       'href',
       '/admin/tecnologias/technology-1/editar',
     )
     expect(screen.queryByRole('button', { name: /favoritos/i })).not.toBeInTheDocument()
-    expect(
-      screen.getByText('Los comentarios se habilitarán cuando se publique la ficha.'),
-    ).toBeInTheDocument()
+    expect(screen.getByText('Borrador')).toBeInTheDocument()
+  })
+
+  it('renders lesson content safely and anchors comments to the lesson', async () => {
+    const { container } = render(
+      <MemoryRouter initialEntries={['/tecnologias/technology-1/hooks']}>
+        <Routes>
+          <Route path="/tecnologias/:id/:leccionSlug" element={<LeccionPage />} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByRole('heading', { name: 'Hooks' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Efectos' })).toBeInTheDocument()
+    expect(container.querySelector('script')).toBeNull()
+    expect(container.querySelector('img')).toBeNull()
+    expect(screen.getByText('Píxel remoto')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Comentarios' })).toBeInTheDocument()
+    const results = await axe(container, {
+      rules: { 'color-contrast': { enabled: false } },
+    })
+    expect(results.violations).toEqual([])
   })
 
   it('renders a public technology safely and without axe violations', async () => {
