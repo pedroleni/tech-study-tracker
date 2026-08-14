@@ -25,6 +25,7 @@ en el chat, que no queda buscable ni versionado.
 
 | Fecha | Archivo | Alcance | Resultado |
 |---|---|---|---|
+| 2026-08-14 | [2026-08-14-icons.md](2026-08-14-icons.md) | Iconos de categoría/tecnología: migración `0005` (columna nullable + GRANT), `IconPicker`, listas curadas, `react-icons` nuevo | 0 High/Medium; revisión ligera (sin RLS nueva); 136 tests, build y lint verdes tras sincronizar con `main` |
 | 2026-08-14 | [2026-08-14-auth-rls-fix-lecciones.md](2026-08-14-auth-rls-fix-lecciones.md) | `solo RLS`, fix de ordering en `0004` (drop policy antes de drop column) + relectura de `lecciones`/`comments` ya aplicados en remoto | 0 High/Medium; verificado con curl real contra las 3 identidades en producción |
 | 2026-08-14 | [2026-08-14-lecciones.md](2026-08-14-lecciones.md) | Lecciones: migración `0004`, RLS/GRANTs, comentarios por `leccion_id`, caché, Markdown, formulario y rutas | 0 High/Medium residuales conocidos; 132 tests y build verdes; validación remota pendiente |
 | 2026-08-13 | [2026-08-13-public-docs.md](2026-08-13-public-docs.md) | Pivote público/admin: migración `0003`, RLS/GRANT, caché de sesión, Markdown, comentarios/favoritos y rutas, antes del PR | 4 MEDIUM corregidos localmente; 0 High/Medium residuales conocidos; validación remota pendiente |
