@@ -7,15 +7,27 @@ import { queryClient } from '@/lib/queryClient'
 export function useAuth() {
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isPasswordRecovery, setIsPasswordRecovery] = useState(
+    () => sessionStorage.getItem('passwordRecovery') === 'true',
+  )
 
   useEffect(() => {
     let active = true
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, nextSession) => {
+        if (event === 'PASSWORD_RECOVERY') {
+          sessionStorage.setItem('passwordRecovery', 'true')
+          if (active) setIsPasswordRecovery(true)
+        }
+
         // Draft technologies are visible to admins. Remove every cached copy when
         // Supabase ends the session, including expiry/revocation outside our button.
-        if (event === 'SIGNED_OUT') queryClient.clear()
+        if (event === 'SIGNED_OUT') {
+          queryClient.clear()
+          sessionStorage.removeItem('passwordRecovery')
+          if (active) setIsPasswordRecovery(false)
+        }
         if (active) {
           setSession(nextSession)
           setLoading(false)
@@ -75,6 +87,8 @@ export function useAuth() {
   const updatePassword = useCallback(async (password: string) => {
     const { data, error } = await supabase.auth.updateUser({ password })
     if (error) throw error
+    sessionStorage.removeItem('passwordRecovery')
+    setIsPasswordRecovery(false)
     return data
   }, [])
 
@@ -95,6 +109,7 @@ export function useAuth() {
     user,
     session,
     loading,
+    isPasswordRecovery,
     signIn,
     signUp,
     signOut,
