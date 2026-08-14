@@ -87,6 +87,9 @@ create policy "lecciones_delete_admin" on public.lecciones
     )
   );
 
+drop policy if exists "comments_select_public" on public.comments;
+drop policy if exists "comments_insert_own" on public.comments;
+drop policy if exists "comments_update_own" on public.comments;
 alter table public.comments drop column technology_id;
 alter table public.comments
   add column leccion_id uuid not null references public.lecciones(id) on delete cascade;
