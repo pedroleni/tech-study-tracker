@@ -41,16 +41,50 @@ rama, mueve los cambios ahí, verifica todo otra vez de forma
 independiente, comitea, hace push y abre el PR. Está documentado con
 más detalle en [`AGENTS.md`](AGENTS.md).
 
+### De un vistazo: cómo se orquesta una feature completa
+
+```mermaid
+flowchart TD
+    A["Usuario pide una feature"] --> B["Claude: brainstorming + spec<br/>specs/features/&lt;feature&gt;.md"]
+    B --> C["Claude: rama feat/&lt;nombre&gt; desde main<br/>(nunca se implementa sobre main)"]
+    C --> D["Claude: plan de implementación"]
+    D --> E["Se delega en Codex:<br/>script codex-task.sh (prompt, effort)<br/>+ panel codex-monitor en localhost:4545"]
+    E --> F["Codex implementa en el working tree<br/>sandbox workspace-write: sin red, sin tocar .git"]
+    F --> G["Codex prueba y compila por su cuenta<br/>y reporta qué hizo (y qué NO pudo hacer)"]
+    G --> H["Claude revisa el diff de verdad<br/>nunca se da por buena la palabra de Codex"]
+    H -->|insuficiente| E
+    H -->|ok| I["Verificación local obligatoria:<br/>tests, build y lint del proyecto<br/>⚠️ el CI de este repo NO los verifica, solo seguridad"]
+    I --> J{"¿Toca RLS, auth o datos sensibles?"}
+    J -->|sí| K["Migración manual en Supabase SQL Editor<br/>(Codex y el sandbox no tienen red)"]
+    K --> L["Verificación real contra Supabase<br/>anónimo / registrado / admin, peticiones HTTP directas"]
+    J -->|no| M
+    L --> M["Claude: revisión de seguridad<br/>/security-review (8 dominios) o fallback secuencial<br/>guardada en security/reviews/"]
+    M --> N["Claude: commit + push + PR contra main"]
+    N --> O["CI (security-scan.yml):<br/>solo los 5 scanners bash de scripts/security/"]
+    O -->|rojo| H
+    O -->|verde y revisado| P["Merge a main<br/>solo con confirmación explícita del usuario"]
+```
+
+**Lo que este diagrama deja explícito y que antes solo estaba en
+prosa repartida:** el CI de este repo **no** corre `test`/`build`/`lint`
+— eso es responsabilidad de Claude en local, cada vez, antes de dar una
+rama por terminada. Y el sandbox `workspace-write` de Codex está
+confinado al repo en el que se lanza *en teoría*, pero en la práctica
+depende del `trust_level` configurado en `~/.codex/config.toml` del
+usuario — no asumir aislamiento total entre proyectos solo por el
+nombre del sandbox.
+
 ### Flujo de ramas
 
 Ninguna feature se comitea directo a `main`:
 
 1. Rama `feat/<nombre>` (o `fix/<nombre>`) desde `main` actualizado —
    una rama por feature, no varias mezcladas.
-2. Implementación + tests en verde localmente.
+2. Implementación + `npm run test && npm run build && npm run lint`
+   en verde **en local** — el CI no los corre (ver diagrama arriba).
 3. Push + PR contra `main`. El workflow de GitHub Actions
    (`.github/workflows/security-scan.yml`) corre automáticamente en
-   cada PR.
+   cada PR, pero solo los scanners de seguridad de `scripts/security/`.
 4. Merge solo cuando CI está en verde y el PR ha sido revisado.
 
 ## Los agentes de seguridad
