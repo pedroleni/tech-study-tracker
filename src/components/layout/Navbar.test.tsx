@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { axe } from 'vitest-axe'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -52,6 +52,30 @@ describe('Navbar', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Cerrar sesión' }))
 
     expect(authState.signOut).toHaveBeenCalledOnce()
+  })
+
+  it('opens the mobile menu and closes it after navigating', () => {
+    renderNavbar()
+
+    const menuButton = screen.getByRole('button', { name: 'Abrir menú' })
+    expect(menuButton).toHaveAttribute('aria-expanded', 'false')
+
+    fireEvent.click(menuButton)
+
+    expect(screen.getByRole('button', { name: 'Cerrar menú' })).toHaveAttribute(
+      'aria-expanded',
+      'true',
+    )
+    const mobileMenu = screen.getByLabelText('Menú de navegación móvil')
+    expect(mobileMenu).toBeInTheDocument()
+
+    fireEvent.click(within(mobileMenu).getByRole('link', { name: 'Categorías' }))
+
+    expect(screen.queryByLabelText('Menú de navegación móvil')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Abrir menú' })).toHaveAttribute(
+      'aria-expanded',
+      'false',
+    )
   })
 
   it('has no detectable accessibility violations', async () => {
