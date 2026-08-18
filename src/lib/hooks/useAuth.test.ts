@@ -42,6 +42,7 @@ describe('useAuth', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     queryClient.clear()
+    sessionStorage.clear()
     authMocks.getSession.mockResolvedValue({ data: { session }, error: null })
     authMocks.onAuthStateChange.mockReturnValue({
       data: { subscription: { unsubscribe: authMocks.unsubscribe } },
@@ -95,6 +96,41 @@ describe('useAuth', () => {
 
     expect(queryClient.getQueryData(queryKeys.technologiesForViewer('user-1'))).toBeUndefined()
     expect(result.current.session).toBeNull()
+  })
+
+  it('marks the session as password recovery when Supabase emits PASSWORD_RECOVERY', async () => {
+    let listener: (_event: string, session: Session | null) => void = () => undefined
+    authMocks.onAuthStateChange.mockImplementation((callback) => {
+      listener = callback
+      return { data: { subscription: { unsubscribe: authMocks.unsubscribe } } }
+    })
+    const { result } = renderHook(() => useAuth())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    act(() => listener('PASSWORD_RECOVERY', session))
+
+    expect(result.current.isPasswordRecovery).toBe(true)
+    expect(sessionStorage.getItem('passwordRecovery')).toBe('true')
+  })
+
+  it('restores the password recovery state from sessionStorage on mount', async () => {
+    sessionStorage.setItem('passwordRecovery', 'true')
+
+    const { result } = renderHook(() => useAuth())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    expect(result.current.isPasswordRecovery).toBe(true)
+  })
+
+  it('clears the password recovery state after a successful password update', async () => {
+    sessionStorage.setItem('passwordRecovery', 'true')
+    const { result } = renderHook(() => useAuth())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    await act(() => result.current.updatePassword('a new secure phrase!'))
+
+    expect(result.current.isPasswordRecovery).toBe(false)
+    expect(sessionStorage.getItem('passwordRecovery')).toBeNull()
   })
 
   it('delegates password auth actions and surfaces errors', async () => {

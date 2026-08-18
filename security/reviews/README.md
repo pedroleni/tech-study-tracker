@@ -25,6 +25,7 @@ en el chat, que no queda buscable ni versionado.
 
 | Fecha | Archivo | Alcance | Resultado |
 |---|---|---|---|
+| 2026-08-15 | [2026-08-15-password-recovery-scope.md](2026-08-15-password-recovery-scope.md) | Sesión de `PASSWORD_RECOVERY` restringida a `/nueva-password` (`useAuth.ts`, `ProtectedRoute.tsx`) | 0 High/Medium; revisión completa (toca sesión/auth); 140 tests, build y lint verdes; 2 notas informativas no bloqueantes |
 | 2026-08-14 | [2026-08-14-icons.md](2026-08-14-icons.md) | Iconos de categoría/tecnología: migración `0005` (columna nullable + GRANT), `IconPicker`, listas curadas, `react-icons` nuevo | 0 High/Medium; revisión ligera (sin RLS nueva); 136 tests, build y lint verdes tras sincronizar con `main` |
 | 2026-08-14 | [2026-08-14-auth-rls-fix-lecciones.md](2026-08-14-auth-rls-fix-lecciones.md) | `solo RLS`, fix de ordering en `0004` (drop policy antes de drop column) + relectura de `lecciones`/`comments` ya aplicados en remoto | 0 High/Medium; verificado con curl real contra las 3 identidades en producción |
 | 2026-08-14 | [2026-08-14-lecciones.md](2026-08-14-lecciones.md) | Lecciones: migración `0004`, RLS/GRANTs, comentarios por `leccion_id`, caché, Markdown, formulario y rutas | 0 High/Medium residuales conocidos; 132 tests y build verdes; validación remota pendiente |

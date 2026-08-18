@@ -27,6 +27,15 @@ invente su propia paleta o sus propios patrones.
    `dark:` — el toggle ya existe vía la clase `.dark` en `<html>`
    (`@custom-variant dark` en `src/index.css`). No asumas que algo "ya
    se verá bien" en oscuro sin comprobarlo.
+5. **Responsive siempre.** Todo componente o página que se toque —
+   nueva o existente — se comprueba en al menos dos anchos (móvil real,
+   ~375-390px, y escritorio) antes de darla por terminada, no solo en
+   el ancho por defecto del editor. No asumas que un layout de
+   escritorio se comporta bien al estrecharlo sin comprobarlo —
+   verificación real (Playwright con distintos viewports, o el propio
+   navegador), igual que ya se exige para modo oscuro. Precedente: la
+   barra de navegación (`Navbar.tsx`) se rompía en móvil por no haberse
+   probado nunca por debajo de `sm`.
 
 ## Paleta semántica: status / priority / difficulty
 
