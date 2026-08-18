@@ -146,6 +146,93 @@ estrictamente privado, a diferencia de `categories`/`technologies`/
 `lecciones` (públicas) o `comments` (públicos). Más cerca de
 `favorites` que de nada más en este esquema.
 
+## Corrección tras implementación: upsert vía RPC, no `.upsert()` directo
+
+Codex detectó, implementando esta spec, dos problemas reales que la
+versión original no cubría:
+
+1. `set_updated_at()` fue movida a `private` en `0003:11`
+   (`alter function public.set_updated_at() set schema private`) — el
+   trigger de esta tabla debe llamar a `private.set_updated_at()`, no
+   al nombre sin cualificar.
+2. El cliente no puede usar `supabase.from(...).upsert(...)` tal cual:
+   PostgREST genera el `ON CONFLICT DO UPDATE SET` incluyendo **todas**
+   las columnas del payload, incluidas `user_id`/`technology_id` — y
+   Postgres exige privilegio `UPDATE` sobre cualquier columna citada en
+   el `SET`, aunque el valor no cambie. El `GRANT` de esta spec
+   deniega `update` sobre esas dos columnas a propósito (para impedir
+   reasignar la fila a otro usuario/tecnología) — así que un
+   `.upsert()` directo siempre sería rechazado por permisos.
+
+**Solución:** una función RPC `security invoker` (no `definer` — no
+eleva privilegios, corre con los del propio usuario, así que las
+políticas RLS ya definidas arriba se siguen aplicando igual) que hace
+el `insert ... on conflict ... do update` con un `set` explícito solo
+sobre `status`/`current_leccion_id`. De paso, la función deriva
+`user_id` de `(select auth.uid())` en vez de aceptarlo como parámetro
+— el cliente ya no lo envía nunca, cierra esa clase de "qué pasa si
+alguien manda un user_id que no es el suyo" a nivel de contrato de API,
+no solo a nivel de RLS.
+
+```sql
+create or replace function public.upsert_my_technology_progress(
+  p_technology_id uuid,
+  p_status text default null,
+  p_current_leccion_id uuid default null,
+  p_update_current_leccion boolean default false
+)
+returns public.user_technology_progress
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+declare
+  result public.user_technology_progress;
+begin
+  insert into public.user_technology_progress as p (user_id, technology_id, status, current_leccion_id)
+  values (
+    (select auth.uid()),
+    p_technology_id,
+    coalesce(p_status, 'pendiente'),
+    case when p_update_current_leccion then p_current_leccion_id else null end
+  )
+  on conflict (user_id, technology_id) do update
+  set
+    status = coalesce(p_status, p.status),
+    current_leccion_id = case
+      when p_update_current_leccion then p_current_leccion_id
+      else p.current_leccion_id
+    end
+  returning * into result;
+
+  return result;
+end;
+$$;
+
+revoke all on function public.upsert_my_technology_progress(uuid, text, uuid, boolean) from public;
+grant execute on function public.upsert_my_technology_progress(uuid, text, uuid, boolean) to authenticated;
+```
+
+- **`p_status` usa `NULL` como "no tocar este campo"** — es seguro
+  porque `status` nunca es legítimamente `NULL` (siempre uno de los
+  tres valores del `check`), así que no hay ambigüedad.
+- **`current_leccion_id` sí puede ser `NULL` de verdad** ("ninguna
+  lección actual"), así que necesita el booleano
+  `p_update_current_leccion` aparte para distinguir "no lo toques" de
+  "ponlo a ninguna" — un solo parámetro nullable no bastaría para
+  distinguir ambos casos.
+- El trigger `user_technology_progress_leccion_check` (anti-oráculo,
+  ya definido arriba) se sigue disparando igual — un RPC `security
+  invoker` no se salta triggers ni RLS, solo cambia la forma del SQL
+  que genera el propio servidor en vez de dejar que PostgREST lo
+  infiera del payload.
+- `queries/progress.ts`: `upsertMyProgress(technologyId, patch)` ya no
+  recibe `userId` como parámetro (lo deriva el propio RPC) — llama a
+  `supabase.rpc('upsert_my_technology_progress', { p_technology_id,
+  p_status: patch.status ?? null, p_current_leccion_id:
+  patch.currentLeccionId ?? null, p_update_current_leccion:
+  patch.currentLeccionId !== undefined })`.
+
 ## GRANTs por columna
 
 ```sql

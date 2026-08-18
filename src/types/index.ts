@@ -67,3 +67,13 @@ export interface Favorite {
   technologyId: string
   createdAt: string
 }
+
+export interface UserTechnologyProgress {
+  id: string
+  userId: string
+  technologyId: string
+  status: Status
+  currentLeccionId: string | null
+  createdAt: string
+  updatedAt: string
+}

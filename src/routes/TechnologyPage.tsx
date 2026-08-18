@@ -15,14 +15,16 @@ import { PriorityBadge } from '@/components/technology/PriorityBadge'
 import { StatusBadge } from '@/components/technology/StatusBadge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { Label } from '@/components/ui/label'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useAddFavorite, useFavorites, useRemoveFavorite } from '@/lib/hooks/useFavorites'
 import { useLecciones } from '@/lib/hooks/useLecciones'
+import { useMyProgress, useSetMyProgress } from '@/lib/hooks/useProgress'
 import { useTechnology } from '@/lib/hooks/useTechnologies'
 import { useProfile } from '@/lib/hooks/useProfile'
 import { technologyIcons } from '@/lib/icons/technologyIcons'
 import { validateResourceUrl } from '@/lib/utils/validateResourceUrl'
-import type { Leccion } from '@/types'
+import type { Leccion, Status } from '@/types'
 
 function groupLecciones(lecciones: Leccion[]) {
   const withoutModule = lecciones.filter((leccion) => !leccion.modulo?.trim())
@@ -83,6 +85,105 @@ function FavoriteControl({ technologyId }: { technologyId: string }) {
       </Button>
       <p aria-live="polite" className="mt-2 text-sm text-destructive">
         {error}
+      </p>
+    </div>
+  )
+}
+
+function ProgressControl({
+  technologyId,
+  lecciones,
+}: {
+  technologyId: string
+  lecciones: Leccion[]
+}) {
+  const { user } = useAuth()
+  const progressQuery = useMyProgress(technologyId)
+  const setProgressMutation = useSetMyProgress()
+  const [error, setError] = useState('')
+  const publishedLecciones = lecciones.filter((leccion) => leccion.status === 'publicado')
+
+  if (!user) {
+    return (
+      <Button asChild variant="outline">
+        <Link to="/login">Inicia sesión para guardar tu progreso</Link>
+      </Button>
+    )
+  }
+
+  async function setProgress(patch: {
+    status?: Status
+    currentLeccionId?: string | null
+  }) {
+    setError('')
+    try {
+      await setProgressMutation.mutateAsync({ technologyId, patch })
+    } catch {
+      setError('No se pudo guardar tu progreso. Inténtalo de nuevo.')
+    }
+  }
+
+  const progress = progressQuery.data
+  const pending = progressQuery.isLoading || setProgressMutation.isPending
+  const pendingPatch = setProgressMutation.variables?.patch
+  const status = pendingPatch?.status ?? progress?.status ?? 'pendiente'
+  const savedLeccionId = publishedLecciones.some(
+    (leccion) => leccion.id === progress?.currentLeccionId,
+  )
+    ? progress?.currentLeccionId
+    : ''
+  const currentLeccionId =
+    pendingPatch?.currentLeccionId !== undefined
+      ? pendingPatch.currentLeccionId
+      : savedLeccionId
+
+  return (
+    <div className="space-y-4">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-2">
+          <Label htmlFor="progress-status">Estado</Label>
+          <select
+            id="progress-status"
+            name="progress-status"
+            value={status}
+            disabled={pending}
+            className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
+            onChange={(event) =>
+              void setProgress({ status: event.currentTarget.value as Status })
+            }
+          >
+            <option value="pendiente">Pendiente</option>
+            <option value="en_progreso">En progreso</option>
+            <option value="completado">Completado</option>
+          </select>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="progress-current-leccion">Lección actual</Label>
+          <select
+            id="progress-current-leccion"
+            name="progress-current-leccion"
+            value={currentLeccionId ?? ''}
+            disabled={pending}
+            className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
+            onChange={(event) =>
+              void setProgress({ currentLeccionId: event.currentTarget.value || null })
+            }
+          >
+            <option value="">Ninguna</option>
+            {publishedLecciones.map((leccion) => (
+              <option key={leccion.id} value={leccion.id}>
+                {leccion.titulo}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+      <p aria-live="polite" className="text-sm text-muted-foreground">
+        {setProgressMutation.isPending ? 'Guardando…' : ''}
+      </p>
+      <p role={error ? 'alert' : undefined} className="text-sm text-destructive">
+        {error || (progressQuery.isError ? 'No se pudo cargar tu progreso.' : '')}
       </p>
     </div>
   )
@@ -183,6 +284,25 @@ export function TechnologyPage() {
             </p>
           )}
         </Card>
+
+        {isPublished && (
+          <section aria-labelledby="progress-title" className="space-y-4">
+            <div>
+              <h2 id="progress-title" className="text-xl font-semibold text-balance">
+                Mi progreso
+              </h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Guarda tu estado y la lección que estás estudiando.
+              </p>
+            </div>
+            <Card>
+              <ProgressControl
+                technologyId={technology.id}
+                lecciones={leccionesQuery.data ?? []}
+              />
+            </Card>
+          </section>
+        )}
 
         <section aria-labelledby="lecciones-title" className="space-y-6">
           <div>

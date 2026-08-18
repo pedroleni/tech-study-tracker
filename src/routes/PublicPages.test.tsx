@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { axe } from 'vitest-axe'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -8,6 +8,7 @@ const state = vi.hoisted(() => ({
   isAdmin: false,
   status: 'completado' as 'pendiente' | 'en_progreso' | 'completado',
   leccionStatus: 'publicado' as 'borrador' | 'publicado',
+  setProgress: vi.fn(),
 }))
 
 const technology = {
@@ -72,7 +73,19 @@ vi.mock('@/lib/hooks/useTechnologies', () => ({
 }))
 vi.mock('@/lib/hooks/useLecciones', () => ({
   useLecciones: () => ({
-    data: [{ ...leccion, status: state.leccionStatus }],
+    data: [
+      { ...leccion, status: state.leccionStatus },
+      ...(state.user && !state.isAdmin
+        ? [
+            {
+              ...leccion,
+              id: 'leccion-draft',
+              titulo: 'Lección interna',
+              status: 'borrador' as const,
+            },
+          ]
+        : []),
+    ],
     isLoading: false,
     isError: false,
   }),
@@ -94,6 +107,13 @@ vi.mock('@/lib/hooks/useFavorites', () => ({
   useFavorites: () => ({ data: [], isLoading: false, isError: false }),
   useAddFavorite: () => ({ isPending: false, mutateAsync: vi.fn() }),
   useRemoveFavorite: () => ({ isPending: false, mutateAsync: vi.fn() }),
+}))
+vi.mock('@/lib/hooks/useProgress', () => ({
+  useMyProgress: () => ({ data: null, isLoading: false, isError: false }),
+  useSetMyProgress: () => ({
+    isPending: false,
+    mutateAsync: state.setProgress.mockResolvedValue(undefined),
+  }),
 }))
 
 import { FavoritesPage } from './FavoritesPage'
@@ -179,6 +199,40 @@ describe('public and account pages', () => {
     expect(container.querySelector('script')).toBeNull()
     expect(container.querySelector('img')).toBeNull()
     expect(screen.getByText('Píxel remoto')).toBeInTheDocument()
+    expect(
+      screen.getByRole('link', { name: 'Inicia sesión para guardar tu progreso' }),
+    ).toHaveAttribute('href', '/login')
+    const results = await axe(container, {
+      rules: { 'color-contrast': { enabled: false } },
+    })
+    expect(results.violations).toEqual([])
+  })
+
+  it('shows accessible progress controls to a signed-in user with published lessons only', async () => {
+    state.user = { id: 'user-1' }
+
+    const { container } = render(
+      <MemoryRouter initialEntries={['/tecnologias/technology-1']}>
+        <Routes>
+          <Route path="/tecnologias/:id" element={<TechnologyPage />} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByRole('heading', { name: 'Mi progreso' })).toBeInTheDocument()
+    expect(screen.getByLabelText('Estado')).toHaveValue('pendiente')
+    expect(screen.getByLabelText('Lección actual')).toHaveTextContent('Hooks')
+    expect(screen.getByLabelText('Lección actual')).not.toHaveTextContent(
+      'Lección interna',
+    )
+
+    fireEvent.change(screen.getByLabelText('Estado'), {
+      target: { value: 'en_progreso' },
+    })
+    expect(state.setProgress).toHaveBeenCalledWith({
+      technologyId: 'technology-1',
+      patch: { status: 'en_progreso' },
+    })
     const results = await axe(container, {
       rules: { 'color-contrast': { enabled: false } },
     })

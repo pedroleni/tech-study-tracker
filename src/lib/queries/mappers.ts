@@ -1,4 +1,12 @@
-import type { Category, Comment, Favorite, Leccion, Profile, Technology } from '@/types'
+import type {
+  Category,
+  Comment,
+  Favorite,
+  Leccion,
+  Profile,
+  Technology,
+  UserTechnologyProgress,
+} from '@/types'
 
 // Fila cruda tal como la devuelve Supabase (snake_case, sin validar).
 interface CategoryRow {
@@ -57,6 +65,16 @@ interface FavoriteRow {
   user_id: string
   technology_id: string
   created_at: string
+}
+
+export interface ProgressRow {
+  id: string
+  user_id: string
+  technology_id: string
+  status: UserTechnologyProgress['status']
+  current_leccion_id: string | null
+  created_at: string
+  updated_at: string
 }
 
 export function mapCategory(row: CategoryRow): Category {
@@ -120,6 +138,18 @@ export function mapFavorite(row: FavoriteRow): Favorite {
   }
 }
 
+export function mapProgress(row: ProgressRow): UserTechnologyProgress {
+  return {
+    id: row.id,
+    userId: row.user_id,
+    technologyId: row.technology_id,
+    status: row.status,
+    currentLeccionId: row.current_leccion_id,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  }
+}
+
 export type NewCategoryInput = Pick<Category, 'name'>
 export type CategoryPatch = Pick<Category, 'name'>
 
@@ -143,3 +173,7 @@ export interface NewCommentInput {
   parentCommentId?: string | null
   body: string
 }
+
+export type ProgressPatch = Partial<
+  Pick<UserTechnologyProgress, 'status' | 'currentLeccionId'>
+>
