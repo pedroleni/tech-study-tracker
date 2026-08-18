@@ -15,4 +15,7 @@ export const queryKeys = {
   profile: ['profile'] as const,
   comments: (leccionId: string) => ['comments', leccionId] as const,
   favorites: ['favorites'] as const,
+  progress: ['progress'] as const,
+  myProgress: (userId: string, technologyId: string) =>
+    ['progress', userId, technologyId] as const,
 }
