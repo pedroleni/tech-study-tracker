@@ -7,6 +7,7 @@ import { AppShell } from '@/components/layout/AppShell'
 import { queryClient } from '@/lib/queryClient'
 import { AdminDashboardPage } from '@/routes/AdminDashboardPage'
 import { AdminCategoriesPage } from '@/routes/AdminCategoriesPage'
+import { AdminLaboratorioEjemplosPage } from '@/routes/AdminLaboratorioEjemplosPage'
 import { AdminTechnologyFormPage } from '@/routes/AdminTechnologyFormPage'
 import { AdminLeccionFormPage } from '@/routes/AdminLeccionFormPage'
 import { CategoryPage } from '@/routes/CategoryPage'
@@ -38,6 +39,7 @@ function App() {
               <Route element={<AdminRoute />}>
                 <Route path="/admin" element={<AdminDashboardPage />} />
                 <Route path="/admin/categorias" element={<AdminCategoriesPage />} />
+                <Route path="/admin/laboratorio" element={<AdminLaboratorioEjemplosPage />} />
                 <Route path="/admin/tecnologias/nueva" element={<AdminTechnologyFormPage />} />
                 <Route
                   path="/admin/tecnologias/:id/editar"

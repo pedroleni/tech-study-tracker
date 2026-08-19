@@ -28,6 +28,9 @@ export function AdminDashboardPage() {
           <Button asChild variant="outline">
             <Link to="/admin/categorias">Gestionar categorías</Link>
           </Button>
+          <Button asChild variant="outline">
+            <Link to="/admin/laboratorio">Componentes de laboratorio</Link>
+          </Button>
           <Button asChild>
             <Link to="/admin/tecnologias/nueva">Nueva ficha</Link>
           </Button>
