@@ -77,6 +77,24 @@ describe('SafeMarkdown con laboratorios', () => {
     expect(screen.getByTitle('Vista previa de la versión Después')).toHaveAttribute('sandbox', '')
   })
 
+  it('renderiza notas-clave con todos sus items', () => {
+    render(
+      <SafeMarkdown permitirLaboratorios>
+        {bloqueLaboratorio({
+          tipo: 'notas-clave',
+          items: [
+            { titulo: 'Primer punto.', texto: 'Explicación del primer punto.' },
+            { titulo: 'Segundo punto.', texto: 'Explicación del segundo punto.' },
+          ],
+        })}
+      </SafeMarkdown>,
+    )
+
+    const region = screen.getByRole('region', { name: 'Puntos clave' })
+    expect(region).toHaveTextContent('Primer punto.')
+    expect(region).toHaveTextContent('Segundo punto.')
+  })
+
   it('usa código plano cuando el JSON es inválido', () => {
     render(
       <SafeMarkdown permitirLaboratorios>
@@ -114,7 +132,7 @@ describe('SafeMarkdown con laboratorios', () => {
     expect(container.querySelector('p code')).toHaveTextContent('main')
   })
 
-  it('no tiene violaciones de accesibilidad con los tres tipos', async () => {
+  it('no tiene violaciones de accesibilidad con los cuatro tipos', async () => {
     const markdown = [
       bloqueLaboratorio({
         tipo: 'predice-el-resultado',
@@ -132,6 +150,13 @@ describe('SafeMarkdown con laboratorios', () => {
         tipo: 'comparador-antes-despues',
         antes: '<div>Hola</div>',
         despues: '<p>Hola</p>',
+      }),
+      bloqueLaboratorio({
+        tipo: 'notas-clave',
+        items: [
+          { titulo: 'Primer punto.', texto: 'Explicación.' },
+          { titulo: 'Segundo punto.', texto: 'Explicación.' },
+        ],
       }),
     ].join('\n\n')
     const { container } = render(

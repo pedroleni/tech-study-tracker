@@ -35,10 +35,24 @@ export const esquemaComparadorAntesDespues = z.object({
   nota: z.string().max(500).optional(),
 })
 
+export const esquemaNotasClave = z.object({
+  tipo: z.literal('notas-clave'),
+  items: z
+    .array(
+      z.object({
+        titulo: z.string().min(1).max(140),
+        texto: z.string().min(1).max(600),
+      }),
+    )
+    .min(2)
+    .max(8),
+})
+
 export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaPrediceElResultado,
   esquemaCodigoAnotado,
   esquemaComparadorAntesDespues,
+  esquemaNotasClave,
 ])
 
 export type DatosPrediceElResultado = z.infer<typeof esquemaPrediceElResultado>
@@ -46,4 +60,5 @@ export type DatosCodigoAnotado = z.infer<typeof esquemaCodigoAnotado>
 export type DatosComparadorAntesDespues = z.infer<
   typeof esquemaComparadorAntesDespues
 >
+export type DatosNotasClave = z.infer<typeof esquemaNotasClave>
 export type DatosBloqueLaboratorio = z.infer<typeof esquemaBloqueLaboratorio>
