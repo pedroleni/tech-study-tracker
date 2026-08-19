@@ -19,6 +19,46 @@ body {
   min-height: 100vh;
 }
 
+@keyframes catalogo-progreso {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+@keyframes catalogo-cubo {
+  from { transform: rotateX(-10deg) rotateY(0deg); }
+  to { transform: rotateX(-10deg) rotateY(360deg); }
+}
+
+@keyframes catalogo-ticker {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes catalogo-cursor {
+  0%, 45% { opacity: 1; }
+  46%, 100% { opacity: 0; }
+}
+
+@keyframes catalogo-confeti {
+  from { opacity: 1; transform: translate(-50%, -50%) rotate(0deg); }
+  to { opacity: 0; transform: translate(calc(-50% + var(--confeti-x)), calc(-50% + var(--confeti-y))) rotate(540deg); }
+}
+
+@keyframes catalogo-escritura {
+  0%, 60%, 100% { opacity: 0.35; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-0.25rem); }
+}
+
+@keyframes catalogo-rueda {
+  from { stroke-dashoffset: var(--rueda-inicio); }
+  to { stroke-dashoffset: var(--rueda-final); }
+}
+
+@keyframes catalogo-flotar {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-0.25rem); }
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
