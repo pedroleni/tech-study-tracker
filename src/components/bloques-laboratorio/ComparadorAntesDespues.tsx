@@ -1,3 +1,4 @@
+import { Columns2 } from 'lucide-react'
 import { useId, useState } from 'react'
 
 import { CodigoResaltado } from '@/components/codigo'
@@ -26,9 +27,21 @@ export function ComparadorAntesDespues({
       aria-label="Comparador antes y después"
       className="my-6 min-w-0 space-y-4 rounded-xl border bg-card p-4 shadow-sm sm:p-5"
     >
-      <div className="space-y-1">
-        <h3 className="text-base font-semibold text-balance">Antes y después</h3>
-        {nota && <p className="text-sm text-pretty text-muted-foreground">{nota}</p>}
+      <div className="flex items-start gap-3">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-violet-50 dark:bg-violet-950/40">
+          <Columns2
+            aria-hidden="true"
+            className="size-4.75 text-violet-600 dark:text-violet-400"
+          />
+        </div>
+        <div className="min-w-0 space-y-0.5">
+          <p className="text-[11px] font-bold tracking-wider text-violet-600 uppercase dark:text-violet-400">
+            Antes y después
+          </p>
+          <h3 className="text-lg font-bold tracking-tight text-balance">
+            {nota ?? 'Compara las dos versiones y su resultado en vivo.'}
+          </h3>
+        </div>
       </div>
 
       <fieldset className="w-full max-w-sm">
