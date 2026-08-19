@@ -25,6 +25,7 @@ en el chat, que no queda buscable ni versionado.
 
 | Fecha | Archivo | Alcance | Resultado |
 |---|---|---|---|
+| 2026-08-19 | [2026-08-19-scanners-grep-macos.md](2026-08-19-scanners-grep-macos.md) | Tooling: `grep -P` sin soporte en macOS, silenciado en los 5 scanners de `scripts/security/` — incluye un fix anterior (PR #14) que quedó a medias | 2 HIGH + 1 MEDIUM, los 3 arreglados en PR #30; verificado que los 5 scanners ahora detectan en local lo mismo que CI |
 | 2026-08-18 | [2026-08-18-progress.md](2026-08-18-progress.md) | Progreso personal: tabla `user_technology_progress` (RLS) + primera función RPC del proyecto (`security invoker`) | 0 High/Medium; 150 tests, build y lint verdes; verificado con curl real en producción, 12/12 casos (3 identidades) |
 | 2026-08-15 | [2026-08-15-password-recovery-scope.md](2026-08-15-password-recovery-scope.md) | Sesión de `PASSWORD_RECOVERY` restringida a `/nueva-password` (`useAuth.ts`, `ProtectedRoute.tsx`) | 0 High/Medium; revisión completa (toca sesión/auth); 140 tests, build y lint verdes; 2 notas informativas no bloqueantes |
 | 2026-08-14 | [2026-08-14-icons.md](2026-08-14-icons.md) | Iconos de categoría/tecnología: migración `0005` (columna nullable + GRANT), `IconPicker`, listas curadas, `react-icons` nuevo | 0 High/Medium; revisión ligera (sin RLS nueva); 136 tests, build y lint verdes tras sincronizar con `main` |
