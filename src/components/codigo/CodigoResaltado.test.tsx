@@ -17,8 +17,8 @@ describe('CodigoResaltado', () => {
   })
 
   // El requisito de seguridad del proyecto: el código del usuario es DATO,
-  // nunca marcado. Se renderiza como nodos de texto de React, jamás con
-  // dangerouslySetInnerHTML.
+  // nunca marcado. Se renderiza como nodos de texto de React, jamás
+  // inyectado como HTML crudo.
   it('trata el código como texto y nunca lo inyecta como HTML', () => {
     const peligroso =
       '<script>window.__ejecutado = true</script>\n<img src=x onerror="window.__ejecutado = true">\n<iframe src="https://ejemplo.test"></iframe>'
