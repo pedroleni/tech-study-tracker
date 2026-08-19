@@ -5,6 +5,7 @@ import {
   BookmarkCheck,
   CircleHelp,
   ExternalLink,
+  PlayCircle,
 } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
@@ -194,6 +195,7 @@ export function TechnologyPage() {
   const { isAdmin } = useProfile()
   const technologyQuery = useTechnology(id)
   const leccionesQuery = useLecciones(id)
+  const progressQuery = useMyProgress(id)
   const technology = technologyQuery.data
 
   if (technologyQuery.isLoading || leccionesQuery.isLoading) {
@@ -335,47 +337,73 @@ export function TechnologyPage() {
                   )}
                   {!group.name && <h3 className="sr-only">Lecciones sin módulo</h3>}
                   <ul className="grid gap-3 sm:grid-cols-2">
-                    {group.lecciones.map((leccion) => (
-                      <li key={leccion.id}>
-                        <Card className="flex h-full min-w-0 flex-col gap-3">
-                          <div className="flex flex-wrap items-start justify-between gap-2">
-                            <h4 className="min-w-0 break-words text-base font-semibold text-balance">
+                    {group.lecciones.map((leccion, indice) => {
+                      const esActual = leccion.id === progressQuery.data?.currentLeccionId
+                      return (
+                        <li key={leccion.id}>
+                          <Card
+                            className={`group flex h-full min-w-0 flex-col gap-3 transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-md motion-reduce:transition-none motion-reduce:hover:translate-y-0 ${
+                              esActual ? 'ring-2 ring-primary/40' : ''
+                            }`}
+                          >
+                            <div className="flex items-start gap-3">
+                              <span
+                                aria-hidden="true"
+                                className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-bold tabular-nums text-muted-foreground"
+                              >
+                                {String(indice + 1).padStart(2, '0')}
+                              </span>
+                              <div className="min-w-0 flex-1 space-y-2">
+                                <div className="flex flex-wrap items-start justify-between gap-2">
+                                  <h4 className="min-w-0 break-words text-base font-semibold text-balance">
+                                    <Link
+                                      to={`/tecnologias/${technology.id}/${leccion.slug}`}
+                                      className="rounded-sm decoration-foreground/30 underline-offset-4 group-hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                    >
+                                      {leccion.titulo}
+                                    </Link>
+                                  </h4>
+                                  {leccion.status === 'borrador' && (
+                                    <span className="shrink-0 rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                                      Borrador
+                                    </span>
+                                  )}
+                                </div>
+                                {esActual && (
+                                  <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+                                    <PlayCircle aria-hidden="true" className="size-3.5" />
+                                    Continuando aquí
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <p className="flex-1 break-words text-sm text-muted-foreground">
+                              {leccion.resumen || 'Esta lección todavía no tiene resumen.'}
+                            </p>
+                            <div className="flex flex-wrap items-center justify-between gap-2">
                               <Link
                                 to={`/tecnologias/${technology.id}/${leccion.slug}`}
-                                className="rounded-sm hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                className="inline-flex items-center gap-1 rounded-sm text-sm font-medium hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                               >
-                                {leccion.titulo}
+                                Leer lección
+                                <ArrowUpRight
+                                  aria-hidden="true"
+                                  className="size-4 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 motion-reduce:transition-none"
+                                />
                               </Link>
-                            </h4>
-                            {leccion.status === 'borrador' && (
-                              <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-                                Borrador
-                              </span>
-                            )}
-                          </div>
-                          <p className="flex-1 break-words text-sm text-muted-foreground">
-                            {leccion.resumen || 'Esta lección todavía no tiene resumen.'}
-                          </p>
-                          <div className="flex flex-wrap items-center justify-between gap-2">
-                            <Link
-                              to={`/tecnologias/${technology.id}/${leccion.slug}`}
-                              className="inline-flex items-center gap-1 rounded-sm text-sm font-medium hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                            >
-                              Leer lección
-                              <ArrowUpRight aria-hidden="true" className="size-4" />
-                            </Link>
-                            {isAdmin && (
-                              <Link
-                                to={`/admin/tecnologias/${technology.id}/lecciones/${leccion.id}/editar`}
-                                className="rounded-sm text-sm text-muted-foreground hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                              >
-                                Editar
-                              </Link>
-                            )}
-                          </div>
-                        </Card>
-                      </li>
-                    ))}
+                              {isAdmin && (
+                                <Link
+                                  to={`/admin/tecnologias/${technology.id}/lecciones/${leccion.id}/editar`}
+                                  className="rounded-sm text-sm text-muted-foreground hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                >
+                                  Editar
+                                </Link>
+                              )}
+                            </div>
+                          </Card>
+                        </li>
+                      )
+                    })}
                   </ul>
                 </section>
               ))}
