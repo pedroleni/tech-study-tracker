@@ -71,7 +71,7 @@ create table public.lecciones (
   modulo text,
   titulo text not null check (char_length(trim(titulo)) between 1 and 120),
   resumen text not null default '' check (char_length(resumen) <= 300),
-  contenido text not null default '' check (char_length(contenido) <= 60000),
+  contenido text not null default '' check (char_length(contenido) <= 200000),
   orden integer not null,
   status text not null default 'borrador'
     check (status in ('borrador', 'publicado')),
@@ -107,10 +107,12 @@ create table public.lecciones (
   tecnología. Una tecnología puede estar visible con 3 lecciones
   publicadas y 21 en borrador. Visibilidad pública real = tecnología
   publicada **y** lección publicada (ver política de `select` abajo).
-- Límite de `contenido` en 60 000 — más holgado que los 50 000 de
-  `notes` porque ahora es contenido real de una lección, no notas de
-  seguimiento, pero sigue siendo un límite explícito en la base, no solo
-  en Zod (mismo criterio ya aplicado a `comments.body`).
+- Límite de `contenido` en 200 000 (ampliado desde 60 000 en `0007`
+  para dejar margen a los bloques ```laboratorio``` intercalados en el
+  mismo Markdown, ver `specs/features/laboratorios.md`) — sigue siendo
+  un límite explícito en la base, no solo en Zod (mismo criterio ya
+  aplicado a `comments.body`). Escribir sigue restringido a admin, así
+  que el cambio no toca RLS ni GRANTs, solo el tope.
 
 ### `comments`: el ancla cambia
 

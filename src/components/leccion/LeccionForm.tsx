@@ -11,7 +11,7 @@ const leccionSchema = z.object({
   modulo: z.string(),
   titulo: z.string().trim().min(1, 'Escribe un título.').max(120),
   resumen: z.string().max(300, 'El resumen no puede superar 300 caracteres.'),
-  contenido: z.string().max(60_000, 'El contenido no puede superar 60 000 caracteres.'),
+  contenido: z.string().max(200_000, 'El contenido no puede superar 200 000 caracteres.'),
   orden: z.number().int('El orden debe ser un número entero.'),
   status: z.enum(['borrador', 'publicado']),
 })
@@ -243,7 +243,7 @@ export function LeccionForm({
         <textarea
           id="leccion-contenido"
           rows={20}
-          maxLength={60_000}
+          maxLength={200_000}
           placeholder="Escribe la lección en Markdown…"
           className="w-full resize-y rounded-lg border border-input bg-background px-3 py-2 font-mono text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           aria-invalid={Boolean(formState.errors.contenido)}
