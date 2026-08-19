@@ -2,6 +2,7 @@ import { useId, useMemo, useState } from 'react'
 
 import { CodigoResaltado } from '@/components/codigo'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import type { DatosCodigoAnotado } from '@/lib/laboratorio/schemas'
 
 export function CodigoAnotado({
@@ -55,13 +56,17 @@ export function CodigoAnotado({
               <Button
                 key={`${anotacion.fragmento}-${indice}`}
                 type="button"
-                variant={indice === anotacionActiva ? 'default' : 'outline'}
+                variant="outline"
                 size="icon"
                 aria-pressed={indice === anotacionActiva}
                 aria-controls={idNota}
                 aria-label={`Ver anotación ${indice + 1}: ${anotacion.nota}`}
                 onClick={() => setAnotacionActiva(indice)}
-                className="size-11 touch-manipulation rounded-full"
+                className={cn(
+                  'size-11 touch-manipulation rounded-full transition-colors',
+                  indice === anotacionActiva &&
+                    'border-amber-500 bg-amber-500 text-white hover:bg-amber-500 dark:border-amber-400 dark:bg-amber-400 dark:text-amber-950',
+                )}
               >
                 {indice + 1}
               </Button>
@@ -70,7 +75,7 @@ export function CodigoAnotado({
           <p
             id={idNota}
             aria-live="polite"
-            className="rounded-lg border bg-muted/30 p-3 text-sm text-pretty"
+            className="rounded-lg border-l-4 border-amber-500 bg-amber-50 p-3 text-sm text-pretty dark:border-amber-400 dark:bg-amber-950/30"
           >
             <span className="font-semibold">Nota {anotacionActiva + 1}.</span>{' '}
             {activa?.nota}

@@ -33,17 +33,22 @@ export function ComparadorAntesDespues({
 
       <fieldset className="w-full max-w-sm">
         <legend className="sr-only">Versión que quieres comparar</legend>
-        <div className="grid grid-cols-2 rounded-xl border bg-muted p-1">
+        <div className="relative grid grid-cols-2 rounded-xl border bg-muted p-1">
+          <div
+            aria-hidden="true"
+            className={cn(
+              'absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] rounded-lg bg-background shadow-sm transition-transform duration-300 ease-out',
+              version === 'despues' && 'translate-x-[calc(100%+0.125rem)]',
+            )}
+          />
           {VERSIONES.map((opcion) => {
             const activa = opcion.id === version
             return (
               <label
                 key={opcion.id}
                 className={cn(
-                  'flex min-h-11 cursor-pointer touch-manipulation items-center justify-center rounded-lg px-3 py-2 text-sm font-medium has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring',
-                  activa
-                    ? 'bg-background text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground',
+                  'relative z-10 flex min-h-11 cursor-pointer touch-manipulation items-center justify-center rounded-lg px-3 py-2 text-sm font-medium transition-colors has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring',
+                  activa ? 'text-foreground' : 'text-muted-foreground hover:text-foreground',
                 )}
               >
                 <input
