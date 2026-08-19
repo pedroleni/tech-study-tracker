@@ -57,6 +57,15 @@ vacío: la persona tiene que recorrerse el menú entero, cada vez, en cada
 página. No es una mejora estética. Es la diferencia entre poder usar tu
 web y no poder.
 
+```laboratorio
+{
+  "tipo": "comparador-antes-despues",
+  "antes": "<style>.header,header{background:#1d4ed8;color:#fff;padding:16px;margin:0;font-family:system-ui}.header h1,header h1{margin:0;font-size:1.2rem}</style><div class=\"header\"><h1>Mi blog</h1></div>",
+  "despues": "<style>.header,header{background:#1d4ed8;color:#fff;padding:16px;margin:0;font-family:system-ui}.header h1,header h1{margin:0;font-size:1.2rem}</style><header><h1>Mi blog</h1></header>",
+  "nota": "Con el mismo CSS los dos se ven exactamente igual. La diferencia no está en la pantalla: está en lo que el navegador entiende que representa cada uno."
+}
+```
+
 **Cuando llega el CSS.** Con etiquetas semánticas escribes `nav a` y ya
 está. Con div soup acabas inventando clases para todo y, lo que es peor,
 dependiendo de ellas: el día que cambies una clase, se rompe el estilo en
@@ -156,51 +165,32 @@ estilo y `<main>` queda de adorno. Ponle el estilo directamente a
 Un lector de pantalla lista las regiones de esta página. ¿Cuántas
 encuentra?
 
-```html
-<body>
-  <div class="header">
-    <h1>Tienda</h1>
-    <div class="nav"><a href="/">Inicio</a></div>
-  </div>
-  <div class="content">
-    <p>Bienvenido</p>
-  </div>
-</body>
+```laboratorio
+{
+  "tipo": "predice-el-resultado",
+  "lenguaje": "html",
+  "codigo": "<body>\n  <div class=\"header\">\n    <h1>Tienda</h1>\n    <div class=\"nav\"><a href=\"/\">Inicio</a></div>\n  </div>\n  <div class=\"content\">\n    <p>Bienvenido</p>\n  </div>\n</body>",
+  "opciones": ["Ninguna región", "1 región", "2 regiones", "4 regiones"],
+  "correcta": 0,
+  "explicacion": "No hay una sola etiqueta semántica: las clases header y nav son nombres para el CSS, y el navegador no les da ningún significado. Para quien navega por regiones, esta página es un bloque único e indivisible."
+}
 ```
-
-<details>
-<summary>Solución</summary>
-
-**Ninguna.** No hay una sola etiqueta semántica: las clases `header` y
-`nav` son nombres para el CSS, y el navegador no les da ningún
-significado. Para quien navega por regiones, esta página es un bloque
-único e indivisible.
-
-</details>
 
 ### 2. Encuentra el error
 
 Este código funciona y se ve bien. Tiene dos problemas de estructura:
 
-```html
-<main>
-  <h1>Recetas</h1>
-  <section>
-    <h3>Tortilla de patatas</h3>
-    <p>Huevos, patatas y paciencia.</p>
-  </section>
-</main>
+```laboratorio
+{
+  "tipo": "codigo-anotado",
+  "lenguaje": "html",
+  "codigo": "<main>\n  <h1>Recetas</h1>\n  <section>\n    <h3>Tortilla de patatas</h3>\n    <p>Huevos, patatas y paciencia.</p>\n  </section>\n</main>",
+  "anotaciones": [
+    { "fragmento": "<h3>Tortilla de patatas</h3>", "nota": "Salta de <h1> a <h3>: falta el <h2> de en medio, y eso deja un hueco en el índice de la página." },
+    { "fragmento": "<section>", "nota": "Debería ser <article>: una receta se entiende por sí sola si la sacas de aquí — es la prueba del algodón." }
+  ]
+}
 ```
-
-<details>
-<summary>Solución</summary>
-
-1. **Salto de `<h1>` a `<h3>`.** Falta el `<h2>`, y eso deja un hueco en
-   el índice de la página.
-2. **`<section>` debería ser `<article>`.** Una receta se entiende por sí
-   sola si la sacas de aquí — es la prueba del algodón.
-
-</details>
 
 ### 3. Escríbelo tú
 

@@ -51,3 +51,4 @@ una decisión global.
 | 2FA con TOTP (segundo factor opcional en login) | _pendiente de escribir_ | ⏳ aplazada a propósito, ver [auth.md](auth.md#fuera-de-alcance-de-esta-feature) |
 | Iconos de categoría y tecnología (`IconPicker`, lucide-react + react-icons/si) | [icons.md](icons.md) | ✅ implementada en PR #20 |
 | Progreso personal por tecnología (estado propio + lección actual, tabla `user_technology_progress`) | [progress.md](progress.md) | ✅ implementada en PR #26 — migración `0006` aplicada y verificada con curl real (12/12 casos, 3 identidades) |
+| Bloques de laboratorio en lecciones (`predice-el-resultado`, `codigo-anotado`, `comparador-antes-despues`, embebidos vía ` ```laboratorio ` en el Markdown) | [laboratorios.md](laboratorios.md) | ⏳ en spec, sin implementar |
