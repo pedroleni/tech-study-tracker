@@ -4,6 +4,7 @@ import {
   BookOpen,
   Bookmark,
   BookmarkCheck,
+  ChevronDown,
   ExternalLink,
   PlayCircle,
 } from 'lucide-react'
@@ -31,6 +32,14 @@ import { useProfile } from '@/lib/hooks/useProfile'
 import { cn } from '@/lib/utils'
 import { validateResourceUrl } from '@/lib/utils/validateResourceUrl'
 import type { Leccion, Status } from '@/types'
+
+// Mismos colores que StatusBadge — el select debe leerse como la misma
+// etiqueta de estado el resto de la app, no como un campo de formulario.
+const leccionProgressPillClassName: Record<Status, string> = {
+  pendiente: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
+  en_progreso: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
+  completado: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300',
+}
 
 function groupLecciones(lecciones: Leccion[]) {
   const withoutModule = lecciones.filter((leccion) => !leccion.modulo?.trim())
@@ -506,24 +515,34 @@ export function TechnologyPage() {
                                   </div>
                                   <div className="flex shrink-0 items-center gap-3">
                                     {user && leccion.status === 'publicado' && (
-                                      <select
-                                        name={`progress-${leccion.id}`}
-                                        value={leccionProgressStatus}
-                                        disabled={leccionProgressPending}
-                                        aria-label={`Estado de ${leccion.titulo}`}
-                                        className="h-8 w-36 rounded-lg border border-input bg-background px-3 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
-                                        onChange={(event) =>
-                                          setLeccionProgressMutation.mutate({
-                                            leccionId: leccion.id,
-                                            technologyId: technology.id,
-                                            status: event.currentTarget.value as Status,
-                                          })
-                                        }
-                                      >
-                                        <option value="pendiente">Pendiente</option>
-                                        <option value="en_progreso">En progreso</option>
-                                        <option value="completado">Completado</option>
-                                      </select>
+                                      <span className="relative inline-flex shrink-0 items-center">
+                                        <select
+                                          name={`progress-${leccion.id}`}
+                                          value={leccionProgressStatus}
+                                          disabled={leccionProgressPending}
+                                          aria-label={`Estado de ${leccion.titulo}`}
+                                          className={cn(
+                                            'h-6 appearance-none rounded-full py-1 pr-6 pl-2.5 text-xs font-medium outline-none disabled:cursor-not-allowed disabled:opacity-50',
+                                            'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background',
+                                            leccionProgressPillClassName[leccionProgressStatus],
+                                          )}
+                                          onChange={(event) =>
+                                            setLeccionProgressMutation.mutate({
+                                              leccionId: leccion.id,
+                                              technologyId: technology.id,
+                                              status: event.currentTarget.value as Status,
+                                            })
+                                          }
+                                        >
+                                          <option value="pendiente">Pendiente</option>
+                                          <option value="en_progreso">En progreso</option>
+                                          <option value="completado">Completado</option>
+                                        </select>
+                                        <ChevronDown
+                                          aria-hidden="true"
+                                          className="pointer-events-none absolute right-1.5 size-3"
+                                        />
+                                      </span>
                                     )}
                                     {isAdmin && (
                                       <Link
