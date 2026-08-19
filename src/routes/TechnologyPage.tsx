@@ -1,9 +1,9 @@
 import {
   ArrowLeft,
   ArrowUpRight,
+  BookOpen,
   Bookmark,
   BookmarkCheck,
-  CircleHelp,
   ExternalLink,
   PlayCircle,
 } from 'lucide-react'
@@ -11,9 +11,8 @@ import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
 import { SafeMarkdown } from '@/components/content/SafeMarkdown'
-import { DifficultyBadge } from '@/components/technology/DifficultyBadge'
-import { PriorityBadge } from '@/components/technology/PriorityBadge'
-import { StatusBadge } from '@/components/technology/StatusBadge'
+import { difficultyLabels, priorityLabels, statusLabels } from '@/components/technology/labels'
+import { TechnologyBrand } from '@/components/technology/TechnologyCard'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
@@ -23,7 +22,7 @@ import { useLecciones } from '@/lib/hooks/useLecciones'
 import { useMyProgress, useSetMyProgress } from '@/lib/hooks/useProgress'
 import { useTechnology } from '@/lib/hooks/useTechnologies'
 import { useProfile } from '@/lib/hooks/useProfile'
-import { technologyIcons } from '@/lib/icons/technologyIcons'
+import { cn } from '@/lib/utils'
 import { validateResourceUrl } from '@/lib/utils/validateResourceUrl'
 import type { Leccion, Status } from '@/types'
 
@@ -226,216 +225,300 @@ export function TechnologyPage() {
     validateResourceUrl(resource.url),
   )
   const isPublished = technology.status === 'completado'
-  const TechnologyIcon = technologyIcons[technology.icon ?? '']?.Icon ?? CircleHelp
   const leccionGroups = groupLecciones(leccionesQuery.data ?? [])
 
   return (
-    <div className="space-y-10">
-      <article className="space-y-8">
-        <header className="space-y-4">
-          <Link
-            to={`/categorias/${technology.categoryId}`}
-            className="inline-flex items-center gap-1 rounded-sm text-sm text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <ArrowLeft aria-hidden="true" className="size-4" />
-            Volver a la categoría
-          </Link>
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div className="min-w-0 space-y-3">
-              <div className="flex items-center gap-3">
-                <span aria-hidden="true" className="rounded-xl bg-muted p-2 text-muted-foreground">
-                  <TechnologyIcon className="size-7" />
-                </span>
-                <h1 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
-                  {technology.name}
-                </h1>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <StatusBadge status={technology.status} />
-                <DifficultyBadge difficulty={technology.difficulty} />
-                <PriorityBadge priority={technology.priority} />
-              </div>
-            </div>
-            <div className="flex flex-wrap items-start gap-2">
-              {isAdmin && (
-                <>
-                  <Button asChild variant="outline">
-                    <Link to={`/admin/tecnologias/${technology.id}/editar`}>
-                      Editar tecnología
-                    </Link>
-                  </Button>
-                  <Button asChild>
-                    <Link to={`/admin/tecnologias/${technology.id}/lecciones/nueva`}>
-                      Nueva lección
-                    </Link>
-                  </Button>
-                </>
-              )}
-              {isPublished && <FavoriteControl technologyId={technology.id} />}
-            </div>
-          </div>
-        </header>
-
-        <Card className="space-y-4">
-          <h2 className="text-xl font-semibold text-balance">Introducción</h2>
-          {technology.notes.trim() ? (
-            <SafeMarkdown>{technology.notes}</SafeMarkdown>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              Esta tecnología todavía no tiene introducción.
-            </p>
-          )}
-        </Card>
-
-        {isPublished && (
-          <section aria-labelledby="progress-title" className="space-y-4">
-            <div>
-              <h2 id="progress-title" className="text-xl font-semibold text-balance">
-                Mi progreso
-              </h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Guarda tu estado y la lección que estás estudiando.
-              </p>
-            </div>
-            <Card>
-              <ProgressControl
-                technologyId={technology.id}
-                lecciones={leccionesQuery.data ?? []}
-              />
-            </Card>
-          </section>
-        )}
-
-        <section aria-labelledby="lecciones-title" className="space-y-6">
-          <div>
-            <h2 id="lecciones-title" className="text-2xl font-semibold text-balance">
-              Lecciones
-            </h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Contenido ordenado por módulos para avanzar paso a paso.
-            </p>
-          </div>
-
-          {leccionGroups.length === 0 ? (
-            <Card>
-              <p className="text-sm text-muted-foreground">
-                Todavía no hay lecciones publicadas.
-              </p>
-            </Card>
-          ) : (
-            <div className="space-y-8">
-              {leccionGroups.map((group) => (
-                <section
-                  key={group.name ?? 'sin-modulo'}
-                  aria-label={group.name ?? 'Lecciones sin módulo'}
-                  className="space-y-3"
+    <TechnologyBrand iconKey={technology.icon}>
+      {(brand) => (
+        <div className="space-y-10">
+          <article className="space-y-8">
+            <header className="space-y-4">
+              <Link
+                to={`/categorias/${technology.categoryId}`}
+                className="inline-flex items-center gap-1 rounded-sm text-sm text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <ArrowLeft aria-hidden="true" className="size-4" />
+                Volver a la categoría
+              </Link>
+              <div
+                className={cn(
+                  'relative isolate min-h-60 overflow-hidden rounded-xl border p-8 shadow-sm sm:p-10',
+                  brand.backgroundClassName,
+                  brand.foregroundClassName,
+                )}
+                style={brand.brandHex ? { backgroundColor: brand.brandHex } : undefined}
+              >
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -right-8 -bottom-12 opacity-[0.14]"
                 >
-                  {group.name && (
-                    <h3 className="break-words text-lg font-semibold text-balance">
-                      {group.name}
-                    </h3>
-                  )}
-                  {!group.name && <h3 className="sr-only">Lecciones sin módulo</h3>}
-                  <ul className="grid gap-3 sm:grid-cols-2">
-                    {group.lecciones.map((leccion, indice) => {
-                      const esActual = leccion.id === progressQuery.data?.currentLeccionId
-                      return (
-                        <li key={leccion.id}>
-                          <Card
-                            className={`group flex h-full min-w-0 flex-col gap-3 transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-md motion-reduce:transition-none motion-reduce:hover:translate-y-0 ${
-                              esActual ? 'ring-2 ring-primary/40' : ''
-                            }`}
-                          >
-                            <div className="flex items-start gap-3">
+                  <brand.Icon className="size-48" />
+                </span>
+                <div className="relative z-10 flex min-h-40 flex-col justify-between gap-8">
+                  <div className="flex flex-wrap items-start justify-between gap-4">
+                    <span
+                      aria-hidden="true"
+                      className={cn(
+                        'rounded-2xl border p-3',
+                        brand.glassClassName,
+                      )}
+                    >
+                      <brand.Icon className="size-13" />
+                    </span>
+                    <div className="flex flex-wrap justify-end gap-2">
+                      <span
+                        className={cn(
+                          'rounded-full border px-3 py-1 text-xs font-medium',
+                          brand.glassClassName,
+                        )}
+                      >
+                        {statusLabels[technology.status]}
+                      </span>
+                      <span
+                        className={cn(
+                          'rounded-full border px-3 py-1 text-xs font-medium',
+                          brand.glassClassName,
+                        )}
+                      >
+                        Dificultad {difficultyLabels[technology.difficulty].toLowerCase()}
+                      </span>
+                      <span
+                        className={cn(
+                          'rounded-full border px-3 py-1 text-xs font-medium',
+                          brand.glassClassName,
+                        )}
+                      >
+                        Prioridad {priorityLabels[technology.priority].toLowerCase()}
+                      </span>
+                    </div>
+                  </div>
+                  <h1 className="break-words text-4xl font-bold tracking-tight text-balance sm:text-5xl">
+                    {technology.name}
+                  </h1>
+                </div>
+              </div>
+              <div className="flex flex-wrap items-start justify-end gap-2">
+                {isAdmin && (
+                  <>
+                    <Button asChild variant="outline">
+                      <Link to={`/admin/tecnologias/${technology.id}/editar`}>
+                        Editar tecnología
+                      </Link>
+                    </Button>
+                    <Button asChild>
+                      <Link to={`/admin/tecnologias/${technology.id}/lecciones/nueva`}>
+                        Nueva lección
+                      </Link>
+                    </Button>
+                  </>
+                )}
+                {isPublished && <FavoriteControl technologyId={technology.id} />}
+              </div>
+            </header>
+
+            <Card className="space-y-4">
+              <h2 className="text-xl font-semibold text-balance">Introducción</h2>
+              {technology.notes.trim() ? (
+                <SafeMarkdown>{technology.notes}</SafeMarkdown>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Esta tecnología todavía no tiene introducción.
+                </p>
+              )}
+            </Card>
+
+            {isPublished && (
+              <section aria-labelledby="progress-title" className="space-y-4">
+                <div>
+                  <h2 id="progress-title" className="text-xl font-semibold text-balance">
+                    Mi progreso
+                  </h2>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Guarda tu estado y la lección que estás estudiando.
+                  </p>
+                </div>
+                <Card>
+                  <ProgressControl
+                    technologyId={technology.id}
+                    lecciones={leccionesQuery.data ?? []}
+                  />
+                </Card>
+              </section>
+            )}
+
+            <section aria-labelledby="lecciones-title" className="space-y-6">
+              <div>
+                <h2 id="lecciones-title" className="text-2xl font-semibold text-balance">
+                  Lecciones
+                </h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Contenido ordenado por módulos para avanzar paso a paso.
+                </p>
+              </div>
+
+              {leccionGroups.length === 0 ? (
+                <Card>
+                  <p className="text-sm text-muted-foreground">
+                    Todavía no hay lecciones publicadas.
+                  </p>
+                </Card>
+              ) : (
+                <div className="space-y-8">
+                  {leccionGroups.map((group) => (
+                    <section
+                      key={group.name ?? 'sin-modulo'}
+                      aria-label={group.name ?? 'Lecciones sin módulo'}
+                    >
+                      <Card className="gap-0 overflow-hidden p-0">
+                        <div
+                          className={cn(
+                            'relative isolate overflow-hidden px-5 py-4',
+                            brand.backgroundClassName,
+                            brand.foregroundClassName,
+                          )}
+                          style={
+                            brand.brandHex
+                              ? { backgroundColor: brand.brandHex }
+                              : undefined
+                          }
+                        >
+                          <div className="relative z-10 flex items-center justify-between gap-4">
+                            <div className="flex min-w-0 items-center gap-3">
                               <span
                                 aria-hidden="true"
-                                className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-bold tabular-nums text-muted-foreground"
-                              >
-                                {String(indice + 1).padStart(2, '0')}
-                              </span>
-                              <div className="min-w-0 flex-1 space-y-2">
-                                <div className="flex flex-wrap items-start justify-between gap-2">
-                                  <h4 className="min-w-0 break-words text-base font-semibold text-balance">
-                                    <Link
-                                      to={`/tecnologias/${technology.id}/${leccion.slug}`}
-                                      className="rounded-sm decoration-foreground/30 underline-offset-4 group-hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                                    >
-                                      {leccion.titulo}
-                                    </Link>
-                                  </h4>
-                                  {leccion.status === 'borrador' && (
-                                    <span className="shrink-0 rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-                                      Borrador
-                                    </span>
-                                  )}
-                                </div>
-                                {esActual && (
-                                  <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
-                                    <PlayCircle aria-hidden="true" className="size-3.5" />
-                                    Continuando aquí
-                                  </span>
+                                className={cn(
+                                  'shrink-0 rounded-xl border p-2',
+                                  brand.glassClassName,
                                 )}
-                              </div>
-                            </div>
-                            <p className="flex-1 break-words text-sm text-muted-foreground">
-                              {leccion.resumen || 'Esta lección todavía no tiene resumen.'}
-                            </p>
-                            <div className="flex flex-wrap items-center justify-between gap-2">
-                              <Link
-                                to={`/tecnologias/${technology.id}/${leccion.slug}`}
-                                className="inline-flex items-center gap-1 rounded-sm text-sm font-medium hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                               >
-                                Leer lección
-                                <ArrowUpRight
-                                  aria-hidden="true"
-                                  className="size-4 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 motion-reduce:transition-none"
-                                />
-                              </Link>
-                              {isAdmin && (
-                                <Link
-                                  to={`/admin/tecnologias/${technology.id}/lecciones/${leccion.id}/editar`}
-                                  className="rounded-sm text-sm text-muted-foreground hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                                >
-                                  Editar
-                                </Link>
+                                <BookOpen className="size-5" />
+                              </span>
+                              {group.name ? (
+                                <h3 className="min-w-0 break-words text-lg font-semibold text-balance">
+                                  {group.name}
+                                </h3>
+                              ) : (
+                                <h3 className="sr-only">Lecciones sin módulo</h3>
                               )}
                             </div>
-                          </Card>
-                        </li>
-                      )
-                    })}
-                  </ul>
-                </section>
-              ))}
-            </div>
-          )}
-        </section>
+                            <span
+                              className={cn(
+                                'shrink-0 rounded-full border px-3 py-1 text-xs font-medium tabular-nums',
+                                brand.glassClassName,
+                              )}
+                            >
+                              {group.lecciones.length}{' '}
+                              {group.lecciones.length === 1 ? 'lección' : 'lecciones'}
+                            </span>
+                          </div>
+                        </div>
+                        <ul>
+                          {group.lecciones.map((leccion, indice) => {
+                            const esActual =
+                              leccion.id === progressQuery.data?.currentLeccionId
+                            return (
+                              <li
+                                key={leccion.id}
+                                className={cn(
+                                  'group min-w-0 border-t p-4 first:border-t-0 sm:p-5',
+                                  esActual && !brand.brandHex && 'bg-muted/50',
+                                )}
+                                style={
+                                  esActual && brand.brandHex
+                                    ? { backgroundColor: `${brand.brandHex}1A` }
+                                    : undefined
+                                }
+                              >
+                                <div className="flex min-w-0 items-start gap-3">
+                                  <span
+                                    aria-hidden="true"
+                                    className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-bold tabular-nums text-muted-foreground"
+                                  >
+                                    {String(indice + 1).padStart(2, '0')}
+                                  </span>
+                                  <div className="min-w-0 flex-1 space-y-2">
+                                    <div className="flex flex-wrap items-center gap-2">
+                                      <h4 className="min-w-0 break-words text-base font-semibold text-balance">
+                                        <Link
+                                          to={`/tecnologias/${technology.id}/${leccion.slug}`}
+                                          className="rounded-sm decoration-foreground/30 underline-offset-4 group-hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                        >
+                                          {leccion.titulo}
+                                        </Link>
+                                      </h4>
+                                      {esActual && (
+                                        <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+                                          <PlayCircle
+                                            aria-hidden="true"
+                                            className="size-3.5"
+                                          />
+                                          Continuando aquí
+                                        </span>
+                                      )}
+                                      {leccion.status === 'borrador' && (
+                                        <span className="shrink-0 rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                                          Borrador
+                                        </span>
+                                      )}
+                                    </div>
+                                    <p className="break-words text-sm text-muted-foreground">
+                                      {leccion.resumen ||
+                                        'Esta lección todavía no tiene resumen.'}
+                                    </p>
+                                  </div>
+                                  <div className="flex shrink-0 items-center gap-3">
+                                    {isAdmin && (
+                                      <Link
+                                        to={`/admin/tecnologias/${technology.id}/lecciones/${leccion.id}/editar`}
+                                        className="rounded-sm text-sm text-muted-foreground hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                      >
+                                        Editar
+                                      </Link>
+                                    )}
+                                    <ArrowUpRight
+                                      aria-hidden="true"
+                                      className="size-4 text-muted-foreground transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 motion-reduce:transition-none"
+                                    />
+                                  </div>
+                                </div>
+                              </li>
+                            )
+                          })}
+                        </ul>
+                      </Card>
+                    </section>
+                  ))}
+                </div>
+              )}
+            </section>
 
-        <section aria-labelledby="resources-title" className="space-y-4">
-          <h2 id="resources-title" className="text-xl font-semibold text-balance">
-            Recursos
-          </h2>
-          {safeResources.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No hay recursos externos.</p>
-          ) : (
-            <ul className="grid gap-3 sm:grid-cols-2">
-              {safeResources.map((resource) => (
-                <li key={`${resource.label}-${resource.url}`}>
-                  <a
-                    href={resource.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center justify-between gap-3 rounded-lg border bg-card p-4 text-sm font-medium hover:bg-muted focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-                  >
-                    <span className="min-w-0 break-words">{resource.label}</span>
-                    <ExternalLink aria-hidden="true" className="size-4 shrink-0" />
-                  </a>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-      </article>
-    </div>
+            <section aria-labelledby="resources-title" className="space-y-4">
+              <h2 id="resources-title" className="text-xl font-semibold text-balance">
+                Recursos
+              </h2>
+              {safeResources.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No hay recursos externos.</p>
+              ) : (
+                <ul className="grid gap-3 sm:grid-cols-2">
+                  {safeResources.map((resource) => (
+                    <li key={`${resource.label}-${resource.url}`}>
+                      <a
+                        href={resource.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex items-center justify-between gap-3 rounded-lg border bg-card p-4 text-sm font-medium hover:bg-muted focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                      >
+                        <span className="min-w-0 break-words">{resource.label}</span>
+                        <ExternalLink aria-hidden="true" className="size-4 shrink-0" />
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          </article>
+        </div>
+      )}
+    </TechnologyBrand>
   )
 }
