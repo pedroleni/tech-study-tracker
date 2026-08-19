@@ -7,6 +7,26 @@ set -euo pipefail
 PROJECT_ROOT="${1:-.}"
 FINDING_COUNT=0
 
+# La mayoría de checks de este script dependen de `grep -P` (PCRE). El grep de
+# BSD que trae macOS NO soporta -P: no falla de forma visible, simplemente
+# devuelve 0 resultados -- asi que en un Mac este scanner puede decir "todo
+# limpio" mientras el CI (Ubuntu, GNU grep) encuentra hallazgos reales.
+# Preferimos ggrep si esta (brew install grep) y, si no hay ningun grep con
+# -P, abortamos en vez de dar un falso "sin hallazgos". Ojo con el test:
+# `grep -qP '' /dev/null` NO sirve, porque un fichero vacio no tiene
+# coincidencias y devuelve 1 igual que un grep sin -P -- hace falta una
+# entrada que si case.
+if printf 'x\n' | grep -qP 'x' 2>/dev/null; then
+    GREP=grep
+elif command -v ggrep >/dev/null 2>&1 && printf 'x\n' | ggrep -qP 'x' 2>/dev/null; then
+    GREP=ggrep
+else
+    echo "ERROR: este scanner necesita un grep con soporte -P (PCRE)." >&2
+    echo "       El grep de macOS no lo tiene. Instala GNU grep:  brew install grep" >&2
+    echo "       Sin el, los checks devolverian 'sin hallazgos' aunque los haya." >&2
+    exit 2
+fi
+
 RED='\033[0;31m'
 YELLOW='\033[0;33m'
 GREEN='\033[0;32m'
@@ -32,10 +52,10 @@ for dockerfile in $(find "$PROJECT_ROOT" -name "Dockerfile*" -not -path "*/.git/
     echo "  Scanning: $dockerfile"
 
     # Check for :latest tag
-    if grep -qP '^FROM\s+\S+:latest' "$dockerfile" 2>/dev/null; then
+    if $GREP -qP '^FROM\s+\S+:latest' "$dockerfile" 2>/dev/null; then
         finding "HIGH" "Docker" "$dockerfile" "Using :latest tag — pin to specific version"
     fi
-    if grep -qP '^FROM\s+\S+\s*$' "$dockerfile" 2>/dev/null; then
+    if $GREP -qP '^FROM\s+\S+\s*$' "$dockerfile" 2>/dev/null; then
         finding "HIGH" "Docker" "$dockerfile" "No tag specified (implies :latest)"
     fi
 
@@ -45,19 +65,19 @@ for dockerfile in $(find "$PROJECT_ROOT" -name "Dockerfile*" -not -path "*/.git/
     fi
 
     # Check for secrets in ENV/ARG
-    if grep -qiP '(?:ENV|ARG)\s+(?:.*(?:PASSWORD|SECRET|KEY|TOKEN|CREDENTIAL))\s*=' "$dockerfile" 2>/dev/null; then
+    if $GREP -qiP '(?:ENV|ARG)\s+(?:.*(?:PASSWORD|SECRET|KEY|TOKEN|CREDENTIAL))\s*=' "$dockerfile" 2>/dev/null; then
         finding "CRITICAL" "Docker" "$dockerfile" "Sensitive value in ENV/ARG directive"
     fi
 
     # Check for COPY . .
-    if grep -qP '^COPY\s+\.\s+' "$dockerfile" 2>/dev/null; then
+    if $GREP -qP '^COPY\s+\.\s+' "$dockerfile" 2>/dev/null; then
         if ! [ -f "$(dirname "$dockerfile")/.dockerignore" ]; then
             finding "MEDIUM" "Docker" "$dockerfile" "COPY . without .dockerignore — may copy secrets"
         fi
     fi
 
     # Check for ADD with URL (prefer COPY + explicit download)
-    if grep -qP '^ADD\s+https?://' "$dockerfile" 2>/dev/null; then
+    if $GREP -qP '^ADD\s+https?://' "$dockerfile" 2>/dev/null; then
         finding "MEDIUM" "Docker" "$dockerfile" "ADD with URL — use COPY + explicit download with checksum"
     fi
 done
@@ -72,14 +92,14 @@ for composefile in $(find "$PROJECT_ROOT" -name "docker-compose*.yml" -o -name "
     if grep -q "network_mode:\s*host" "$composefile" 2>/dev/null; then
         finding "HIGH" "Docker" "$composefile" "Container using host network mode"
     fi
-    if grep -qP "docker\.sock" "$composefile" 2>/dev/null; then
+    if $GREP -qP "docker\.sock" "$composefile" 2>/dev/null; then
         finding "CRITICAL" "Docker" "$composefile" "Docker socket mounted — container escape risk"
     fi
-    if grep -qP '^\s+-\s+/:/\w' "$composefile" 2>/dev/null; then
+    if $GREP -qP '^\s+-\s+/:/\w' "$composefile" 2>/dev/null; then
         finding "CRITICAL" "Docker" "$composefile" "Host root filesystem mounted"
     fi
     # Inline env vars with secrets
-    if grep -qiP '(?:PASSWORD|SECRET|KEY|TOKEN)=(?!\$\{)[^\s]+' "$composefile" 2>/dev/null; then
+    if $GREP -qiP '(?:PASSWORD|SECRET|KEY|TOKEN)=(?!\$\{)[^\s]+' "$composefile" 2>/dev/null; then
         finding "HIGH" "Docker" "$composefile" "Hardcoded credential in environment directive"
     fi
 done
@@ -98,14 +118,14 @@ for workflow in $(find "$PROJECT_ROOT/.github/workflows" -name "*.yml" -o -name 
     # `set -o pipefail` without duplicating output — `| wc -l || echo 0` captures BOTH
     # wc -l's real count AND the echo fallback whenever grep finds zero matches, producing
     # a two-line value that breaks the numeric comparison below under `set -e`.
-    unpinned=$(grep -P 'uses:\s+[^@]+@v\d' "$workflow" 2>/dev/null | wc -l; true)
+    unpinned=$($GREP -P 'uses:\s+[^@]+@v\d' "$workflow" 2>/dev/null | wc -l; true)
     if [ "$unpinned" -gt 0 ]; then
         finding "MEDIUM" "CI/CD" "$workflow" "$unpinned actions pinned to tag instead of SHA"
     fi
 
     # pull_request_target with checkout
     if grep -q "pull_request_target" "$workflow" 2>/dev/null; then
-        if grep -qP 'ref.*pull_request\.head' "$workflow" 2>/dev/null; then
+        if $GREP -qP 'ref.*pull_request\.head' "$workflow" 2>/dev/null; then
             finding "CRITICAL" "CI/CD" "$workflow" "pull_request_target with PR head checkout — RCE risk"
         else
             finding "HIGH" "CI/CD" "$workflow" "pull_request_target trigger — review carefully for injection"
@@ -113,17 +133,17 @@ for workflow in $(find "$PROJECT_ROOT/.github/workflows" -name "*.yml" -o -name 
     fi
 
     # Overly permissive permissions
-    if grep -qP 'permissions:\s*write-all' "$workflow" 2>/dev/null; then
+    if $GREP -qP 'permissions:\s*write-all' "$workflow" 2>/dev/null; then
         finding "HIGH" "CI/CD" "$workflow" "Workflow has write-all permissions"
     fi
 
     # Script injection via github context
-    if grep -qP '\$\{\{\s*github\.event\.' "$workflow" 2>/dev/null; then
+    if $GREP -qP '\$\{\{\s*github\.event\.' "$workflow" 2>/dev/null; then
         finding "MEDIUM" "CI/CD" "$workflow" "GitHub event context used — check for injection"
     fi
 
     # Self-hosted runners
-    if grep -qP 'runs-on:\s*self-hosted' "$workflow" 2>/dev/null; then
+    if $GREP -qP 'runs-on:\s*self-hosted' "$workflow" 2>/dev/null; then
         finding "MEDIUM" "CI/CD" "$workflow" "Self-hosted runners — ensure isolated from untrusted PRs"
     fi
 done
@@ -132,7 +152,7 @@ done
 if [ -f "$PROJECT_ROOT/.gitlab-ci.yml" ]; then
     echo "  Scanning: .gitlab-ci.yml"
 
-    if grep -qiP '(?:PASSWORD|SECRET|TOKEN|KEY)\s*:\s*(?!\$)' "$PROJECT_ROOT/.gitlab-ci.yml" 2>/dev/null; then
+    if $GREP -qiP '(?:PASSWORD|SECRET|TOKEN|KEY)\s*:\s*(?!\$)' "$PROJECT_ROOT/.gitlab-ci.yml" 2>/dev/null; then
         finding "CRITICAL" "CI/CD" ".gitlab-ci.yml" "Hardcoded secret in pipeline config"
     fi
     if grep -q "allow_failure:\s*true" "$PROJECT_ROOT/.gitlab-ci.yml" 2>/dev/null; then
@@ -150,14 +170,14 @@ echo -e "\n${CYAN}── Infrastructure-as-Code ──${NC}"
 
 for tffile in $(find "$PROJECT_ROOT" -name "*.tf" -not -path "*/.terraform/*" 2>/dev/null | head -30); do
     # Open security groups
-    if grep -qP 'cidr_blocks\s*=\s*\["0\.0\.0\.0/0"\]' "$tffile" 2>/dev/null; then
-        if grep -B10 'cidr_blocks\s*=\s*\["0.0.0.0/0"\]' "$tffile" | grep -qP 'from_port\s*=\s*(22|3389|3306|5432|27017)' 2>/dev/null; then
+    if $GREP -qP 'cidr_blocks\s*=\s*\["0\.0\.0\.0/0"\]' "$tffile" 2>/dev/null; then
+        if $GREP -PB10 'cidr_blocks\s*=\s*\["0\.0\.0\.0/0"\]' "$tffile" | $GREP -qP 'from_port\s*=\s*(22|3389|3306|5432|27017)' 2>/dev/null; then
             finding "CRITICAL" "IaC" "$tffile" "Security group allows 0.0.0.0/0 on management/DB port"
         fi
     fi
 
     # Hardcoded secrets
-    if grep -qiP '(?:password|secret_key|access_key)\s*=\s*"(?!\$\{)' "$tffile" 2>/dev/null; then
+    if $GREP -qiP '(?:password|secret_key|access_key)\s*=\s*"(?!\$\{)' "$tffile" 2>/dev/null; then
         finding "CRITICAL" "IaC" "$tffile" "Hardcoded credential in Terraform"
     fi
 
@@ -174,7 +194,7 @@ done
 
 # Check for .tfvars with secrets
 for tfvars in $(find "$PROJECT_ROOT" -name "*.tfvars" -not -path "*/.git/*" 2>/dev/null); do
-    if grep -qiP '(?:password|secret|key|token)\s*=' "$tfvars" 2>/dev/null; then
+    if $GREP -qiP '(?:password|secret|key|token)\s*=' "$tfvars" 2>/dev/null; then
         finding "CRITICAL" "IaC" "$tfvars" ".tfvars file contains credentials — should use vault"
     fi
 done
@@ -224,14 +244,14 @@ echo -e "\n${CYAN}── Package Manager Configuration ──${NC}"
 
 # .npmrc with auth tokens
 if [ -f "$PROJECT_ROOT/.npmrc" ]; then
-    if grep -qP '_authToken|_auth\s*=' "$PROJECT_ROOT/.npmrc" 2>/dev/null; then
+    if $GREP -qP '_authToken|_auth\s*=' "$PROJECT_ROOT/.npmrc" 2>/dev/null; then
         finding "CRITICAL" "Config" ".npmrc" "Auth token in .npmrc — use environment variable"
     fi
 fi
 
 # pip.conf with credentials
 if [ -f "$PROJECT_ROOT/pip.conf" ]; then
-    if grep -qiP '(?:password|token)' "$PROJECT_ROOT/pip.conf" 2>/dev/null; then
+    if $GREP -qiP '(?:password|token)' "$PROJECT_ROOT/pip.conf" 2>/dev/null; then
         finding "HIGH" "Config" "pip.conf" "Credentials in pip.conf"
     fi
 fi
@@ -244,7 +264,7 @@ echo -e "\n${CYAN}── Security Headers & CORS ──${NC}"
 # Wide-open CORS
 # "|| true" guards the whole pipeline: under `set -o pipefail`, grep finding zero matches
 # (its normal, non-error exit code 1) would otherwise abort the script here via `set -e`.
-grep -rnP "Access-Control-Allow-Origin.*\*|cors\(\s*\)|origin:\s*(?:true|\*|['\"]?\*)" \
+$GREP -rnP "Access-Control-Allow-Origin.*\*|cors\(\s*\)|origin:\s*(?:true|\*|['\"]?\*)" \
     "$PROJECT_ROOT" --include="*.js" --include="*.ts" --include="*.py" \
     --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=vendor 2>/dev/null | head -10 | while IFS= read -r line; do
     finding "HIGH" "CORS" "$(echo "$line" | cut -d: -f1)" "Unrestricted CORS — allows any origin"

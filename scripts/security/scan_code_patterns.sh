@@ -7,6 +7,26 @@ set -euo pipefail
 PROJECT_ROOT="${1:-.}"
 FINDING_COUNT=0
 
+# La mayoría de checks de este script dependen de `grep -P` (PCRE). El grep de
+# BSD que trae macOS NO soporta -P: no falla de forma visible, simplemente
+# devuelve 0 resultados -- asi que en un Mac este scanner puede decir "todo
+# limpio" mientras el CI (Ubuntu, GNU grep) encuentra hallazgos reales.
+# Preferimos ggrep si esta (brew install grep) y, si no hay ningun grep con
+# -P, abortamos en vez de dar un falso "sin hallazgos". Ojo con el test:
+# `grep -qP '' /dev/null` NO sirve, porque un fichero vacio no tiene
+# coincidencias y devuelve 1 igual que un grep sin -P -- hace falta una
+# entrada que si case.
+if printf 'x\n' | grep -qP 'x' 2>/dev/null; then
+    GREP=grep
+elif command -v ggrep >/dev/null 2>&1 && printf 'x\n' | ggrep -qP 'x' 2>/dev/null; then
+    GREP=ggrep
+else
+    echo "ERROR: este scanner necesita un grep con soporte -P (PCRE)." >&2
+    echo "       El grep de macOS no lo tiene. Instala GNU grep:  brew install grep" >&2
+    echo "       Sin el, los checks devolverian 'sin hallazgos' aunque los haya." >&2
+    exit 2
+fi
+
 RED='\033[0;31m'
 YELLOW='\033[0;33m'
 GREEN='\033[0;32m'
@@ -18,7 +38,7 @@ EXCLUDE="--exclude-dir=.git --exclude-dir=node_modules --exclude-dir=vendor --ex
 scan_pattern() {
     local severity="$1" category="$2" description="$3" pattern="$4" includes="$5"
     local results
-    results=$(grep -rnP $EXCLUDE $includes "$pattern" "$PROJECT_ROOT" 2>/dev/null | head -20 || true)
+    results=$($GREP -rnP $EXCLUDE $includes "$pattern" "$PROJECT_ROOT" 2>/dev/null | head -20 || true)
     if [ -n "$results" ]; then
         local count
         count=$(echo "$results" | wc -l)
