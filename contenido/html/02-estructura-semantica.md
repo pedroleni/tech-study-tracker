@@ -49,13 +49,29 @@ estructuran una página son estas:
 La documentación oficial te dice qué es cada etiqueta. Lo que casi nunca
 te dice es cuándo notas la diferencia. Son estos cuatro momentos:
 
-**Cuando alguien navega tu página sin ver.** Un lector de pantalla ofrece
-un atajo para saltar directamente al contenido principal, y ese atajo
-existe porque hay un `<main>`. También puede listar las regiones de la
-página como si fuera un índice. Si todo son `<div>`, ese índice sale
-vacío: la persona tiene que recorrerse el menú entero, cada vez, en cada
-página. No es una mejora estética. Es la diferencia entre poder usar tu
-web y no poder.
+```laboratorio
+{
+  "tipo": "notas-clave",
+  "items": [
+    {
+      "titulo": "Cuando alguien navega tu página sin ver.",
+      "texto": "Un lector de pantalla ofrece un atajo para saltar directamente al contenido principal, y ese atajo existe porque hay un <main>. Si todo son <div>, ese índice sale vacío: no es una mejora estética, es la diferencia entre poder usar tu web y no poder."
+    },
+    {
+      "titulo": "Cuando llega el CSS.",
+      "texto": "Con etiquetas semánticas escribes nav a y ya está. Con div soup acabas inventando clases para todo y dependiendo de ellas: el día que cambies una clase, se rompe el estilo en sitios que no recuerdas."
+    },
+    {
+      "titulo": "Cuando entra Google.",
+      "texto": "El buscador usa la estructura para saber qué parte de la página es el contenido y cuál es el menú repetido en las doscientas páginas del sitio."
+    },
+    {
+      "titulo": "Cuando vuelves tú, seis meses después.",
+      "texto": "Un HTML semántico se lee de arriba abajo y se entiende sin abrirlo en el navegador. Trescientos <div> anidados, no."
+    }
+  ]
+}
+```
 
 ```laboratorio
 {
@@ -65,19 +81,6 @@ web y no poder.
   "nota": "Con el mismo CSS los dos se ven exactamente igual. La diferencia no está en la pantalla: está en lo que el navegador entiende que representa cada uno."
 }
 ```
-
-**Cuando llega el CSS.** Con etiquetas semánticas escribes `nav a` y ya
-está. Con div soup acabas inventando clases para todo y, lo que es peor,
-dependiendo de ellas: el día que cambies una clase, se rompe el estilo en
-sitios que no recuerdas.
-
-**Cuando entra Google.** El buscador usa la estructura para saber qué
-parte de la página es el contenido y cuál es el menú repetido en las
-doscientas páginas del sitio.
-
-**Cuando vuelves tú, seis meses después.** Un HTML semántico se lee de
-arriba abajo y se entiende sin abrirlo en el navegador. Trescientos
-`<div>` anidados, no.
 
 ---
 
@@ -129,32 +132,37 @@ esa entrada, no: es una `<section>`.
 
 ## Errores típicos 👤
 
-**Usar `<section>` como si fuera un `<div>` más elegante.** Es el error
-más extendido. Una `<section>` sin un encabezado dentro casi siempre
-debería ser un `<div>`. La regla práctica: si no puedes ponerle un
-título, no es una sección.
-
-**Saltarse niveles de encabezado por el tamaño de la letra.** Ir de
-`<h2>` a `<h4>` porque el `<h3>` "se veía muy grande". Los encabezados
-son el índice de la página, y ese salto deja un hueco en el índice. Si el
-tamaño no te gusta, eso lo arregla el CSS.
-
-**Poner varios `<h1>`.** Uno por página. Es el título de *esto*, y no hay
-dos títulos.
-
-**Meter el `<nav>` fuera del `<header>` sin pensarlo.** Se puede, pero
-suele ser porque se copió de algún sitio.
-
-**Convertir un `<div>` en un botón.** Un `<div onclick>` no recibe el
-foco con el tabulador, no se activa con la barra espaciadora y no se
-anuncia como botón. Reproducir a mano todo lo que `<button>` ya te da es
-mucho trabajo para acabar peor.
-
-**El error del que casi nadie avisa: envolver `<main>` en un `<div>` con
-la clase del layout.** Funciona, no rompe nada, y sin embargo es una
-oportunidad perdida — porque el `<div>` acaba siendo el que lleva el
-estilo y `<main>` queda de adorno. Ponle el estilo directamente a
-`<main>`.
+```laboratorio
+{
+  "tipo": "notas-clave",
+  "items": [
+    {
+      "titulo": "Usar <section> como si fuera un <div> más elegante.",
+      "texto": "Es el error más extendido. Una <section> sin un encabezado dentro casi siempre debería ser un <div>. La regla práctica: si no puedes ponerle un título, no es una sección."
+    },
+    {
+      "titulo": "Saltarse niveles de encabezado por el tamaño de la letra.",
+      "texto": "Ir de <h2> a <h4> porque el <h3> \"se veía muy grande\". Los encabezados son el índice de la página, y ese salto deja un hueco. Si el tamaño no te gusta, eso lo arregla el CSS."
+    },
+    {
+      "titulo": "Poner varios <h1>.",
+      "texto": "Uno por página. Es el título de esto, y no hay dos títulos."
+    },
+    {
+      "titulo": "Meter el <nav> fuera del <header> sin pensarlo.",
+      "texto": "Se puede, pero suele ser porque se copió de algún sitio."
+    },
+    {
+      "titulo": "Convertir un <div> en un botón.",
+      "texto": "Un <div onclick> no recibe el foco con el tabulador, no se activa con la barra espaciadora y no se anuncia como botón. Reproducir a mano todo lo que <button> ya te da es mucho trabajo para acabar peor."
+    },
+    {
+      "titulo": "El error del que casi nadie avisa: envolver <main> en un <div> con la clase del layout.",
+      "texto": "Funciona, no rompe nada, y sin embargo es una oportunidad perdida — el <div> acaba llevando el estilo y <main> queda de adorno. Ponle el estilo directamente a <main>."
+    }
+  ]
+}
+```
 
 ---
 

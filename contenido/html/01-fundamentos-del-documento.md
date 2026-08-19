@@ -56,32 +56,29 @@ cada uno adivina distinto.
 Aquí es donde casi nadie mira, y es donde se explica el 90% de los "esto en
 mi móvil se ve fatal" que llegan sin previo aviso.
 
-**El `<meta charset="UTF-8">` que falta.** Sin él, cualquier tilde, eñe o
-símbolo de moneda puede aparecer como un cuadrado o un carácter extraño,
-dependiendo de qué codificación adivine el navegador. Es la primera línea
-dentro de `<head>`, siempre, porque el navegador necesita saberlo antes de
-leer ni un carácter más del fichero — si viene después de un `<title>` con
-una eñe, esa eñe ya se leyó mal.
-
-**El `<meta name="viewport">` que falta.** Sin él, un móvil renderiza la
-página como si fuera un monitor de escritorio de 980 píxeles y luego la
-encoge entera para que quepa: todo se ve diminuto y hay que hacer zoom para
-leer una palabra. No es un problema de CSS responsive — es que sin esta
-línea el CSS responsive ni siquiera llega a activarse.
-
-**Por qué el orden de `<head>` casi nunca importa, salvo `charset`.** El
-navegador lee el `<head>` entero antes de pintar nada, así que el orden de
-`<title>`, enlaces a CSS o fuentes rara vez cambia el resultado. La única
-excepción real es `charset`: tiene que ir antes que cualquier contenido que
-pueda tener caracteres especiales, títulos incluidos.
-
-**Cuándo SÍ hace falta un comentario `<!-- -->`.** Casi nunca. El código
-HTML bien escrito se explica por su propia estructura — un `<nav>` ya dice
-"esto es la navegación", no hace falta un comentario que lo repita encima.
-Los comentarios sobreviven mal a los cambios: alguien reordena el HTML y el
-comentario se queda mintiendo, apuntando a algo que ya no está ahí. Resérvalos
-para lo que el código no puede decir por sí mismo: por qué algo se hizo así,
-no qué es.
+```laboratorio
+{
+  "tipo": "notas-clave",
+  "items": [
+    {
+      "titulo": "El <meta charset=\"UTF-8\"> que falta.",
+      "texto": "Sin él, cualquier tilde, eñe o símbolo de moneda puede aparecer como un cuadrado o un carácter extraño. Es la primera línea dentro de <head>, siempre — si viene después de un <title> con una eñe, esa eñe ya se leyó mal."
+    },
+    {
+      "titulo": "El <meta name=\"viewport\"> que falta.",
+      "texto": "Sin él, un móvil renderiza la página como si fuera un monitor de escritorio de 980 píxeles y la encoge entera para que quepa: todo se ve diminuto. No es un problema de CSS responsive — es que sin esta línea el CSS responsive ni siquiera llega a activarse."
+    },
+    {
+      "titulo": "El orden de <head> casi nunca importa, salvo charset.",
+      "texto": "El navegador lee el <head> entero antes de pintar nada, así que el orden de <title>, enlaces a CSS o fuentes rara vez cambia el resultado. La única excepción real es charset: tiene que ir antes que cualquier contenido con caracteres especiales."
+    },
+    {
+      "titulo": "Cuándo SÍ hace falta un comentario <!-- -->.",
+      "texto": "Casi nunca. El código HTML bien escrito se explica por su propia estructura. Los comentarios sobreviven mal a los cambios: alguien reordena el HTML y el comentario se queda mintiendo. Resérvalos para el porqué, no para el qué."
+    }
+  ]
+}
+```
 
 ---
 
@@ -124,34 +121,33 @@ es como si valiera `false`.
 
 ## Errores típicos 👤
 
-**Poner el `<meta charset>` en cualquier sitio del `<head>` menos el
-primero.** Ya lo has visto arriba, pero merece repetirse porque es el error
-más silencioso de todos: el navegador ya empezó a interpretar el texto con
-la codificación equivocada antes de llegar a la línea que la corrige, y
-para entonces algunos caracteres ya se leyeron mal.
-
-**Cerrar las etiquetas en el orden que no es.** `<div><p>texto</div></p>`.
-El navegador intentará salvarlo adivinando, pero cada navegador adivina
-distinto, y lo que en Chrome se ve bien puede desmontarse en otro sitio. La
-regla es simple aunque cueste acostumbrarse: lo último que abres es lo
-primero que cierras.
-
-**Escribir HTML en mayúsculas o mezclado.** `<DIV>`, `<Body>`. Funciona —el
-navegador no distingue mayúsculas de minúsculas en las etiquetas— pero
-rompe la convención que sigue todo el código HTML que vas a leer de aquí en
-adelante. Minúsculas, siempre.
-
-**Olvidar el atributo `lang` en `<html>`.** No rompe nada visualmente, así
-que es fácil que pase inadvertido para siempre. Pero un lector de pantalla
-sin esa pista puede intentar leer una página en español con el motor de
-pronunciación de otro idioma, y el resultado es difícil de entender.
-
-**Confundir "no se ve el error" con "está bien escrito".** Los navegadores
-son extremadamente tolerantes: perdonan etiquetas sin cerrar, atributos mal
-escritos, anidamientos incorrectos. Esa tolerancia es útil para no romper
-la web entera por un error tipográfico de alguien, pero tiene un precio:
-acostumbra a escribir HTML descuidado que "funciona" hasta que deja de
-hacerlo, casi siempre en el navegador de otra persona.
+```laboratorio
+{
+  "tipo": "notas-clave",
+  "items": [
+    {
+      "titulo": "Poner el <meta charset> en cualquier sitio menos el primero.",
+      "texto": "Es el error más silencioso de todos: el navegador ya empezó a interpretar el texto con la codificación equivocada antes de llegar a la línea que la corrige, y para entonces algunos caracteres ya se leyeron mal."
+    },
+    {
+      "titulo": "Cerrar las etiquetas en el orden que no es.",
+      "texto": "<div><p>texto</div></p>. El navegador intentará salvarlo adivinando, pero cada navegador adivina distinto. La regla: lo último que abres es lo primero que cierras."
+    },
+    {
+      "titulo": "Escribir HTML en mayúsculas o mezclado.",
+      "texto": "<DIV>, <Body>. Funciona —el navegador no distingue mayúsculas de minúsculas— pero rompe la convención que sigue todo el código HTML que vas a leer de aquí en adelante. Minúsculas, siempre."
+    },
+    {
+      "titulo": "Olvidar el atributo lang en <html>.",
+      "texto": "No rompe nada visualmente, así que es fácil que pase inadvertido para siempre. Pero un lector de pantalla sin esa pista puede leer la página en español con el motor de pronunciación de otro idioma."
+    },
+    {
+      "titulo": "Confundir \"no se ve el error\" con \"está bien escrito\".",
+      "texto": "Los navegadores son extremadamente tolerantes: perdonan etiquetas sin cerrar, atributos mal escritos, anidamientos incorrectos. Eso acostumbra a escribir HTML descuidado que funciona hasta que deja de hacerlo, casi siempre en el navegador de otra persona."
+    }
+  ]
+}
+```
 
 ---
 
