@@ -1,6 +1,6 @@
 # Progreso personal por tecnología
 
-**Estado:** 🚧 en spec, sin implementar.
+**Estado:** ✅ implementada en PR #26; migración `0006` aplicada y verificada con curl real en producción.
 
 ## Por qué existe esta feature
 
