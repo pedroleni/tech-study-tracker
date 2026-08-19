@@ -88,7 +88,7 @@ export function LeccionPage() {
 
         <Card>
           {leccion.contenido.trim() ? (
-            <SafeMarkdown>{leccion.contenido}</SafeMarkdown>
+            <SafeMarkdown permitirLaboratorios>{leccion.contenido}</SafeMarkdown>
           ) : (
             <p className="text-sm text-muted-foreground">
               Esta lección todavía no tiene contenido.

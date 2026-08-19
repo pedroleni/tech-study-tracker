@@ -1,0 +1,49 @@
+import { z } from 'zod'
+
+export const esquemaPrediceElResultado = z
+  .object({
+    tipo: z.literal('predice-el-resultado'),
+    lenguaje: z.literal('html').default('html'),
+    codigo: z.string().min(1).max(2000),
+    opciones: z.array(z.string().min(1)).min(2).max(5),
+    correcta: z.number().int().min(0),
+    explicacion: z.string().min(1).max(500),
+  })
+  .refine((datos) => datos.correcta < datos.opciones.length, {
+    message: 'correcta debe ser un índice válido de opciones',
+  })
+
+export const esquemaCodigoAnotado = z.object({
+  tipo: z.literal('codigo-anotado'),
+  lenguaje: z.literal('html').default('html'),
+  codigo: z.string().min(1).max(4000),
+  anotaciones: z
+    .array(
+      z.object({
+        fragmento: z.string().min(1),
+        nota: z.string().min(1).max(500),
+      }),
+    )
+    .min(1)
+    .max(8),
+})
+
+export const esquemaComparadorAntesDespues = z.object({
+  tipo: z.literal('comparador-antes-despues'),
+  antes: z.string().min(1).max(2000),
+  despues: z.string().min(1).max(2000),
+  nota: z.string().max(500).optional(),
+})
+
+export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
+  esquemaPrediceElResultado,
+  esquemaCodigoAnotado,
+  esquemaComparadorAntesDespues,
+])
+
+export type DatosPrediceElResultado = z.infer<typeof esquemaPrediceElResultado>
+export type DatosCodigoAnotado = z.infer<typeof esquemaCodigoAnotado>
+export type DatosComparadorAntesDespues = z.infer<
+  typeof esquemaComparadorAntesDespues
+>
+export type DatosBloqueLaboratorio = z.infer<typeof esquemaBloqueLaboratorio>

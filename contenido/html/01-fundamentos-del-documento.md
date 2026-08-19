@@ -161,49 +161,37 @@ hacerlo, casi siempre en el navegador de otra persona.
 
 ¿Qué carácter es probable que se vea mal en la página, y por qué?
 
-```html
-<!DOCTYPE html>
-<html lang="es">
-  <head>
-    <title>Información</title>
-    <meta charset="UTF-8">
-  </head>
-  <body>
-    <p>Información</p>
-  </body>
-</html>
+```laboratorio
+{
+  "tipo": "predice-el-resultado",
+  "lenguaje": "html",
+  "codigo": "<!DOCTYPE html>\n<html lang=\"es\">\n  <head>\n    <title>Información</title>\n    <meta charset=\"UTF-8\">\n  </head>\n  <body>\n    <p>Información</p>\n  </body>\n</html>",
+  "opciones": [
+    "La 'ó' de \"Información\" dentro del <title>, en la pestaña del navegador",
+    "La 'ó' de \"Información\" dentro del <body>, en el texto de la página",
+    "Ninguna: las dos se ven bien"
+  ],
+  "correcta": 0,
+  "explicacion": "El <meta charset> va después del <title>, así que el navegador ya interpretó y mostró el título —con su tilde— antes de saber qué codificación usar. Para cuando llega a <body>, ya procesó la línea de charset y esa segunda \"Información\" se ve bien."
+}
 ```
-
-<details>
-<summary>Solución</summary>
-
-La palabra **"Información"** dentro del `<title>`. El `<meta charset>` va
-después del `<title>`, así que el navegador ya leyó e interpretó ese título
-—con su tilde— antes de saber qué codificación usar. La segunda
-"Información", dentro de `<body>`, se ve bien porque para cuando el
-navegador llega ahí ya procesó la línea de `charset`.
-
-</details>
 
 ### 2. Encuentra el error
 
 Este documento tiene un error de anidamiento. Encuéntralo antes de mirar la
 solución.
 
-```html
-<body>
-  <p>Bienvenido a <strong>mi página</p></strong>
-</body>
+```laboratorio
+{
+  "tipo": "codigo-anotado",
+  "lenguaje": "html",
+  "codigo": "<p>Bienvenido a <strong>mi página</p></strong>",
+  "anotaciones": [
+    { "fragmento": "<strong>", "nota": "Se abre aquí, dentro de <p>. Lo último que se abre tiene que ser lo primero que se cierra." },
+    { "fragmento": "</p></strong>", "nota": "El cierre está al revés: </p> va antes que </strong>, cuando debería ir después. Lo correcto es </strong></p>." }
+  ]
+}
 ```
-
-<details>
-<summary>Solución</summary>
-
-`<strong>` se abre dentro de `<p>` pero se cierra fuera. Lo correcto es
-`<p>Bienvenido a <strong>mi página</strong></p>` — lo último que se abre
-(`<strong>`) es lo primero que se cierra.
-
-</details>
 
 ### 3. Escríbelo tú
 
