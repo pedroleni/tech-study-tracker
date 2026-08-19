@@ -25,11 +25,44 @@ const nombresComponentes = [
   'ResumenTLDR',
   'ComparacionCodigo',
   'TarjetaRecursoExterno',
+  'CarruselTarjetas',
+  'CarruselCoverflow',
+  'CarruselAutoplay',
+  'GaleriaMiniaturas',
+  'CarruselVertical',
+  'TarjetaVolteable',
+  'TarjetaInclinacion',
+  'CuboGirable',
+  'PilaTarjetas',
+  'LibroPagina',
+  'RevelarAlDesplazar',
+  'ContadorEnScroll',
+  'ParallaxCapa',
+  'IndicadorScrollSecciones',
+  'AparicionEscalonada',
+  'TickerHorizontal',
+  'TextoRotativo',
+  'MaquinaEscribir',
+  'ContadorRegresivo',
+  'AntesDespuesDeslizante',
+  'RuedaProgreso',
+  'InterruptorAnimado',
+  'TarjetaConfeti',
+  'BotonMagnetico',
+  'IndicadorEscritura',
+  'GraficoBarras',
+  'MapaCalor',
+  'ArbolExpandible',
+  'NubeEtiquetas',
+  'LineaComparativaAnimada',
 ] as const
 
 describe('AdminReferenciaContenidoPage', () => {
   it('renderiza el catálogo completo sin errores ni violaciones de accesibilidad', async () => {
     vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({ matches: true }))
+    vi.spyOn(window, 'setInterval').mockImplementation(
+      (() => 0) as unknown as typeof window.setInterval,
+    )
     const { container } = render(<AdminReferenciaContenidoPage />)
 
     expect(screen.getByRole('heading', { name: 'Componentes de contenido' })).toBeInTheDocument()
