@@ -12,6 +12,7 @@ import { Link, useParams } from 'react-router-dom'
 
 import { SafeMarkdown } from '@/components/content/SafeMarkdown'
 import { difficultyLabels, priorityLabels, statusLabels } from '@/components/technology/labels'
+import { StatusBadge } from '@/components/technology/StatusBadge'
 import { TechnologyBrand } from '@/components/technology/TechnologyCard'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -19,7 +20,12 @@ import { Label } from '@/components/ui/label'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useAddFavorite, useFavorites, useRemoveFavorite } from '@/lib/hooks/useFavorites'
 import { useLecciones } from '@/lib/hooks/useLecciones'
-import { useMyProgress, useSetMyProgress } from '@/lib/hooks/useProgress'
+import {
+  useMyLeccionesProgress,
+  useMyProgress,
+  useSetMyLeccionProgress,
+  useSetMyProgress,
+} from '@/lib/hooks/useProgress'
 import { useTechnology } from '@/lib/hooks/useTechnologies'
 import { useProfile } from '@/lib/hooks/useProfile'
 import { cn } from '@/lib/utils'
@@ -93,9 +99,13 @@ function FavoriteControl({ technologyId }: { technologyId: string }) {
 function ProgressControl({
   technologyId,
   lecciones,
+  publishedLeccionIds,
+  leccionProgressById,
 }: {
   technologyId: string
   lecciones: Leccion[]
+  publishedLeccionIds: string[]
+  leccionProgressById: ReadonlyMap<string, Status>
 }) {
   const { user } = useAuth()
   const progressQuery = useMyProgress(technologyId)
@@ -111,10 +121,7 @@ function ProgressControl({
     )
   }
 
-  async function setProgress(patch: {
-    status?: Status
-    currentLeccionId?: string | null
-  }) {
+  async function setProgress(patch: { currentLeccionId?: string | null }) {
     setError('')
     try {
       await setProgressMutation.mutateAsync({ technologyId, patch })
@@ -126,7 +133,20 @@ function ProgressControl({
   const progress = progressQuery.data
   const pending = progressQuery.isLoading || setProgressMutation.isPending
   const pendingPatch = setProgressMutation.variables?.patch
-  const status = pendingPatch?.status ?? progress?.status ?? 'pendiente'
+  const totalPublished = publishedLeccionIds.length
+  const completedCount = publishedLeccionIds.filter(
+    (leccionId) => leccionProgressById.get(leccionId) === 'completado',
+  ).length
+  const hasStarted = publishedLeccionIds.some((leccionId) => {
+    const status = leccionProgressById.get(leccionId) ?? 'pendiente'
+    return status === 'en_progreso' || status === 'completado'
+  })
+  const derivedStatus: Status =
+    totalPublished > 0 && completedCount === totalPublished
+      ? 'completado'
+      : hasStarted
+        ? 'en_progreso'
+        : 'pendiente'
   const savedLeccionId = publishedLecciones.some(
     (leccion) => leccion.id === progress?.currentLeccionId,
   )
@@ -141,21 +161,13 @@ function ProgressControl({
     <div className="space-y-4">
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="progress-status">Estado</Label>
-          <select
-            id="progress-status"
-            name="progress-status"
-            value={status}
-            disabled={pending}
-            className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
-            onChange={(event) =>
-              void setProgress({ status: event.currentTarget.value as Status })
-            }
-          >
-            <option value="pendiente">Pendiente</option>
-            <option value="en_progreso">En progreso</option>
-            <option value="completado">Completado</option>
-          </select>
+          <p className="text-sm font-medium leading-none">Estado</p>
+          <StatusBadge status={derivedStatus} />
+          <p className="text-sm text-muted-foreground tabular-nums">
+            {totalPublished > 0
+              ? `${completedCount} de ${totalPublished} lecciones completadas`
+              : 'Todavía no hay lecciones publicadas'}
+          </p>
         </div>
 
         <div className="space-y-2">
@@ -191,11 +203,29 @@ function ProgressControl({
 
 export function TechnologyPage() {
   const { id = '' } = useParams()
+  const { user } = useAuth()
   const { isAdmin } = useProfile()
   const technologyQuery = useTechnology(id)
   const leccionesQuery = useLecciones(id)
   const progressQuery = useMyProgress(id)
   const technology = technologyQuery.data
+  const publishedLecciones = (leccionesQuery.data ?? []).filter(
+    (leccion) => leccion.status === 'publicado',
+  )
+  const publishedLeccionIds = publishedLecciones.map((leccion) => leccion.id)
+  const leccionesProgressQuery = useMyLeccionesProgress(
+    technology?.id ?? '',
+    publishedLeccionIds,
+  )
+  const setLeccionProgressMutation = useSetMyLeccionProgress()
+  const leccionProgressById = new Map<string, Status>(
+    publishedLeccionIds.map((leccionId) => [leccionId, 'pendiente']),
+  )
+  leccionesProgressQuery.data?.forEach((progress) => {
+    if (leccionProgressById.has(progress.leccionId)) {
+      leccionProgressById.set(progress.leccionId, progress.status)
+    }
+  })
 
   if (technologyQuery.isLoading || leccionesQuery.isLoading) {
     return <p role="status">Cargando ficha…</p>
@@ -334,13 +364,15 @@ export function TechnologyPage() {
                     Mi progreso
                   </h2>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    Guarda tu estado y la lección que estás estudiando.
+                    Consulta tu avance y guarda la lección que estás estudiando.
                   </p>
                 </div>
                 <Card>
                   <ProgressControl
                     technologyId={technology.id}
                     lecciones={leccionesQuery.data ?? []}
+                    publishedLeccionIds={publishedLeccionIds}
+                    leccionProgressById={leccionProgressById}
                   />
                 </Card>
               </section>
@@ -416,6 +448,12 @@ export function TechnologyPage() {
                           {group.lecciones.map((leccion, indice) => {
                             const esActual =
                               leccion.id === progressQuery.data?.currentLeccionId
+                            const leccionProgressPending =
+                              setLeccionProgressMutation.isPending &&
+                              setLeccionProgressMutation.variables?.leccionId === leccion.id
+                            const leccionProgressStatus = leccionProgressPending
+                              ? setLeccionProgressMutation.variables.status
+                              : (leccionProgressById.get(leccion.id) ?? 'pendiente')
                             return (
                               <li
                                 key={leccion.id}
@@ -467,6 +505,26 @@ export function TechnologyPage() {
                                     </p>
                                   </div>
                                   <div className="flex shrink-0 items-center gap-3">
+                                    {user && leccion.status === 'publicado' && (
+                                      <select
+                                        name={`progress-${leccion.id}`}
+                                        value={leccionProgressStatus}
+                                        disabled={leccionProgressPending}
+                                        aria-label={`Estado de ${leccion.titulo}`}
+                                        className="h-8 w-36 rounded-lg border border-input bg-background px-3 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
+                                        onChange={(event) =>
+                                          setLeccionProgressMutation.mutate({
+                                            leccionId: leccion.id,
+                                            technologyId: technology.id,
+                                            status: event.currentTarget.value as Status,
+                                          })
+                                        }
+                                      >
+                                        <option value="pendiente">Pendiente</option>
+                                        <option value="en_progreso">En progreso</option>
+                                        <option value="completado">Completado</option>
+                                      </select>
+                                    )}
                                     {isAdmin && (
                                       <Link
                                         to={`/admin/tecnologias/${technology.id}/lecciones/${leccion.id}/editar`}

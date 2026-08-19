@@ -5,6 +5,7 @@ import type {
   Leccion,
   Profile,
   Technology,
+  UserLeccionProgress,
   UserTechnologyProgress,
 } from '@/types'
 
@@ -73,6 +74,15 @@ export interface ProgressRow {
   technology_id: string
   status: UserTechnologyProgress['status']
   current_leccion_id: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface LeccionProgressRow {
+  id: string
+  user_id: string
+  leccion_id: string
+  status: UserLeccionProgress['status']
   created_at: string
   updated_at: string
 }
@@ -150,6 +160,17 @@ export function mapProgress(row: ProgressRow): UserTechnologyProgress {
   }
 }
 
+export function mapLeccionProgress(row: LeccionProgressRow): UserLeccionProgress {
+  return {
+    id: row.id,
+    userId: row.user_id,
+    leccionId: row.leccion_id,
+    status: row.status,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  }
+}
+
 export type NewCategoryInput = Pick<Category, 'name'>
 export type CategoryPatch = Pick<Category, 'name'>
 
@@ -177,3 +198,5 @@ export interface NewCommentInput {
 export type ProgressPatch = Partial<
   Pick<UserTechnologyProgress, 'status' | 'currentLeccionId'>
 >
+
+export type LeccionProgressPatch = Pick<UserLeccionProgress, 'status'>

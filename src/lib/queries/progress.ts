@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabaseClient'
-import type { UserTechnologyProgress } from '@/types'
+import type { Status, UserLeccionProgress, UserTechnologyProgress } from '@/types'
 
-import { mapProgress, type ProgressPatch } from './mappers'
+import { mapLeccionProgress, mapProgress, type ProgressPatch } from './mappers'
 
 export async function getMyProgress(
   userId: string,
@@ -29,4 +29,36 @@ export async function upsertMyProgress(
   })
   if (error) throw error
   return mapProgress(data)
+}
+
+export async function getMyLeccionesProgress(
+  userId: string,
+  leccionIds: string[],
+): Promise<UserLeccionProgress[]> {
+  if (leccionIds.length === 0) return []
+
+  const { data, error } = await supabase
+    .from('user_leccion_progress')
+    .select()
+    .eq('user_id', userId)
+    .in('leccion_id', leccionIds)
+  if (error) throw error
+  return data.map(mapLeccionProgress)
+}
+
+export async function upsertMyLeccionProgress(
+  userId: string,
+  leccionId: string,
+  status: Status,
+): Promise<UserLeccionProgress> {
+  const { data, error } = await supabase
+    .from('user_leccion_progress')
+    .upsert(
+      { user_id: userId, leccion_id: leccionId, status },
+      { onConflict: 'user_id,leccion_id' },
+    )
+    .select()
+    .single()
+  if (error) throw error
+  return mapLeccionProgress(data)
 }
