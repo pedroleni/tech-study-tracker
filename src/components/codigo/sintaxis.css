@@ -1,0 +1,116 @@
+/*
+  Paleta del resaltado de sintaxis.
+
+  Vive en variables CSS y no en clases de Tailwind con `dark:` porque los
+  colores los consume cada token por su tipo: un único sitio donde ajustar la
+  paleta, y el modo oscuro se resuelve solo al cambiar la clase `.dark` del
+  <html>. Los valores de claro están calculados para superar 4.5:1 sobre fondo
+  claro, y los de oscuro sobre `--muted` en oscuro.
+*/
+
+:root {
+  --sintaxis-texto: var(--foreground);
+  --sintaxis-puntuacion: oklch(0.52 0.02 265);
+  --sintaxis-etiqueta: oklch(0.48 0.19 22);
+  --sintaxis-atributo: oklch(0.48 0.13 65);
+  --sintaxis-cadena: oklch(0.48 0.13 155);
+  --sintaxis-comentario: oklch(0.5 0.03 250);
+  --sintaxis-palabra-clave: oklch(0.48 0.2 300);
+  --sintaxis-numero: oklch(0.48 0.15 40);
+  --sintaxis-funcion: oklch(0.48 0.17 255);
+  --sintaxis-selector: oklch(0.48 0.17 330);
+  --sintaxis-propiedad: oklch(0.48 0.13 235);
+  --sintaxis-valor: oklch(0.48 0.13 155);
+  --sintaxis-doctype: oklch(0.5 0.05 280);
+
+  --sintaxis-numero-linea: oklch(0.55 0.02 265);
+  --sintaxis-destacado-fondo: oklch(0.85 0.13 90 / 0.3);
+  --sintaxis-destacado-borde: oklch(0.68 0.15 75);
+}
+
+.dark {
+  --sintaxis-puntuacion: oklch(0.72 0.02 265);
+  --sintaxis-etiqueta: oklch(0.78 0.13 20);
+  --sintaxis-atributo: oklch(0.83 0.12 85);
+  --sintaxis-cadena: oklch(0.8 0.13 155);
+  --sintaxis-comentario: oklch(0.68 0.03 250);
+  --sintaxis-palabra-clave: oklch(0.78 0.14 305);
+  --sintaxis-numero: oklch(0.82 0.12 55);
+  --sintaxis-funcion: oklch(0.78 0.13 250);
+  --sintaxis-selector: oklch(0.8 0.13 330);
+  --sintaxis-propiedad: oklch(0.8 0.1 235);
+  --sintaxis-valor: oklch(0.8 0.13 155);
+  --sintaxis-doctype: oklch(0.72 0.05 280);
+
+  --sintaxis-numero-linea: oklch(0.6 0.02 265);
+  --sintaxis-destacado-fondo: oklch(0.75 0.14 85 / 0.18);
+  --sintaxis-destacado-borde: oklch(0.78 0.13 85);
+}
+
+.sintaxis-texto {
+  color: var(--sintaxis-texto);
+}
+.sintaxis-puntuacion {
+  color: var(--sintaxis-puntuacion);
+}
+.sintaxis-etiqueta {
+  color: var(--sintaxis-etiqueta);
+}
+.sintaxis-atributo {
+  color: var(--sintaxis-atributo);
+}
+.sintaxis-cadena {
+  color: var(--sintaxis-cadena);
+}
+.sintaxis-comentario {
+  color: var(--sintaxis-comentario);
+  font-style: italic;
+}
+.sintaxis-palabra-clave {
+  color: var(--sintaxis-palabra-clave);
+}
+.sintaxis-numero {
+  color: var(--sintaxis-numero);
+}
+.sintaxis-funcion {
+  color: var(--sintaxis-funcion);
+}
+.sintaxis-selector {
+  color: var(--sintaxis-selector);
+}
+.sintaxis-propiedad {
+  color: var(--sintaxis-propiedad);
+}
+.sintaxis-valor {
+  color: var(--sintaxis-valor);
+}
+.sintaxis-doctype {
+  color: var(--sintaxis-doctype);
+}
+
+/* Cada línea es un bloque para que el destacado ocupe todo el ancho del
+   código, también cuando hay desplazamiento horizontal. */
+.sintaxis-linea {
+  display: block;
+}
+
+.sintaxis-linea-destacada {
+  background-color: var(--sintaxis-destacado-fondo);
+  box-shadow: inset 2px 0 0 0 var(--sintaxis-destacado-borde);
+}
+
+/* Los números no son contenido: ni se leen en voz alta (aria-hidden) ni se
+   copian con el código (user-select). */
+.sintaxis-numero-linea {
+  display: inline-block;
+  width: 2.5rem;
+  padding-right: 0.75rem;
+  text-align: right;
+  color: var(--sintaxis-numero-linea);
+  user-select: none;
+}
+
+.sintaxis-columna-numeros {
+  color: var(--sintaxis-numero-linea);
+  user-select: none;
+}
