@@ -1,3 +1,4 @@
+import { MessageSquareText } from 'lucide-react'
 import { useId, useMemo, useState } from 'react'
 
 import { CodigoResaltado } from '@/components/codigo'
@@ -34,11 +35,21 @@ export function CodigoAnotado({
       aria-label="Código anotado"
       className="my-6 min-w-0 space-y-4 rounded-xl border bg-card p-4 shadow-sm sm:p-5"
     >
-      <div className="space-y-1">
-        <h3 className="text-base font-semibold text-balance">Código anotado</h3>
-        <p className="text-sm text-pretty text-muted-foreground">
-          Selecciona un número para destacar su línea y leer la nota.
-        </p>
+      <div className="flex items-start gap-3">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-amber-50 dark:bg-amber-950/40">
+          <MessageSquareText
+            aria-hidden="true"
+            className="size-4.75 text-amber-600 dark:text-amber-400"
+          />
+        </div>
+        <div className="min-w-0 space-y-0.5">
+          <p className="text-[11px] font-bold tracking-wider text-amber-600 uppercase dark:text-amber-400">
+            Código anotado
+          </p>
+          <h3 className="text-lg font-bold tracking-tight text-balance">
+            Selecciona un número para destacar su línea y leer la nota
+          </h3>
+        </div>
       </div>
 
       <CodigoResaltado

@@ -1,4 +1,4 @@
-import { CircleCheck, CircleX } from 'lucide-react'
+import { CircleCheck, CircleHelp, CircleX } from 'lucide-react'
 import { useId, useState } from 'react'
 
 import { CodigoResaltado } from '@/components/codigo'
@@ -22,11 +22,21 @@ export function PrediceElResultado({
       aria-label="Predice el resultado"
       className="my-6 min-w-0 space-y-4 rounded-xl border bg-card p-4 shadow-sm sm:p-5"
     >
-      <div className="space-y-1">
-        <h3 className="text-base font-semibold text-balance">Predice el resultado</h3>
-        <p className="text-sm text-pretty text-muted-foreground">
-          Lee el código, elige una opción y comprueba qué muestra el navegador.
-        </p>
+      <div className="flex items-start gap-3">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-blue-50 dark:bg-blue-950/40">
+          <CircleHelp
+            aria-hidden="true"
+            className="size-4.75 text-blue-600 dark:text-blue-400"
+          />
+        </div>
+        <div className="min-w-0 space-y-0.5">
+          <p className="text-[11px] font-bold tracking-wider text-blue-600 uppercase dark:text-blue-400">
+            Predice el resultado
+          </p>
+          <h3 className="text-lg font-bold tracking-tight text-balance">
+            Lee el código, elige una opción y comprueba qué muestra el navegador.
+          </h3>
+        </div>
       </div>
 
       <CodigoResaltado
