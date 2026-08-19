@@ -31,6 +31,9 @@ export function AdminDashboardPage() {
           <Button asChild variant="outline">
             <Link to="/admin/laboratorio">Componentes de laboratorio</Link>
           </Button>
+          <Button asChild variant="outline">
+            <Link to="/admin/referencia-contenido">Componentes de contenido</Link>
+          </Button>
           <Button asChild>
             <Link to="/admin/tecnologias/nueva">Nueva ficha</Link>
           </Button>
