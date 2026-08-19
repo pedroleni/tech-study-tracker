@@ -202,27 +202,27 @@ for claudemd in $(find "$PROJECT_ROOT" -name "CLAUDE.md" -not -path "*/.git/*" -
     echo "  Analyzing: $claudemd"
 
     # Check for auto-approve / skip-permission patterns
-    if grep -qiP '(?:always.*approve|auto.*(?:execute|approve|accept)|skip.*(?:confirm|permission|approval))' "$claudemd" 2>/dev/null; then
+    if $GREP -qiP '(?:always.*approve|auto.*(?:execute|approve|accept)|skip.*(?:confirm|permission|approval))' "$claudemd" 2>/dev/null; then
         finding "CRITICAL" "Agent Config" "$claudemd" "Contains auto-approve/skip-confirmation directive"
     fi
 
     # Check for encoded content
-    if grep -qP '(?:[A-Za-z0-9+/]{4}){12,}={0,2}' "$claudemd" 2>/dev/null; then
+    if $GREP -qP '(?:[A-Za-z0-9+/]{4}){12,}={0,2}' "$claudemd" 2>/dev/null; then
         finding "HIGH" "Agent Config" "$claudemd" "Contains base64-encoded block — decode and verify content"
     fi
 
     # Check for external URL references for "more instructions"
-    if grep -qiP '(?:additional|more|extra|further).*instruction.*https?://' "$claudemd" 2>/dev/null; then
+    if $GREP -qiP '(?:additional|more|extra|further).*instruction.*https?://' "$claudemd" 2>/dev/null; then
         finding "CRITICAL" "Agent Config" "$claudemd" "References external URL for additional instructions"
     fi
 
     # Check for shell modification directives
-    if grep -qiP '(?:bashrc|zshrc|profile|shell.*config|PATH.*export)' "$claudemd" 2>/dev/null; then
+    if $GREP -qiP '(?:bashrc|zshrc|profile|shell.*config|PATH.*export)' "$claudemd" 2>/dev/null; then
         finding "HIGH" "Agent Config" "$claudemd" "References shell configuration modification"
     fi
 
     # Check for permission expansion
-    if grep -qiP 'dangerously-skip-permissions' "$claudemd" 2>/dev/null; then
+    if $GREP -qiP 'dangerously-skip-permissions' "$claudemd" 2>/dev/null; then
         finding "CRITICAL" "Agent Config" "$claudemd" "References --dangerously-skip-permissions flag"
     fi
 done
@@ -230,7 +230,7 @@ done
 # Check .cursorrules
 for cursorrules in $(find "$PROJECT_ROOT" -name ".cursorrules" -not -path "*/.git/*" 2>/dev/null); do
     echo "  Analyzing: $cursorrules"
-    if grep -qiP '(?:ignore|override|bypass|skip).*(?:security|check|validation)' "$cursorrules" 2>/dev/null; then
+    if $GREP -qiP '(?:ignore|override|bypass|skip).*(?:security|check|validation)' "$cursorrules" 2>/dev/null; then
         finding "HIGH" "Agent Config" "$cursorrules" "Contains directive to bypass security checks"
     fi
 done
@@ -241,14 +241,14 @@ if [ -d "$PROJECT_ROOT/.claude" ]; then
 
     if [ -f "$PROJECT_ROOT/.claude/settings.json" ]; then
         # Check for overly permissive settings
-        if grep -qP '"dangerously' "$PROJECT_ROOT/.claude/settings.json" 2>/dev/null; then
+        if $GREP -qP '"dangerously' "$PROJECT_ROOT/.claude/settings.json" 2>/dev/null; then
             finding "CRITICAL" "Agent Config" ".claude/settings.json" "Contains dangerous permission override"
         fi
     fi
 
     # Check custom commands
     for cmd in $(find "$PROJECT_ROOT/.claude/commands" -type f 2>/dev/null); do
-        if grep -qiP '(?:curl|wget|\bnc\b|eval|exec|bash -c)' "$cmd" 2>/dev/null; then
+        if $GREP -qiP '(?:curl|wget|\bnc\b|eval|exec|bash -c)' "$cmd" 2>/dev/null; then
             finding "HIGH" "Agent Config" "$cmd" "Custom command executes potentially dangerous operations"
         fi
     done
@@ -311,13 +311,13 @@ for htmlfile in $(find "$PROJECT_ROOT" -name "*.html" -o -name "*.htm" -o -name 
     -not -path "*/build/*" -size -1M 2>/dev/null | head -50); do
 
     # Check for hidden text with potential instructions
-    if grep -qiP '(?:display\s*:\s*none|visibility\s*:\s*hidden|opacity\s*:\s*0|font-size\s*:\s*0|position\s*:\s*absolute.*left\s*:\s*-\d{4,}).*(?:AI|assistant|agent|instruction|execute|ignore|override)' "$htmlfile" 2>/dev/null; then
+    if $GREP -qiP '(?:display\s*:\s*none|visibility\s*:\s*hidden|opacity\s*:\s*0|font-size\s*:\s*0|position\s*:\s*absolute.*left\s*:\s*-\d{4,}).*(?:AI|assistant|agent|instruction|execute|ignore|override)' "$htmlfile" 2>/dev/null; then
         finding "CRITICAL" "Hidden Content" "$htmlfile" "Hidden HTML element contains AI-targeted text"
     fi
 
     # SVG hidden text
     if echo "$htmlfile" | grep -qi "\.svg$"; then
-        if grep -qiP '<text[^>]*(?:opacity="0"|display="none"|font-size="0|x="-\d{4,})' "$htmlfile" 2>/dev/null; then
+        if $GREP -qiP '<text[^>]*(?:opacity="0"|display="none"|font-size="0|x="-\d{4,})' "$htmlfile" 2>/dev/null; then
             finding "HIGH" "Hidden Content" "$htmlfile" "SVG contains hidden text element"
         fi
         # SVG script tags
@@ -333,8 +333,8 @@ done
 
 # Hidden HTML blocks in markdown
 for mdfile in $(find "$PROJECT_ROOT" -name "*.md" -not -path "*/.git/*" -not -path "*/node_modules/*" -size -1M 2>/dev/null | head -50); do
-    if grep -qiP '<[^>]*(?:display\s*:\s*none|visibility\s*:\s*hidden|aria-hidden|hidden)' "$mdfile" 2>/dev/null; then
-        if grep -qiP '<[^>]*(?:hidden|display:none)[^>]*>.*(?:AI|assistant|agent|instruction|execute|override)' "$mdfile" 2>/dev/null; then
+    if $GREP -qiP '<[^>]*(?:display\s*:\s*none|visibility\s*:\s*hidden|aria-hidden|hidden)' "$mdfile" 2>/dev/null; then
+        if $GREP -qiP '<[^>]*(?:hidden|display:none)[^>]*>.*(?:AI|assistant|agent|instruction|execute|override)' "$mdfile" 2>/dev/null; then
             finding "CRITICAL" "Hidden Content" "$mdfile" "Hidden HTML in markdown contains AI-targeted instructions"
         else
             finding "MEDIUM" "Hidden Content" "$mdfile" "Markdown contains hidden HTML elements — review content"
@@ -373,7 +373,7 @@ fi
 
 # Check pyproject.toml descriptions
 if [ -f "$PROJECT_ROOT/pyproject.toml" ]; then
-    if grep -qiP 'description\s*=\s*"[^"]*(?:AI|assistant|agent|instruction|execute|curl|bash)' "$PROJECT_ROOT/pyproject.toml" 2>/dev/null; then
+    if $GREP -qiP 'description\s*=\s*"[^"]*(?:AI|assistant|agent|instruction|execute|curl|bash)' "$PROJECT_ROOT/pyproject.toml" 2>/dev/null; then
         finding "MEDIUM" "Metadata Injection" "pyproject.toml" "Suspicious content in description field"
     fi
 fi
@@ -390,22 +390,22 @@ if [ -d "$PROJECT_ROOT/.git/hooks" ]; then
         echo "  Analyzing: $hook"
 
         # Check for network access
-        if grep -qiP '(?:curl|wget|\bnc\b|ncat|fetch|http|ssh|scp|rsync)' "$hook" 2>/dev/null; then
+        if $GREP -qiP '(?:curl|wget|\bnc\b|ncat|fetch|http|ssh|scp|rsync)' "$hook" 2>/dev/null; then
             finding "HIGH" "Git Hook" "$hook" "Hook accesses network — verify this is intended"
         fi
 
         # Check for encoded execution
-        if grep -qiP '(?:base64.*decode|eval|exec.*\$)' "$hook" 2>/dev/null; then
+        if $GREP -qiP '(?:base64.*decode|eval|exec.*\$)' "$hook" 2>/dev/null; then
             finding "CRITICAL" "Git Hook" "$hook" "Hook contains encoded execution pattern"
         fi
 
         # Check for environment variable exfiltration
-        if grep -qiP '(?:printenv|env\b|\$\{?(?:API|SECRET|KEY|TOKEN|PASSWORD|AWS))' "$hook" 2>/dev/null; then
+        if $GREP -qiP '(?:printenv|env\b|\$\{?(?:API|SECRET|KEY|TOKEN|PASSWORD|AWS))' "$hook" 2>/dev/null; then
             finding "HIGH" "Git Hook" "$hook" "Hook accesses environment variables or secrets"
         fi
 
         # Check for file modification outside project
-        if grep -qiP '(?:~\/|/home/|/root/|/etc/|/tmp/)' "$hook" 2>/dev/null; then
+        if $GREP -qiP '(?:~\/|/home/|/root/|/etc/|/tmp/)' "$hook" 2>/dev/null; then
             finding "MEDIUM" "Git Hook" "$hook" "Hook references paths outside project directory"
         fi
     done
@@ -417,7 +417,7 @@ fi
 if [ -d "$PROJECT_ROOT/.husky" ]; then
     for hook in $(find "$PROJECT_ROOT/.husky" -type f -executable 2>/dev/null | grep -v "_"); do
         echo "  Analyzing Husky hook: $hook"
-        if grep -qiP '(?:curl|wget|\bnc\b|ncat|eval|base64|exec.*\$)' "$hook" 2>/dev/null; then
+        if $GREP -qiP '(?:curl|wget|\bnc\b|ncat|eval|base64|exec.*\$)' "$hook" 2>/dev/null; then
             finding "HIGH" "Git Hook" "$hook" "Husky hook contains suspicious patterns"
         fi
     done
