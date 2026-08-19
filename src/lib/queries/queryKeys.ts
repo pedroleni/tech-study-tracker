@@ -18,4 +18,6 @@ export const queryKeys = {
   progress: ['progress'] as const,
   myProgress: (userId: string, technologyId: string) =>
     ['progress', userId, technologyId] as const,
+  leccionesProgress: (userId: string, technologyId: string) =>
+    ['leccionesProgress', userId, technologyId] as const,
 }

@@ -9,6 +9,7 @@ const state = vi.hoisted(() => ({
   status: 'completado' as 'pendiente' | 'en_progreso' | 'completado',
   leccionStatus: 'publicado' as 'borrador' | 'publicado',
   setProgress: vi.fn(),
+  setLeccionProgress: vi.fn(),
 }))
 
 const technology = {
@@ -114,6 +115,11 @@ vi.mock('@/lib/hooks/useProgress', () => ({
     isPending: false,
     mutateAsync: state.setProgress.mockResolvedValue(undefined),
   }),
+  useMyLeccionesProgress: () => ({ data: [], isLoading: false }),
+  useSetMyLeccionProgress: () => ({
+    isPending: false,
+    mutate: state.setLeccionProgress,
+  }),
 }))
 
 import { FavoritesPage } from './FavoritesPage'
@@ -127,6 +133,8 @@ describe('public and account pages', () => {
     state.isAdmin = false
     state.status = 'completado'
     state.leccionStatus = 'publicado'
+    state.setProgress.mockClear()
+    state.setLeccionProgress.mockClear()
   })
 
   it('does not mix admin drafts into the public category view', () => {
@@ -220,18 +228,23 @@ describe('public and account pages', () => {
     )
 
     expect(screen.getByRole('heading', { name: 'Mi progreso' })).toBeInTheDocument()
-    expect(screen.getByLabelText('Estado')).toHaveValue('pendiente')
+    expect(screen.queryByLabelText('Estado')).not.toBeInTheDocument()
+    expect(screen.getByText('Pendiente', { selector: 'span' })).toBeInTheDocument()
+    expect(screen.getByText('0 de 1 lecciones completadas')).toBeInTheDocument()
     expect(screen.getByLabelText('Lección actual')).toHaveTextContent('Hooks')
     expect(screen.getByLabelText('Lección actual')).not.toHaveTextContent(
       'Lección interna',
     )
+    expect(screen.getByLabelText('Estado de Hooks')).toHaveValue('pendiente')
+    expect(screen.queryByLabelText('Estado de Lección interna')).not.toBeInTheDocument()
 
-    fireEvent.change(screen.getByLabelText('Estado'), {
+    fireEvent.change(screen.getByLabelText('Estado de Hooks'), {
       target: { value: 'en_progreso' },
     })
-    expect(state.setProgress).toHaveBeenCalledWith({
+    expect(state.setLeccionProgress).toHaveBeenCalledWith({
+      leccionId: 'leccion-1',
       technologyId: 'technology-1',
-      patch: { status: 'en_progreso' },
+      status: 'en_progreso',
     })
     const results = await axe(container, {
       rules: { 'color-contrast': { enabled: false } },
