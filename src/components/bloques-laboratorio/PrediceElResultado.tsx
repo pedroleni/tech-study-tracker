@@ -1,7 +1,9 @@
+import { CircleCheck, CircleX } from 'lucide-react'
 import { useId, useState } from 'react'
 
 import { CodigoResaltado } from '@/components/codigo'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import type { DatosPrediceElResultado } from '@/lib/laboratorio/schemas'
 
 export function PrediceElResultado({
@@ -67,22 +69,49 @@ export function PrediceElResultado({
 
       <div aria-live="polite">
         {revelado && seleccionada !== null && (
-          <div className="space-y-4 rounded-lg border bg-muted/30 p-4">
+          <div
+            className={cn(
+              'space-y-4 rounded-lg border-2 p-4',
+              seleccionada === correcta
+                ? 'border-green-200 bg-green-50 dark:border-green-900/50 dark:bg-green-950/30'
+                : 'border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-950/30',
+            )}
+          >
             <div className="space-y-1">
-              <p className="text-sm font-semibold">
+              <p
+                className={cn(
+                  'flex items-center gap-1.5 text-sm font-semibold',
+                  seleccionada === correcta
+                    ? 'text-green-700 dark:text-green-300'
+                    : 'text-red-700 dark:text-red-300',
+                )}
+              >
+                {seleccionada === correcta ? (
+                  <CircleCheck className="size-4 shrink-0" aria-hidden="true" />
+                ) : (
+                  <CircleX className="size-4 shrink-0" aria-hidden="true" />
+                )}
                 {seleccionada === correcta ? 'Respuesta correcta' : 'Esta vez no'}
               </p>
               <p className="text-sm text-pretty text-muted-foreground">{explicacion}</p>
-              <p className="text-sm">
-                Respuesta: <span className="font-medium">{opciones[correcta]}</span>
-              </p>
+              {seleccionada !== correcta && (
+                <p className="text-sm">
+                  Respuesta correcta:{' '}
+                  <span className="font-medium text-foreground">{opciones[correcta]}</span>
+                </p>
+              )}
             </div>
-            <iframe
-              className="block h-48 w-full max-w-full rounded-lg border bg-white"
-              sandbox=""
-              srcDoc={codigo}
-              title="Resultado real del código HTML"
-            />
+            <div className="space-y-1.5">
+              <p className="text-xs font-medium text-muted-foreground">Así se ve de verdad</p>
+              <div className="flex justify-center rounded-lg border bg-muted/40 p-3">
+                <iframe
+                  className="block h-24 w-full max-w-64 rounded-md border bg-white"
+                  sandbox=""
+                  srcDoc={codigo}
+                  title="Resultado real del código HTML"
+                />
+              </div>
+            </div>
           </div>
         )}
       </div>
