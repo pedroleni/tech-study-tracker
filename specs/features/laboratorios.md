@@ -1,6 +1,9 @@
 # Bloques de laboratorio en lecciones
 
-**Estado:** ⏳ pendiente de implementar.
+**Estado:** ✅ implementada. Los 3 tipos de bloque, el prop
+`permitirLaboratorios`, y las dos lecciones piloto de HTML reescritas
+y verificadas en producción (capturas reales, toggle antes/después
+probado en ambos estados).
 
 ## Por qué existe esta feature
 
@@ -234,13 +237,13 @@ Cada componente que renderiza HTML en vivo usa
 
 ## Checklist de implementación
 
-- [ ] `src/lib/laboratorio/schemas.ts` (3 esquemas + unión discriminada)
-- [ ] `src/components/bloques-laboratorio/` (3 componentes + registro + punto de entrada)
-- [ ] `SafeMarkdown.tsx`: prop, override de `code`, `CodigoResaltado` para código normal
-- [ ] `LeccionPage.tsx`: pasar el prop
-- [ ] Tests: los 3 tipos renderizan con datos válidos; JSON inválido cae a código plano; `tipo` desconocido cae a código plano; comentario con bloque `laboratorio` NO se activa
-- [ ] `contenido/html/01-*.md` y `02-*.md` reescritos con bloques reales
-- [ ] Contenido actualizado en producción vía el formulario de admin
-- [ ] `npm run test`, `build`, `lint` en verde
-- [ ] Verificación visual real (Playwright) de las dos lecciones publicadas
-- [ ] Revisión de seguridad — foco en el checkpoint de comentarios de arriba
+- [x] `src/lib/laboratorio/schemas.ts` (3 esquemas + unión discriminada)
+- [x] `src/components/bloques-laboratorio/` (3 componentes + registro + punto de entrada)
+- [x] `SafeMarkdown.tsx`: prop, override de `code`, `CodigoResaltado` para código normal
+- [x] `LeccionPage.tsx`: pasar el prop
+- [x] Tests: los 3 tipos renderizan con datos válidos; JSON inválido cae a código plano; `tipo` desconocido cae a código plano; comentario con bloque `laboratorio` NO se activa
+- [x] `contenido/html/01-*.md` y `02-*.md` reescritos con bloques reales
+- [x] Contenido actualizado en producción vía el formulario de admin
+- [x] `npm run test`, `build`, `lint` en verde (209/209 tests)
+- [x] Verificación visual real (Playwright) de las dos lecciones publicadas, incluido el toggle antes/después en ambos estados
+- [x] Revisión de seguridad — foco en el checkpoint de comentarios de arriba, 0 hallazgos High/Medium
