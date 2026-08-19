@@ -47,18 +47,13 @@ export async function getMyLeccionesProgress(
 }
 
 export async function upsertMyLeccionProgress(
-  userId: string,
   leccionId: string,
   status: Status,
 ): Promise<UserLeccionProgress> {
-  const { data, error } = await supabase
-    .from('user_leccion_progress')
-    .upsert(
-      { user_id: userId, leccion_id: leccionId, status },
-      { onConflict: 'user_id,leccion_id' },
-    )
-    .select()
-    .single()
+  const { data, error } = await supabase.rpc('upsert_my_leccion_progress', {
+    p_leccion_id: leccionId,
+    p_status: status,
+  })
   if (error) throw error
   return mapLeccionProgress(data)
 }

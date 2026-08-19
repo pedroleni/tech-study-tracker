@@ -55,7 +55,7 @@ export function useSetMyLeccionProgress() {
   return useMutation({
     mutationFn: ({ leccionId, status }: { leccionId: string; technologyId: string; status: Status }) => {
       if (!user) throw new Error('Inicia sesión para guardar tu progreso.')
-      return upsertMyLeccionProgress(user.id, leccionId, status)
+      return upsertMyLeccionProgress(leccionId, status)
     },
     onSuccess: (_, { technologyId }) => {
       if (!user) return
