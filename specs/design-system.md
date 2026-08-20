@@ -76,6 +76,78 @@ del enum a estas clases, mismo patrón que `buttonVariants` en
 de color sueltas — los tres valores posibles de cada enum son fijos y
 conocidos, así que el mapeo va hardcodeado dentro del propio componente.
 
+## Bandas de marca (`technologyBrandColors`)
+
+**Qué es:** desde 2026-08 (PR #39), `TechnologyCard` (grid de
+tecnologías), la cabecera de `TechnologyPage` y la cabecera de cada
+módulo en la lista de lecciones usan una banda de color con el color de
+marca real del icono de la tecnología, en vez del tile monocromo
+pequeño (`bg-muted` + icono gris) de antes. El icono, de nuevo grande,
+se recorta también como marca de agua translúcida de fondo.
+
+**De dónde sale el color — dato, no memoria.** `src/lib/icons/
+technologyBrandColors.ts` exporta `Record<string, { hex: string;
+iconTone: 'light' | 'dark' }>`, con las mismas claves que
+`technologyIcons.ts`. El `hex` no se escribió de memoria: se extrajo
+programáticamente del paquete npm `simple-icons` (instalado en
+temporal, nunca en `package.json` — mismo patrón que las
+verificaciones con Playwright) para los ~68 iconos presentes en esa
+versión del paquete; los pocos que faltan ahí (`css3`, `csharp`,
+`aws`, `azure`, `vscode` — o bien renombrados/retirados de Simple
+Icons por temas de marca registrada, o nunca incluidos) llevan su color
+oficial documentado a mano, justo porque son marcas lo bastante
+estables y conocidas como para no necesitar la fuente de datos. Si se
+añade un icono nuevo a `technologyIcons.ts`, su color debe salir del
+mismo sitio (`simple-icons`), no inventarse.
+
+**`iconTone` se calcula, no se elige a ojo.** Luminancia relativa
+(fórmula WCAG) sobre el `hex`; por encima de ~0.55 el icono/texto sobre
+la banda se pinta oscuro (`text-neutral-900`), si no, blanco
+(`text-white`). De los colores actuales, solo `javascript`, `react` y
+`linux` caen en el lado claro y necesitan texto oscuro — el resto usa
+blanco.
+
+**Lógica compartida, no duplicada.** `TechnologyBrand`
+(`src/components/technology/TechnologyCard.tsx`, exportado y reusado
+por `TechnologyPage.tsx`) es un componente de render-prop que resuelve
+una vez icono + color + clases de contraste + fallback, y expone
+`backgroundClassName`/`foregroundClassName`/`glassClassName`/`brandHex`/
+`Icon` a quien lo use. Sin entrada en el mapa (p. ej. `terminal`, que
+no es una marca) cae a un tratamiento neutro (`bg-muted` /
+`text-muted-foreground`), nunca a un color inventado.
+
+**Badges "de cristal" sobre la banda — y el bug real que enseñó por
+qué existen.** Los badges que van encima de una banda de color
+(dificultad, prioridad, estado, contador de lecciones del módulo) NO
+son `StatusBadge`/`DifficultyBadge`/`PriorityBadge` con un `className`
+para sobreescribir el color — se probó así y falló en modo oscuro de
+verdad: esos componentes llevan sus propias clases `dark:bg-*
+dark:text-*` internas, y `tailwind-merge` no las trata como conflicto
+con un `bg-white/15` sin prefijo (son "grupos" de modificador
+distintos para `twMerge`), así que ambas clases quedan en el DOM a la
+vez y gana la que caiga después en la hoja de estilos generada por
+Tailwind — en la práctica, el color semántico propio del badge, no el
+override. Confirmado visualmente con Playwright contra producción
+(pastillas de "Completado"/"Dificultad fácil" en verde en vez del
+cristal translúcido esperado). Arreglo real: `<span>` planos con solo
+el texto de la etiqueta (`difficultyLabels`/`priorityLabels`/
+`statusLabels`, en `src/components/technology/labels.ts` — separados
+en su propio archivo porque mezclarlos como export no-componente en
+`TechnologyCard.tsx` rompía `react-refresh/only-export-components`),
+pintados con `glassClassName` de `TechnologyBrand`. **Regla derivada:**
+nunca reusar un badge semántico ya estilado (`StatusBadge` y
+compañía) sobre una superficie que no sea `--card`/`--background` lisos
+— sobre cualquier fondo de color propio, pastilla de cristal a mano.
+
+**La pastilla de progreso por lección reutiliza la paleta semántica de
+arriba**, no colores nuevos: el `<select>` de estado en cada fila de
+lección (`TechnologyPage.tsx`, ver `specs/features/progress.md`) usa
+exactamente `leccionProgressPillClassName` = las mismas clases de la
+tabla "Status" de esta misma sección, con `appearance-none` +
+`ChevronDown` superpuesto para que se lea como una etiqueta de estado
+en vez de un campo de formulario — solo se abre como desplegable al
+hacer clic o con teclado, igual que cualquier `<select>` nativo.
+
 ## Inventario de componentes
 
 | Componente | Estado | Base |
@@ -84,7 +156,10 @@ conocidos, así que el mapeo va hardcodeado dentro del propio componente.
 | `Input` | ✅ instalado (a mano, sin red) | estilo shadcn |
 | `Label` | ✅ instalado (a mano, sin red) | estilo shadcn |
 | `Card` | ✅ instalado (a mano, sin red) | estilo shadcn |
-| `StatusBadge` / `PriorityBadge` / `DifficultyBadge` | ⏳ pendiente | paleta semántica de arriba |
+| `StatusBadge` / `PriorityBadge` / `DifficultyBadge` | ✅ implementado | paleta semántica de arriba |
+| `TechnologyBrand` + `technologyBrandColors` | ✅ implementado (PR #39) | banda de marca, ver sección de arriba |
+| `TechnologyCard` (grid) | ✅ implementado, banda de marca | banda de marca |
+| Pastilla de progreso por lección | ✅ implementado (PR #40/#41) | paleta semántica "Status", ver arriba |
 | `Dialog` (modal de edición de tecnología) | ⏳ pendiente | `npx shadcn add dialog` si hay red |
 | `Select` (categoría, status, priority, difficulty en el form) | ⏳ pendiente | `npx shadcn add select` si hay red |
 | `DropdownMenu` (acciones de card: editar/borrar) | ⏳ pendiente | `npx shadcn add dropdown-menu` si hay red |

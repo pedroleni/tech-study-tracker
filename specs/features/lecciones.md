@@ -1,6 +1,11 @@
 # Lecciones: tercer nivel del contenido (categoría → tecnología → lección)
 
-**Estado:** 🚧 en spec, sin implementar.
+**Estado:** ✅ implementada — migraciones `0004`/`0007` aplicadas. El
+resto de este documento queda como registro histórico de las
+decisiones tomadas antes de implementar; para el estado actual de
+`TechnologyPage`/`TechnologyCard` (banda de marca) ver
+`specs/design-system.md`, y para el progreso por lección
+`specs/features/progress.md`.
 
 ## Por qué existe esta feature
 

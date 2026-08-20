@@ -1,6 +1,6 @@
 # Progreso personal por tecnología
 
-**Estado:** ✅ implementada en PR #26; migración `0006` aplicada y verificada con curl real en producción.
+**Estado:** ✅ implementada en PR #26; migración `0006` aplicada y verificada con curl real en producción. Extendida con progreso por lección individual en PR #40/#41 (migraciones `0008`/`0009`) — ver sección dedicada más abajo; cambió además el "Estado" de esta sección de manual a derivado, ver esa misma sección.
 
 ## Por qué existe esta feature
 
@@ -298,14 +298,226 @@ garantiza que no se duplica sin querer).
       el `on delete set null` con una prueba real, no solo leerlo en
       el SQL.
 
+## Progreso por lección individual (`user_leccion_progress`)
+
+**Por qué se añadió después, y no en el diseño original:** la sección
+de arriba solo permite un estado por *tecnología completa*. Usando la
+app real, esto resultó confuso — no había forma de decir "ya hice
+esta lección en concreto", solo un selector de estado manual y
+desconectado de lo que realmente se había leído. La primera versión
+de este documento (ver abajo) daba esto explícitamente por fuera de
+alcance; se revisó esa decisión al tener uso real de la app, no antes.
+
+### Modelo de datos
+
+Misma forma que `user_technology_progress`, a nivel de lección
+(migración `0008`):
+
+```sql
+create table public.user_leccion_progress (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  leccion_id uuid not null references public.lecciones(id) on delete cascade,
+  status text not null default 'pendiente'
+    check (status in ('pendiente', 'en_progreso', 'completado')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (user_id, leccion_id)
+);
+```
+
+- Sin `current_leccion_id` aquí — ese puntero sigue viviendo solo en
+  `user_technology_progress` (arriba); es un concepto distinto ("qué
+  lección retomo") del de esta tabla ("qué lecciones ya hice").
+- Sin trigger de integridad cruzada: a diferencia de
+  `current_leccion_id`, aquí no hay una segunda columna
+  (`technology_id`) con la que `leccion_id` pueda desincronizarse.
+
+### RLS — mismo patrón, mismo anti-oráculo que arriba
+
+```sql
+alter table public.user_leccion_progress enable row level security;
+
+create policy "user_leccion_progress_select_own" on public.user_leccion_progress
+  for select to authenticated
+  using (user_id = (select auth.uid()));
+
+-- Mismo anti-oráculo que user_technology_progress_insert_own_public:
+-- solo se puede trackear una lección publicada de una tecnología pública real.
+create policy "user_leccion_progress_insert_own_public" on public.user_leccion_progress
+  for insert to authenticated
+  with check (
+    user_id = (select auth.uid())
+    and exists (
+      select 1
+      from public.lecciones l
+      join public.technologies t on t.id = l.technology_id
+      where l.id = leccion_id
+        and l.status = 'publicado'
+        and t.status = 'completado'
+        and private.is_admin(t.user_id)
+    )
+  );
+
+create policy "user_leccion_progress_update_own" on public.user_leccion_progress
+  for update to authenticated
+  using (user_id = (select auth.uid()))
+  with check (user_id = (select auth.uid()));
+
+create policy "user_leccion_progress_delete_own" on public.user_leccion_progress
+  for delete to authenticated
+  using (user_id = (select auth.uid()));
+
+revoke all on table public.user_leccion_progress from anon, authenticated;
+grant select, delete on table public.user_leccion_progress to authenticated;
+grant insert (user_id, leccion_id, status), update (status)
+  on table public.user_leccion_progress to authenticated;
+```
+
+Revisado por un agente de seguridad adversarial dedicado (no solo el
+scanner de patrones automático) antes de mergear, comparado
+explícitamente contra este mismo precedente — sin hallazgos.
+
+### El mismo error de `.upsert()` directo, esta vez con un solo campo — y por qué eso no lo salva
+
+Más arriba en este documento ya está el porqué de que
+`user_technology_progress` necesite RPC en vez de `.upsert()` directo.
+Al implementar esta tabla se asumió que, con un solo campo mutable
+(`status`, no dos como allí), un `.upsert()` directo desde el cliente
+sí sería seguro. **Error real, no hipotético:** se implementó así
+primero (migración `0008`, sin RPC), se probó en vivo contra
+producción con una cuenta real, y falló con `403 permission denied for
+table user_leccion_progress`.
+
+**Por qué falla igual con un solo campo:** PostgREST no sabe qué
+columnas del payload de `.upsert(...)` son "identidad" y cuáles son
+"estado mutable" — regenera el `ON CONFLICT DO UPDATE SET` con
+*todas* las columnas que mandó el cliente (`user_id`, `leccion_id`,
+`status`), no solo con la que la app considera editable. El `GRANT` de
+esta tabla deniega `update` sobre `user_id`/`leccion_id` a propósito.
+Concederlo para que el upsert funcionara habría sido la solución
+rápida y la incorrecta: la política de `update`
+(`user_leccion_progress_update_own`) no vuelve a comprobar que la
+lección esté publicada, así que un `UPDATE` directo con `leccion_id`
+editable podría repuntar la fila hacia una lección en borrador sin
+pasar por el anti-oráculo del `insert` — reabriendo exactamente el
+agujero que esa política existe para cerrar.
+
+**Solución (migración `0009`, corrigiendo `0008` ya aplicada en
+producción):** RPC `security invoker`, mismo patrón que
+`upsert_my_technology_progress`, con SQL a mano que solo toca `status`
+en el `SET`:
+
+```sql
+create or replace function public.upsert_my_leccion_progress(
+  p_leccion_id uuid,
+  p_status text
+)
+returns public.user_leccion_progress
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+declare
+  result public.user_leccion_progress;
+begin
+  insert into public.user_leccion_progress as p (user_id, leccion_id, status)
+  values ((select auth.uid()), p_leccion_id, p_status)
+  on conflict (user_id, leccion_id) do update
+  set status = p_status
+  returning * into result;
+
+  return result;
+end;
+$$;
+
+revoke all on function public.upsert_my_leccion_progress(uuid, text) from public;
+grant execute on function public.upsert_my_leccion_progress(uuid, text) to authenticated;
+```
+
+`queries/progress.ts`: `upsertMyLeccionProgress(leccionId, status)` —
+sin `userId` como parámetro (lo deriva el RPC de `auth.uid()`, igual
+que la versión de tecnología).
+
+**Lección para la próxima tabla con upsert desde el cliente:** la
+pregunta correcta no es "¿cuántos campos mutables tiene?" sino "¿hay
+alguna columna en el `INSERT` que no deba ser editable después?". Si
+la respuesta es sí — y casi siempre lo es, para `user_id`/las FKs de
+identidad — el upsert va por RPC con `SET` explícito, sin excepción,
+aunque solo haya un campo realmente mutable.
+
+### Estado de la tecnología: de manual a derivado
+
+El `<select>` de "Estado" en `ProgressControl` (`TechnologyPage.tsx`,
+sección "Mi progreso") **ya no es editable**. Se calcula en el cliente
+a partir del progreso real de las lecciones publicadas de esa
+tecnología, no se lee ni se escribe
+`user_technology_progress.status`:
+
+- `completado`: el 100% de las lecciones publicadas están en
+  `completado` (y hay al menos una — cero lecciones publicadas nunca
+  cuenta como "completado", para no tratar 0-de-0 como éxito vacío).
+- `en_progreso`: al menos una lección publicada está en `en_progreso`
+  o `completado`, sin llegar al 100%.
+- `pendiente`: ninguna lección tiene progreso, o no hay lecciones
+  publicadas todavía.
+
+Se muestra además el conteo real ("X de Y lecciones completadas") en
+vez de solo la etiqueta. `user_technology_progress.status` y el
+parámetro `p_status` de `upsert_my_technology_progress` (RPC de
+arriba) siguen existiendo en la base de datos sin usarse desde la UI
+— migrarlos o eliminarlos queda fuera de alcance de este cambio, no se
+tocan hasta que haga falta de verdad.
+
+### Qué cambia fuera de la base de datos (además de lo ya listado arriba)
+
+- **`src/types/index.ts`**: `UserLeccionProgress { id, userId,
+  leccionId, status: Status, createdAt, updatedAt }`.
+- **`src/lib/queries/mappers.ts`**: `LeccionProgressRow` +
+  `mapLeccionProgress`.
+- **`src/lib/queries/progress.ts`**: `getMyLeccionesProgress(userId,
+  leccionIds)` — una sola query con `.in('leccion_id', leccionIds)`;
+  si `leccionIds` está vacío devuelve `[]` sin llamar a la API (un
+  `.in()` vacío no es seguro de mandar a PostgREST) — y
+  `upsertMyLeccionProgress(leccionId, status)` (RPC, ver arriba).
+- **`src/lib/queries/queryKeys.ts`**: `leccionesProgress(userId,
+  technologyId)` — cacheado por tecnología (granularidad de fetch de
+  la UI), no por lección individual.
+- **`src/lib/hooks/useProgress.ts`**: `useMyLeccionesProgress
+  (technologyId, leccionIds)` + `useSetMyLeccionProgress()` — esta
+  última invalida la query tras cada escritura en vez de parchear la
+  caché a mano (es un array; más simple refetchear que mantenerlo
+  sincronizado a mano).
+- **`TechnologyPage.tsx`**: un `<select>` por lección publicada, en su
+  fila dentro del módulo (ver `specs/design-system.md` para el estilo
+  de pastilla), visible solo con sesión iniciada; sin fila en la tabla
+  = `pendiente` por defecto, tal como se pidió. Deshabilitado mientras
+  su propia mutación está en curso (no bloquea las demás filas).
+
+### Checkpoints de seguridad específicos de `user_leccion_progress`
+
+- [x] Revisión adversarial dedicada contra el precedente de
+      `user_technology_progress` — sin hallazgos (RLS correcta, sin
+      IDOR, `user_id` siempre de la sesión, sin fuga de lecciones en
+      borrador en el cálculo del estado derivado).
+- [ ] Un usuario no puede leer ni escribir el progreso de otro usuario
+      — probar con curl real con dos identidades registradas
+      distintas.
+- [ ] Trackear una lección en `borrador`, o de una tecnología no
+      `completado`/no admin, falla igual que un `leccion_id`
+      inexistente.
+- [ ] `user_id`/`leccion_id` no son editables vía `update` directo a
+      la API aunque se envíen en el payload — confirmar que la fila no
+      cambia, no solo que la llamada no falla.
+- [x] Upsert por RPC probado en vivo contra producción con una cuenta
+      real: guardar, recargar, confirmar que persiste de verdad (no
+      solo UI optimista) y que el rollup de la tecnología se
+      recalcula bien.
+
 ## Fuera de alcance de esta feature
 
 - Vista agregada "todo mi progreso" (todas las tecnologías que sigo, en
   un único sitio) — esta spec solo cubre el control en la propia
   `TechnologyPage`. Se revisita si hace falta de verdad.
-- Progreso por lección individual (marcar cada lección como
-  vista/completada) — el modelo de esta spec es un único puntero de
-  "lección actual" por tecnología, no una lista de lecciones vistas.
-  Si se quiere eso, es una tabla y una spec distintas.
 - Cualquier gamificación (rachas, puntos, insignias) sobre este
   progreso — no pedido, no se añade especulativamente.
