@@ -3,7 +3,7 @@
 - **Módulo:** Fundamentos del documento
 - **Slug:** `anatomia-de-una-etiqueta-elementos-atributos-y-por-que-algunas-se-cierran-solas` (autogenerado del título)
 - **Orden:** 5
-- **Fuentes:** [Basic HTML syntax (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Basic_HTML_syntax) + [Overview of HTML (web.dev)](https://web.dev/learn/html/overview) — ver `contenido/html/TEMARIO.md` #1
+- **Fuentes:** [Basic HTML syntax (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Basic_HTML_syntax) + [Overview of HTML (web.dev)](https://web.dev/learn/html/overview) — ver `contenido/html/TEMARIO.md` #2
 
 ---
 
@@ -11,7 +11,9 @@
 
 Una **etiqueta** (`tag`) es el marcador entre `<` y `>`: `<p>`, `<strong>`, `<img>`. Un **elemento** es la unidad completa: etiqueta de apertura, el contenido que envuelve, y etiqueta de cierre — `<p>Hola</p>` es un elemento; `<p>` por sí sola es solo una etiqueta. La distinción importa porque casi todo lo que vas a leer sobre HTML habla de "elementos" (el `<p>` es un elemento de bloque, el `<a>` es un elemento en línea) dando por hecho que ya sabes de qué piezas está hecho uno.
 
-Dentro de la etiqueta de apertura pueden ir **atributos**: pares `nombre="valor"` que añaden información o configuran el comportamiento del elemento sin que se vean como contenido — el `href` de un enlace, el `src` de una imagen, el `class` que usará tu CSS. Y no todos los elementos siguen el patrón apertura-contenido-cierre: unos pocos, los que nunca pueden contener nada (una imagen, un salto de línea), se escriben con una sola etiqueta y punto.
+Dentro de la etiqueta de apertura pueden ir **atributos**: pares `nombre="valor"` que añaden información o configuran el comportamiento del elemento sin que se vean como contenido — el `href` de un enlace, el `src` de una imagen, el `class` que usará tu CSS. Hay dos familias de atributos que conviene distinguir desde ya: los **globales**, que funcionan en cualquier etiqueta (`class`, `id`, `title`, `lang`), y los **específicos**, que solo tienen sentido en una etiqueta concreta (`href` solo en `<a>`, `src` solo en elementos que cargan un recurso). Y no todos los atributos llevan valor: los **atributos booleanos** (`disabled`, `checked`, `required`) activan o desactivan un comportamiento solo con estar presentes — no necesitan `="algo"`, y de hecho escribir `disabled="false"` sigue dejando el elemento deshabilitado, porque lo único que importa es si el atributo aparece o no.
+
+Y no todos los elementos siguen el patrón apertura-contenido-cierre: unos pocos, los que nunca pueden contener nada (una imagen, un salto de línea), se escriben con una sola etiqueta y punto. Cuando anidas elementos unos dentro de otros — como llevas haciendo sin darte cuenta en cada ejemplo de HTML que has visto hasta ahora — el navegador construye internamente un árbol con ellos (el DOM). No hace falta que lo entiendas hoy, pero conviene que sepas que existe: la mayoría de bugs de "por qué mi CSS no aplica" o "por qué mi JavaScript no encuentra el elemento" se explican mirando ese árbol, no la etiqueta suelta.
 
 ## Cuándo lo usarías de verdad 👤
 
@@ -21,14 +23,14 @@ Dentro de la etiqueta de apertura pueden ir **atributos**: pares `nombre="valor"
   "items": [
     { "titulo": "Cada vez que escribes o lees HTML, sin excepción.", "texto": "Esto no es una técnica puntual, es la gramática básica. Todo lo demás del temario — formularios, tablas, accesibilidad — se explica dando por hecho que ya sabes leer una etiqueta." },
     { "titulo": "Cuando depuras una página que 'se ve rota'.", "texto": "Una etiqueta sin cerrar o cerrada en el orden equivocado es una de las causas más comunes de que el diseño se descuadre a partir de cierto punto de la página, sin que haya ningún error visible en la consola." },
-    { "titulo": "Cuando lees la documentación de una etiqueta que no conoces.", "texto": "Lo primero que necesitas saber de una etiqueta nueva es si es normal o si se cierra sola, y qué atributos acepta. Es la primera pregunta que responde cualquier referencia de MDN." }
+    { "titulo": "Cuando lees la documentación de una etiqueta que no conoces.", "texto": "Lo primero que necesitas saber de una etiqueta nueva es si es normal o si se cierra sola, qué atributos acepta, y si alguno de ellos es booleano. Es la primera pregunta que responde cualquier referencia de MDN." }
   ]
 }
 ```
 
 ## Cómo se usa
 
-Un elemento normal, completo:
+Un elemento normal, completo, con varios atributos:
 
 ```html
 <p class="intro">
@@ -52,6 +54,18 @@ Un elemento normal, completo:
 }
 ```
 
+Los atributos booleanos se escriben distinto — sin `="valor"` — y por eso conviene verlos aparte:
+
+```html
+<label>
+  <input type="checkbox" checked>
+  Acepto los términos
+</label>
+<button type="submit" disabled>Enviar</button>
+```
+
+Aquí `checked` deja la casilla marcada desde el principio y `disabled` deja el botón inactivo — ninguno de los dos lleva valor, su sola presencia en la etiqueta ya activa el comportamiento. Si quitas `checked` o `disabled` de la etiqueta, vuelven al estado contrario; no existe un `checked="false"` que sirva para desactivarlos, porque el navegador solo mira si el atributo está o no está.
+
 ¿Qué pasa si cierras dos elementos anidados en el orden equivocado?
 
 ```laboratorio
@@ -68,6 +82,19 @@ Un elemento normal, completo:
 }
 ```
 
+## Lo que una etiqueta desconocida NO hace 👤
+
+```laboratorio
+{
+  "tipo": "notas-clave",
+  "items": [
+    { "titulo": "El navegador no rechaza una etiqueta que no reconoce.", "texto": "Escribe <marcador-inventado>texto</marcador-inventado> en cualquier página: no hay error, no hay aviso. El navegador la trata como un elemento genérico sin ningún estilo ni comportamiento especial, y sigue mostrando el texto de dentro con normalidad." },
+    { "titulo": "Por eso una etiqueta mal escrita no 'avisa'.", "texto": "Si escribes <strogn> en vez de <strong> por error de tecleo, el navegador no te va a decir nada — simplemente el texto no se pondrá en negrita, porque <strogn> es, para él, una etiqueta desconocida más." },
+    { "titulo": "Esto es justo lo que hace posibles los Web Components.", "texto": "Etiquetas personalizadas como <mi-componente> funcionan porque el navegador ya las acepta sintácticamente sin quejarse; solo les falta que JavaScript les defina un comportamiento. No es magia nueva, es esta misma tolerancia de HTML." }
+  ]
+}
+```
+
 ## Errores típicos 👤
 
 ```laboratorio
@@ -77,6 +104,7 @@ Un elemento normal, completo:
     { "titulo": "Olvidar cerrar una etiqueta que sí lo necesita.", "texto": "Confundir un elemento normal con uno vacío — pensar que, como <img> no lleva cierre, tampoco hace falta cerrar un <div> o un <p>. Solo el puñado de elementos vacíos (img, br, meta, input, hr, entre otros) se libran." },
     { "titulo": "Cerrar en el orden equivocado.", "texto": "<b><i>texto</b></i> en vez de <b><i>texto</i></b> — el cierre tiene que deshacer el anidamiento en orden inverso al de apertura, como una pila." },
     { "titulo": "Olvidar las comillas en un atributo con espacios.", "texto": "class=mi clase sin comillas solo asigna \"mi\" como valor y deja \"clase\" suelto como si fuera otro atributo sin valor. Las comillas no son opcionales en cuanto el valor tiene un espacio." },
+    { "titulo": "Escribir un atributo booleano como si llevara valor de verdad.", "texto": "disabled=\"false\" sigue dejando el botón deshabilitado, porque el navegador solo comprueba si disabled está presente, no qué valor tiene. Para activarlo o no, se añade o se quita la etiqueta entera del atributo." },
     { "titulo": "Añadir una barra de cierre a una etiqueta que no es vacía pensando que así se cierra sola.", "texto": "<div /> no cierra el div en HTML5 — a diferencia de XML/XHTML, el navegador lo trata como una apertura normal y sigue esperando un </div> más adelante." }
   ]
 }
@@ -87,6 +115,8 @@ Un elemento normal, completo:
 1. Abre cualquier página web real con las herramientas de desarrollador y encuentra tres elementos distintos: uno normal con contenido de texto, uno con al menos dos atributos, y uno vacío/void.
 2. Escribe un párrafo con un enlace dentro que se abra en una pestaña nueva, usando los atributos correctos y las comillas en su sitio.
 3. Corrige este HTML mal anidado: `<p>Texto <strong>importante</p></strong>`.
+4. Escribe un `<button>` que empiece deshabilitado usando un atributo booleano, y explica con tus palabras por qué `disabled="false"` no serviría para lo contrario.
+5. Escribe en un archivo `<marcador-que-te-inventes>Hola</marcador-que-te-inventes>` y ábrelo en el navegador. ¿Da algún error? ¿Se ve el texto?
 
 ## Para profundizar
 
