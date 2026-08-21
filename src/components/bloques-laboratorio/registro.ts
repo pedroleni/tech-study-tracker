@@ -2,6 +2,7 @@ import type { ComponentType } from 'react'
 
 import { CodigoAnotado } from '@/components/bloques-laboratorio/CodigoAnotado'
 import { ComparadorAntesDespues } from '@/components/bloques-laboratorio/ComparadorAntesDespues'
+import { DiagramaEtiqueta } from '@/components/bloques-laboratorio/DiagramaEtiqueta'
 import { NotasClave } from '@/components/bloques-laboratorio/NotasClave'
 import { PrediceElResultado } from '@/components/bloques-laboratorio/PrediceElResultado'
 
@@ -13,4 +14,5 @@ export const registroBloquesLaboratorio: Record<string, ComponentType<any>> = {
   'codigo-anotado': CodigoAnotado,
   'comparador-antes-despues': ComparadorAntesDespues,
   'notas-clave': NotasClave,
+  'diagrama-etiqueta': DiagramaEtiqueta,
 }

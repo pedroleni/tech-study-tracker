@@ -95,6 +95,42 @@ describe('SafeMarkdown con laboratorios', () => {
     expect(region).toHaveTextContent('Segundo punto.')
   })
 
+  it('renderiza diagrama-etiqueta con sus partes y etiquetas de rol', () => {
+    render(
+      <SafeMarkdown permitirLaboratorios>
+        {bloqueLaboratorio({
+          tipo: 'diagrama-etiqueta',
+          partes: [
+            { texto: '<', rol: 'simbolo' },
+            { texto: 'p', rol: 'apertura' },
+            { texto: ' ', rol: 'simbolo' },
+            { texto: 'class', rol: 'atributo-nombre' },
+            { texto: '=', rol: 'simbolo' },
+            { texto: '"intro"', rol: 'atributo-valor' },
+            { texto: '>', rol: 'simbolo' },
+            { texto: 'Hola', rol: 'contenido' },
+            { texto: '</p>', rol: 'cierre' },
+          ],
+        })}
+      </SafeMarkdown>,
+    )
+
+    const region = screen.getByRole('region', { name: 'Diagrama de etiqueta' })
+    expect(region).toHaveTextContent('Etiqueta de apertura')
+    expect(region).toHaveTextContent('Nombre del atributo')
+    expect(region).toHaveTextContent('Valor del atributo')
+    expect(region).toHaveTextContent('Contenido')
+    expect(region).toHaveTextContent('Etiqueta de cierre')
+    expect(screen.getByText('<')).toBeInTheDocument()
+    expect(screen.getByText('p')).toBeInTheDocument()
+    expect(screen.getByText('class')).toBeInTheDocument()
+    expect(screen.getByText('=')).toBeInTheDocument()
+    expect(screen.getByText('"intro"')).toBeInTheDocument()
+    expect(screen.getByText('>')).toBeInTheDocument()
+    expect(screen.getByText('Hola')).toBeInTheDocument()
+    expect(screen.getByText('</p>')).toBeInTheDocument()
+  })
+
   it('usa código plano cuando el JSON es inválido', () => {
     render(
       <SafeMarkdown permitirLaboratorios>
@@ -132,7 +168,7 @@ describe('SafeMarkdown con laboratorios', () => {
     expect(container.querySelector('p code')).toHaveTextContent('main')
   })
 
-  it('no tiene violaciones de accesibilidad con los cuatro tipos', async () => {
+  it('no tiene violaciones de accesibilidad con los cinco tipos', async () => {
     const markdown = [
       bloqueLaboratorio({
         tipo: 'predice-el-resultado',
@@ -156,6 +192,20 @@ describe('SafeMarkdown con laboratorios', () => {
         items: [
           { titulo: 'Primer punto.', texto: 'Explicación.' },
           { titulo: 'Segundo punto.', texto: 'Explicación.' },
+        ],
+      }),
+      bloqueLaboratorio({
+        tipo: 'diagrama-etiqueta',
+        partes: [
+          { texto: '<', rol: 'simbolo' },
+          { texto: 'p', rol: 'apertura' },
+          { texto: ' ', rol: 'simbolo' },
+          { texto: 'class', rol: 'atributo-nombre' },
+          { texto: '=', rol: 'simbolo' },
+          { texto: '"intro"', rol: 'atributo-valor' },
+          { texto: '>', rol: 'simbolo' },
+          { texto: 'Hola', rol: 'contenido' },
+          { texto: '</p>', rol: 'cierre' },
         ],
       }),
     ].join('\n\n')

@@ -69,6 +69,16 @@ aporta nada. Se usa igual de oportunista que `comparador-antes-despues`
 o `predice-el-resultado`: no en todas las lecciones, solo donde hay un
 malentendido real que desmontar.
 
+**Nuevo tipo de bloque 2026-08-22: `diagrama-etiqueta`** — descompone
+una etiqueta de una sola línea en sus partes (apertura, nombre/valor
+de atributo, contenido, cierre) con chips de color y leyenda, en vez
+de las anotaciones de `codigo-anotado` (que solo resaltan la línea
+entera, inútil cuando toda la etiqueta cabe en una línea). Usarlo en
+cualquier lección futura que necesite descomponer visualmente una
+sintaxis de una línea — `<form action="" method="">`, un `<input
+type="">`, etc. — no solo en "Anatomía de una etiqueta". Ver
+`specs/features/laboratorios.md`.
+
 ---
 
 ## Módulo 1 — Fundamentos del documento

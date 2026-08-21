@@ -48,11 +48,33 @@ export const esquemaNotasClave = z.object({
     .max(8),
 })
 
+export const esquemaDiagramaEtiqueta = z.object({
+  tipo: z.literal('diagrama-etiqueta'),
+  titulo: z.string().min(1).max(120).optional(),
+  partes: z
+    .array(
+      z.object({
+        texto: z.string().min(1).max(40),
+        rol: z.enum([
+          'apertura',
+          'atributo-nombre',
+          'atributo-valor',
+          'contenido',
+          'cierre',
+          'simbolo',
+        ]),
+      }),
+    )
+    .min(3)
+    .max(20),
+})
+
 export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaPrediceElResultado,
   esquemaCodigoAnotado,
   esquemaComparadorAntesDespues,
   esquemaNotasClave,
+  esquemaDiagramaEtiqueta,
 ])
 
 export type DatosPrediceElResultado = z.infer<typeof esquemaPrediceElResultado>
@@ -61,4 +83,5 @@ export type DatosComparadorAntesDespues = z.infer<
   typeof esquemaComparadorAntesDespues
 >
 export type DatosNotasClave = z.infer<typeof esquemaNotasClave>
+export type DatosDiagramaEtiqueta = z.infer<typeof esquemaDiagramaEtiqueta>
 export type DatosBloqueLaboratorio = z.infer<typeof esquemaBloqueLaboratorio>

@@ -1,9 +1,13 @@
 # Bloques de laboratorio en lecciones
 
-**Estado:** ✅ implementada. Los 3 tipos de bloque, el prop
-`permitirLaboratorios`, y las dos lecciones piloto de HTML reescritas
-y verificadas en producción (capturas reales, toggle antes/después
-probado en ambos estados).
+**Estado:** ✅ implementada. Ampliada dos veces desde la versión
+original de 3 tipos: `notas-clave` (para los puntos clave de las
+lecciones reales) y `diagrama-etiqueta` (2026-08-22, descomposición
+visual de una etiqueta en partes coloreadas — pedido explícito tras
+feedback de que `codigo-anotado` no sirve para eso: solo resalta la
+línea entera, no un fragmento dentro de ella). 5 tipos de bloque en
+total, el prop `permitirLaboratorios`, y el temario real de HTML en
+progreso sobre este mecanismo.
 
 ## Por qué existe esta feature
 
@@ -28,17 +32,32 @@ construidas para explorar el diseño visual. Esto es el sistema real:
 componentes genéricos que reciben sus datos por JSON, reutilizables en
 cualquier lección.
 
-## Alcance de esta primera versión
+## Alcance
 
-Tres tipos de bloque — los tres que ya tienen un ejemplo real
-esperando en `contenido/html/01-*.md` y `02-*.md`:
+Cinco tipos de bloque, cada uno con un ejemplo real ya escrito en
+`contenido/html/`:
 
 1. **`predice-el-resultado`** — código + opciones + botón "Revelar" que
    muestra la explicación y el resultado real en un iframe.
 2. **`codigo-anotado`** — código con fragmentos marcados y numerados;
-   pulsar un número resalta la línea y muestra la nota.
+   pulsar un número resalta la **línea entera** que contiene el
+   fragmento y muestra la nota. No resalta el fragmento en sí dentro de
+   la línea — importante para el punto siguiente.
 3. **`comparador-antes-despues`** — dos versiones del mismo HTML
    (antes/después) con su código y su vista en vivo.
+4. **`notas-clave`** — lista de puntos clave (título + texto), cada uno
+   numerado. Es el tipo más usado en las lecciones reales, en
+   "Cuándo lo usarías de verdad" y "Errores típicos".
+5. **`diagrama-etiqueta`** (2026-08-22) — descompone una etiqueta HTML
+   en sus partes (`apertura`, `atributo-nombre`, `atributo-valor`,
+   `contenido`, `cierre`, `simbolo` para la puntuación sin rol
+   pedagógico) y las pinta como una fila de chips coloreados con una
+   etiqueta de rol encima de cada uno, más una leyenda de texto debajo
+   (nunca solo color — un rol también se lee como texto, para
+   daltonismo y lectores de pantalla). Se añadió porque `codigo-anotado`
+   no sirve para "esta etiqueta de una sola línea tiene 5 partes
+   distintas": todas las anotaciones acaban resaltando la misma única
+   línea, sin diferenciar visualmente las partes entre sí.
 
 **Fuera de alcance a propósito:** el ejercicio "Escríbelo tú" con
 comprobaciones automáticas (`RetoConComprobaciones` en
@@ -147,10 +166,32 @@ export const esquemaComparadorAntesDespues = z.object({
   nota: z.string().max(500).optional(),
 })
 
+export const esquemaNotasClave = z.object({
+  tipo: z.literal('notas-clave'),
+  items: z.array(z.object({
+    titulo: z.string().min(1).max(140),
+    texto: z.string().min(1).max(600),
+  })).min(2).max(8),
+})
+
+export const esquemaDiagramaEtiqueta = z.object({
+  tipo: z.literal('diagrama-etiqueta'),
+  titulo: z.string().min(1).max(120).optional(),
+  partes: z.array(z.object({
+    texto: z.string().min(1).max(40),
+    rol: z.enum([
+      'apertura', 'atributo-nombre', 'atributo-valor',
+      'contenido', 'cierre', 'simbolo',
+    ]),
+  })).min(3).max(20),
+})
+
 export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaPrediceElResultado,
   esquemaCodigoAnotado,
   esquemaComparadorAntesDespues,
+  esquemaNotasClave,
+  esquemaDiagramaEtiqueta,
 ])
 ```
 
@@ -173,6 +214,14 @@ diseño" con "feature real".
 - `PrediceElResultado.tsx` — recibe `z.infer<typeof esquemaPrediceElResultado>`.
 - `CodigoAnotado.tsx` — recibe `z.infer<typeof esquemaCodigoAnotado>`.
 - `ComparadorAntesDespues.tsx` — recibe `z.infer<typeof esquemaComparadorAntesDespues>`.
+- `NotasClave.tsx` — recibe `z.infer<typeof esquemaNotasClave>`.
+- `DiagramaEtiqueta.tsx` — recibe `z.infer<typeof esquemaDiagramaEtiqueta>`.
+  No acepta `className` ni ningún prop de color externo — los 5 colores
+  por rol están hardcodeados con su variante `dark:` explícita dentro
+  del propio componente, a propósito: `tailwind-merge` no depara un
+  color pasado por fuera y su contrapartida `dark:` interna (ver
+  `specs/design-system.md`, el incidente de las badges de
+  `TechnologyPage` que motivó esa regla).
 - `registro.ts` — `Record<string, ComponentType<any>>` cerrado, una
   entrada por `tipo`.
 - `BloqueLaboratorio.tsx` — el punto de entrada que usa `SafeMarkdown`:
@@ -237,13 +286,17 @@ Cada componente que renderiza HTML en vivo usa
 
 ## Checklist de implementación
 
-- [x] `src/lib/laboratorio/schemas.ts` (3 esquemas + unión discriminada)
-- [x] `src/components/bloques-laboratorio/` (3 componentes + registro + punto de entrada)
+- [x] `src/lib/laboratorio/schemas.ts` (5 esquemas + unión discriminada)
+- [x] `src/components/bloques-laboratorio/` (5 componentes + registro + punto de entrada)
 - [x] `SafeMarkdown.tsx`: prop, override de `code`, `CodigoResaltado` para código normal
 - [x] `LeccionPage.tsx`: pasar el prop
-- [x] Tests: los 3 tipos renderizan con datos válidos; JSON inválido cae a código plano; `tipo` desconocido cae a código plano; comentario con bloque `laboratorio` NO se activa
-- [x] `contenido/html/01-*.md` y `02-*.md` reescritos con bloques reales
+- [x] Tests: los 5 tipos renderizan con datos válidos; JSON inválido cae a código plano; `tipo` desconocido cae a código plano; comentario con bloque `laboratorio` NO se activa; 0 violaciones de accesibilidad (`axe`) con los 5 tipos a la vez
+- [x] `contenido/html/01-*.md` y `02-*.md` reescritos con bloques reales (versión piloto; el temario real de 2026-08-21 los sustituye lección a lección)
 - [x] Contenido actualizado en producción vía el formulario de admin
-- [x] `npm run test`, `build`, `lint` en verde (209/209 tests)
-- [x] Verificación visual real (Playwright) de las dos lecciones publicadas, incluido el toggle antes/después en ambos estados
+- [x] `npm run test`, `build`, `lint` en verde
+- [x] Verificación visual real (Playwright) de las lecciones publicadas, incluido el toggle antes/después en ambos estados
 - [x] Revisión de seguridad — foco en el checkpoint de comentarios de arriba, 0 hallazgos High/Medium
+- [x] `diagrama-etiqueta` (2026-08-22): implementado por Codex sobre un
+  prompt detallado de Claude, verificado archivo a archivo antes de
+  aceptarlo (no solo confiando en su propio reporte) — `tsc`, `lint` y
+  la suite completa (212/212) en verde tras la revisión.

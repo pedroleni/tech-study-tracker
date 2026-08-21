@@ -30,7 +30,27 @@ Y no todos los elementos siguen el patrón apertura-contenido-cierre: unos pocos
 
 ## Cómo se usa
 
-Un elemento normal, completo, con varios atributos:
+Antes de nada, así se ve una etiqueta por dentro, parte por parte:
+
+```laboratorio
+{
+  "tipo": "diagrama-etiqueta",
+  "titulo": "Un elemento completo, descompuesto",
+  "partes": [
+    { "texto": "<", "rol": "simbolo" },
+    { "texto": "p", "rol": "apertura" },
+    { "texto": " ", "rol": "simbolo" },
+    { "texto": "class", "rol": "atributo-nombre" },
+    { "texto": "=", "rol": "simbolo" },
+    { "texto": "\"intro\"", "rol": "atributo-valor" },
+    { "texto": ">", "rol": "simbolo" },
+    { "texto": "Hola", "rol": "contenido" },
+    { "texto": "</p>", "rol": "cierre" }
+  ]
+}
+```
+
+Ahora en contexto, dentro de un elemento más completo, con varios atributos:
 
 ```html
 <p class="intro">
