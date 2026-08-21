@@ -79,3 +79,14 @@ export async function updateLeccion(
   if (error) throw error
   return mapLeccion(data)
 }
+
+export async function deleteLeccion(id: string): Promise<Leccion> {
+  const { data, error } = await supabase
+    .from('lecciones')
+    .delete()
+    .eq('id', id)
+    .select()
+    .single()
+  if (error) throw error
+  return mapLeccion(data)
+}

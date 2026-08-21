@@ -6,6 +6,7 @@ import type { LeccionPatch, NewLeccionInput } from '@/lib/queries/mappers'
 import { queryKeys } from '@/lib/queries/queryKeys'
 import {
   createLeccion,
+  deleteLeccion,
   listLecciones,
   updateLeccion,
 } from '@/lib/queries/lecciones'
@@ -44,6 +45,21 @@ export function useUpdateLeccion() {
       if (!user) throw new Error('No hay sesión activa.')
       if (!isAdmin) throw new Error('Solo el administrador puede gestionar contenido.')
       return updateLeccion(id, patch)
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.lecciones }),
+  })
+}
+
+export function useDeleteLeccion() {
+  const { user } = useAuth()
+  const { isAdmin } = useProfile()
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (id: string) => {
+      if (!user) throw new Error('No hay sesión activa.')
+      if (!isAdmin) throw new Error('Solo el administrador puede gestionar contenido.')
+      return deleteLeccion(id)
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.lecciones }),
   })
