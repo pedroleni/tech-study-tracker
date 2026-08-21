@@ -1,123 +1,81 @@
 # Lo mínimo que el navegador necesita para funcionar
 
 - **Módulo:** Fundamentos del documento
-- **Nivel:** primeros pasos
-- **Requisitos previos:** ninguno
-- **Tiempo estimado de lectura:** 7 minutos
+- **Slug:** `lo-minimo-que-el-navegador-necesita-para-funcionar` (autogenerado del título)
+- **Orden:** 10
+- **Fuentes:** [Basic HTML syntax (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Basic_HTML_syntax) + [Document structure (web.dev)](https://web.dev/learn/html/document-structure) — ver `contenido/html/TEMARIO.md` #1
 
 ---
 
 ## Qué es y para qué sirve
 
-Un documento HTML son cinco cosas, siempre las mismas, en el mismo orden:
+Todo documento HTML necesita un esqueleto mínimo para que el navegador sepa qué está leyendo: un aviso de qué versión de HTML es, un contenedor raíz, una zona de metadatos que nadie ve y una zona de contenido que sí se ve. Cuatro piezas, siempre las mismas, siempre en el mismo orden: `<!doctype html>`, `<html>`, `<head>`, `<body>`.
 
-```html
-<!DOCTYPE html>
-<html lang="es">
-  <head>
-    <meta charset="UTF-8">
-    <title>Mi página</title>
-  </head>
-  <body>
-    <p>Aquí va lo que se ve.</p>
-  </body>
-</html>
-```
-
-**`<!DOCTYPE html>`** no es una etiqueta: es una instrucción para el
-navegador, la primera línea del fichero, sin excepción. Le dice "interpreta
-esto con las reglas modernas del estándar, no con las reglas de hace veinte
-años pensadas para no romper páginas antiguas". Sin ella, el navegador entra
-en un modo de compatibilidad donde el CSS se comporta de forma distinta y
-más impredecible. Se escribe una vez, se olvida para siempre.
-
-**`<html lang="es">`** es la raíz: todo lo demás vive dentro. El atributo
-`lang` no es decoración — es lo que usa un lector de pantalla para elegir el
-motor de pronunciación correcto, y lo que usa un traductor automático para
-saber desde qué idioma traducir.
-
-**`<head>`** es la parte que nadie ve directamente: metadatos, el título de
-la pestaña, enlaces a hojas de estilo. Todo lo que necesita el navegador
-*antes* de empezar a pintar la página, pero que un lector humano no lee.
-
-**`<body>`** es todo lo que sí se ve. Un documento HTML solo tiene un
-`<head>` y un `<body>`, y van en ese orden, siempre.
-
-Los elementos se anidan como cajas dentro de cajas: si abres una etiqueta
-dentro de otra, la cierras antes de cerrar la de fuera. `<p><strong>texto
-</strong></p>` es correcto; `<p><strong>texto</p></strong>` no lo es, y
-aunque muchos navegadores lo arreglan solos adivinando qué quisiste decir,
-cada uno adivina distinto.
-
----
+No es ceremonia vacía. Sin ese esqueleto (o con él mal puesto), el navegador tiene que **adivinar** cómo interpretar el resto de la página — y lo hace de forma distinta según el navegador, según la época y según lo que crea que quisiste decir. Eso es exactamente lo que quieres evitar cuando escribes HTML que otra persona (o tú dentro de seis meses) va a tener que entender igual en cualquier sitio.
 
 ## Cuándo lo usarías de verdad 👤
-
-Aquí es donde casi nadie mira, y es donde se explica el 90% de los "esto en
-mi móvil se ve fatal" que llegan sin previo aviso.
 
 ```laboratorio
 {
   "tipo": "notas-clave",
   "items": [
-    {
-      "titulo": "El <meta charset=\"UTF-8\"> que falta.",
-      "texto": "Sin él, cualquier tilde, eñe o símbolo de moneda puede aparecer como un cuadrado o un carácter extraño. Es la primera línea dentro de <head>, siempre — si viene después de un <title> con una eñe, esa eñe ya se leyó mal."
-    },
-    {
-      "titulo": "El <meta name=\"viewport\"> que falta.",
-      "texto": "Sin él, un móvil renderiza la página como si fuera un monitor de escritorio de 980 píxeles y la encoge entera para que quepa: todo se ve diminuto. No es un problema de CSS responsive — es que sin esta línea el CSS responsive ni siquiera llega a activarse."
-    },
-    {
-      "titulo": "El orden de <head> casi nunca importa, salvo charset.",
-      "texto": "El navegador lee el <head> entero antes de pintar nada, así que el orden de <title>, enlaces a CSS o fuentes rara vez cambia el resultado. La única excepción real es charset: tiene que ir antes que cualquier contenido con caracteres especiales."
-    },
-    {
-      "titulo": "Cuándo SÍ hace falta un comentario <!-- -->.",
-      "texto": "Casi nunca. El código HTML bien escrito se explica por su propia estructura. Los comentarios sobreviven mal a los cambios: alguien reordena el HTML y el comentario se queda mintiendo. Resérvalos para el porqué, no para el qué."
-    }
+    { "titulo": "Cada archivo .html nuevo", "texto": "Es lo primero que escribes, antes de cualquier etiqueta de contenido. Si tu editor no lo genera solo, es la plantilla que copias siempre." },
+    { "titulo": "Cuando algo se ve distinto en cada navegador", "texto": "Un doctype ausente o mal escrito activa el 'modo quirks': cada navegador rellena los huecos a su manera. Es lo primero que revisar antes de sospechar de tu CSS." },
+    { "titulo": "Cuando compartes o publicas código", "texto": "El head con charset y viewport no es opcional si esperas que se vea igual en el móvil de otra persona que en tu portátil." }
   ]
 }
 ```
 
----
-
 ## Cómo se usa
 
-**Elementos vacíos frente a elementos contenedores.** La mayoría de
-etiquetas van en pareja, con apertura y cierre: `<p>...</p>`. Un puñado no
-tiene contenido dentro y no se cierran con una etiqueta aparte:
+La estructura mínima real, sin nada de más:
 
 ```html
-<img src="foto.jpg" alt="Un gato durmiendo">
-<br>
-<input type="text">
-<hr>
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Título de la página</title>
+  </head>
+  <body>
+    <!-- Aquí va todo lo que se ve -->
+  </body>
+</html>
 ```
 
-No hace falta escribir `<br />` con la barra — eso era una convención de
-XHTML que HTML5 no exige. `<br>` a secas es correcto y es lo que vas a ver
-en código moderno.
+Cada línea tiene un trabajo concreto:
 
-**Atributos: siempre en la etiqueta de apertura, con el valor entre
-comillas.**
-
-```html
-<a href="https://ejemplo.com" target="_blank">Enlace</a>
+```laboratorio
+{
+  "tipo": "codigo-anotado",
+  "codigo": "<!doctype html>\n<html lang=\"es\">\n  <head>\n    <meta charset=\"utf-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n    <title>Título de la página</title>\n  </head>\n  <body>\n    <!-- Aquí va todo lo que se ve -->\n  </body>\n</html>",
+  "anotaciones": [
+    { "fragmento": "<!doctype html>", "nota": "Le dice al navegador 'interpreta esto como HTML moderno, sin adivinar'. Tiene que ser la primerísima línea del archivo — antes ni un espacio." },
+    { "fragmento": "<html lang=\"es\">", "nota": "El elemento raíz. El atributo lang no es cosmético: lectores de pantalla y traductores automáticos lo usan para saber en qué idioma leer el contenido." },
+    { "fragmento": "<meta charset=\"utf-8\">", "nota": "Sin esto, tildes y eñes pueden verse como símbolos raros según el navegador y el sistema operativo. Va siempre como la primera línea dentro de head." },
+    { "fragmento": "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">", "nota": "Sin esta línea, un móvil renderiza la página como si fuera de escritorio y luego la encoge — todo se ve minúsculo hasta que haces zoom." },
+    { "fragmento": "<title>Título de la página</title>", "nota": "Lo que se ve en la pestaña del navegador, en resultados de búsqueda y al compartir el enlace. El único texto de head que un humano llega a ver directamente." },
+    { "fragmento": "<body>", "nota": "Todo el contenido visible va aquí dentro, y solo aquí. Nada de contenido visible antes de body ni después de cerrarlo." }
+  ]
+}
 ```
 
-Técnicamente el HTML permite comillas simples o incluso ningún tipo de
-comillas si el valor no tiene espacios. No lo hagas: usa comillas dobles
-siempre. Es lo que espera cualquier herramienta que analice tu código, y es
-lo único obligatorio si el valor contiene espacios — `class="tarjeta
-destacada"` sin comillas se rompe en dos atributos.
+¿Y si te lo saltas? Pruébalo:
 
-**Un atributo puede no llevar valor.** `disabled`, `required`, `checked`:
-su sola presencia ya significa "verdadero". No se escribe
-`disabled="true"` — se escribe `disabled`, y punto. Si el atributo no está,
-es como si valiera `false`.
-
----
+```laboratorio
+{
+  "tipo": "predice-el-resultado",
+  "codigo": "<html>\n<body>\n<p>Hola</p>\n</body>\n</html>",
+  "opciones": [
+    "El navegador rechaza la página y muestra un error",
+    "Se ve exactamente igual, pero el navegador activa el 'modo quirks' por debajo",
+    "No pasa nada, el doctype es solo para validadores automáticos"
+  ],
+  "correcta": 1,
+  "explicacion": "Un navegador nunca 'rompe' una página por falta de doctype — pero activa un modo de compatibilidad con webs de los años 90 (quirks mode) donde el cálculo de tamaños y márgenes cambia de forma sutil y distinta según el navegador. Por eso a veces algo 'se ve raro solo en Safari' y la causa real es un doctype ausente, no el CSS."
+}
+```
 
 ## Errores típicos 👤
 
@@ -125,97 +83,21 @@ es como si valiera `false`.
 {
   "tipo": "notas-clave",
   "items": [
-    {
-      "titulo": "Poner el <meta charset> en cualquier sitio menos el primero.",
-      "texto": "Es el error más silencioso de todos: el navegador ya empezó a interpretar el texto con la codificación equivocada antes de llegar a la línea que la corrige, y para entonces algunos caracteres ya se leyeron mal."
-    },
-    {
-      "titulo": "Cerrar las etiquetas en el orden que no es.",
-      "texto": "<div><p>texto</div></p>. El navegador intentará salvarlo adivinando, pero cada navegador adivina distinto. La regla: lo último que abres es lo primero que cierras."
-    },
-    {
-      "titulo": "Escribir HTML en mayúsculas o mezclado.",
-      "texto": "<DIV>, <Body>. Funciona —el navegador no distingue mayúsculas de minúsculas— pero rompe la convención que sigue todo el código HTML que vas a leer de aquí en adelante. Minúsculas, siempre."
-    },
-    {
-      "titulo": "Olvidar el atributo lang en <html>.",
-      "texto": "No rompe nada visualmente, así que es fácil que pase inadvertido para siempre. Pero un lector de pantalla sin esa pista puede leer la página en español con el motor de pronunciación de otro idioma."
-    },
-    {
-      "titulo": "Confundir \"no se ve el error\" con \"está bien escrito\".",
-      "texto": "Los navegadores son extremadamente tolerantes: perdonan etiquetas sin cerrar, atributos mal escritos, anidamientos incorrectos. Eso acostumbra a escribir HTML descuidado que funciona hasta que deja de hacerlo, casi siempre en el navegador de otra persona."
-    }
+    { "titulo": "Doctype que no es la primera línea", "texto": "Un comentario, un espacio en blanco raro del editor o algo del servidor antes del doctype ya basta para activar modo quirks. Tiene que ser literalmente lo primero del archivo." },
+    { "titulo": "Olvidar el charset", "texto": "Si tu editor guarda en UTF-8 pero no lo declaras, cualquier tilde o eñe puede acabar mostrándose como símbolos ilegibles en otro ordenador — aunque en el tuyo se vea perfecto." },
+    { "titulo": "Copiar el viewport sin entenderlo", "texto": "Es habitual copiar y pegar la línea de meta viewport sin saber qué hace. Sin ella, cualquier diseño responsive que hagas después con CSS simplemente no se activa en móvil." },
+    { "titulo": "Contenido fuera de body", "texto": "Texto suelto antes de html o después de cerrarlo — algunos navegadores lo mueven dentro de body automáticamente, otros no. No confíes en ese comportamiento." }
   ]
 }
 ```
-
----
 
 ## Ejercicios
 
-### 1. Predice el resultado
-
-¿Qué carácter es probable que se vea mal en la página, y por qué?
-
-```laboratorio
-{
-  "tipo": "predice-el-resultado",
-  "lenguaje": "html",
-  "codigo": "<!DOCTYPE html>\n<html lang=\"es\">\n  <head>\n    <title>Información</title>\n    <meta charset=\"UTF-8\">\n  </head>\n  <body>\n    <p>Información</p>\n  </body>\n</html>",
-  "opciones": [
-    "La 'ó' de \"Información\" dentro del <title>, en la pestaña del navegador",
-    "La 'ó' de \"Información\" dentro del <body>, en el texto de la página",
-    "Ninguna: las dos se ven bien"
-  ],
-  "correcta": 0,
-  "explicacion": "El <meta charset> va después del <title>, así que el navegador ya interpretó y mostró el título —con su tilde— antes de saber qué codificación usar. Para cuando llega a <body>, ya procesó la línea de charset y esa segunda \"Información\" se ve bien."
-}
-```
-
-### 2. Encuentra el error
-
-Este documento tiene un error de anidamiento. Encuéntralo antes de mirar la
-solución.
-
-```laboratorio
-{
-  "tipo": "codigo-anotado",
-  "lenguaje": "html",
-  "codigo": "<p>Bienvenido a <strong>mi página</p></strong>",
-  "anotaciones": [
-    { "fragmento": "<strong>", "nota": "Se abre aquí, dentro de <p>. Lo último que se abre tiene que ser lo primero que se cierra." },
-    { "fragmento": "</p></strong>", "nota": "El cierre está al revés: </p> va antes que </strong>, cuando debería ir después. Lo correcto es </strong></p>." }
-  ]
-}
-```
-
-### 3. Escríbelo tú
-
-Escribe el esqueleto completo de un documento HTML válido para una página
-cuyo título de pestaña sea "Contacto", en español, con codificación UTF-8 y
-preparado para verse bien en móvil. El `<body>` puede quedar vacío.
-
-**Se comprueba automáticamente que:**
-
-- el documento empieza por `<!DOCTYPE html>`
-- `<html>` tiene el atributo `lang="es"`
-- dentro de `<head>` hay un `<meta charset="UTF-8">` antes que cualquier
-  otro contenido con texto
-- hay un `<meta name="viewport">` con `width=device-width`
-- el `<title>` contiene exactamente el texto "Contacto"
-
----
+1. Crea un archivo `.html` desde cero, sin usar una plantilla del editor, escribiendo las cinco piezas de memoria: doctype, html con lang, head con charset y viewport, title, y body.
+2. Quita el `<!doctype html>` de una página que ya tengas y ábrela en el navegador. ¿Ves algún cambio visual? Ahora inspecciona el `<body>` con las herramientas de desarrollador y compara lo que calcula con y sin doctype.
+3. Busca en un proyecto real (tuyo o de código abierto) el `<head>` de su página principal. ¿Qué metaetiquetas tiene además de charset, viewport y title? Anota una que no conocías y para qué sirve.
 
 ## Para profundizar
 
-- [Estándar HTML de WHATWG — sintaxis](https://html.spec.whatwg.org/multipage/syntax.html)
-- [Guía de `<!DOCTYPE>` en el estándar HTML](https://html.spec.whatwg.org/multipage/syntax.html#the-doctype)
-
----
-
-### Atribución
-
-Los datos de referencia sobre sintaxis y elementos proceden del
-[Estándar HTML de WHATWG](https://html.spec.whatwg.org/), publicado bajo
-[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). El texto de esta
-página es original y no reproduce el estándar; los ejemplos son propios.
+- [Basic HTML syntax (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Basic_HTML_syntax)
+- [Document structure (web.dev)](https://web.dev/learn/html/document-structure)
