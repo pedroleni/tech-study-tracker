@@ -197,8 +197,8 @@ export function AdminReferenciaContenidoPage() {
       </GrupoCatalogo>
 
       <GrupoCatalogo
-        titulo="Fundamentos"
-        descripcion="Los 20 patrones base del catálogo: contenido editorial, navegación local y presentación de recursos."
+        titulo="Avisos y alertas"
+        descripcion="Mensajes que interrumpen la lectura a propósito porque hay algo que el lector no debería pasar por alto."
       >
         <Referencia nombre="Callout">
           <Callout
@@ -208,6 +208,15 @@ export function AdminReferenciaContenidoPage() {
           />
         </Referencia>
 
+        <Referencia nombre="BannerAlerta">
+          <BannerAlerta mensaje="Esta lección usa HTML5: no necesitas la barra final de XHTML en etiquetas vacías como br o img." />
+        </Referencia>
+      </GrupoCatalogo>
+
+      <GrupoCatalogo
+        titulo="Navegación y contenido expandible"
+        descripcion="Contenido que se oculta o se reorganiza bajo demanda, en vez de ocupar espacio todo el tiempo."
+      >
         <Referencia nombre="Acordeon">
           <Acordeon
             items={[
@@ -252,6 +261,19 @@ export function AdminReferenciaContenidoPage() {
           />
         </Referencia>
 
+        <Referencia nombre="TarjetaExpandible">
+          <TarjetaExpandible
+            titulo="¿Por qué el navegador corrige HTML mal anidado?"
+            resumen="Los navegadores intentan mostrar páginas antiguas incluso cuando contienen errores."
+            contenido="El parser aplica reglas de recuperación y reconstruye el árbol que considera más probable. Esa tolerancia evita una pantalla en blanco, pero distintos errores pueden producir una estructura inesperada: por eso conviene validar el documento en vez de confiar en la corrección automática."
+          />
+        </Referencia>
+      </GrupoCatalogo>
+
+      <GrupoCatalogo
+        titulo="Estructura secuencial"
+        descripcion="Contenido que solo tiene sentido en un orden concreto: un proceso, un progreso, o lo que hace falta saber antes de empezar."
+      >
         <Referencia nombre="LineaDeTiempo">
           <LineaDeTiempo
             items={[
@@ -294,24 +316,27 @@ export function AdminReferenciaContenidoPage() {
           />
         </Referencia>
 
+        <Referencia nombre="RequisitosPrevios">
+          <RequisitosPrevios
+            titulo="Antes de empezar"
+            requisitos={[
+              'Un editor de texto para crear un archivo index.html.',
+              'Un navegador moderno para abrir el documento.',
+              'No necesitas conocer CSS ni JavaScript.',
+            ]}
+          />
+        </Referencia>
+      </GrupoCatalogo>
+
+      <GrupoCatalogo
+        titulo="Enriquecimiento de texto"
+        descripcion="Anotaciones que se insertan dentro de un párrafo normal, sin romper el flujo de lectura."
+      >
         <Referencia nombre="CitaDestacada">
           <CitaDestacada
             cita="Un h1 no es texto grande: es el título de la página."
             atribucion="Principio de HTML semántico"
             fuente="La estructura de una página"
-          />
-        </Referencia>
-
-        <Referencia nombre="TarjetaEstadistica">
-          <div className="max-w-sm">
-            <TarjetaEstadistica valor={7} sufijo=" min" etiqueta="Lectura estimada de la lección" />
-          </div>
-        </Referencia>
-
-        <Referencia nombre="GrupoInsignias">
-          <GrupoInsignias
-            etiquetas={['HTML', 'Semántica', 'Accesibilidad', 'Primeros pasos']}
-            ariaLabel="Temas de la lección"
           />
         </Referencia>
 
@@ -325,7 +350,54 @@ export function AdminReferenciaContenidoPage() {
             conserva las relaciones de anidamiento entre las etiquetas.
           </p>
         </Referencia>
+      </GrupoCatalogo>
 
+      <GrupoCatalogo
+        titulo="Metadatos y progreso"
+        descripcion="Información sobre la lección misma — cuánto dura, qué la etiqueta, cuánto llevas leído — no sobre HTML."
+      >
+        <Referencia nombre="TarjetaEstadistica">
+          <div className="max-w-sm">
+            <TarjetaEstadistica valor={7} sufijo=" min" etiqueta="Lectura estimada de la lección" />
+          </div>
+        </Referencia>
+
+        <Referencia nombre="GrupoInsignias">
+          <GrupoInsignias
+            etiquetas={['HTML', 'Semántica', 'Accesibilidad', 'Primeros pasos']}
+            ariaLabel="Temas de la lección"
+          />
+        </Referencia>
+
+        <Referencia nombre="MedidorDificultad">
+          <MedidorDificultad nivel={1} etiqueta="Dificultad" />
+        </Referencia>
+
+        <Referencia nombre="ResumenTLDR">
+          <ResumenTLDR
+            titulo="El documento HTML mínimo en 3 ideas"
+            puntos={[
+              'DOCTYPE activa el modo estándar del navegador.',
+              'head describe el documento y body contiene lo que se ve.',
+              'Las etiquetas se cierran en el orden inverso al que se abren.',
+            ]}
+          />
+        </Referencia>
+
+        <Referencia nombre="BarraProgresoLectura">
+          <div className="rounded-xl border bg-card p-5 shadow-sm">
+            <p className="text-sm text-pretty text-muted-foreground">
+              La línea fija en el borde superior de la ventana avanza a medida que recorres este
+              catálogo.
+            </p>
+          </div>
+        </Referencia>
+      </GrupoCatalogo>
+
+      <GrupoCatalogo
+        titulo="Comparación y verificación"
+        descripcion="Dos alternativas o una serie de condiciones puestas una junto a otra para que la diferencia salte a la vista."
+      >
         <Referencia nombre="ListaComprobacion">
           <ListaComprobacion
             titulo="Revisa el esqueleto del documento"
@@ -351,33 +423,24 @@ export function AdminReferenciaContenidoPage() {
           />
         </Referencia>
 
-        <Referencia nombre="RequisitosPrevios">
-          <RequisitosPrevios
-            titulo="Antes de empezar"
-            requisitos={[
-              'Un editor de texto para crear un archivo index.html.',
-              'Un navegador moderno para abrir el documento.',
-              'No necesitas conocer CSS ni JavaScript.',
-            ]}
+        <Referencia nombre="ComparacionCodigo">
+          <ComparacionCodigo
+            evitar={{
+              etiqueta: 'Evitar',
+              codigo: '<div class="nav">\n  <a href="/">Inicio</a>\n</div>',
+            }}
+            preferir={{
+              etiqueta: 'Preferir',
+              codigo: '<nav aria-label="Principal">\n  <a href="/">Inicio</a>\n</nav>',
+            }}
           />
         </Referencia>
+      </GrupoCatalogo>
 
-        <Referencia nombre="MedidorDificultad">
-          <MedidorDificultad nivel={1} etiqueta="Dificultad" />
-        </Referencia>
-
-        <Referencia nombre="BannerAlerta">
-          <BannerAlerta mensaje="Esta lección usa HTML5: no necesitas la barra final de XHTML en etiquetas vacías como br o img." />
-        </Referencia>
-
-        <Referencia nombre="TarjetaExpandible">
-          <TarjetaExpandible
-            titulo="¿Por qué el navegador corrige HTML mal anidado?"
-            resumen="Los navegadores intentan mostrar páginas antiguas incluso cuando contienen errores."
-            contenido="El parser aplica reglas de recuperación y reconstruye el árbol que considera más probable. Esa tolerancia evita una pantalla en blanco, pero distintos errores pueden producir una estructura inesperada: por eso conviene validar el documento en vez de confiar en la corrección automática."
-          />
-        </Referencia>
-
+      <GrupoCatalogo
+        titulo="Tarjetas de recursos"
+        descripcion="Enlaces salientes presentados como una tarjeta, individual o en cuadrícula, en vez de un enlace suelto en el texto."
+      >
         <Referencia nombre="CuadriculaRecursos">
           <CuadriculaRecursos
             recursos={[
@@ -394,39 +457,6 @@ export function AdminReferenciaContenidoPage() {
                 etiqueta: 'Guía W3C',
               },
             ]}
-          />
-        </Referencia>
-
-        <Referencia nombre="BarraProgresoLectura">
-          <div className="rounded-xl border bg-card p-5 shadow-sm">
-            <p className="text-sm text-pretty text-muted-foreground">
-              La línea fija en el borde superior de la ventana avanza a medida que recorres este
-              catálogo.
-            </p>
-          </div>
-        </Referencia>
-
-        <Referencia nombre="ResumenTLDR">
-          <ResumenTLDR
-            titulo="El documento HTML mínimo en 3 ideas"
-            puntos={[
-              'DOCTYPE activa el modo estándar del navegador.',
-              'head describe el documento y body contiene lo que se ve.',
-              'Las etiquetas se cierran en el orden inverso al que se abren.',
-            ]}
-          />
-        </Referencia>
-
-        <Referencia nombre="ComparacionCodigo">
-          <ComparacionCodigo
-            evitar={{
-              etiqueta: 'Evitar',
-              codigo: '<div class="nav">\n  <a href="/">Inicio</a>\n</div>',
-            }}
-            preferir={{
-              etiqueta: 'Preferir',
-              codigo: '<nav aria-label="Principal">\n  <a href="/">Inicio</a>\n</nav>',
-            }}
           />
         </Referencia>
 
