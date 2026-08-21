@@ -20,7 +20,7 @@ export function PrediceElResultado({
   return (
     <section
       aria-label="Predice el resultado"
-      className="my-6 min-w-0 space-y-4 rounded-xl border bg-card p-4 shadow-sm sm:p-5"
+      className="animate-in fade-in-0 slide-in-from-bottom-2 my-6 min-w-0 space-y-4 rounded-xl border bg-card p-4 shadow-sm duration-500 motion-reduce:animate-none sm:p-5"
     >
       <div className="flex items-start gap-3">
         <div className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-blue-50 dark:bg-blue-950/40">
@@ -81,7 +81,7 @@ export function PrediceElResultado({
         {revelado && seleccionada !== null && (
           <div
             className={cn(
-              'space-y-4 rounded-lg border-2 p-4',
+              'animate-in fade-in-0 slide-in-from-top-2 space-y-4 rounded-lg border-2 p-4 duration-300 motion-reduce:animate-none',
               seleccionada === correcta
                 ? 'border-green-200 bg-green-50 dark:border-green-900/50 dark:bg-green-950/30'
                 : 'border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-950/30',

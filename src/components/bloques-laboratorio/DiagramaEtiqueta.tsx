@@ -59,7 +59,7 @@ export function DiagramaEtiqueta({
   return (
     <section
       aria-label="Diagrama de etiqueta"
-      className="my-6 min-w-0 space-y-4 rounded-xl border bg-card p-4 shadow-sm sm:p-5"
+      className="animate-in fade-in-0 slide-in-from-bottom-2 my-6 min-w-0 space-y-4 rounded-xl border bg-card p-4 shadow-sm duration-500 motion-reduce:animate-none sm:p-5"
     >
       <div className="flex items-start gap-3">
         <div className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-rose-50 dark:bg-rose-950/40">
@@ -97,7 +97,8 @@ export function DiagramaEtiqueta({
           return (
             <span
               key={`${parte.rol}-${parte.texto}-${indice}`}
-              className="inline-flex flex-col items-center gap-1"
+              className="animate-in fade-in-0 zoom-in-95 inline-flex flex-col items-center gap-1 duration-300 motion-reduce:animate-none"
+              style={{ animationDelay: `${indice * 60}ms`, animationFillMode: 'both' }}
             >
               <span
                 className={`text-center text-[9px] leading-tight font-bold tracking-wide uppercase ${clases.etiqueta}`}

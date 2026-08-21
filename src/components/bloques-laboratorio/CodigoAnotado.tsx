@@ -33,7 +33,7 @@ export function CodigoAnotado({
   return (
     <section
       aria-label="Código anotado"
-      className="my-6 min-w-0 space-y-4 rounded-xl border bg-card p-4 shadow-sm sm:p-5"
+      className="animate-in fade-in-0 slide-in-from-bottom-2 my-6 min-w-0 space-y-4 rounded-xl border bg-card p-4 shadow-sm duration-500 motion-reduce:animate-none sm:p-5"
     >
       <div className="flex items-start gap-3">
         <div className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-amber-50 dark:bg-amber-950/40">
@@ -84,9 +84,10 @@ export function CodigoAnotado({
             ))}
           </div>
           <p
+            key={anotacionActiva}
             id={idNota}
             aria-live="polite"
-            className="rounded-lg border-l-4 border-amber-500 bg-amber-50 p-3 text-sm text-pretty dark:border-amber-400 dark:bg-amber-950/30"
+            className="animate-in fade-in-0 slide-in-from-bottom-1 rounded-lg border-l-4 border-amber-500 bg-amber-50 p-3 text-sm text-pretty duration-200 motion-reduce:animate-none dark:border-amber-400 dark:bg-amber-950/30"
           >
             <span className="font-semibold">Nota {anotacionActiva + 1}.</span>{' '}
             {activa?.nota}

@@ -17,16 +17,11 @@ Y no todos los elementos siguen el patrón apertura-contenido-cierre: unos pocos
 
 ## Cuándo lo usarías de verdad 👤
 
-```laboratorio
-{
-  "tipo": "notas-clave",
-  "items": [
-    { "titulo": "Cada vez que escribes o lees HTML, sin excepción.", "texto": "Esto no es una técnica puntual, es la gramática básica. Todo lo demás del temario — formularios, tablas, accesibilidad — se explica dando por hecho que ya sabes leer una etiqueta." },
-    { "titulo": "Cuando depuras una página que 'se ve rota'.", "texto": "Una etiqueta sin cerrar o cerrada en el orden equivocado es una de las causas más comunes de que el diseño se descuadre a partir de cierto punto de la página, sin que haya ningún error visible en la consola." },
-    { "titulo": "Cuando lees la documentación de una etiqueta que no conoces.", "texto": "Lo primero que necesitas saber de una etiqueta nueva es si es normal o si se cierra sola, qué atributos acepta, y si alguno de ellos es booleano. Es la primera pregunta que responde cualquier referencia de MDN." }
-  ]
-}
-```
+Cada vez que escribes o lees HTML, sin excepción. Esto no es una técnica puntual, es la gramática básica: todo lo demás del temario — formularios, tablas, accesibilidad — se explica dando por hecho que ya sabes leer una etiqueta.
+
+También cuando depuras una página que "se ve rota": una etiqueta sin cerrar o cerrada en el orden equivocado es una de las causas más comunes de que el diseño se descuadre a partir de cierto punto de la página, sin que haya ningún error visible en la consola.
+
+Y cuando lees la documentación de una etiqueta que no conoces: lo primero que necesitas saber es si es normal o si se cierra sola, qué atributos acepta, y si alguno de ellos es booleano. Es la primera pregunta que responde cualquier referencia de MDN.
 
 ## Cómo se usa
 
@@ -104,16 +99,11 @@ Aquí `checked` deja la casilla marcada desde el principio y `disabled` deja el 
 
 ## Lo que una etiqueta desconocida NO hace 👤
 
-```laboratorio
-{
-  "tipo": "notas-clave",
-  "items": [
-    { "titulo": "El navegador no rechaza una etiqueta que no reconoce.", "texto": "Escribe <marcador-inventado>texto</marcador-inventado> en cualquier página: no hay error, no hay aviso. El navegador la trata como un elemento genérico sin ningún estilo ni comportamiento especial, y sigue mostrando el texto de dentro con normalidad." },
-    { "titulo": "Por eso una etiqueta mal escrita no 'avisa'.", "texto": "Si escribes <strogn> en vez de <strong> por error de tecleo, el navegador no te va a decir nada — simplemente el texto no se pondrá en negrita, porque <strogn> es, para él, una etiqueta desconocida más." },
-    { "titulo": "Esto es justo lo que hace posibles los Web Components.", "texto": "Etiquetas personalizadas como <mi-componente> funcionan porque el navegador ya las acepta sintácticamente sin quejarse; solo les falta que JavaScript les defina un comportamiento. No es magia nueva, es esta misma tolerancia de HTML." }
-  ]
-}
-```
+**El navegador no rechaza una etiqueta que no reconoce.** Escribe `<marcador-inventado>texto</marcador-inventado>` en cualquier página: no hay error, no hay aviso. La trata como un elemento genérico sin ningún estilo ni comportamiento especial, y sigue mostrando el texto de dentro con normalidad.
+
+**Por eso una etiqueta mal escrita tampoco "avisa".** Si escribes `<strogn>` en vez de `<strong>` por error de tecleo, el navegador no dice nada — simplemente el texto no se pondrá en negrita, porque `<strogn>` es, para él, una etiqueta desconocida más.
+
+**Esto es justo lo que hace posibles los Web Components.** Etiquetas personalizadas como `<mi-componente>` funcionan porque el navegador ya las acepta sintácticamente sin quejarse; solo les falta que JavaScript les defina un comportamiento. No es magia nueva, es esta misma tolerancia de HTML.
 
 ## Errores típicos 👤
 

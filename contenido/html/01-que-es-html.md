@@ -17,16 +17,11 @@ HTML no trabaja solo. Verás esta idea repetida en casi todo el temario, así qu
 
 ## Cuándo lo usarías de verdad 👤
 
-```laboratorio
-{
-  "tipo": "notas-clave",
-  "items": [
-    { "titulo": "En cada página web que existe, sin excepción.", "texto": "Da igual si está hecha a mano, con WordPress o con el framework de moda: en algún punto del proceso, lo que llega al navegador es HTML. Es la única lengua que todos los navegadores entienden de forma nativa." },
-    { "titulo": "Cuando te importa que el contenido sea accesible y encontrable.", "texto": "Los lectores de pantalla y los buscadores no 've' el diseño visual — leen la estructura HTML. Un título marcado como <h1> le dice a ambos que es el título principal; el mismo texto en negrita sin etiqueta de título no dice nada de eso." },
-    { "titulo": "Cuando trabajas con más gente en el mismo proyecto.", "texto": "HTML da nombres compartidos a las cosas — 'el encabezado', 'el formulario', 'la lista de productos' — que diseño, desarrollo y contenido usan igual. Es el terreno común antes de que cada disciplina añada lo suyo." }
-  ]
-}
-```
+Lo vas a usar en cada página web que existe, sin excepción — da igual si está hecha a mano, con WordPress o con el framework de moda: en algún punto del proceso, lo que llega al navegador es HTML. Es la única lengua que todos los navegadores entienden de forma nativa.
+
+También te importa cuando quieres que el contenido sea accesible y encontrable: los lectores de pantalla y los buscadores no "ven" el diseño visual, leen la estructura HTML. Un título marcado como `<h1>` le dice a ambos que es el título principal; el mismo texto en negrita sin esa etiqueta no dice nada de eso.
+
+Y cuando trabajas con más gente en el mismo proyecto: HTML da nombres compartidos a las cosas — "el encabezado", "el formulario", "la lista de productos" — que diseño, desarrollo y contenido usan igual. Es el terreno común antes de que cada disciplina añada lo suyo.
 
 ## Cómo se usa
 
@@ -57,17 +52,13 @@ Sin etiquetas, el navegador ignora los saltos de línea y lo aplasta todo en una
 
 ## Lo que HTML NO es 👤
 
-```laboratorio
-{
-  "tipo": "notas-clave",
-  "items": [
-    { "titulo": "HTML no es un lenguaje de programación.", "texto": "No tiene variables, ni bucles, ni condicionales — no le puedes decir 'si pasa esto, haz aquello'. Solo describe qué es cada trozo de contenido. Aprender HTML es el primer paso hacia programar, pero no es programar todavía." },
-    { "titulo": "HTML no es CSS.", "texto": "HTML dice qué es cada cosa (un título, una lista); CSS decide cómo se ve (colores, tamaños, disposición). Son dos lenguajes distintos con trabajos distintos, aunque en la práctica siempre vayan juntos." },
-    { "titulo": "HTML no es interactivo por sí mismo.", "texto": "Un botón de HTML no hace nada al pulsarlo hasta que JavaScript le dice qué hacer. HTML solo declara 'aquí hay un botón' — el comportamiento es responsabilidad de otra tecnología." },
-    { "titulo": "HTML no 'se compila' ni 'se ejecuta' como un programa.", "texto": "El navegador lo lee (lo parsea) y construye directamente un árbol de elementos con él — no hay un paso previo de compilación como en un lenguaje de programación tradicional." }
-  ]
-}
-```
+**HTML no es un lenguaje de programación.** No tiene variables, ni bucles, ni condicionales — no le puedes decir "si pasa esto, haz aquello". Solo describe qué es cada trozo de contenido. Aprender HTML es el primer paso hacia programar, pero no es programar todavía.
+
+**HTML no es CSS.** HTML dice qué es cada cosa (un título, una lista); CSS decide cómo se ve (colores, tamaños, disposición). Son dos lenguajes distintos con trabajos distintos, aunque en la práctica siempre vayan juntos.
+
+**HTML no es interactivo por sí mismo.** Un botón de HTML no hace nada al pulsarlo hasta que JavaScript le dice qué hacer. HTML solo declara "aquí hay un botón" — el comportamiento es responsabilidad de otra tecnología.
+
+**HTML no "se compila" ni "se ejecuta" como un programa.** El navegador lo lee (lo parsea) y construye directamente un árbol de elementos con él — no hay un paso previo de compilación como en un lenguaje de programación tradicional.
 
 ## Errores típicos 👤
 

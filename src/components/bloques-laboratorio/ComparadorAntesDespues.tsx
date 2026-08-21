@@ -25,7 +25,7 @@ export function ComparadorAntesDespues({
   return (
     <section
       aria-label="Comparador antes y después"
-      className="my-6 min-w-0 space-y-4 rounded-xl border bg-card p-4 shadow-sm sm:p-5"
+      className="animate-in fade-in-0 slide-in-from-bottom-2 my-6 min-w-0 space-y-4 rounded-xl border bg-card p-4 shadow-sm duration-500 motion-reduce:animate-none sm:p-5"
     >
       <div className="flex items-start gap-3">
         <div className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-violet-50 dark:bg-violet-950/40">
@@ -80,7 +80,10 @@ export function ComparadorAntesDespues({
       </fieldset>
 
       <div className="grid min-w-0 gap-4 lg:grid-cols-2">
-        <div className="min-w-0 space-y-2">
+        <div
+          key={`codigo-${version}`}
+          className="animate-in fade-in-0 min-w-0 space-y-2 duration-300 motion-reduce:animate-none"
+        >
           <h4 className="text-sm font-semibold">Código · {etiquetaVersion}</h4>
           <CodigoResaltado
             codigo={codigo}
@@ -90,7 +93,10 @@ export function ComparadorAntesDespues({
             className="h-64"
           />
         </div>
-        <div className="min-w-0 space-y-2">
+        <div
+          key={`resultado-${version}`}
+          className="animate-in fade-in-0 min-w-0 space-y-2 duration-300 motion-reduce:animate-none"
+        >
           <h4 className="text-sm font-semibold">Resultado · {etiquetaVersion}</h4>
           <iframe
             className="block h-64 w-full max-w-full rounded-lg border bg-white"

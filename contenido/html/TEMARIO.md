@@ -79,7 +79,27 @@ sintaxis de una línea — `<form action="" method="">`, un `<input
 type="">`, etc. — no solo en "Anatomía de una etiqueta". Ver
 `specs/features/laboratorios.md`.
 
----
+**Regla de variedad 2026-08-22: máximo 1 `notas-clave` por lección.**
+Las dos primeras lecciones metían `notas-clave` en "Cuándo lo usarías
+de verdad", en "Lo que [X] no es" Y en "Errores típicos" — 3 veces el
+mismo componente en una sola página. Feedback directo: "repites mucho
+este componente". Regla desde ahora:
+
+- **"Cuándo lo usarías de verdad" y "Lo que [X] no es" van en prosa por
+  defecto**, no en bloque `notas-clave`. Son secciones narrativas — se
+  leen mejor como texto corrido (con `**negrita**` para los conceptos
+  clave si hace falta un ancla visual) que como una lista de tarjetas
+  numeradas. Solo usar `notas-clave` ahí si el contenido es
+  genuinamente una lista de ítems independientes sin relación narrativa
+  entre ellos.
+- **`notas-clave` se reserva casi siempre para "Errores típicos"**, que
+  sí es una lista real de gotchas independientes entre sí.
+- Con 5 tipos de bloque disponibles (`predice-el-resultado`,
+  `codigo-anotado`, `comparador-antes-despues`, `notas-clave`,
+  `diagrama-etiqueta`), cada lección debería usar al menos 2-3 tipos
+  distintos, no el mismo repetido. Antes de escribir una lección,
+  pensar qué tipo encaja mejor con CADA sección en vez de reutilizar
+  el último que se usó.
 
 ## Módulo 1 — Fundamentos del documento
 

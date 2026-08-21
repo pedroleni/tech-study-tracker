@@ -92,6 +92,7 @@
    código, también cuando hay desplazamiento horizontal. */
 .sintaxis-linea {
   display: block;
+  transition: background-color 200ms ease, box-shadow 200ms ease;
 }
 
 .sintaxis-linea-destacada {
@@ -113,4 +114,10 @@
 .sintaxis-columna-numeros {
   color: var(--sintaxis-numero-linea);
   user-select: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sintaxis-linea {
+    transition: none;
+  }
 }
