@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { createContext, useContext, useState, type ReactNode } from 'react'
 
 import { CodigoAnotado } from '@/components/bloques-laboratorio/CodigoAnotado'
 import { ComparadorAntesDespues } from '@/components/bloques-laboratorio/ComparadorAntesDespues'
@@ -55,6 +55,7 @@ import { TarjetaVolteable } from '@/components/referencia-contenido/TarjetaVolte
 import { TerminoGlosario } from '@/components/referencia-contenido/TerminoGlosario'
 import { TextoRotativo } from '@/components/referencia-contenido/TextoRotativo'
 import { TickerHorizontal } from '@/components/referencia-contenido/TickerHorizontal'
+import { cn } from '@/lib/utils'
 
 interface PropiedadesReferencia {
   nombre: string
@@ -67,11 +68,42 @@ interface PropiedadesGrupoCatalogo {
   children: ReactNode
 }
 
+// Todas las categorías del catálogo, en el orden en que aparecen abajo — la
+// lista para los chips de filtro se mantiene a mano porque los títulos de
+// GrupoCatalogo también están escritos a mano, no generados desde aquí.
+const CATEGORIAS = [
+  'Bloques de laboratorio',
+  'Avisos y alertas',
+  'Navegación y contenido expandible',
+  'Estructura secuencial',
+  'Enriquecimiento de texto',
+  'Metadatos y progreso',
+  'Comparación y verificación',
+  'Tarjetas de recursos',
+  'Carruseles',
+  'Efectos 3D',
+  'Animaciones de scroll',
+  'Texto dinámico',
+  'Interactivos',
+  'Datos animados',
+]
+
+function idDeCategoria(titulo: string) {
+  return `grupo-${titulo.toLowerCase().replace(/\s+/g, '-')}`
+}
+
+// Cada GrupoCatalogo lee el filtro activo por contexto en vez de recibirlo
+// como prop — así el filtro no obliga a tocar las 14 llamadas existentes.
+const CategoriaActivaContext = createContext<string | null>(null)
+
 function GrupoCatalogo({ titulo, descripcion, children }: PropiedadesGrupoCatalogo) {
-  const tituloId = `grupo-${titulo.toLowerCase().replace(/\s+/g, '-')}`
+  const categoriaActiva = useContext(CategoriaActivaContext)
+  if (categoriaActiva !== null && categoriaActiva !== titulo) return null
+
+  const tituloId = idDeCategoria(titulo)
 
   return (
-    <section aria-labelledby={tituloId} className="space-y-8">
+    <section aria-labelledby={tituloId} className="scroll-mt-16 space-y-8">
       <header className="border-b pb-4">
         <h2 id={tituloId} className="text-2xl font-semibold tracking-tight text-balance">
           {titulo}
@@ -80,6 +112,55 @@ function GrupoCatalogo({ titulo, descripcion, children }: PropiedadesGrupoCatalo
       </header>
       <div className="space-y-12">{children}</div>
     </section>
+  )
+}
+
+function FiltroCategorias({
+  categoriaActiva,
+  onCambiar,
+}: {
+  categoriaActiva: string | null
+  onCambiar: (categoria: string | null) => void
+}) {
+  return (
+    <div
+      role="group"
+      aria-label="Filtrar componentes por categoría"
+      className="sticky top-0 z-10 -mx-1 flex flex-wrap gap-2 border-b bg-background px-1 py-3"
+    >
+      <button
+        type="button"
+        aria-pressed={categoriaActiva === null}
+        onClick={() => onCambiar(null)}
+        className={cn(
+          'min-h-9 touch-manipulation rounded-full border px-3 py-1 text-xs font-medium transition-colors',
+          categoriaActiva === null
+            ? 'border-primary bg-primary text-primary-foreground'
+            : 'border-input bg-background text-muted-foreground hover:bg-muted hover:text-foreground',
+        )}
+      >
+        Todas
+      </button>
+      {CATEGORIAS.map((categoria) => {
+        const activa = categoriaActiva === categoria
+        return (
+          <button
+            key={categoria}
+            type="button"
+            aria-pressed={activa}
+            onClick={() => onCambiar(activa ? null : categoria)}
+            className={cn(
+              'min-h-9 touch-manipulation rounded-full border px-3 py-1 text-xs font-medium transition-colors',
+              activa
+                ? 'border-primary bg-primary text-primary-foreground'
+                : 'border-input bg-background text-muted-foreground hover:bg-muted hover:text-foreground',
+            )}
+          >
+            {categoria}
+          </button>
+        )
+      })}
+    </div>
   )
 }
 
@@ -97,6 +178,8 @@ function Referencia({ nombre, children }: PropiedadesReferencia) {
 }
 
 export function AdminReferenciaContenidoPage() {
+  const [categoriaActiva, setCategoriaActiva] = useState<string | null>(null)
+
   return (
     <section aria-labelledby="admin-referencia-contenido-title" className="space-y-10">
       <BarraProgresoLectura etiqueta="Progreso por el catálogo de componentes" />
@@ -120,6 +203,9 @@ export function AdminReferenciaContenidoPage() {
         </p>
       </header>
 
+      <FiltroCategorias categoriaActiva={categoriaActiva} onCambiar={setCategoriaActiva} />
+
+      <CategoriaActivaContext.Provider value={categoriaActiva}>
       <GrupoCatalogo
         titulo="Bloques de laboratorio"
         descripcion="Los 5 tipos reales que un autor puede usar dentro de un bloque ```laboratorio en el Markdown de una lección (src/components/bloques-laboratorio/). Validados por Zod, registrados en un lookup cerrado — no prototipos."
@@ -754,6 +840,7 @@ export function AdminReferenciaContenidoPage() {
           />
         </Referencia>
       </GrupoCatalogo>
+      </CategoriaActivaContext.Provider>
     </section>
   )
 }
