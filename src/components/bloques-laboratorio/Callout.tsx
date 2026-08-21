@@ -1,10 +1,6 @@
 import { CircleCheck, CircleX, Info, TriangleAlert } from 'lucide-react'
 
-export interface PropiedadesCallout {
-  variante: 'info' | 'aviso' | 'error' | 'exito'
-  titulo: string
-  contenido: string
-}
+import type { DatosCallout } from '@/lib/laboratorio/schemas'
 
 const variantes = {
   info: {
@@ -33,7 +29,7 @@ const variantes = {
   },
 } as const
 
-export function Callout({ variante, titulo, contenido }: PropiedadesCallout) {
+export function Callout({ variante, titulo, contenido }: DatosCallout) {
   const { Icono, contenedor, icono, etiqueta } = variantes[variante]
 
   return (

@@ -131,6 +131,24 @@ describe('SafeMarkdown con laboratorios', () => {
     expect(screen.getByText('</p>')).toBeInTheDocument()
   })
 
+  it('renderiza callout con su variante y contenido', () => {
+    render(
+      <SafeMarkdown permitirLaboratorios>
+        {bloqueLaboratorio({
+          tipo: 'callout',
+          variante: 'aviso',
+          titulo: 'Orden importante',
+          contenido: 'Coloca meta charset antes de cualquier texto con tildes.',
+        })}
+      </SafeMarkdown>,
+    )
+
+    expect(screen.getByText('Orden importante')).toBeInTheDocument()
+    expect(
+      screen.getByText('Coloca meta charset antes de cualquier texto con tildes.'),
+    ).toBeInTheDocument()
+  })
+
   it('usa código plano cuando el JSON es inválido', () => {
     render(
       <SafeMarkdown permitirLaboratorios>
@@ -168,7 +186,7 @@ describe('SafeMarkdown con laboratorios', () => {
     expect(container.querySelector('p code')).toHaveTextContent('main')
   })
 
-  it('no tiene violaciones de accesibilidad con los cinco tipos', async () => {
+  it('no tiene violaciones de accesibilidad con los seis tipos', async () => {
     const markdown = [
       bloqueLaboratorio({
         tipo: 'predice-el-resultado',
@@ -207,6 +225,12 @@ describe('SafeMarkdown con laboratorios', () => {
           { texto: 'Hola', rol: 'contenido' },
           { texto: '</p>', rol: 'cierre' },
         ],
+      }),
+      bloqueLaboratorio({
+        tipo: 'callout',
+        variante: 'info',
+        titulo: 'Dato',
+        contenido: 'El navegador construye un árbol a partir del HTML.',
       }),
     ].join('\n\n')
     const { container } = render(

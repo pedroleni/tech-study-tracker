@@ -1,11 +1,14 @@
 # Bloques de laboratorio en lecciones
 
-**Estado:** ✅ implementada. Ampliada dos veces desde la versión
+**Estado:** ✅ implementada. Ampliada tres veces desde la versión
 original de 3 tipos: `notas-clave` (para los puntos clave de las
-lecciones reales) y `diagrama-etiqueta` (2026-08-22, descomposición
+lecciones reales), `diagrama-etiqueta` (2026-08-22, descomposición
 visual de una etiqueta en partes coloreadas — pedido explícito tras
 feedback de que `codigo-anotado` no sirve para eso: solo resalta la
-línea entera, no un fragmento dentro de ella). 5 tipos de bloque en
+línea entera, no un fragmento dentro de ella) y `callout` (2026-08-22,
+promovido desde `referencia-contenido/Callout.tsx` — feedback directo
+de que `notas-clave` se repetía 3 veces por lección y quitarlo sin más
+tampoco valía, hacía falta un sustituto real). 6 tipos de bloque en
 total, el prop `permitirLaboratorios`, y el temario real de HTML en
 progreso sobre este mecanismo.
 
@@ -34,7 +37,7 @@ cualquier lección.
 
 ## Alcance
 
-Cinco tipos de bloque, cada uno con un ejemplo real ya escrito en
+Seis tipos de bloque, cada uno con un ejemplo real ya escrito en
 `contenido/html/`:
 
 1. **`predice-el-resultado`** — código + opciones + botón "Revelar" que
@@ -46,8 +49,9 @@ Cinco tipos de bloque, cada uno con un ejemplo real ya escrito en
 3. **`comparador-antes-despues`** — dos versiones del mismo HTML
    (antes/después) con su código y su vista en vivo.
 4. **`notas-clave`** — lista de puntos clave (título + texto), cada uno
-   numerado. Es el tipo más usado en las lecciones reales, en
-   "Cuándo lo usarías de verdad" y "Errores típicos".
+   numerado, dentro de una única tarjeta agrupada. Reservado a lo sumo
+   una vez por lección (normalmente "Errores típicos") — ver la regla
+   de variedad en `contenido/html/TEMARIO.md`.
 5. **`diagrama-etiqueta`** (2026-08-22) — descompone una etiqueta HTML
    en sus partes (`apertura`, `atributo-nombre`, `atributo-valor`,
    `contenido`, `cierre`, `simbolo` para la puntuación sin rol
@@ -58,6 +62,15 @@ Cinco tipos de bloque, cada uno con un ejemplo real ya escrito en
    no sirve para "esta etiqueta de una sola línea tiene 5 partes
    distintas": todas las anotaciones acaban resaltando la misma única
    línea, sin diferenciar visualmente las partes entre sí.
+6. **`callout`** (2026-08-22) — un único punto destacado: icono +
+   título + texto, en una de 4 variantes (`info`, `aviso`, `error`,
+   `exito`). Promovido desde `referencia-contenido/Callout.tsx` (ya
+   existía como prototipo, ya tenía el reveal de entrada
+   `animate-in`/`motion-reduce`) al registro real. Se usa en varias
+   instancias sueltas — una por punto — en vez de agrupar todo en una
+   tarjeta `notas-clave`: es lo que sustituye a `notas-clave` en
+   "Cuándo lo usarías de verdad" y en "Lo que [X] no es", que antes
+   repetían el mismo componente 3 veces por lección.
 
 **Fuera de alcance a propósito:** el ejercicio "Escríbelo tú" con
 comprobaciones automáticas (`RetoConComprobaciones` en
@@ -186,12 +199,20 @@ export const esquemaDiagramaEtiqueta = z.object({
   })).min(3).max(20),
 })
 
+export const esquemaCallout = z.object({
+  tipo: z.literal('callout'),
+  variante: z.enum(['info', 'aviso', 'error', 'exito']),
+  titulo: z.string().min(1).max(140),
+  contenido: z.string().min(1).max(600),
+})
+
 export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaPrediceElResultado,
   esquemaCodigoAnotado,
   esquemaComparadorAntesDespues,
   esquemaNotasClave,
   esquemaDiagramaEtiqueta,
+  esquemaCallout,
 ])
 ```
 
@@ -222,6 +243,12 @@ diseño" con "feature real".
   color pasado por fuera y su contrapartida `dark:` interna (ver
   `specs/design-system.md`, el incidente de las badges de
   `TechnologyPage` que motivó esa regla).
+- `Callout.tsx` — recibe `z.infer<typeof esquemaCallout>`. Movido desde
+  `referencia-contenido/Callout.tsx` (`git mv`, mismo componente, sin
+  cambios de diseño) el día que se promovió a tipo real — un
+  componente no puede vivir a la vez en "prototipo, no forma parte del
+  pipeline" y en el registro real, por la misma razón que V1-V5 no
+  comparten carpeta con este sistema.
 - `registro.ts` — `Record<string, ComponentType<any>>` cerrado, una
   entrada por `tipo`.
 - `BloqueLaboratorio.tsx` — el punto de entrada que usa `SafeMarkdown`:
@@ -286,11 +313,11 @@ Cada componente que renderiza HTML en vivo usa
 
 ## Checklist de implementación
 
-- [x] `src/lib/laboratorio/schemas.ts` (5 esquemas + unión discriminada)
-- [x] `src/components/bloques-laboratorio/` (5 componentes + registro + punto de entrada)
+- [x] `src/lib/laboratorio/schemas.ts` (6 esquemas + unión discriminada)
+- [x] `src/components/bloques-laboratorio/` (6 componentes + registro + punto de entrada)
 - [x] `SafeMarkdown.tsx`: prop, override de `code`, `CodigoResaltado` para código normal
 - [x] `LeccionPage.tsx`: pasar el prop
-- [x] Tests: los 5 tipos renderizan con datos válidos; JSON inválido cae a código plano; `tipo` desconocido cae a código plano; comentario con bloque `laboratorio` NO se activa; 0 violaciones de accesibilidad (`axe`) con los 5 tipos a la vez
+- [x] Tests: los 6 tipos renderizan con datos válidos; JSON inválido cae a código plano; `tipo` desconocido cae a código plano; comentario con bloque `laboratorio` NO se activa; 0 violaciones de accesibilidad (`axe`) con los 6 tipos a la vez
 - [x] `contenido/html/01-*.md` y `02-*.md` reescritos con bloques reales (versión piloto; el temario real de 2026-08-21 los sustituye lección a lección)
 - [x] Contenido actualizado en producción vía el formulario de admin
 - [x] `npm run test`, `build`, `lint` en verde
@@ -300,3 +327,8 @@ Cada componente que renderiza HTML en vivo usa
   prompt detallado de Claude, verificado archivo a archivo antes de
   aceptarlo (no solo confiando en su propio reporte) — `tsc`, `lint` y
   la suite completa (212/212) en verde tras la revisión.
+- [x] `callout` (2026-08-22): `git mv` de `referencia-contenido/Callout.tsx`
+  a `bloques-laboratorio/`, tipado sobre `DatosCallout` en vez de su
+  interfaz suelta anterior, registrado, con test dedicado y sumado a la
+  auditoría axe conjunta — `tsc`, `lint` y la suite completa (213/213)
+  en verde.

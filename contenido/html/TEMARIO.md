@@ -83,23 +83,28 @@ type="">`, etc. — no solo en "Anatomía de una etiqueta". Ver
 Las dos primeras lecciones metían `notas-clave` en "Cuándo lo usarías
 de verdad", en "Lo que [X] no es" Y en "Errores típicos" — 3 veces el
 mismo componente en una sola página. Feedback directo: "repites mucho
-este componente". Regla desde ahora:
+este componente". Primer intento — pasar esas dos secciones a prosa
+plana — fue corregido también por feedback directo: "no es que lo
+quitases y no pusieras ninguno, quiero que te replantees cuál utilizar
+que lo sustituya". Regla final desde 2026-08-22:
 
-- **"Cuándo lo usarías de verdad" y "Lo que [X] no es" van en prosa por
-  defecto**, no en bloque `notas-clave`. Son secciones narrativas — se
-  leen mejor como texto corrido (con `**negrita**` para los conceptos
-  clave si hace falta un ancla visual) que como una lista de tarjetas
-  numeradas. Solo usar `notas-clave` ahí si el contenido es
-  genuinamente una lista de ítems independientes sin relación narrativa
-  entre ellos.
 - **`notas-clave` se reserva casi siempre para "Errores típicos"**, que
-  sí es una lista real de gotchas independientes entre sí.
-- Con 5 tipos de bloque disponibles (`predice-el-resultado`,
+  es una lista real de gotchas independientes entre sí — el único caso
+  donde agrupar todo en una tarjeta numerada tiene sentido.
+- **"Cuándo lo usarías de verdad" y "Lo que [X] no es" usan `callout`**,
+  uno por punto (no agrupados en una sola tarjeta): cada escenario o
+  cada malentendido es su propio aviso suelto, con su propia `variante`
+  (`info` para contexto neutro, `aviso` para algo que conviene no
+  pasar por alto). Visualmente distinto de `notas-clave` — asides
+  independientes en vez de una lista dentro de una tarjeta — así que
+  usarlo ahí no cuenta como "repetir el mismo componente".
+- Con 6 tipos de bloque disponibles (`predice-el-resultado`,
   `codigo-anotado`, `comparador-antes-despues`, `notas-clave`,
-  `diagrama-etiqueta`), cada lección debería usar al menos 2-3 tipos
-  distintos, no el mismo repetido. Antes de escribir una lección,
-  pensar qué tipo encaja mejor con CADA sección en vez de reutilizar
-  el último que se usó.
+  `diagrama-etiqueta`, `callout`), cada lección debería usar al menos
+  3 tipos distintos, no el mismo repetido. Antes de escribir una
+  lección, pensar qué tipo encaja mejor con CADA sección en vez de
+  reutilizar el último que se usó — y nunca "quitar el bloque y dejar
+  prosa" como solución por defecto a la repetición.
 
 ## Módulo 1 — Fundamentos del documento
 

@@ -17,11 +17,32 @@ Y no todos los elementos siguen el patrón apertura-contenido-cierre: unos pocos
 
 ## Cuándo lo usarías de verdad 👤
 
-Cada vez que escribes o lees HTML, sin excepción. Esto no es una técnica puntual, es la gramática básica: todo lo demás del temario — formularios, tablas, accesibilidad — se explica dando por hecho que ya sabes leer una etiqueta.
+```laboratorio
+{
+  "tipo": "callout",
+  "variante": "info",
+  "titulo": "Cada vez que escribes o lees HTML, sin excepción",
+  "contenido": "Esto no es una técnica puntual, es la gramática básica: todo lo demás del temario — formularios, tablas, accesibilidad — se explica dando por hecho que ya sabes leer una etiqueta."
+}
+```
 
-También cuando depuras una página que "se ve rota": una etiqueta sin cerrar o cerrada en el orden equivocado es una de las causas más comunes de que el diseño se descuadre a partir de cierto punto de la página, sin que haya ningún error visible en la consola.
+```laboratorio
+{
+  "tipo": "callout",
+  "variante": "info",
+  "titulo": "Cuando depuras una página que \"se ve rota\"",
+  "contenido": "Una etiqueta sin cerrar o cerrada en el orden equivocado es una de las causas más comunes de que el diseño se descuadre a partir de cierto punto de la página, sin que haya ningún error visible en la consola."
+}
+```
 
-Y cuando lees la documentación de una etiqueta que no conoces: lo primero que necesitas saber es si es normal o si se cierra sola, qué atributos acepta, y si alguno de ellos es booleano. Es la primera pregunta que responde cualquier referencia de MDN.
+```laboratorio
+{
+  "tipo": "callout",
+  "variante": "info",
+  "titulo": "Cuando lees la documentación de una etiqueta que no conoces",
+  "contenido": "Lo primero que necesitas saber es si es normal o si se cierra sola, qué atributos acepta, y si alguno de ellos es booleano. Es la primera pregunta que responde cualquier referencia de MDN."
+}
+```
 
 ## Cómo se usa
 
@@ -99,11 +120,32 @@ Aquí `checked` deja la casilla marcada desde el principio y `disabled` deja el 
 
 ## Lo que una etiqueta desconocida NO hace 👤
 
-**El navegador no rechaza una etiqueta que no reconoce.** Escribe `<marcador-inventado>texto</marcador-inventado>` en cualquier página: no hay error, no hay aviso. La trata como un elemento genérico sin ningún estilo ni comportamiento especial, y sigue mostrando el texto de dentro con normalidad.
+```laboratorio
+{
+  "tipo": "callout",
+  "variante": "aviso",
+  "titulo": "El navegador no rechaza una etiqueta que no reconoce",
+  "contenido": "Escribe <marcador-inventado>texto</marcador-inventado> en cualquier página: no hay error, no hay aviso. La trata como un elemento genérico sin ningún estilo ni comportamiento especial, y sigue mostrando el texto de dentro con normalidad."
+}
+```
 
-**Por eso una etiqueta mal escrita tampoco "avisa".** Si escribes `<strogn>` en vez de `<strong>` por error de tecleo, el navegador no dice nada — simplemente el texto no se pondrá en negrita, porque `<strogn>` es, para él, una etiqueta desconocida más.
+```laboratorio
+{
+  "tipo": "callout",
+  "variante": "aviso",
+  "titulo": "Por eso una etiqueta mal escrita tampoco \"avisa\"",
+  "contenido": "Si escribes <strogn> en vez de <strong> por error de tecleo, el navegador no dice nada — simplemente el texto no se pondrá en negrita, porque <strogn> es, para él, una etiqueta desconocida más."
+}
+```
 
-**Esto es justo lo que hace posibles los Web Components.** Etiquetas personalizadas como `<mi-componente>` funcionan porque el navegador ya las acepta sintácticamente sin quejarse; solo les falta que JavaScript les defina un comportamiento. No es magia nueva, es esta misma tolerancia de HTML.
+```laboratorio
+{
+  "tipo": "callout",
+  "variante": "info",
+  "titulo": "Esto es justo lo que hace posibles los Web Components",
+  "contenido": "Etiquetas personalizadas como <mi-componente> funcionan porque el navegador ya las acepta sintácticamente sin quejarse; solo les falta que JavaScript les defina un comportamiento. No es magia nueva, es esta misma tolerancia de HTML."
+}
+```
 
 ## Errores típicos 👤
 
