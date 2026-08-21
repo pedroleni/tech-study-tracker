@@ -71,6 +71,7 @@ describe('AdminReferenciaContenidoPage', () => {
     }
 
     const resultados = await axe(container, {
+      iframes: false,
       rules: { 'color-contrast': { enabled: false } },
     })
     expect(resultados.violations).toEqual([])

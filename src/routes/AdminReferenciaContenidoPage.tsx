@@ -1,5 +1,10 @@
 import type { ReactNode } from 'react'
 
+import { CodigoAnotado } from '@/components/bloques-laboratorio/CodigoAnotado'
+import { ComparadorAntesDespues } from '@/components/bloques-laboratorio/ComparadorAntesDespues'
+import { DiagramaEtiqueta } from '@/components/bloques-laboratorio/DiagramaEtiqueta'
+import { NotasClave } from '@/components/bloques-laboratorio/NotasClave'
+import { PrediceElResultado } from '@/components/bloques-laboratorio/PrediceElResultado'
 import { Acordeon } from '@/components/referencia-contenido/Acordeon'
 import { AntesDespuesDeslizante } from '@/components/referencia-contenido/AntesDespuesDeslizante'
 import { AparicionEscalonada } from '@/components/referencia-contenido/AparicionEscalonada'
@@ -105,11 +110,91 @@ export function AdminReferenciaContenidoPage() {
           Componentes de contenido
         </h1>
         <p className="mt-3 max-w-3xl text-sm text-pretty text-muted-foreground">
-          Catálogo visual de componentes React para futuras lecciones. Estos ejemplos sirven
-          para comparar patrones de presentación y todavía no forman parte del pipeline de
-          Markdown ni del sistema de laboratorios.
+          Catálogo visual de componentes React organizado por tipo. El primer grupo, "Bloques de
+          laboratorio", son los 5 componentes reales que ya renderiza cualquier lección a través
+          de un bloque <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">```laboratorio</code>{' '}
+          en su Markdown (ver <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">specs/features/laboratorios.md</code>).
+          El resto de grupos son prototipos de diseño de <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">referencia-contenido/</code> —
+          sirven para comparar patrones de presentación, pero todavía no forman parte del
+          pipeline de Markdown ni del sistema de laboratorios.
         </p>
       </header>
+
+      <GrupoCatalogo
+        titulo="Bloques de laboratorio"
+        descripcion="Los 5 tipos reales que un autor puede usar dentro de un bloque ```laboratorio en el Markdown de una lección (src/components/bloques-laboratorio/). Validados por Zod, registrados en un lookup cerrado — no prototipos."
+      >
+        <Referencia nombre="PrediceElResultado">
+          <PrediceElResultado
+            lenguaje="html"
+            codigo={'<html>\n<body>\n<p>Hola</p>\n</body>\n</html>'}
+            opciones={[
+              'El navegador rechaza la página y muestra un error',
+              "Se ve exactamente igual, pero el navegador activa el 'modo quirks' por debajo",
+              'No pasa nada, el doctype es solo para validadores automáticos',
+            ]}
+            correcta={1}
+            explicacion="Un navegador nunca 'rompe' una página por falta de doctype — pero activa un modo de compatibilidad (quirks mode) donde el cálculo de tamaños y márgenes cambia de forma sutil y distinta según el navegador."
+          />
+        </Referencia>
+
+        <Referencia nombre="CodigoAnotado">
+          <CodigoAnotado
+            lenguaje="html"
+            codigo={'<p class="intro">\n  Bienvenido a <strong>mi web</strong>.\n</p>'}
+            anotaciones={[
+              {
+                fragmento: '<p class="intro">',
+                nota: 'Etiqueta de apertura con un atributo: nombre (class) igual, valor entre comillas.',
+              },
+              {
+                fragmento: '<strong>mi web</strong>',
+                nota: 'Un elemento completo dentro de otro: apertura, contenido, cierre.',
+              },
+            ]}
+          />
+        </Referencia>
+
+        <Referencia nombre="ComparadorAntesDespues">
+          <ComparadorAntesDespues
+            antes="Instrucciones para la vida: Come. Duerme. Repite."
+            despues={'<p>Instrucciones para la vida:</p>\n<ul>\n  <li>Come</li>\n  <li>Duerme</li>\n  <li>Repite</li>\n</ul>'}
+            nota="Mismo contenido, con y sin HTML."
+          />
+        </Referencia>
+
+        <Referencia nombre="NotasClave">
+          <NotasClave
+            items={[
+              {
+                titulo: 'Olvidar cerrar una etiqueta que sí lo necesita.',
+                texto: 'Confundir un elemento normal con uno vacío, como <img> o <br>.',
+              },
+              {
+                titulo: 'Cerrar en el orden equivocado.',
+                texto: 'El cierre tiene que deshacer el anidamiento en orden inverso al de apertura, como una pila.',
+              },
+            ]}
+          />
+        </Referencia>
+
+        <Referencia nombre="DiagramaEtiqueta">
+          <DiagramaEtiqueta
+            titulo="Un elemento completo, descompuesto"
+            partes={[
+              { texto: '<', rol: 'simbolo' },
+              { texto: 'p', rol: 'apertura' },
+              { texto: ' ', rol: 'simbolo' },
+              { texto: 'class', rol: 'atributo-nombre' },
+              { texto: '=', rol: 'simbolo' },
+              { texto: '"intro"', rol: 'atributo-valor' },
+              { texto: '>', rol: 'simbolo' },
+              { texto: 'Hola', rol: 'contenido' },
+              { texto: '</p>', rol: 'cierre' },
+            ]}
+          />
+        </Referencia>
+      </GrupoCatalogo>
 
       <GrupoCatalogo
         titulo="Fundamentos"
