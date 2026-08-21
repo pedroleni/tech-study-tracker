@@ -3,7 +3,7 @@
 - **Módulo:** Fundamentos del documento
 - **Slug:** `lo-minimo-que-el-navegador-necesita-para-funcionar` (autogenerado del título)
 - **Orden:** 10
-- **Fuentes:** [Basic HTML syntax (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Basic_HTML_syntax) + [Document structure (web.dev)](https://web.dev/learn/html/document-structure) — ver `contenido/html/TEMARIO.md` #1
+- **Fuentes:** [Basic HTML syntax (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Basic_HTML_syntax) + [Document structure (web.dev)](https://web.dev/learn/html/document-structure) — ver `contenido/html/TEMARIO.md` #2
 
 ---
 
