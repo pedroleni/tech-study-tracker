@@ -40,7 +40,7 @@ Dentro de la etiqueta de apertura pueden ir **atributos**: pares `nombre="valor"
 
 Y no todos los elementos se cierran: unos pocos (una imagen, un salto de línea) se escriben con una sola etiqueta y punto — los ves en detalle más abajo. Cuando anidas elementos, el navegador construye con ellos un árbol (el DOM); no hace falta entenderlo hoy, pero la mayoría de bugs de "por qué mi CSS no aplica" se explican mirando ese árbol.
 
-## Cuándo lo usarías de verdad 👤
+## Cuándo lo usarías de verdad
 
 ```laboratorio
 {
@@ -143,7 +143,7 @@ Aquí `checked` deja la casilla marcada desde el principio y `disabled` deja el 
 }
 ```
 
-## Lo que una etiqueta desconocida NO hace 👤
+## Lo que una etiqueta desconocida NO hace
 
 ```laboratorio
 {
@@ -165,7 +165,7 @@ Aquí `checked` deja la casilla marcada desde el principio y `disabled` deja el 
 }
 ```
 
-## Errores típicos 👤
+## Errores típicos
 
 ```laboratorio
 {

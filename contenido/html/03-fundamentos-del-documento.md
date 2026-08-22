@@ -13,7 +13,7 @@ Todo documento HTML necesita un esqueleto mínimo para que el navegador sepa qu�
 
 Hay una razón concreta para exigirlo: sin ese esqueleto (o con él mal puesto), el navegador tiene que **adivinar** cómo interpretar el resto de la página — y lo hace de forma distinta según el navegador, según la época y según lo que crea que quisiste decir. Eso es exactamente lo que quieres evitar cuando escribes HTML que otra persona (o tú dentro de seis meses) va a tener que entender igual en cualquier sitio.
 
-## Cuándo lo usarías de verdad 👤
+## Cuándo lo usarías de verdad
 
 ```laboratorio
 {
@@ -77,7 +77,7 @@ Cada línea tiene un trabajo concreto:
 }
 ```
 
-## Errores típicos 👤
+## Errores típicos
 
 ```laboratorio
 {

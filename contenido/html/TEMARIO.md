@@ -50,13 +50,21 @@ mantenerla):
 
 ```
 ## Qué es y para qué sirve
-## Cuándo lo usarías de verdad 👤
+## Cuándo lo usarías de verdad
 ## Cómo se usa
-## Lo que [X] NO es 👤   (opcional, ver nota abajo)
-## Errores típicos 👤
+## Lo que [X] NO es   (opcional, ver nota abajo)
+## Errores típicos
 ## Ejercicios
 ## Para profundizar
 ```
+
+"Cuándo lo usarías de verdad" y "Errores típicos" son las secciones que
+el autor tiene que escribir sí o sí — no existen en la documentación
+oficial y son las que justifican que la ficha exista (antes se
+marcaban con un emoji 👤 al final del título; se quitó 2026-08-23
+porque acabó renderizándose tal cual en la página publicada, que no
+era la intención — era una nota solo para quien escribe, no para
+quien lee).
 
 **Sección opcional "Lo que [X] no es"** — añadida 2026-08-21 tras
 feedback directo de que las lecciones se quedaban cortas en teoría.

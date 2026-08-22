@@ -1,9 +1,10 @@
 # La estructura de una página
 
 > **Ficha piloto.** Sirve para fijar la plantilla y medir cuánto cuesta
-> escribir una ficha de verdad. Las secciones marcadas con 👤 son las que
-> el autor tiene que escribir sí o sí: son las que no existen en la
-> documentación oficial y las que justifican que esta página exista.
+> escribir una ficha de verdad. "Cuándo lo usarías de verdad" y
+> "Errores típicos" son las secciones que el autor tiene que escribir
+> sí o sí: son las que no existen en la documentación oficial y las
+> que justifican que esta página exista.
 
 - **Nivel:** primeros pasos
 - **Requisitos previos:** ninguno
@@ -44,7 +45,7 @@ estructuran una página son estas:
 
 ---
 
-## Cuándo lo usarías de verdad 👤
+## Cuándo lo usarías de verdad
 
 La documentación oficial te dice qué es cada etiqueta. Lo que casi nunca
 te dice es cuándo notas la diferencia. Son estos cuatro momentos:
@@ -130,7 +131,7 @@ esa entrada, no: es una `<section>`.
 
 ---
 
-## Errores típicos 👤
+## Errores típicos
 
 ```laboratorio
 {

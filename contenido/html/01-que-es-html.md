@@ -45,7 +45,7 @@ HTML no trabaja solo. Verás esta idea repetida en casi todo el temario, así qu
 
 Puedes tener un HTML perfecto con un CSS horrible, o un HTML pésimo con un CSS espectacular por encima — son responsabilidades separadas a propósito, y mezclarlas es una de las fuentes de errores más comunes cuando se empieza.
 
-## Cuándo lo usarías de verdad 👤
+## Cuándo lo usarías de verdad
 
 ```laboratorio
 {
@@ -101,7 +101,7 @@ Sin etiquetas, el navegador ignora los saltos de línea y lo aplasta todo en una
 }
 ```
 
-## Lo que HTML NO es 👤
+## Lo que HTML NO es
 
 ```laboratorio
 {
@@ -127,7 +127,7 @@ Sin etiquetas, el navegador ignora los saltos de línea y lo aplasta todo en una
 }
 ```
 
-## Errores típicos 👤
+## Errores típicos
 
 ```laboratorio
 {
