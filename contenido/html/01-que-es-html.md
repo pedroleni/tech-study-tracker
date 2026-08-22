@@ -163,6 +163,7 @@ Sin etiquetas, el navegador ignora los saltos de línea y lo aplasta todo en una
 ```laboratorio
 {
   "tipo": "recursos",
+  "titulo": "Fuentes de esta lección",
   "recursos": [
     {
       "titulo": "Creating the content",

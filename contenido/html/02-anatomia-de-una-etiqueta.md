@@ -175,6 +175,7 @@ Aquí `checked` deja la casilla marcada desde el principio y `disabled` deja el 
 ```laboratorio
 {
   "tipo": "recursos",
+  "titulo": "Fuentes de esta lección",
   "recursos": [
     {
       "titulo": "Basic HTML syntax",
