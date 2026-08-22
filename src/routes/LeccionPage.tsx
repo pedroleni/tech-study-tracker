@@ -10,7 +10,7 @@ import { Card } from '@/components/ui/card'
 import { useLeccion } from '@/lib/hooks/useLeccion'
 import { useProfile } from '@/lib/hooks/useProfile'
 import { useTechnology } from '@/lib/hooks/useTechnologies'
-import { extraerEncabezadosH2 } from '@/lib/utils/extraerEncabezadosH2'
+import { dividirEnSecciones } from '@/lib/utils/dividirEnSecciones'
 
 export function LeccionPage() {
   const { id = '', leccionSlug = '' } = useParams()
@@ -22,7 +22,7 @@ export function LeccionPage() {
   const loading = technologyQuery.isLoading || leccionQuery.isLoading
   const failed = technologyQuery.isError || leccionQuery.isError
   const secciones = useMemo(
-    () => extraerEncabezadosH2(leccion?.contenido ?? ''),
+    () => dividirEnSecciones(leccion?.contenido ?? ''),
     [leccion?.contenido],
   )
 
@@ -108,15 +108,40 @@ export function LeccionPage() {
             )}
           </header>
 
-          <Card>
-            {leccion.contenido.trim() ? (
-              <SafeMarkdown permitirLaboratorios>{leccion.contenido}</SafeMarkdown>
-            ) : (
+          {!leccion.contenido.trim() ? (
+            <Card>
               <p className="text-sm text-muted-foreground">
                 Esta lección todavía no tiene contenido.
               </p>
-            )}
-          </Card>
+            </Card>
+          ) : secciones.length > 0 ? (
+            <div className="space-y-6">
+              {secciones.map((seccion, indice) => (
+                <Card key={seccion.id} id={seccion.id} className="scroll-mt-28">
+                  <div className="flex items-start gap-5">
+                    <span
+                      aria-hidden="true"
+                      className="shrink-0 text-4xl leading-none font-extrabold tabular-nums text-foreground/[0.14] dark:text-foreground/20"
+                    >
+                      {String(indice + 1).padStart(2, '0')}
+                    </span>
+                    <h2 className="pt-1 text-xl font-bold tracking-tight text-balance">
+                      {seccion.titulo}
+                    </h2>
+                  </div>
+                  {seccion.cuerpo && (
+                    <div className="mt-4">
+                      <SafeMarkdown permitirLaboratorios>{seccion.cuerpo}</SafeMarkdown>
+                    </div>
+                  )}
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card>
+              <SafeMarkdown permitirLaboratorios>{leccion.contenido}</SafeMarkdown>
+            </Card>
+          )}
         </article>
       </div>
 
