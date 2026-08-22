@@ -1,4 +1,4 @@
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Layers } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
 
 import { CommentsSection } from '@/components/comment/CommentsSection'
@@ -58,7 +58,10 @@ export function LeccionPage() {
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="min-w-0 space-y-2">
               {leccion.modulo && (
-                <p className="text-sm font-medium text-muted-foreground">{leccion.modulo}</p>
+                <p className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
+                  <Layers aria-hidden="true" className="size-3.5" />
+                  {leccion.modulo}
+                </p>
               )}
               <h1 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
                 {leccion.titulo}

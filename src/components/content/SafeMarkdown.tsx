@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { Circle, Code2, Info, Library, ListChecks, TriangleAlert, User } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
@@ -6,6 +7,52 @@ import { BloqueLaboratorio } from '@/components/bloques-laboratorio/BloqueLabora
 import { CodigoResaltado } from '@/components/codigo'
 import type { Lenguaje } from '@/components/codigo'
 import { validateResourceUrl } from '@/lib/utils/validateResourceUrl'
+
+// Icono temático por apartado — mismo lenguaje visual que ya usan los
+// bloques de laboratorio (insignia de color + icono), para que los
+// encabezados de sección se distingan de un vistazo sin añadir un
+// sistema visual nuevo. El texto se normaliza (minúsculas, sin tildes)
+// porque el título exacto de "Lo que [X] no es" varía por lección.
+function normalizarTexto(texto: string) {
+  return texto
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+}
+
+function textoPlano(children: ReactNode): string {
+  if (typeof children === 'string' || typeof children === 'number') return String(children)
+  if (Array.isArray(children)) return children.map(textoPlano).join('')
+  return ''
+}
+
+const tonosApartado = {
+  blue: { badge: 'bg-blue-50 dark:bg-blue-950/40', icono: 'text-blue-600 dark:text-blue-400' },
+  violet: {
+    badge: 'bg-violet-50 dark:bg-violet-950/40',
+    icono: 'text-violet-600 dark:text-violet-400',
+  },
+  amber: { badge: 'bg-amber-50 dark:bg-amber-950/40', icono: 'text-amber-600 dark:text-amber-400' },
+  rose: { badge: 'bg-rose-50 dark:bg-rose-950/40', icono: 'text-rose-600 dark:text-rose-400' },
+  teal: { badge: 'bg-teal-50 dark:bg-teal-950/40', icono: 'text-teal-600 dark:text-teal-400' },
+  cyan: { badge: 'bg-cyan-50 dark:bg-cyan-950/40', icono: 'text-cyan-600 dark:text-cyan-400' },
+  gray: { badge: 'bg-muted', icono: 'text-muted-foreground' },
+} as const
+
+const reglasApartado: { detecta: (texto: string) => boolean; Icono: typeof Info; tono: keyof typeof tonosApartado }[] = [
+  { detecta: (t) => t.includes('que es') && t.includes('para que sirve'), Icono: Info, tono: 'blue' },
+  { detecta: (t) => t.includes('cuando lo usarias'), Icono: User, tono: 'violet' },
+  { detecta: (t) => t.includes('como se usa'), Icono: Code2, tono: 'amber' },
+  { detecta: (t) => t.startsWith('lo que') || t.includes('errores tipicos'), Icono: TriangleAlert, tono: 'rose' },
+  { detecta: (t) => t.includes('ejercicio'), Icono: ListChecks, tono: 'teal' },
+  { detecta: (t) => t.includes('profundizar'), Icono: Library, tono: 'cyan' },
+]
+
+function iconoDeApartado(textoCrudo: string) {
+  const texto = normalizarTexto(textoCrudo)
+  const regla = reglasApartado.find(({ detecta }) => detecta(texto))
+  return { Icono: regla?.Icono ?? Circle, ...tonosApartado[regla?.tono ?? 'gray'] }
+}
 
 type PropiedadesSafeMarkdown = {
   children: string
@@ -57,11 +104,22 @@ export function SafeMarkdown({
               {h1Children}
             </h1>
           ),
-          h2: ({ children: h2Children }) => (
-            <h2 className="mt-12 mb-4 border-t pt-8 text-xl font-bold tracking-tight first:mt-0 first:border-0 first:pt-0">
-              {h2Children}
-            </h2>
-          ),
+          h2: ({ children: h2Children }) => {
+            const { Icono, badge, icono } = iconoDeApartado(textoPlano(h2Children))
+            return (
+              <h2 className="mt-12 mb-4 flex items-center gap-3 first:mt-0">
+                <span
+                  aria-hidden="true"
+                  className={`flex size-8 shrink-0 items-center justify-center rounded-[10px] ${badge}`}
+                >
+                  <Icono className={`size-4 ${icono}`} />
+                </span>
+                <span className="text-xl font-bold tracking-tight text-balance">
+                  {h2Children}
+                </span>
+              </h2>
+            )
+          },
           h3: ({ children: h3Children }) => (
             <h3 className="mt-8 mb-3 text-base font-semibold tracking-tight">{h3Children}</h3>
           ),
