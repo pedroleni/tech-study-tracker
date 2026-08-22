@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Circle, Code2, Info, Library, ListChecks, TriangleAlert, User } from 'lucide-react'
+import { Circle, CircleX, Code2, Info, Library, ListChecks, TriangleAlert, User } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
@@ -34,16 +34,21 @@ const tonosApartado = {
   },
   amber: { badge: 'bg-amber-50 dark:bg-amber-950/40', icono: 'text-amber-600 dark:text-amber-400' },
   rose: { badge: 'bg-rose-50 dark:bg-rose-950/40', icono: 'text-rose-600 dark:text-rose-400' },
+  indigo: { badge: 'bg-indigo-50 dark:bg-indigo-950/40', icono: 'text-indigo-600 dark:text-indigo-400' },
   teal: { badge: 'bg-teal-50 dark:bg-teal-950/40', icono: 'text-teal-600 dark:text-teal-400' },
   cyan: { badge: 'bg-cyan-50 dark:bg-cyan-950/40', icono: 'text-cyan-600 dark:text-cyan-400' },
   gray: { badge: 'bg-muted', icono: 'text-muted-foreground' },
 } as const
 
+// "Lo que [X] no es" y "Errores típicos" son conceptualmente distintos
+// (desmontar una idea equivocada sobre qué ES algo, frente a errores
+// concretos al USARLO) — con el mismo icono se leían como repetición.
 const reglasApartado: { detecta: (texto: string) => boolean; Icono: typeof Info; tono: keyof typeof tonosApartado }[] = [
   { detecta: (t) => t.includes('que es') && t.includes('para que sirve'), Icono: Info, tono: 'blue' },
   { detecta: (t) => t.includes('cuando lo usarias'), Icono: User, tono: 'violet' },
   { detecta: (t) => t.includes('como se usa'), Icono: Code2, tono: 'amber' },
-  { detecta: (t) => t.startsWith('lo que') || t.includes('errores tipicos'), Icono: TriangleAlert, tono: 'rose' },
+  { detecta: (t) => t.startsWith('lo que'), Icono: CircleX, tono: 'indigo' },
+  { detecta: (t) => t.includes('errores tipicos'), Icono: TriangleAlert, tono: 'rose' },
   { detecta: (t) => t.includes('ejercicio'), Icono: ListChecks, tono: 'teal' },
   { detecta: (t) => t.includes('profundizar'), Icono: Library, tono: 'cyan' },
 ]
