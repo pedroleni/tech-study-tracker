@@ -39,7 +39,7 @@ export function Roles({ titulo = 'Reparto de roles', roles }: DatosRoles) {
           >
             <h4 className="break-words text-base font-bold text-balance">{item.etiqueta}</h4>
             <span
-              className={`mt-2 inline-flex max-w-full rounded-full border px-2 py-0.5 text-[11px] font-semibold tracking-wide uppercase ${clasesRol[indice % clasesRol.length]}`}
+              className={`mt-2 inline-flex max-w-full rounded-md border px-2.5 py-1 text-[11px] leading-snug font-semibold tracking-wide uppercase ${clasesRol[indice % clasesRol.length]}`}
             >
               <span className="break-words">{item.rol}</span>
             </span>
