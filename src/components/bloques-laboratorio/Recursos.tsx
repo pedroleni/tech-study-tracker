@@ -36,7 +36,7 @@ export function Recursos({ titulo = 'Para profundizar', recursos }: DatosRecurso
         </div>
       </div>
 
-      <ul className="grid gap-4 sm:grid-cols-2">
+      <ul className="grid list-none! gap-4 pl-0! sm:grid-cols-2">
         {recursosSeguros.map((recurso, indice) => (
           <li
             key={`${recurso.url}-${recurso.titulo}`}

@@ -22,7 +22,7 @@ export function NotasClave({ items }: DatosNotasClave) {
         </div>
       </div>
 
-      <ul className="grid gap-3">
+      <ul className="grid list-none! gap-3 pl-0!">
         {items.map((item, indice) => (
           <li
             key={`${item.titulo}-${indice}`}

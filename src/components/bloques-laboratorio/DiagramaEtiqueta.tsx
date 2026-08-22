@@ -115,7 +115,10 @@ export function DiagramaEtiqueta({
         })}
       </div>
 
-      <ul className="grid gap-1.5 text-xs text-muted-foreground" aria-label="Leyenda">
+      <ul
+        className="grid list-none! gap-1.5 pl-0! text-xs text-muted-foreground"
+        aria-label="Leyenda"
+      >
         {rolesPresentes.map((rol) => (
           <li key={rol} className="flex items-center gap-2">
             <span
