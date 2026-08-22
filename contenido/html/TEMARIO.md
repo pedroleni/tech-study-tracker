@@ -98,12 +98,16 @@ que lo sustituya". Regla final desde 2026-08-22:
   pasar por alto). Visualmente distinto de `notas-clave` — asides
   independientes en vez de una lista dentro de una tarjeta — así que
   usarlo ahí no cuenta como "repetir el mismo componente".
-- Con 6 tipos de bloque disponibles (`predice-el-resultado`,
+- Con 8 tipos de bloque disponibles (`predice-el-resultado`,
   `codigo-anotado`, `comparador-antes-despues`, `notas-clave`,
-  `diagrama-etiqueta`, `callout`), cada lección debería usar al menos
-  3 tipos distintos, no el mismo repetido. Antes de escribir una
-  lección, pensar qué tipo encaja mejor con CADA sección en vez de
-  reutilizar el último que se usó — y nunca "quitar el bloque y dejar
+  `diagrama-etiqueta`, `callout`, `linea-de-tiempo`, `roles`), cada
+  lección debería usar al menos 3 tipos distintos, no el mismo
+  repetido. `linea-de-tiempo` para contexto histórico/evolutivo;
+  `roles` para 2-4 piezas con responsabilidades distintas mostradas en
+  paralelo (ni lista agrupada como `notas-clave`, ni orden cronológico
+  como `linea-de-tiempo`). Antes de escribir una lección, pensar qué
+  tipo encaja mejor con CADA sección en vez de reutilizar el último que
+  se usó — y nunca "quitar el bloque y dejar
   prosa" como solución por defecto a la repetición.
 
 ## Módulo 1 — Fundamentos del documento

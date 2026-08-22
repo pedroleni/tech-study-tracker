@@ -1,16 +1,20 @@
 # Bloques de laboratorio en lecciones
 
-**Estado:** ✅ implementada. Ampliada tres veces desde la versión
+**Estado:** ✅ implementada. Ampliada varias veces desde la versión
 original de 3 tipos: `notas-clave` (para los puntos clave de las
 lecciones reales), `diagrama-etiqueta` (2026-08-22, descomposición
 visual de una etiqueta en partes coloreadas — pedido explícito tras
 feedback de que `codigo-anotado` no sirve para eso: solo resalta la
-línea entera, no un fragmento dentro de ella) y `callout` (2026-08-22,
+línea entera, no un fragmento dentro de ella), `callout` (2026-08-22,
 promovido desde `referencia-contenido/Callout.tsx` — feedback directo
 de que `notas-clave` se repetía 3 veces por lección y quitarlo sin más
-tampoco valía, hacía falta un sustituto real). 6 tipos de bloque en
-total, el prop `permitirLaboratorios`, y el temario real de HTML en
-progreso sobre este mecanismo.
+tampoco valía, hacía falta un sustituto real), y `linea-de-tiempo` +
+`roles` (2026-08-22, mismo día: pedido explícito de hacer "más gráfica"
+la sección introductoria de la lección de HTML — la primera promovida
+desde `referencia-contenido/`, el segundo construido desde cero para
+la tríada HTML/CSS/JavaScript, que no encajaba en ningún tipo
+existente). 8 tipos de bloque en total, el prop `permitirLaboratorios`,
+y el temario real de HTML en progreso sobre este mecanismo.
 
 ## Por qué existe esta feature
 
@@ -37,7 +41,7 @@ cualquier lección.
 
 ## Alcance
 
-Seis tipos de bloque, cada uno con un ejemplo real ya escrito en
+Ocho tipos de bloque, cada uno con un ejemplo real ya escrito en
 `contenido/html/`:
 
 1. **`predice-el-resultado`** — código + opciones + botón "Revelar" que
@@ -71,6 +75,23 @@ Seis tipos de bloque, cada uno con un ejemplo real ya escrito en
    tarjeta `notas-clave`: es lo que sustituye a `notas-clave` en
    "Cuándo lo usarías de verdad" y en "Lo que [X] no es", que antes
    repetían el mismo componente 3 veces por lección.
+7. **`linea-de-tiempo`** (2026-08-22) — hitos ordenados (fecha opcional
+   + título + texto) sobre un riel vertical, con reveal escalonado.
+   Promovido desde `referencia-contenido/LineaDeTiempo.tsx` — el mismo
+   patrón de "git mv, tipar sobre el esquema Zod, registrar" que
+   `callout`. Pensado para contexto histórico o evolutivo (cómo llegó
+   algo a ser como es hoy), no para pasos secuenciales de una tarea —
+   eso sigue siendo prosa numerada en `## Ejercicios`.
+8. **`roles`** (2026-08-22) — 2 a 4 tarjetas lado a lado (`etiqueta` +
+   `rol` + `descripcion`), cada una con su propio color indexado (no
+   hay un rol fijo como en `diagrama-etiqueta`, aquí el significado de
+   cada tarjeta lo da el autor). Construido desde cero — a diferencia
+   de `callout`/`linea-de-tiempo`, no existía nada parecido en
+   `referencia-contenido/` que promover — para el caso concreto de "N
+   piezas con responsabilidades distintas mostradas en paralelo", como
+   HTML/CSS/JavaScript. No confundir con `notas-clave` (lista vertical
+   agrupada) ni con `linea-de-tiempo` (orden cronológico): `roles` no
+   implica ni agrupación en una sola tarjeta ni secuencia temporal.
 
 **Fuera de alcance a propósito:** el ejercicio "Escríbelo tú" con
 comprobaciones automáticas (`RetoConComprobaciones` en
@@ -206,6 +227,26 @@ export const esquemaCallout = z.object({
   contenido: z.string().min(1).max(600),
 })
 
+export const esquemaLineaDeTiempo = z.object({
+  tipo: z.literal('linea-de-tiempo'),
+  titulo: z.string().min(1).max(120).optional(),
+  items: z.array(z.object({
+    fecha: z.string().min(1).max(40).optional(),
+    titulo: z.string().min(1).max(140),
+    texto: z.string().min(1).max(400),
+  })).min(2).max(8),
+})
+
+export const esquemaRoles = z.object({
+  tipo: z.literal('roles'),
+  titulo: z.string().min(1).max(120).optional(),
+  roles: z.array(z.object({
+    etiqueta: z.string().min(1).max(40),
+    rol: z.string().min(1).max(60),
+    descripcion: z.string().min(1).max(200),
+  })).min(2).max(4),
+})
+
 export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaPrediceElResultado,
   esquemaCodigoAnotado,
@@ -213,6 +254,8 @@ export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaNotasClave,
   esquemaDiagramaEtiqueta,
   esquemaCallout,
+  esquemaLineaDeTiempo,
+  esquemaRoles,
 ])
 ```
 
@@ -249,6 +292,17 @@ diseño" con "feature real".
   componente no puede vivir a la vez en "prototipo, no forma parte del
   pipeline" y en el registro real, por la misma razón que V1-V5 no
   comparten carpeta con este sistema.
+- `LineaDeTiempo.tsx` — recibe `z.infer<typeof esquemaLineaDeTiempo>`.
+  Mismo `git mv` desde `referencia-contenido/`, pero además se envolvió
+  en la tarjeta estándar (`<section>` + icono + eyebrow) que el
+  prototipo original no tenía — todos los tipos reales comparten ese
+  chrome, los prototipos de `referencia-contenido/` no.
+- `Roles.tsx` — recibe `z.infer<typeof esquemaRoles>`. Construido desde
+  cero, no promovido — no había nada parecido en `referencia-contenido/`.
+  Acento fucsia; colores de cada tarjeta indexados por posición
+  (`roles[i]`), no por un significado fijo, porque a diferencia de
+  `diagrama-etiqueta` aquí el autor define libremente 2-4 roles
+  cualesquiera.
 - `registro.ts` — `Record<string, ComponentType<any>>` cerrado, una
   entrada por `tipo`.
 - `BloqueLaboratorio.tsx` — el punto de entrada que usa `SafeMarkdown`:
@@ -313,11 +367,11 @@ Cada componente que renderiza HTML en vivo usa
 
 ## Checklist de implementación
 
-- [x] `src/lib/laboratorio/schemas.ts` (6 esquemas + unión discriminada)
-- [x] `src/components/bloques-laboratorio/` (6 componentes + registro + punto de entrada)
+- [x] `src/lib/laboratorio/schemas.ts` (8 esquemas + unión discriminada)
+- [x] `src/components/bloques-laboratorio/` (8 componentes + registro + punto de entrada)
 - [x] `SafeMarkdown.tsx`: prop, override de `code`, `CodigoResaltado` para código normal
 - [x] `LeccionPage.tsx`: pasar el prop
-- [x] Tests: los 6 tipos renderizan con datos válidos; JSON inválido cae a código plano; `tipo` desconocido cae a código plano; comentario con bloque `laboratorio` NO se activa; 0 violaciones de accesibilidad (`axe`) con los 6 tipos a la vez
+- [x] Tests: los 8 tipos renderizan con datos válidos; JSON inválido cae a código plano; `tipo` desconocido cae a código plano; comentario con bloque `laboratorio` NO se activa; 0 violaciones de accesibilidad (`axe`) con los 8 tipos a la vez
 - [x] `contenido/html/01-*.md` y `02-*.md` reescritos con bloques reales (versión piloto; el temario real de 2026-08-21 los sustituye lección a lección)
 - [x] Contenido actualizado en producción vía el formulario de admin
 - [x] `npm run test`, `build`, `lint` en verde
@@ -332,3 +386,10 @@ Cada componente que renderiza HTML en vivo usa
   interfaz suelta anterior, registrado, con test dedicado y sumado a la
   auditoría axe conjunta — `tsc`, `lint` y la suite completa (213/213)
   en verde.
+- [x] `linea-de-tiempo` y `roles` (2026-08-22, mismo pedido: hacer más
+  gráfica la introducción de la lección de HTML): el primero promovido
+  desde `referencia-contenido/` igual que `callout`; el segundo
+  construido desde cero por Codex sobre un prompt detallado (schema y
+  registro ya preparados de antemano por Claude para acotar el trabajo),
+  verificado archivo a archivo antes de aceptarlo — `tsc`, `lint` y la
+  suite completa (215/215) en verde.
