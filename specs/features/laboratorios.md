@@ -13,7 +13,7 @@ tampoco valía, hacía falta un sustituto real), y `linea-de-tiempo` +
 la sección introductoria de la lección de HTML — la primera promovida
 desde `referencia-contenido/`, el segundo construido desde cero para
 la tríada HTML/CSS/JavaScript, que no encajaba en ningún tipo
-existente). 8 tipos de bloque en total, el prop `permitirLaboratorios`,
+existente). 9 tipos de bloque en total, el prop `permitirLaboratorios`,
 y el temario real de HTML en progreso sobre este mecanismo.
 
 ## Por qué existe esta feature
@@ -41,7 +41,7 @@ cualquier lección.
 
 ## Alcance
 
-Ocho tipos de bloque, cada uno con un ejemplo real ya escrito en
+Nueve tipos de bloque, cada uno con un ejemplo real ya escrito en
 `contenido/html/`:
 
 1. **`predice-el-resultado`** — código + opciones + botón "Revelar" que
@@ -92,6 +92,16 @@ Ocho tipos de bloque, cada uno con un ejemplo real ya escrito en
    HTML/CSS/JavaScript. No confundir con `notas-clave` (lista vertical
    agrupada) ni con `linea-de-tiempo` (orden cronológico): `roles` no
    implica ni agrupación en una sola tarjeta ni secuencia temporal.
+9. **`recursos`** (2026-08-22) — cuadrícula de tarjetas de enlace
+   externo (título + descripción + URL + etiqueta de fuente opcional).
+   Promovido desde `referencia-contenido/CuadriculaRecursos.tsx`
+   (renombrado a `Recursos.tsx` en el proceso). Filtra en runtime
+   cualquier URL que no sea `http:`/`https:` (`javascript:` incluida) —
+   esa comprobación ya existía en el prototipo, se conservó tal cual, y
+   se le añadió `z.url()` en el esquema como una capa extra, no como
+   sustituto. Pedido explícito: darle a "Para profundizar" el mismo
+   estilo que "Tarjetas de recursos" en el catálogo, en vez de una
+   lista `- [texto](url)` plana.
 
 **Fuera de alcance a propósito:** el ejercicio "Escríbelo tú" con
 comprobaciones automáticas (`RetoConComprobaciones` en
@@ -247,6 +257,17 @@ export const esquemaRoles = z.object({
   })).min(2).max(4),
 })
 
+export const esquemaRecursos = z.object({
+  tipo: z.literal('recursos'),
+  titulo: z.string().min(1).max(120).optional(),
+  recursos: z.array(z.object({
+    titulo: z.string().min(1).max(140),
+    descripcion: z.string().min(1).max(300),
+    url: z.url().max(500),
+    etiqueta: z.string().min(1).max(60).optional(),
+  })).min(1).max(8),
+})
+
 export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaPrediceElResultado,
   esquemaCodigoAnotado,
@@ -256,6 +277,7 @@ export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaCallout,
   esquemaLineaDeTiempo,
   esquemaRoles,
+  esquemaRecursos,
 ])
 ```
 
@@ -303,6 +325,16 @@ diseño" con "feature real".
   (`roles[i]`), no por un significado fijo, porque a diferencia de
   `diagrama-etiqueta` aquí el autor define libremente 2-4 roles
   cualesquiera.
+- `Recursos.tsx` — recibe `z.infer<typeof esquemaRecursos>`. Promovido
+  desde `referencia-contenido/CuadriculaRecursos.tsx` (`git mv` +
+  renombrado, envuelto en la tarjeta estándar igual que
+  `LineaDeTiempo.tsx`). Conserva su propio filtrado de URLs inseguras
+  en runtime (`new URL(url).protocol` tiene que ser `http:` o `https:`,
+  si no la tarjeta simplemente no se renderiza) — esa comprobación
+  existía ya en el prototipo original y se mantuvo intacta; `z.url()`
+  en el esquema es una capa adicional (valida forma de URL), no la
+  sustituye (no filtra `javascript:`, que sí es una URL válida
+  sintácticamente).
 - `registro.ts` — `Record<string, ComponentType<any>>` cerrado, una
   entrada por `tipo`.
 - `BloqueLaboratorio.tsx` — el punto de entrada que usa `SafeMarkdown`:
@@ -367,11 +399,11 @@ Cada componente que renderiza HTML en vivo usa
 
 ## Checklist de implementación
 
-- [x] `src/lib/laboratorio/schemas.ts` (8 esquemas + unión discriminada)
-- [x] `src/components/bloques-laboratorio/` (8 componentes + registro + punto de entrada)
+- [x] `src/lib/laboratorio/schemas.ts` (9 esquemas + unión discriminada)
+- [x] `src/components/bloques-laboratorio/` (9 componentes + registro + punto de entrada)
 - [x] `SafeMarkdown.tsx`: prop, override de `code`, `CodigoResaltado` para código normal
 - [x] `LeccionPage.tsx`: pasar el prop
-- [x] Tests: los 8 tipos renderizan con datos válidos; JSON inválido cae a código plano; `tipo` desconocido cae a código plano; comentario con bloque `laboratorio` NO se activa; 0 violaciones de accesibilidad (`axe`) con los 8 tipos a la vez
+- [x] Tests: los 9 tipos renderizan con datos válidos; JSON inválido cae a código plano; `tipo` desconocido cae a código plano; comentario con bloque `laboratorio` NO se activa; 0 violaciones de accesibilidad (`axe`) con los 9 tipos a la vez
 - [x] `contenido/html/01-*.md` y `02-*.md` reescritos con bloques reales (versión piloto; el temario real de 2026-08-21 los sustituye lección a lección)
 - [x] Contenido actualizado en producción vía el formulario de admin
 - [x] `npm run test`, `build`, `lint` en verde
@@ -393,3 +425,12 @@ Cada componente que renderiza HTML en vivo usa
   registro ya preparados de antemano por Claude para acotar el trabajo),
   verificado archivo a archivo antes de aceptarlo — `tsc`, `lint` y la
   suite completa (215/215) en verde.
+- [x] `recursos` (2026-08-22): `git mv` + renombre de
+  `CuadriculaRecursos.tsx`, envuelto en la tarjeta estándar, con test
+  dedicado (incluye caso de URL insegura filtrada) y sumado a la
+  auditoría axe conjunta. De paso se corrigió
+  `AdminReferenciaContenidoPage.test.tsx`, que tenía una lista de
+  nombres de componentes desactualizada desde antes de esta sesión
+  (nunca incluía los tipos reales de `bloques-laboratorio/`) —
+  completada con los 9. `tsc`, `lint` y la suite completa (216/216) en
+  verde.
