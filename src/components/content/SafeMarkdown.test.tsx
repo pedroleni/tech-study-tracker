@@ -149,6 +149,78 @@ describe('SafeMarkdown con laboratorios', () => {
     ).toBeInTheDocument()
   })
 
+  it('renderiza linea-de-tiempo con todos sus hitos', () => {
+    render(
+      <SafeMarkdown permitirLaboratorios>
+        {bloqueLaboratorio({
+          tipo: 'linea-de-tiempo',
+          titulo: 'Cómo llegó HTML hasta aquí',
+          items: [
+            {
+              fecha: '1991',
+              titulo: 'Tim Berners-Lee publica HTML',
+              texto: 'Nace para conectar documentos entre sí.',
+            },
+            {
+              fecha: 'Hoy',
+              titulo: 'Living standard del WHATWG',
+              texto:
+                'Especificación viva, con los navegadores implicados en su evolución.',
+            },
+          ],
+        })}
+      </SafeMarkdown>,
+    )
+
+    const region = screen.getByRole('region', { name: 'Línea de tiempo' })
+    expect(region).toHaveTextContent('1991')
+    expect(region).toHaveTextContent('Tim Berners-Lee publica HTML')
+    expect(region).toHaveTextContent('Nace para conectar documentos entre sí.')
+    expect(region).toHaveTextContent('Hoy')
+    expect(region).toHaveTextContent('Living standard del WHATWG')
+    expect(region).toHaveTextContent(
+      'Especificación viva, con los navegadores implicados en su evolución.',
+    )
+  })
+
+  it('renderiza roles con sus tarjetas', () => {
+    render(
+      <SafeMarkdown permitirLaboratorios>
+        {bloqueLaboratorio({
+          tipo: 'roles',
+          titulo: 'Quién hace qué en una página web',
+          roles: [
+            {
+              etiqueta: 'HTML',
+              rol: 'Estructura',
+              descripcion: '"Esto es un botón".',
+            },
+            {
+              etiqueta: 'CSS',
+              rol: 'Presentación',
+              descripcion: 'Decide de qué color y tamaño se ve.',
+            },
+            {
+              etiqueta: 'JavaScript',
+              rol: 'Comportamiento',
+              descripcion: 'Decide qué pasa cuando alguien hace clic.',
+            },
+          ],
+        })}
+      </SafeMarkdown>,
+    )
+
+    expect(screen.getByText('HTML')).toBeInTheDocument()
+    expect(screen.getByText('CSS')).toBeInTheDocument()
+    expect(screen.getByText('JavaScript')).toBeInTheDocument()
+    expect(screen.getByText('Estructura')).toBeInTheDocument()
+    expect(screen.getByText('Presentación')).toBeInTheDocument()
+    expect(screen.getByText('Comportamiento')).toBeInTheDocument()
+    expect(screen.getByText('"Esto es un botón".')).toBeInTheDocument()
+    expect(screen.getByText('Decide de qué color y tamaño se ve.')).toBeInTheDocument()
+    expect(screen.getByText('Decide qué pasa cuando alguien hace clic.')).toBeInTheDocument()
+  })
+
   it('usa código plano cuando el JSON es inválido', () => {
     render(
       <SafeMarkdown permitirLaboratorios>
@@ -186,7 +258,7 @@ describe('SafeMarkdown con laboratorios', () => {
     expect(container.querySelector('p code')).toHaveTextContent('main')
   })
 
-  it('no tiene violaciones de accesibilidad con los seis tipos', async () => {
+  it('no tiene violaciones de accesibilidad con los ocho tipos', async () => {
     const markdown = [
       bloqueLaboratorio({
         tipo: 'predice-el-resultado',
@@ -231,6 +303,43 @@ describe('SafeMarkdown con laboratorios', () => {
         variante: 'info',
         titulo: 'Dato',
         contenido: 'El navegador construye un árbol a partir del HTML.',
+      }),
+      bloqueLaboratorio({
+        tipo: 'linea-de-tiempo',
+        titulo: 'Cómo llegó HTML hasta aquí',
+        items: [
+          {
+            fecha: '1991',
+            titulo: 'Tim Berners-Lee publica HTML',
+            texto: 'Nace para conectar documentos entre sí.',
+          },
+          {
+            fecha: 'Hoy',
+            titulo: 'Living standard del WHATWG',
+            texto: 'Especificación viva, con los navegadores implicados en su evolución.',
+          },
+        ],
+      }),
+      bloqueLaboratorio({
+        tipo: 'roles',
+        titulo: 'Quién hace qué en una página web',
+        roles: [
+          {
+            etiqueta: 'HTML',
+            rol: 'Estructura',
+            descripcion: '"Esto es un botón".',
+          },
+          {
+            etiqueta: 'CSS',
+            rol: 'Presentación',
+            descripcion: 'Decide de qué color y tamaño se ve.',
+          },
+          {
+            etiqueta: 'JavaScript',
+            rol: 'Comportamiento',
+            descripcion: 'Decide qué pasa cuando alguien hace clic.',
+          },
+        ],
       }),
     ].join('\n\n')
     const { container } = render(

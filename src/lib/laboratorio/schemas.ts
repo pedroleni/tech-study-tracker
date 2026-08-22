@@ -76,6 +76,36 @@ export const esquemaCallout = z.object({
   contenido: z.string().min(1).max(600),
 })
 
+export const esquemaLineaDeTiempo = z.object({
+  tipo: z.literal('linea-de-tiempo'),
+  titulo: z.string().min(1).max(120).optional(),
+  items: z
+    .array(
+      z.object({
+        fecha: z.string().min(1).max(40).optional(),
+        titulo: z.string().min(1).max(140),
+        texto: z.string().min(1).max(400),
+      }),
+    )
+    .min(2)
+    .max(8),
+})
+
+export const esquemaRoles = z.object({
+  tipo: z.literal('roles'),
+  titulo: z.string().min(1).max(120).optional(),
+  roles: z
+    .array(
+      z.object({
+        etiqueta: z.string().min(1).max(40),
+        rol: z.string().min(1).max(60),
+        descripcion: z.string().min(1).max(200),
+      }),
+    )
+    .min(2)
+    .max(4),
+})
+
 export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaPrediceElResultado,
   esquemaCodigoAnotado,
@@ -83,6 +113,8 @@ export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaNotasClave,
   esquemaDiagramaEtiqueta,
   esquemaCallout,
+  esquemaLineaDeTiempo,
+  esquemaRoles,
 ])
 
 export type DatosPrediceElResultado = z.infer<typeof esquemaPrediceElResultado>
@@ -93,4 +125,6 @@ export type DatosComparadorAntesDespues = z.infer<
 export type DatosNotasClave = z.infer<typeof esquemaNotasClave>
 export type DatosDiagramaEtiqueta = z.infer<typeof esquemaDiagramaEtiqueta>
 export type DatosCallout = z.infer<typeof esquemaCallout>
+export type DatosLineaDeTiempo = z.infer<typeof esquemaLineaDeTiempo>
+export type DatosRoles = z.infer<typeof esquemaRoles>
 export type DatosBloqueLaboratorio = z.infer<typeof esquemaBloqueLaboratorio>

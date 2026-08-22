@@ -4,8 +4,10 @@ import { Callout } from '@/components/bloques-laboratorio/Callout'
 import { CodigoAnotado } from '@/components/bloques-laboratorio/CodigoAnotado'
 import { ComparadorAntesDespues } from '@/components/bloques-laboratorio/ComparadorAntesDespues'
 import { DiagramaEtiqueta } from '@/components/bloques-laboratorio/DiagramaEtiqueta'
+import { LineaDeTiempo } from '@/components/bloques-laboratorio/LineaDeTiempo'
 import { NotasClave } from '@/components/bloques-laboratorio/NotasClave'
 import { PrediceElResultado } from '@/components/bloques-laboratorio/PrediceElResultado'
+import { Roles } from '@/components/bloques-laboratorio/Roles'
 
 // El registro es deliberadamente cerrado: el JSON solo puede escoger uno de
 // estos componentes, nunca un nombre de elemento o módulo arbitrario.
@@ -17,4 +19,6 @@ export const registroBloquesLaboratorio: Record<string, ComponentType<any>> = {
   'notas-clave': NotasClave,
   'diagrama-etiqueta': DiagramaEtiqueta,
   callout: Callout,
+  'linea-de-tiempo': LineaDeTiempo,
+  roles: Roles,
 }

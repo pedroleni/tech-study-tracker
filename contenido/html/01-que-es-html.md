@@ -11,9 +11,37 @@
 
 **HTML** (HyperText Markup Language) es un **lenguaje de marcado**, no un lenguaje de programación: no describe pasos ni lógica, describe qué es cada trozo de contenido. Un título es un título, un párrafo es un párrafo, una lista es una lista — HTML es el vocabulario que usas para decírselo al navegador envolviendo el contenido con etiquetas. Sin ese vocabulario, el navegador solo tiene texto plano, sin jerarquía, sin enlaces entre páginas, sin nada que le diga qué es más importante que qué.
 
-Eso es literalmente lo que significa la H de HTML: *HyperText*, texto que enlaza con otro texto. Nació en 1991 de la mano de Tim Berners-Lee, precisamente para eso — conectar documentos entre sí — y hoy sigue siendo la base de cualquier página que visitas, incluidas las hechas con frameworks modernos (React, Vue, lo que sea): todos acaban generando HTML, porque es lo único que el navegador sabe leer de verdad. Desde hace años se mantiene como un **living standard** — una especificación viva, mantenida por el WHATWG con los navegadores grandes implicados directamente — que es la razón por la que hoy puedes confiar en que una etiqueta se comporta razonablemente igual en Chrome, Firefox o Safari. No siempre fue así: durante años cada navegador improvisaba por su cuenta, y una misma página podía verse rota en la mitad de ellos.
+Eso es literalmente lo que significa la H de HTML: *HyperText*, texto que enlaza con otro texto. No siempre fue el estándar consistente que es hoy:
 
-HTML no trabaja solo. Verás esta idea repetida en casi todo el temario, así que conviene fijarla ya: **HTML estructura, CSS presenta, JavaScript se comporta**. HTML dice "esto es un botón"; CSS decide de qué color y tamaño se ve ese botón; JavaScript decide qué pasa cuando alguien hace clic en él. Puedes tener un HTML perfecto con un CSS horrible, o un HTML pésimo con un CSS espectacular por encima — son responsabilidades separadas a propósito, y mezclarlas es una de las fuentes de errores más comunes cuando se empieza.
+```laboratorio
+{
+  "tipo": "linea-de-tiempo",
+  "titulo": "Cómo llegó HTML hasta aquí",
+  "items": [
+    { "fecha": "1991", "titulo": "Tim Berners-Lee publica HTML", "texto": "Nace para conectar documentos entre sí — la H de HyperText." },
+    { "fecha": "Años siguientes", "titulo": "Cada navegador improvisaba por su cuenta", "texto": "Sin una especificación de referencia única, una misma página podía verse rota en la mitad de los navegadores." },
+    { "fecha": "Hoy", "titulo": "Living standard del WHATWG", "texto": "Una especificación viva, con los navegadores grandes implicados directamente en su evolución — por eso hoy una etiqueta se comporta igual en Chrome, Firefox o Safari." }
+  ]
+}
+```
+
+Y hoy sigue siendo la base de cualquier página que visitas, incluidas las hechas con frameworks modernos (React, Vue, lo que sea): todos acaban generando HTML, porque es lo único que el navegador sabe leer de verdad.
+
+HTML no trabaja solo. Verás esta idea repetida en casi todo el temario, así que conviene fijarla ya:
+
+```laboratorio
+{
+  "tipo": "roles",
+  "titulo": "Quién hace qué en una página web",
+  "roles": [
+    { "etiqueta": "HTML", "rol": "Estructura", "descripcion": "\"Esto es un botón\"." },
+    { "etiqueta": "CSS", "rol": "Presentación", "descripcion": "Decide de qué color y tamaño se ve ese botón." },
+    { "etiqueta": "JavaScript", "rol": "Comportamiento", "descripcion": "Decide qué pasa cuando alguien hace clic en él." }
+  ]
+}
+```
+
+Puedes tener un HTML perfecto con un CSS horrible, o un HTML pésimo con un CSS espectacular por encima — son responsabilidades separadas a propósito, y mezclarlas es una de las fuentes de errores más comunes cuando se empieza.
 
 ## Cuándo lo usarías de verdad 👤
 

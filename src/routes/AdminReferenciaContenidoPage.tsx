@@ -4,8 +4,10 @@ import { Callout } from '@/components/bloques-laboratorio/Callout'
 import { CodigoAnotado } from '@/components/bloques-laboratorio/CodigoAnotado'
 import { ComparadorAntesDespues } from '@/components/bloques-laboratorio/ComparadorAntesDespues'
 import { DiagramaEtiqueta } from '@/components/bloques-laboratorio/DiagramaEtiqueta'
+import { LineaDeTiempo } from '@/components/bloques-laboratorio/LineaDeTiempo'
 import { NotasClave } from '@/components/bloques-laboratorio/NotasClave'
 import { PrediceElResultado } from '@/components/bloques-laboratorio/PrediceElResultado'
+import { Roles } from '@/components/bloques-laboratorio/Roles'
 import { Acordeon } from '@/components/referencia-contenido/Acordeon'
 import { AntesDespuesDeslizante } from '@/components/referencia-contenido/AntesDespuesDeslizante'
 import { AparicionEscalonada } from '@/components/referencia-contenido/AparicionEscalonada'
@@ -30,7 +32,6 @@ import { IndicadorEscritura } from '@/components/referencia-contenido/IndicadorE
 import { IndicadorScrollSecciones } from '@/components/referencia-contenido/IndicadorScrollSecciones'
 import { InterruptorAnimado } from '@/components/referencia-contenido/InterruptorAnimado'
 import { LibroPagina } from '@/components/referencia-contenido/LibroPagina'
-import { LineaDeTiempo } from '@/components/referencia-contenido/LineaDeTiempo'
 import { LineaComparativaAnimada } from '@/components/referencia-contenido/LineaComparativaAnimada'
 import { ListaComprobacion } from '@/components/referencia-contenido/ListaComprobacion'
 import { MaquinaEscribir } from '@/components/referencia-contenido/MaquinaEscribir'
@@ -194,7 +195,7 @@ export function AdminReferenciaContenidoPage() {
         </h1>
         <p className="mt-3 max-w-3xl text-sm text-pretty text-muted-foreground">
           Catálogo visual de componentes React organizado por tipo. El primer grupo, "Bloques de
-          laboratorio", son los 6 componentes reales que ya renderiza cualquier lección a través
+          laboratorio", son los 8 componentes reales que ya renderiza cualquier lección a través
           de un bloque <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">```laboratorio</code>{' '}
           en su Markdown (ver <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">specs/features/laboratorios.md</code>).
           El resto de grupos son prototipos de diseño de <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">referencia-contenido/</code> —
@@ -208,7 +209,7 @@ export function AdminReferenciaContenidoPage() {
       <CategoriaActivaContext.Provider value={categoriaActiva}>
       <GrupoCatalogo
         titulo="Bloques de laboratorio"
-        descripcion="Los 6 tipos reales que un autor puede usar dentro de un bloque ```laboratorio en el Markdown de una lección (src/components/bloques-laboratorio/). Validados por Zod, registrados en un lookup cerrado — no prototipos."
+        descripcion="Los 8 tipos reales que un autor puede usar dentro de un bloque ```laboratorio en el Markdown de una lección (src/components/bloques-laboratorio/). Validados por Zod, registrados en un lookup cerrado — no prototipos."
       >
         <Referencia nombre="PrediceElResultado">
           <PrediceElResultado
@@ -288,6 +289,40 @@ export function AdminReferenciaContenidoPage() {
             contenido="Coloca meta charset antes de cualquier texto con tildes: el navegador necesita conocer la codificación antes de interpretar el título."
           />
         </Referencia>
+
+        <Referencia nombre="LineaDeTiempo">
+          <LineaDeTiempo
+            titulo="Cómo llegó HTML hasta aquí"
+            items={[
+              {
+                fecha: '1991',
+                titulo: 'Tim Berners-Lee publica HTML',
+                texto: 'Nace para conectar documentos entre sí — la H de HyperText.',
+              },
+              {
+                fecha: 'Años 2000',
+                titulo: 'Cada navegador improvisaba por su cuenta',
+                texto: 'Sin una única especificación de referencia, una misma página podía verse rota en la mitad de los navegadores.',
+              },
+              {
+                fecha: 'Hoy',
+                titulo: 'Living standard del WHATWG',
+                texto: 'Especificación viva, con los navegadores grandes implicados directamente en su evolución.',
+              },
+            ]}
+          />
+        </Referencia>
+
+        <Referencia nombre="Roles">
+          <Roles
+            titulo="Quién hace qué en una página web"
+            roles={[
+              { etiqueta: 'HTML', rol: 'Estructura', descripcion: '"Esto es un botón".' },
+              { etiqueta: 'CSS', rol: 'Presentación', descripcion: 'Decide de qué color y tamaño se ve.' },
+              { etiqueta: 'JavaScript', rol: 'Comportamiento', descripcion: 'Decide qué pasa cuando alguien hace clic.' },
+            ]}
+          />
+        </Referencia>
       </GrupoCatalogo>
 
       <GrupoCatalogo
@@ -360,28 +395,6 @@ export function AdminReferenciaContenidoPage() {
         titulo="Estructura secuencial"
         descripcion="Contenido que solo tiene sentido en un orden concreto: un proceso, un progreso, o lo que hace falta saber antes de empezar."
       >
-        <Referencia nombre="LineaDeTiempo">
-          <LineaDeTiempo
-            items={[
-              {
-                fecha: '1',
-                titulo: 'El navegador recibe texto',
-                texto: 'Lee el archivo HTML de arriba abajo y reconoce el tipo de documento.',
-              },
-              {
-                fecha: '2',
-                titulo: 'Construye la estructura',
-                texto: 'Convierte las etiquetas anidadas en un árbol de elementos relacionado.',
-              },
-              {
-                fecha: '3',
-                titulo: 'Presenta el contenido',
-                texto: 'Interpreta head y pinta en pantalla todo lo que encuentra dentro de body.',
-              },
-            ]}
-          />
-        </Referencia>
-
         <Referencia nombre="Pasos">
           <Pasos
             pasoActivo={2}
