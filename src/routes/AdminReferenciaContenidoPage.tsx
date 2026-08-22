@@ -213,6 +213,7 @@ export function AdminReferenciaContenidoPage() {
       >
         <Referencia nombre="PrediceElResultado">
           <PrediceElResultado
+            tipo="predice-el-resultado"
             lenguaje="html"
             codigo={'<html>\n<body>\n<p>Hola</p>\n</body>\n</html>'}
             opciones={[
@@ -227,6 +228,7 @@ export function AdminReferenciaContenidoPage() {
 
         <Referencia nombre="CodigoAnotado">
           <CodigoAnotado
+            tipo="codigo-anotado"
             lenguaje="html"
             codigo={'<p class="intro">\n  Bienvenido a <strong>mi web</strong>.\n</p>'}
             anotaciones={[
@@ -244,6 +246,7 @@ export function AdminReferenciaContenidoPage() {
 
         <Referencia nombre="ComparadorAntesDespues">
           <ComparadorAntesDespues
+            tipo="comparador-antes-despues"
             antes="Instrucciones para la vida: Come. Duerme. Repite."
             despues={'<p>Instrucciones para la vida:</p>\n<ul>\n  <li>Come</li>\n  <li>Duerme</li>\n  <li>Repite</li>\n</ul>'}
             nota="Mismo contenido, con y sin HTML."
@@ -252,6 +255,7 @@ export function AdminReferenciaContenidoPage() {
 
         <Referencia nombre="NotasClave">
           <NotasClave
+            tipo="notas-clave"
             items={[
               {
                 titulo: 'Olvidar cerrar una etiqueta que sí lo necesita.',
@@ -267,6 +271,7 @@ export function AdminReferenciaContenidoPage() {
 
         <Referencia nombre="DiagramaEtiqueta">
           <DiagramaEtiqueta
+            tipo="diagrama-etiqueta"
             titulo="Un elemento completo, descompuesto"
             partes={[
               { texto: '<', rol: 'simbolo' },
@@ -284,6 +289,7 @@ export function AdminReferenciaContenidoPage() {
 
         <Referencia nombre="Callout">
           <Callout
+            tipo="callout"
             variante="aviso"
             titulo="Orden importante"
             contenido="Coloca meta charset antes de cualquier texto con tildes: el navegador necesita conocer la codificación antes de interpretar el título."
@@ -292,6 +298,7 @@ export function AdminReferenciaContenidoPage() {
 
         <Referencia nombre="LineaDeTiempo">
           <LineaDeTiempo
+            tipo="linea-de-tiempo"
             titulo="Cómo llegó HTML hasta aquí"
             items={[
               {
@@ -315,6 +322,7 @@ export function AdminReferenciaContenidoPage() {
 
         <Referencia nombre="Roles">
           <Roles
+            tipo="roles"
             titulo="Quién hace qué en una página web"
             roles={[
               { etiqueta: 'HTML', rol: 'Estructura', descripcion: '"Esto es un botón".' },
@@ -326,6 +334,7 @@ export function AdminReferenciaContenidoPage() {
 
         <Referencia nombre="Recursos">
           <Recursos
+            tipo="recursos"
             recursos={[
               {
                 titulo: 'Sintaxis de HTML',
