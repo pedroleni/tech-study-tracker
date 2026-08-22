@@ -160,5 +160,22 @@ Sin etiquetas, el navegador ignora los saltos de línea y lo aplasta todo en una
 
 ## Para profundizar
 
-- [Creating the content (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Getting_started/Your_first_website/Creating_the_content)
-- [Overview of HTML (web.dev)](https://web.dev/learn/html/overview)
+```laboratorio
+{
+  "tipo": "recursos",
+  "recursos": [
+    {
+      "titulo": "Creating the content",
+      "descripcion": "El artículo de MDN que sirvió de base para esta lección: qué es HTML y cómo se crea el primer documento, con ejemplos paso a paso.",
+      "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Getting_started/Your_first_website/Creating_the_content",
+      "etiqueta": "MDN"
+    },
+    {
+      "titulo": "Overview of HTML",
+      "descripcion": "El resumen de web.dev sobre qué es HTML y cómo estructura el contenido — la segunda fuente de esta lección.",
+      "url": "https://web.dev/learn/html/overview",
+      "etiqueta": "web.dev"
+    }
+  ]
+}
+```

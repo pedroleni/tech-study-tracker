@@ -221,6 +221,37 @@ describe('SafeMarkdown con laboratorios', () => {
     expect(screen.getByText('Decide qué pasa cuando alguien hace clic.')).toBeInTheDocument()
   })
 
+  it('renderiza recursos como tarjetas de enlace y filtra URLs inseguras', () => {
+    render(
+      <SafeMarkdown permitirLaboratorios>
+        {bloqueLaboratorio({
+          tipo: 'recursos',
+          recursos: [
+            {
+              titulo: 'Sintaxis de HTML',
+              descripcion: 'Reglas del estándar para escribir elementos y atributos.',
+              url: 'https://html.spec.whatwg.org/multipage/syntax.html',
+              etiqueta: 'Estándar WHATWG',
+            },
+            {
+              titulo: 'Enlace peligroso',
+              descripcion: 'No debería renderizarse.',
+              url: 'javascript:alert(1)',
+            },
+          ],
+        })}
+      </SafeMarkdown>,
+    )
+
+    const region = screen.getByRole('region', { name: 'Recursos para profundizar' })
+    const enlace = screen.getByRole('link', { name: /Sintaxis de HTML/ })
+    expect(enlace).toHaveAttribute('href', 'https://html.spec.whatwg.org/multipage/syntax.html')
+    expect(enlace).toHaveAttribute('target', '_blank')
+    expect(enlace).toHaveAttribute('rel', 'noreferrer')
+    expect(region).toHaveTextContent('Estándar WHATWG')
+    expect(screen.queryByText('Enlace peligroso')).not.toBeInTheDocument()
+  })
+
   it('usa código plano cuando el JSON es inválido', () => {
     render(
       <SafeMarkdown permitirLaboratorios>
@@ -258,7 +289,7 @@ describe('SafeMarkdown con laboratorios', () => {
     expect(container.querySelector('p code')).toHaveTextContent('main')
   })
 
-  it('no tiene violaciones de accesibilidad con los ocho tipos', async () => {
+  it('no tiene violaciones de accesibilidad con los nueve tipos', async () => {
     const markdown = [
       bloqueLaboratorio({
         tipo: 'predice-el-resultado',
@@ -338,6 +369,17 @@ describe('SafeMarkdown con laboratorios', () => {
             etiqueta: 'JavaScript',
             rol: 'Comportamiento',
             descripcion: 'Decide qué pasa cuando alguien hace clic.',
+          },
+        ],
+      }),
+      bloqueLaboratorio({
+        tipo: 'recursos',
+        recursos: [
+          {
+            titulo: 'Sintaxis de HTML',
+            descripcion: 'Reglas del estándar para escribir elementos y atributos.',
+            url: 'https://html.spec.whatwg.org/multipage/syntax.html',
+            etiqueta: 'Estándar WHATWG',
           },
         ],
       }),

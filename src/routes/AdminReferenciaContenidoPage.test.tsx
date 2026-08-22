@@ -5,10 +5,17 @@ import { describe, expect, it, vi } from 'vitest'
 import { AdminReferenciaContenidoPage } from './AdminReferenciaContenidoPage'
 
 const nombresComponentes = [
+  'PrediceElResultado',
+  'CodigoAnotado',
+  'ComparadorAntesDespues',
+  'NotasClave',
+  'DiagramaEtiqueta',
   'Callout',
+  'LineaDeTiempo',
+  'Roles',
+  'Recursos',
   'Acordeon',
   'Pestanas',
-  'LineaDeTiempo',
   'Pasos',
   'CitaDestacada',
   'TarjetaEstadistica',
@@ -20,7 +27,6 @@ const nombresComponentes = [
   'MedidorDificultad',
   'BannerAlerta',
   'TarjetaExpandible',
-  'CuadriculaRecursos',
   'BarraProgresoLectura',
   'ResumenTLDR',
   'ComparacionCodigo',

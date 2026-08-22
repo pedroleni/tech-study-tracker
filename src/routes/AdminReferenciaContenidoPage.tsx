@@ -7,6 +7,7 @@ import { DiagramaEtiqueta } from '@/components/bloques-laboratorio/DiagramaEtiqu
 import { LineaDeTiempo } from '@/components/bloques-laboratorio/LineaDeTiempo'
 import { NotasClave } from '@/components/bloques-laboratorio/NotasClave'
 import { PrediceElResultado } from '@/components/bloques-laboratorio/PrediceElResultado'
+import { Recursos } from '@/components/bloques-laboratorio/Recursos'
 import { Roles } from '@/components/bloques-laboratorio/Roles'
 import { Acordeon } from '@/components/referencia-contenido/Acordeon'
 import { AntesDespuesDeslizante } from '@/components/referencia-contenido/AntesDespuesDeslizante'
@@ -24,7 +25,6 @@ import { ComparacionCodigo } from '@/components/referencia-contenido/Comparacion
 import { ContadorEnScroll } from '@/components/referencia-contenido/ContadorEnScroll'
 import { ContadorRegresivo } from '@/components/referencia-contenido/ContadorRegresivo'
 import { CuboGirable } from '@/components/referencia-contenido/CuboGirable'
-import { CuadriculaRecursos } from '@/components/referencia-contenido/CuadriculaRecursos'
 import { GaleriaMiniaturas } from '@/components/referencia-contenido/GaleriaMiniaturas'
 import { GraficoBarras } from '@/components/referencia-contenido/GraficoBarras'
 import { GrupoInsignias } from '@/components/referencia-contenido/GrupoInsignias'
@@ -195,7 +195,7 @@ export function AdminReferenciaContenidoPage() {
         </h1>
         <p className="mt-3 max-w-3xl text-sm text-pretty text-muted-foreground">
           Catálogo visual de componentes React organizado por tipo. El primer grupo, "Bloques de
-          laboratorio", son los 8 componentes reales que ya renderiza cualquier lección a través
+          laboratorio", son los 9 componentes reales que ya renderiza cualquier lección a través
           de un bloque <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">```laboratorio</code>{' '}
           en su Markdown (ver <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">specs/features/laboratorios.md</code>).
           El resto de grupos son prototipos de diseño de <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">referencia-contenido/</code> —
@@ -209,7 +209,7 @@ export function AdminReferenciaContenidoPage() {
       <CategoriaActivaContext.Provider value={categoriaActiva}>
       <GrupoCatalogo
         titulo="Bloques de laboratorio"
-        descripcion="Los 8 tipos reales que un autor puede usar dentro de un bloque ```laboratorio en el Markdown de una lección (src/components/bloques-laboratorio/). Validados por Zod, registrados en un lookup cerrado — no prototipos."
+        descripcion="Los 9 tipos reales que un autor puede usar dentro de un bloque ```laboratorio en el Markdown de una lección (src/components/bloques-laboratorio/). Validados por Zod, registrados en un lookup cerrado — no prototipos."
       >
         <Referencia nombre="PrediceElResultado">
           <PrediceElResultado
@@ -320,6 +320,25 @@ export function AdminReferenciaContenidoPage() {
               { etiqueta: 'HTML', rol: 'Estructura', descripcion: '"Esto es un botón".' },
               { etiqueta: 'CSS', rol: 'Presentación', descripcion: 'Decide de qué color y tamaño se ve.' },
               { etiqueta: 'JavaScript', rol: 'Comportamiento', descripcion: 'Decide qué pasa cuando alguien hace clic.' },
+            ]}
+          />
+        </Referencia>
+
+        <Referencia nombre="Recursos">
+          <Recursos
+            recursos={[
+              {
+                titulo: 'Sintaxis de HTML',
+                descripcion: 'Reglas del estándar para escribir elementos, atributos y comentarios.',
+                url: 'https://html.spec.whatwg.org/multipage/syntax.html',
+                etiqueta: 'Estándar WHATWG',
+              },
+              {
+                titulo: 'Regiones de una página',
+                descripcion: 'Buenas prácticas para que los landmarks ayuden a navegar el contenido.',
+                url: 'https://www.w3.org/WAI/ARIA/apg/practices/landmark-regions/',
+                etiqueta: 'Guía W3C',
+              },
             ]}
           />
         </Referencia>
@@ -540,25 +559,6 @@ export function AdminReferenciaContenidoPage() {
         titulo="Tarjetas de recursos"
         descripcion="Enlaces salientes presentados como una tarjeta, individual o en cuadrícula, en vez de un enlace suelto en el texto."
       >
-        <Referencia nombre="CuadriculaRecursos">
-          <CuadriculaRecursos
-            recursos={[
-              {
-                titulo: 'Sintaxis de HTML',
-                descripcion: 'Reglas del estándar para escribir elementos, atributos y comentarios.',
-                url: 'https://html.spec.whatwg.org/multipage/syntax.html',
-                etiqueta: 'Estándar WHATWG',
-              },
-              {
-                titulo: 'Regiones de una página',
-                descripcion: 'Buenas prácticas para que los landmarks ayuden a navegar el contenido.',
-                url: 'https://www.w3.org/WAI/ARIA/apg/practices/landmark-regions/',
-                etiqueta: 'Guía W3C',
-              },
-            ]}
-          />
-        </Referencia>
-
         <Referencia nombre="TarjetaRecursoExterno">
           <TarjetaRecursoExterno
             titulo="Estándar HTML Living Standard"

@@ -172,5 +172,22 @@ Aquí `checked` deja la casilla marcada desde el principio y `disabled` deja el 
 
 ## Para profundizar
 
-- [Basic HTML syntax (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Basic_HTML_syntax)
-- [Overview of HTML (web.dev)](https://web.dev/learn/html/overview)
+```laboratorio
+{
+  "tipo": "recursos",
+  "recursos": [
+    {
+      "titulo": "Basic HTML syntax",
+      "descripcion": "El artículo de MDN que cubre elementos, atributos y las reglas básicas de sintaxis — la fuente principal de esta lección.",
+      "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Basic_HTML_syntax",
+      "etiqueta": "MDN"
+    },
+    {
+      "titulo": "Overview of HTML",
+      "descripcion": "El resumen de web.dev sobre la anatomía de una etiqueta y la estructura de un documento HTML.",
+      "url": "https://web.dev/learn/html/overview",
+      "etiqueta": "web.dev"
+    }
+  ]
+}
+```

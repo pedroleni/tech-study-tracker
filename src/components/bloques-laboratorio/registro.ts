@@ -7,6 +7,7 @@ import { DiagramaEtiqueta } from '@/components/bloques-laboratorio/DiagramaEtiqu
 import { LineaDeTiempo } from '@/components/bloques-laboratorio/LineaDeTiempo'
 import { NotasClave } from '@/components/bloques-laboratorio/NotasClave'
 import { PrediceElResultado } from '@/components/bloques-laboratorio/PrediceElResultado'
+import { Recursos } from '@/components/bloques-laboratorio/Recursos'
 import { Roles } from '@/components/bloques-laboratorio/Roles'
 
 // El registro es deliberadamente cerrado: el JSON solo puede escoger uno de
@@ -21,4 +22,5 @@ export const registroBloquesLaboratorio: Record<string, ComponentType<any>> = {
   callout: Callout,
   'linea-de-tiempo': LineaDeTiempo,
   roles: Roles,
+  recursos: Recursos,
 }
