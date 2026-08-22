@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useProfile } from '@/lib/hooks/useProfile'
 import { Menu, X } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Popover } from 'radix-ui'
 import { Link } from 'react-router-dom'
 
@@ -13,6 +13,16 @@ export function Navbar() {
   const { session, signOut } = useAuth()
   const { isAdmin } = useProfile()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [elevado, setElevado] = useState(false)
+
+  useEffect(() => {
+    const actualizarElevacion = () => setElevado(window.scrollY > 10)
+
+    actualizarElevacion()
+    window.addEventListener('scroll', actualizarElevacion, { passive: true })
+
+    return () => window.removeEventListener('scroll', actualizarElevacion)
+  }, [])
 
   const navigationItems = [
     { to: '/#categorias', label: 'Categorías', visible: true },
@@ -30,7 +40,12 @@ export function Navbar() {
       ))
 
   return (
-    <nav className="border-b bg-background" aria-label="Navegación principal">
+    <nav
+      className={`sticky top-0 z-40 border-b transition-[box-shadow,background-color,backdrop-filter] duration-300 motion-reduce:transition-none ${
+        elevado ? 'bg-background/80 shadow-sm backdrop-blur-sm' : 'bg-background'
+      }`}
+      aria-label="Navegación principal"
+    >
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
         <Link
           to="/"

@@ -1,13 +1,16 @@
 import { ArrowLeft, Layers } from 'lucide-react'
+import { useMemo } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
 import { CommentsSection } from '@/components/comment/CommentsSection'
 import { SafeMarkdown } from '@/components/content/SafeMarkdown'
+import { RielSecciones } from '@/components/leccion/RielSecciones'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { useLeccion } from '@/lib/hooks/useLeccion'
 import { useProfile } from '@/lib/hooks/useProfile'
 import { useTechnology } from '@/lib/hooks/useTechnologies'
+import { extraerEncabezadosH2 } from '@/lib/utils/extraerEncabezadosH2'
 
 export function LeccionPage() {
   const { id = '', leccionSlug = '' } = useParams()
@@ -18,6 +21,10 @@ export function LeccionPage() {
   const leccion = leccionQuery.data
   const loading = technologyQuery.isLoading || leccionQuery.isLoading
   const failed = technologyQuery.isError || leccionQuery.isError
+  const secciones = useMemo(
+    () => extraerEncabezadosH2(leccion?.contenido ?? ''),
+    [leccion?.contenido],
+  )
 
   if (loading) return <p role="status">Cargando lección…</p>
   if (failed) {
@@ -46,59 +53,72 @@ export function LeccionPage() {
 
   return (
     <div className="space-y-10">
-      <article className="space-y-8">
-        <header className="space-y-4">
-          <Link
-            to={`/tecnologias/${technology.id}`}
-            className="inline-flex items-center gap-1 rounded-sm text-sm text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <ArrowLeft aria-hidden="true" className="size-4" />
-            Volver a {technology.name}
-          </Link>
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div className="min-w-0 space-y-2">
-              {leccion.modulo && (
-                <p className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
-                  <Layers aria-hidden="true" className="size-3.5" />
-                  {leccion.modulo}
-                </p>
-              )}
-              <h1 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
-                {leccion.titulo}
-              </h1>
-              {leccion.resumen && (
-                <p className="max-w-3xl text-base text-pretty text-muted-foreground">
-                  {leccion.resumen}
-                </p>
+      <div
+        className={
+          secciones.length > 0
+            ? 'lg:grid lg:grid-cols-[200px_minmax(0,1fr)] lg:gap-10'
+            : ''
+        }
+      >
+        {secciones.length > 0 && (
+          <div className="hidden lg:block">
+            <RielSecciones secciones={secciones} />
+          </div>
+        )}
+        <article className="space-y-8">
+          <header className="space-y-4">
+            <Link
+              to={`/tecnologias/${technology.id}`}
+              className="inline-flex items-center gap-1 rounded-sm text-sm text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <ArrowLeft aria-hidden="true" className="size-4" />
+              Volver a {technology.name}
+            </Link>
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div className="min-w-0 space-y-2">
+                {leccion.modulo && (
+                  <p className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
+                    <Layers aria-hidden="true" className="size-3.5" />
+                    {leccion.modulo}
+                  </p>
+                )}
+                <h1 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
+                  {leccion.titulo}
+                </h1>
+                {leccion.resumen && (
+                  <p className="max-w-3xl text-base text-pretty text-muted-foreground">
+                    {leccion.resumen}
+                  </p>
+                )}
+              </div>
+              {isAdmin && (
+                <Button asChild variant="outline">
+                  <Link
+                    to={`/admin/tecnologias/${technology.id}/lecciones/${leccion.id}/editar`}
+                  >
+                    Editar lección
+                  </Link>
+                </Button>
               )}
             </div>
-            {isAdmin && (
-              <Button asChild variant="outline">
-                <Link
-                  to={`/admin/tecnologias/${technology.id}/lecciones/${leccion.id}/editar`}
-                >
-                  Editar lección
-                </Link>
-              </Button>
+            {leccion.status === 'borrador' && (
+              <p className="w-fit rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                Borrador · solo visible para administración
+              </p>
             )}
-          </div>
-          {leccion.status === 'borrador' && (
-            <p className="w-fit rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-              Borrador · solo visible para administración
-            </p>
-          )}
-        </header>
+          </header>
 
-        <Card>
-          {leccion.contenido.trim() ? (
-            <SafeMarkdown permitirLaboratorios>{leccion.contenido}</SafeMarkdown>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              Esta lección todavía no tiene contenido.
-            </p>
-          )}
-        </Card>
-      </article>
+          <Card>
+            {leccion.contenido.trim() ? (
+              <SafeMarkdown permitirLaboratorios>{leccion.contenido}</SafeMarkdown>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Esta lección todavía no tiene contenido.
+              </p>
+            )}
+          </Card>
+        </article>
+      </div>
 
       <CommentsSection leccionId={leccion.id} writable={writable} />
     </div>
