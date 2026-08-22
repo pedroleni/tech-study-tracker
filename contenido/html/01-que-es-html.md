@@ -18,8 +18,10 @@ Eso es literalmente lo que significa la H de HTML: *HyperText*, texto que enlaza
   "tipo": "linea-de-tiempo",
   "titulo": "Cómo llegó HTML hasta aquí",
   "items": [
-    { "fecha": "1991", "titulo": "Tim Berners-Lee publica HTML", "texto": "Nace para conectar documentos entre sí — la H de HyperText." },
-    { "fecha": "Años siguientes", "titulo": "Cada navegador improvisaba por su cuenta", "texto": "Sin una especificación de referencia única, una misma página podía verse rota en la mitad de los navegadores." },
+    { "fecha": "1991", "titulo": "Tim Berners-Lee publica HTML", "texto": "Nace para conectar documentos entre sí — la H de HyperText. Ni siquiera había una especificación única: cada navegador interpretaba las etiquetas a su manera." },
+    { "fecha": "Web 1.0 (años 90)", "titulo": "La web de solo lectura", "texto": "Páginas HTML estáticas pensadas para leer, no para interactuar — sin formularios ricos, sin contenido que cambiara sin recargar la página." },
+    { "fecha": "Web 2.0 (desde 2004)", "titulo": "La web se vuelve interactiva", "texto": "Blogs, redes sociales, contenido creado por cualquiera. HTML tuvo que ampliarse — HTML5 trajo <video>, <canvas> y formularios más ricos — para dejar de ser solo un documento." },
+    { "fecha": "Web 3.0", "titulo": "Un término todavía en disputa", "texto": "Para el W3C significa \"web semántica\": datos que las máquinas también puedan entender. En el uso más popular hoy, \"Web3\" se asocia a blockchain — un significado distinto, más de marketing que técnico." },
     { "fecha": "Hoy", "titulo": "Living standard del WHATWG", "texto": "Una especificación viva, con los navegadores grandes implicados directamente en su evolución — por eso hoy una etiqueta se comporta igual en Chrome, Firefox o Safari." }
   ]
 }
