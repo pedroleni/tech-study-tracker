@@ -26,7 +26,7 @@ export function LineaDeTiempo({
         </div>
       </div>
 
-      <ol className="relative ml-2 border-l">
+      <ol className="relative ml-2 list-none! border-l pl-0!">
         {items.map((item, indice) => (
           <li
             key={`${item.titulo}-${indice}`}

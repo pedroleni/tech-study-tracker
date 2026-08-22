@@ -9,11 +9,36 @@
 
 ## Qué es y para qué sirve
 
-Una **etiqueta** (`tag`) es el marcador entre `<` y `>`: `<p>`, `<strong>`, `<img>`. Un **elemento** es la unidad completa: etiqueta de apertura, el contenido que envuelve, y etiqueta de cierre — `<p>Hola</p>` es un elemento; `<p>` por sí sola es solo una etiqueta. La distinción importa porque casi todo lo que vas a leer sobre HTML habla de "elementos" (el `<p>` es un elemento de bloque, el `<a>` es un elemento en línea) dando por hecho que ya sabes de qué piezas está hecho uno.
+Dos palabras que se confunden constantemente:
 
-Dentro de la etiqueta de apertura pueden ir **atributos**: pares `nombre="valor"` que añaden información o configuran el comportamiento del elemento sin que se vean como contenido — el `href` de un enlace, el `src` de una imagen, el `class` que usará tu CSS. Hay dos familias de atributos que conviene distinguir desde ya: los **globales**, que funcionan en cualquier etiqueta (`class`, `id`, `title`, `lang`), y los **específicos**, que solo tienen sentido en una etiqueta concreta (`href` solo en `<a>`, `src` solo en elementos que cargan un recurso). Y no todos los atributos llevan valor: los **atributos booleanos** (`disabled`, `checked`, `required`) activan o desactivan un comportamiento solo con estar presentes — no necesitan `="algo"`, y de hecho escribir `disabled="false"` sigue dejando el elemento deshabilitado, porque lo único que importa es si el atributo aparece o no.
+```laboratorio
+{
+  "tipo": "roles",
+  "titulo": "Etiqueta o elemento: no es lo mismo",
+  "roles": [
+    { "etiqueta": "Etiqueta", "rol": "El marcador", "descripcion": "El texto entre < y >: <p>, <strong>, <img>." },
+    { "etiqueta": "Elemento", "rol": "La pieza completa", "descripcion": "Apertura + contenido + cierre. <p>Hola</p> es un elemento; <p> sola es solo una etiqueta." }
+  ]
+}
+```
 
-Y no todos los elementos siguen el patrón apertura-contenido-cierre: unos pocos, los que nunca pueden contener nada (una imagen, un salto de línea), se escriben con una sola etiqueta y punto. Cuando anidas elementos unos dentro de otros — como llevas haciendo sin darte cuenta en cada ejemplo de HTML que has visto hasta ahora — el navegador construye internamente un árbol con ellos (el DOM). No hace falta que lo entiendas hoy, pero conviene que sepas que existe: la mayoría de bugs de "por qué mi CSS no aplica" o "por qué mi JavaScript no encuentra el elemento" se explican mirando ese árbol, no la etiqueta suelta.
+Casi todo lo que vas a leer sobre HTML habla de "elementos" (el `<p>` es un elemento de bloque, el `<a>` es un elemento en línea) dando por hecho que ya sabes de qué piezas está hecho uno.
+
+Dentro de la etiqueta de apertura pueden ir **atributos**: pares `nombre="valor"` que añaden información sin verse como contenido — el `href` de un enlace, el `src` de una imagen. Hay tres familias:
+
+```laboratorio
+{
+  "tipo": "roles",
+  "titulo": "Tres tipos de atributos",
+  "roles": [
+    { "etiqueta": "Globales", "rol": "Funcionan en cualquier etiqueta", "descripcion": "class, id, title, lang." },
+    { "etiqueta": "Específicos", "rol": "Solo en una etiqueta concreta", "descripcion": "href solo en <a>, src solo en elementos que cargan un recurso." },
+    { "etiqueta": "Booleanos", "rol": "Sin valor, solo presencia", "descripcion": "disabled, checked, required. Escribir disabled=\"false\" los sigue activando." }
+  ]
+}
+```
+
+Y no todos los elementos se cierran: unos pocos (una imagen, un salto de línea) se escriben con una sola etiqueta y punto — los ves en detalle más abajo. Cuando anidas elementos, el navegador construye con ellos un árbol (el DOM); no hace falta entenderlo hoy, pero la mayoría de bugs de "por qué mi CSS no aplica" se explican mirando ese árbol.
 
 ## Cuándo lo usarías de verdad 👤
 

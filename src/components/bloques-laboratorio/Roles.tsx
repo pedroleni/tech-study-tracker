@@ -30,7 +30,7 @@ export function Roles({ titulo = 'Reparto de roles', roles }: DatosRoles) {
         </div>
       </div>
 
-      <ul className="flex flex-col gap-4 sm:flex-row sm:flex-wrap">
+      <ul className="flex list-none! flex-col gap-4 pl-0! sm:flex-row sm:flex-wrap">
         {roles.map((item, indice) => (
           <li
             key={`${item.etiqueta}-${indice}`}
