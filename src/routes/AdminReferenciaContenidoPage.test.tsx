@@ -14,6 +14,7 @@ const nombresComponentes = [
   'LineaDeTiempo',
   'Roles',
   'Recursos',
+  'Mitos',
   'Acordeon',
   'Pestanas',
   'Pasos',

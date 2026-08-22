@@ -122,6 +122,20 @@ export const esquemaRecursos = z.object({
     .max(8),
 })
 
+export const esquemaMitos = z.object({
+  tipo: z.literal('mitos'),
+  titulo: z.string().min(1).max(120).optional(),
+  mitos: z
+    .array(
+      z.object({
+        mito: z.string().min(1).max(140),
+        realidad: z.string().min(1).max(400),
+      }),
+    )
+    .min(2)
+    .max(6),
+})
+
 export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaPrediceElResultado,
   esquemaCodigoAnotado,
@@ -132,6 +146,7 @@ export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaLineaDeTiempo,
   esquemaRoles,
   esquemaRecursos,
+  esquemaMitos,
 ])
 
 export type DatosPrediceElResultado = z.infer<typeof esquemaPrediceElResultado>
@@ -145,4 +160,5 @@ export type DatosCallout = z.infer<typeof esquemaCallout>
 export type DatosLineaDeTiempo = z.infer<typeof esquemaLineaDeTiempo>
 export type DatosRoles = z.infer<typeof esquemaRoles>
 export type DatosRecursos = z.infer<typeof esquemaRecursos>
+export type DatosMitos = z.infer<typeof esquemaMitos>
 export type DatosBloqueLaboratorio = z.infer<typeof esquemaBloqueLaboratorio>

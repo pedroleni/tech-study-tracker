@@ -252,6 +252,51 @@ describe('SafeMarkdown con laboratorios', () => {
     expect(screen.queryByText('Enlace peligroso')).not.toBeInTheDocument()
   })
 
+  it('renderiza mitos con tarjetas volteables', () => {
+    render(
+      <SafeMarkdown permitirLaboratorios>
+        {bloqueLaboratorio({
+          tipo: 'mitos',
+          mitos: [
+            {
+              mito: 'HTML no es CSS',
+              realidad: 'HTML dice qué es cada cosa; CSS decide cómo se ve.',
+            },
+            {
+              mito: 'Un doctype es solo decorativo',
+              realidad:
+                'Sin él el navegador activa el modo quirks, con resultados inconsistentes.',
+            },
+          ],
+        })}
+      </SafeMarkdown>,
+    )
+
+    expect(screen.getByText('HTML no es CSS')).toBeInTheDocument()
+    expect(screen.getByText('Un doctype es solo decorativo')).toBeInTheDocument()
+    expect(
+      screen.getByText('HTML dice qué es cada cosa; CSS decide cómo se ve.'),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        'Sin él el navegador activa el modo quirks, con resultados inconsistentes.',
+      ),
+    ).toBeInTheDocument()
+
+    const primeraTarjeta = screen.getByRole('button', {
+      name: 'Girar tarjeta: HTML no es CSS',
+    })
+    const segundaTarjeta = screen.getByRole('button', {
+      name: 'Girar tarjeta: Un doctype es solo decorativo',
+    })
+
+    expect(primeraTarjeta).toHaveAttribute('aria-pressed', 'false')
+    expect(segundaTarjeta).toHaveAttribute('aria-pressed', 'false')
+    fireEvent.click(primeraTarjeta)
+    expect(primeraTarjeta).toHaveAttribute('aria-pressed', 'true')
+    expect(segundaTarjeta).toHaveAttribute('aria-pressed', 'false')
+  })
+
   it('usa código plano cuando el JSON es inválido', () => {
     render(
       <SafeMarkdown permitirLaboratorios>
@@ -289,7 +334,7 @@ describe('SafeMarkdown con laboratorios', () => {
     expect(container.querySelector('p code')).toHaveTextContent('main')
   })
 
-  it('no tiene violaciones de accesibilidad con los nueve tipos', async () => {
+  it('no tiene violaciones de accesibilidad con los diez tipos', async () => {
     const markdown = [
       bloqueLaboratorio({
         tipo: 'predice-el-resultado',
@@ -380,6 +425,20 @@ describe('SafeMarkdown con laboratorios', () => {
             descripcion: 'Reglas del estándar para escribir elementos y atributos.',
             url: 'https://html.spec.whatwg.org/multipage/syntax.html',
             etiqueta: 'Estándar WHATWG',
+          },
+        ],
+      }),
+      bloqueLaboratorio({
+        tipo: 'mitos',
+        mitos: [
+          {
+            mito: 'HTML no es CSS',
+            realidad: 'HTML dice qué es cada cosa; CSS decide cómo se ve.',
+          },
+          {
+            mito: 'Un doctype es solo decorativo',
+            realidad:
+              'Sin él el navegador activa el modo quirks, con resultados inconsistentes.',
           },
         ],
       }),

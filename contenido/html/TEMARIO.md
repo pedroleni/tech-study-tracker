@@ -91,23 +91,31 @@ que lo sustituya". Regla final desde 2026-08-22:
 - **`notas-clave` se reserva casi siempre para "Errores típicos"**, que
   es una lista real de gotchas independientes entre sí — el único caso
   donde agrupar todo en una tarjeta numerada tiene sentido.
-- **"Cuándo lo usarías de verdad" y "Lo que [X] no es" usan `callout`**,
-  uno por punto (no agrupados en una sola tarjeta): cada escenario o
-  cada malentendido es su propio aviso suelto, con su propia `variante`
-  (`info` para contexto neutro, `aviso` para algo que conviene no
-  pasar por alto). Visualmente distinto de `notas-clave` — asides
-  independientes en vez de una lista dentro de una tarjeta — así que
-  usarlo ahí no cuenta como "repetir el mismo componente".
-- Con 9 tipos de bloque disponibles (`predice-el-resultado`,
+- **"Cuándo lo usarías de verdad" usa `callout`**, uno por punto (no
+  agrupados en una sola tarjeta): cada escenario es su propio aviso
+  suelto, con su propia `variante` (`info` para contexto neutro,
+  `aviso` para algo que conviene no pasar por alto). Visualmente
+  distinto de `notas-clave` — asides independientes en vez de una lista
+  dentro de una tarjeta — así que usarlo ahí no cuenta como "repetir el
+  mismo componente".
+- **"Lo que [X] no es" usa `mitos`** (desde 2026-08-23; antes usaba
+  `callout` uno por punto, pero 4 avisos idénticos apilados volvió a
+  leerse como el mismo componente repetido — feedback directo: "haz
+  algo más visual estilo cartas 3D"). Cada malentendido es
+  `{mito, realidad}`: el mito como titular en la cara frontal de una
+  tarjeta, la realidad revelada al voltearla.
+- Con 10 tipos de bloque disponibles (`predice-el-resultado`,
   `codigo-anotado`, `comparador-antes-despues`, `notas-clave`,
   `diagrama-etiqueta`, `callout`, `linea-de-tiempo`, `roles`,
-  `recursos`), cada lección debería usar al menos 3 tipos distintos, no
-  el mismo repetido. `linea-de-tiempo` para contexto
+  `recursos`, `mitos`), cada lección debería usar al menos 3 tipos
+  distintos, no el mismo repetido. `linea-de-tiempo` para contexto
   histórico/evolutivo; `roles` para 2-4 piezas con responsabilidades
   distintas mostradas en paralelo (ni lista agrupada como
   `notas-clave`, ni orden cronológico como `linea-de-tiempo`);
   `recursos` para "Para profundizar" (sustituye la lista plana
-  `- [texto](url)` de las 2 primeras lecciones). Antes de escribir una
+  `- [texto](url)` de las 2 primeras lecciones); `mitos` para "Lo que
+  [X] no es" (sustituye los `callout` apilados de las 2 primeras
+  lecciones). Antes de escribir una
   lección, pensar qué
   tipo encaja mejor con CADA sección en vez de reutilizar el último que
   se usó — y nunca "quitar el bloque y dejar

@@ -5,6 +5,7 @@ import { CodigoAnotado } from '@/components/bloques-laboratorio/CodigoAnotado'
 import { ComparadorAntesDespues } from '@/components/bloques-laboratorio/ComparadorAntesDespues'
 import { DiagramaEtiqueta } from '@/components/bloques-laboratorio/DiagramaEtiqueta'
 import { LineaDeTiempo } from '@/components/bloques-laboratorio/LineaDeTiempo'
+import { Mitos } from '@/components/bloques-laboratorio/Mitos'
 import { NotasClave } from '@/components/bloques-laboratorio/NotasClave'
 import { PrediceElResultado } from '@/components/bloques-laboratorio/PrediceElResultado'
 import { Recursos } from '@/components/bloques-laboratorio/Recursos'
@@ -195,7 +196,7 @@ export function AdminReferenciaContenidoPage() {
         </h1>
         <p className="mt-3 max-w-3xl text-sm text-pretty text-muted-foreground">
           Catálogo visual de componentes React organizado por tipo. El primer grupo, "Bloques de
-          laboratorio", son los 9 componentes reales que ya renderiza cualquier lección a través
+          laboratorio", son los 10 componentes reales que ya renderiza cualquier lección a través
           de un bloque <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">```laboratorio</code>{' '}
           en su Markdown (ver <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">specs/features/laboratorios.md</code>).
           El resto de grupos son prototipos de diseño de <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">referencia-contenido/</code> —
@@ -209,7 +210,7 @@ export function AdminReferenciaContenidoPage() {
       <CategoriaActivaContext.Provider value={categoriaActiva}>
       <GrupoCatalogo
         titulo="Bloques de laboratorio"
-        descripcion="Los 9 tipos reales que un autor puede usar dentro de un bloque ```laboratorio en el Markdown de una lección (src/components/bloques-laboratorio/). Validados por Zod, registrados en un lookup cerrado — no prototipos."
+        descripcion="Los 10 tipos reales que un autor puede usar dentro de un bloque ```laboratorio en el Markdown de una lección (src/components/bloques-laboratorio/). Validados por Zod, registrados en un lookup cerrado — no prototipos."
       >
         <Referencia nombre="PrediceElResultado">
           <PrediceElResultado
@@ -347,6 +348,30 @@ export function AdminReferenciaContenidoPage() {
                 descripcion: 'Buenas prácticas para que los landmarks ayuden a navegar el contenido.',
                 url: 'https://www.w3.org/WAI/ARIA/apg/practices/landmark-regions/',
                 etiqueta: 'Guía W3C',
+              },
+            ]}
+          />
+        </Referencia>
+
+        <Referencia nombre="Mitos">
+          <Mitos
+            tipo="mitos"
+            mitos={[
+              {
+                mito: 'HTML no es CSS',
+                realidad: 'HTML dice qué es cada cosa; CSS decide cómo se ve.',
+              },
+              {
+                mito: 'Un <div> sirve para cualquier cosa',
+                realidad: 'Existen etiquetas con significado propio (nav, article, button) que ayudan a lectores de pantalla y buscadores — usar siempre div los deja sin esa información.',
+              },
+              {
+                mito: 'Cerrar mal una etiqueta rompe la página',
+                realidad: 'El navegador suele "adivinar" el cierre y seguir renderizando, pero de forma inconsistente entre navegadores — no es un error visible, es un riesgo silencioso.',
+              },
+              {
+                mito: 'El orden de los atributos importa',
+                realidad: 'A diferencia de las etiquetas anidadas, los atributos dentro de una etiqueta se pueden escribir en cualquier orden sin cambiar el resultado.',
               },
             ]}
           />

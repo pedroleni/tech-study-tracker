@@ -13,8 +13,11 @@ tampoco valía, hacía falta un sustituto real), y `linea-de-tiempo` +
 la sección introductoria de la lección de HTML — la primera promovida
 desde `referencia-contenido/`, el segundo construido desde cero para
 la tríada HTML/CSS/JavaScript, que no encajaba en ningún tipo
-existente). 9 tipos de bloque en total, el prop `permitirLaboratorios`,
-y el temario real de HTML en progreso sobre este mecanismo.
+existente), y `mitos` (2026-08-23, feedback directo de que "Lo que [X]
+no es" —4 `callout` idénticos apilados— se veía repetitivo: pedido
+explícito de "algo más visual estilo cartas 3D"). 10 tipos de bloque en
+total, el prop `permitirLaboratorios`, y el temario real de HTML en
+progreso sobre este mecanismo.
 
 ## Por qué existe esta feature
 
@@ -41,7 +44,7 @@ cualquier lección.
 
 ## Alcance
 
-Nueve tipos de bloque, cada uno con un ejemplo real ya escrito en
+Diez tipos de bloque, cada uno con un ejemplo real ya escrito en
 `contenido/html/`:
 
 1. **`predice-el-resultado`** — código + opciones + botón "Revelar" que
@@ -102,6 +105,22 @@ Nueve tipos de bloque, cada uno con un ejemplo real ya escrito en
    sustituto. Pedido explícito: darle a "Para profundizar" el mismo
    estilo que "Tarjetas de recursos" en el catálogo, en vez de una
    lista `- [texto](url)` plana.
+10. **`mitos`** (2026-08-23) — cuadrícula de 2 a 6 tarjetas volteables en
+    3D (`mito` + `realidad` por tarjeta): la cara frontal muestra el
+    mito como titular; al pasar el cursor o pulsar (con estado propio
+    por tarjeta y `aria-pressed`), gira sobre el eje Y y revela la
+    realidad en la cara trasera. Construido desde cero por Codex
+    reutilizando la técnica CSS 3D exacta de
+    `referencia-contenido/TarjetaVolteable.tsx` (`perspective` +
+    `preserve-3d` + `backface-visibility` + rotación por hover **y**
+    por clic, para que funcione también en táctil) simplificada a dos
+    campos y dimensionada para rejilla (`h-64` fija en vez de la
+    tarjeta única centrada del prototipo). Acento naranja, icono
+    `RotateCw` en la cabecera del bloque y `Rotate3D` en la cara
+    frontal de cada tarjeta — deliberadamente distintos entre sí para
+    no repetir el mismo icono en dos lugares del mismo componente.
+    Sustituye a `callout` en "Lo que [X] no es", que antes apilaba 4
+    avisos idénticos ahí.
 
 **Fuera de alcance a propósito:** el ejercicio "Escríbelo tú" con
 comprobaciones automáticas (`RetoConComprobaciones` en
@@ -268,6 +287,15 @@ export const esquemaRecursos = z.object({
   })).min(1).max(8),
 })
 
+export const esquemaMitos = z.object({
+  tipo: z.literal('mitos'),
+  titulo: z.string().min(1).max(120).optional(),
+  mitos: z.array(z.object({
+    mito: z.string().min(1).max(140),
+    realidad: z.string().min(1).max(400),
+  })).min(2).max(6),
+})
+
 export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaPrediceElResultado,
   esquemaCodigoAnotado,
@@ -278,6 +306,7 @@ export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaLineaDeTiempo,
   esquemaRoles,
   esquemaRecursos,
+  esquemaMitos,
 ])
 ```
 
@@ -335,6 +364,18 @@ diseño" con "feature real".
   en el esquema es una capa adicional (valida forma de URL), no la
   sustituye (no filtra `javascript:`, que sí es una URL válida
   sintácticamente).
+- `Mitos.tsx` — recibe `z.infer<typeof esquemaMitos>`. Construido desde
+  cero por Codex, no promovido, pero reutilizando la técnica CSS 3D
+  exacta de `referencia-contenido/TarjetaVolteable.tsx` (misma pila
+  `[perspective:900px]` / `[transform-style:preserve-3d]` /
+  `[backface-visibility:hidden]`, mismo doble disparador hover+clic con
+  `aria-pressed`) en vez de reinventar el mecanismo de giro. A
+  diferencia del prototipo, cada tarjeta tiene su propio estado de giro
+  (array, no un único booleano) y una altura fija (`h-64`) para encajar
+  en una rejilla en vez del ancho centrado y limitado del original.
+  Acento naranja; icono `RotateCw` en la cabecera del bloque distinto
+  de `Rotate3D` en cada tarjeta, a propósito, para no repetir el mismo
+  icono en dos sitios del mismo componente.
 - `registro.ts` — `Record<string, ComponentType<any>>` cerrado, una
   entrada por `tipo`.
 - `BloqueLaboratorio.tsx` — el punto de entrada que usa `SafeMarkdown`:
@@ -399,11 +440,11 @@ Cada componente que renderiza HTML en vivo usa
 
 ## Checklist de implementación
 
-- [x] `src/lib/laboratorio/schemas.ts` (9 esquemas + unión discriminada)
-- [x] `src/components/bloques-laboratorio/` (9 componentes + registro + punto de entrada)
+- [x] `src/lib/laboratorio/schemas.ts` (10 esquemas + unión discriminada)
+- [x] `src/components/bloques-laboratorio/` (10 componentes + registro + punto de entrada)
 - [x] `SafeMarkdown.tsx`: prop, override de `code`, `CodigoResaltado` para código normal
 - [x] `LeccionPage.tsx`: pasar el prop
-- [x] Tests: los 9 tipos renderizan con datos válidos; JSON inválido cae a código plano; `tipo` desconocido cae a código plano; comentario con bloque `laboratorio` NO se activa; 0 violaciones de accesibilidad (`axe`) con los 9 tipos a la vez
+- [x] Tests: los 10 tipos renderizan con datos válidos; JSON inválido cae a código plano; `tipo` desconocido cae a código plano; comentario con bloque `laboratorio` NO se activa; 0 violaciones de accesibilidad (`axe`) con los 10 tipos a la vez
 - [x] `contenido/html/01-*.md` y `02-*.md` reescritos con bloques reales (versión piloto; el temario real de 2026-08-21 los sustituye lección a lección)
 - [x] Contenido actualizado en producción vía el formulario de admin
 - [x] `npm run test`, `build`, `lint` en verde
@@ -434,3 +475,14 @@ Cada componente que renderiza HTML en vivo usa
   (nunca incluía los tipos reales de `bloques-laboratorio/`) —
   completada con los 9. `tsc`, `lint` y la suite completa (216/216) en
   verde.
+- [x] `mitos` (2026-08-23): construido desde cero por Codex sobre un
+  prompt detallado (schema y registro ya preparados de antemano por
+  Claude), reutilizando la técnica CSS 3D de `TarjetaVolteable.tsx` y
+  las convenciones de tarjeta/rejilla de `Roles.tsx`/`Recursos.tsx`,
+  verificado archivo a archivo antes de aceptarlo (build real, no
+  `tsc --noEmit` suelto) — `npm run build`, `lint` y la suite completa
+  (217/217) en verde. Catálogo (`AdminReferenciaContenidoPage.tsx`) y
+  su lista de nombres de test actualizados a los 10 tipos. Verificación
+  visual real (Playwright, ruta temporal sin auth revertida tras la
+  captura) en claro y oscuro, en reposo y con la tarjeta volteada — 0
+  errores de consola.

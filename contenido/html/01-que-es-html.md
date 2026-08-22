@@ -105,37 +105,25 @@ Sin etiquetas, el navegador ignora los saltos de línea y lo aplasta todo en una
 
 ```laboratorio
 {
-  "tipo": "callout",
-  "variante": "aviso",
-  "titulo": "HTML no es un lenguaje de programación",
-  "contenido": "No tiene variables, ni bucles, ni condicionales — no le puedes decir \"si pasa esto, haz aquello\". Solo describe qué es cada trozo de contenido. Aprender HTML es el primer paso hacia programar, pero no es programar todavía."
-}
-```
-
-```laboratorio
-{
-  "tipo": "callout",
-  "variante": "aviso",
-  "titulo": "HTML no es CSS",
-  "contenido": "HTML dice qué es cada cosa (un título, una lista); CSS decide cómo se ve (colores, tamaños, disposición). Son dos lenguajes distintos con trabajos distintos, aunque en la práctica siempre vayan juntos."
-}
-```
-
-```laboratorio
-{
-  "tipo": "callout",
-  "variante": "aviso",
-  "titulo": "HTML no es interactivo por sí mismo",
-  "contenido": "Un botón de HTML no hace nada al pulsarlo hasta que JavaScript le dice qué hacer. HTML solo declara \"aquí hay un botón\" — el comportamiento es responsabilidad de otra tecnología."
-}
-```
-
-```laboratorio
-{
-  "tipo": "callout",
-  "variante": "aviso",
-  "titulo": "HTML no \"se compila\" ni \"se ejecuta\" como un programa",
-  "contenido": "El navegador lo lee (lo parsea) y construye directamente un árbol de elementos con él — no hay un paso previo de compilación como en un lenguaje de programación tradicional."
+  "tipo": "mitos",
+  "mitos": [
+    {
+      "mito": "HTML no es un lenguaje de programación",
+      "realidad": "No tiene variables, ni bucles, ni condicionales — no le puedes decir \"si pasa esto, haz aquello\". Solo describe qué es cada trozo de contenido. Aprender HTML es el primer paso hacia programar, pero no es programar todavía."
+    },
+    {
+      "mito": "HTML no es CSS",
+      "realidad": "HTML dice qué es cada cosa (un título, una lista); CSS decide cómo se ve (colores, tamaños, disposición). Son dos lenguajes distintos con trabajos distintos, aunque en la práctica siempre vayan juntos."
+    },
+    {
+      "mito": "HTML no es interactivo por sí mismo",
+      "realidad": "Un botón de HTML no hace nada al pulsarlo hasta que JavaScript le dice qué hacer. HTML solo declara \"aquí hay un botón\" — el comportamiento es responsabilidad de otra tecnología."
+    },
+    {
+      "mito": "HTML no \"se compila\" ni \"se ejecuta\" como un programa",
+      "realidad": "El navegador lo lee (lo parsea) y construye directamente un árbol de elementos con él — no hay un paso previo de compilación como en un lenguaje de programación tradicional."
+    }
+  ]
 }
 ```
 

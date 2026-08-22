@@ -147,28 +147,21 @@ Aquí `checked` deja la casilla marcada desde el principio y `disabled` deja el 
 
 ```laboratorio
 {
-  "tipo": "callout",
-  "variante": "aviso",
-  "titulo": "El navegador no rechaza una etiqueta que no reconoce",
-  "contenido": "Escribe <marcador-inventado>texto</marcador-inventado> en cualquier página: no hay error, no hay aviso. La trata como un elemento genérico sin ningún estilo ni comportamiento especial, y sigue mostrando el texto de dentro con normalidad."
-}
-```
-
-```laboratorio
-{
-  "tipo": "callout",
-  "variante": "aviso",
-  "titulo": "Por eso una etiqueta mal escrita tampoco \"avisa\"",
-  "contenido": "Si escribes <strogn> en vez de <strong> por error de tecleo, el navegador no dice nada — simplemente el texto no se pondrá en negrita, porque <strogn> es, para él, una etiqueta desconocida más."
-}
-```
-
-```laboratorio
-{
-  "tipo": "callout",
-  "variante": "info",
-  "titulo": "Esto es justo lo que hace posibles los Web Components",
-  "contenido": "Etiquetas personalizadas como <mi-componente> funcionan porque el navegador ya las acepta sintácticamente sin quejarse; solo les falta que JavaScript les defina un comportamiento. No es magia nueva, es esta misma tolerancia de HTML."
+  "tipo": "mitos",
+  "mitos": [
+    {
+      "mito": "El navegador rechaza una etiqueta que no reconoce",
+      "realidad": "Escribe <marcador-inventado>texto</marcador-inventado> en cualquier página: no hay error, no hay aviso. La trata como un elemento genérico sin ningún estilo ni comportamiento especial, y sigue mostrando el texto de dentro con normalidad."
+    },
+    {
+      "mito": "Una etiqueta mal escrita hace saltar un aviso",
+      "realidad": "Si escribes <strogn> en vez de <strong> por error de tecleo, el navegador no dice nada — simplemente el texto no se pondrá en negrita, porque <strogn> es, para él, una etiqueta desconocida más."
+    },
+    {
+      "mito": "Las etiquetas personalizadas como <mi-componente> son magia nueva",
+      "realidad": "Funcionan porque el navegador ya las acepta sintácticamente sin quejarse; solo les falta que JavaScript les defina un comportamiento. No es magia nueva, es esta misma tolerancia de HTML — la base de los Web Components."
+    }
+  ]
 }
 ```
 
