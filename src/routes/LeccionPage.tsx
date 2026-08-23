@@ -29,8 +29,6 @@ export function LeccionPage() {
     () => dividirEnSecciones(leccion?.contenido ?? ''),
     [leccion?.contenido],
   )
-  const mostrarBarraNav =
-    lecciones.filter((item) => item.status === 'publicado').length > 1
 
   if (loading) return <p role="status">Cargando lección…</p>
   if (failed) {
@@ -58,7 +56,7 @@ export function LeccionPage() {
     technology.status === 'completado' && leccion.status === 'publicado'
 
   return (
-    <div className={mostrarBarraNav ? 'space-y-10 pb-16' : 'space-y-10'}>
+    <div className="space-y-10">
       <div
         className={
           secciones.length > 0
@@ -148,16 +146,16 @@ export function LeccionPage() {
               <SafeMarkdown permitirLaboratorios>{leccion.contenido}</SafeMarkdown>
             </Card>
           )}
+
+          <BarraNavegacionLeccion
+            technologyId={technology.id}
+            leccionActualId={leccion.id}
+            lecciones={lecciones}
+          />
         </article>
       </div>
 
       <CommentsSection leccionId={leccion.id} writable={writable} />
-
-      <BarraNavegacionLeccion
-        technologyId={technology.id}
-        leccionActualId={leccion.id}
-        lecciones={lecciones}
-      />
     </div>
   )
 }
