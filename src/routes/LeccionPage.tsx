@@ -4,10 +4,12 @@ import { Link, useParams } from 'react-router-dom'
 
 import { CommentsSection } from '@/components/comment/CommentsSection'
 import { SafeMarkdown } from '@/components/content/SafeMarkdown'
+import { BarraNavegacionLeccion } from '@/components/leccion/BarraNavegacionLeccion'
 import { RielSecciones } from '@/components/leccion/RielSecciones'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { useLeccion } from '@/lib/hooks/useLeccion'
+import { useLecciones } from '@/lib/hooks/useLecciones'
 import { useProfile } from '@/lib/hooks/useProfile'
 import { useTechnology } from '@/lib/hooks/useTechnologies'
 import { dividirEnSecciones } from '@/lib/utils/dividirEnSecciones'
@@ -17,14 +19,18 @@ export function LeccionPage() {
   const { isAdmin } = useProfile()
   const technologyQuery = useTechnology(id)
   const leccionQuery = useLeccion({ technologyId: id, slug: leccionSlug })
+  const leccionesQuery = useLecciones(id)
   const technology = technologyQuery.data
   const leccion = leccionQuery.data
+  const lecciones = leccionesQuery.data ?? []
   const loading = technologyQuery.isLoading || leccionQuery.isLoading
   const failed = technologyQuery.isError || leccionQuery.isError
   const secciones = useMemo(
     () => dividirEnSecciones(leccion?.contenido ?? ''),
     [leccion?.contenido],
   )
+  const mostrarBarraNav =
+    lecciones.filter((item) => item.status === 'publicado').length > 1
 
   if (loading) return <p role="status">Cargando lección…</p>
   if (failed) {
@@ -52,7 +58,7 @@ export function LeccionPage() {
     technology.status === 'completado' && leccion.status === 'publicado'
 
   return (
-    <div className="space-y-10">
+    <div className={mostrarBarraNav ? 'space-y-10 pb-16' : 'space-y-10'}>
       <div
         className={
           secciones.length > 0
@@ -146,6 +152,12 @@ export function LeccionPage() {
       </div>
 
       <CommentsSection leccionId={leccion.id} writable={writable} />
+
+      <BarraNavegacionLeccion
+        technologyId={technology.id}
+        leccionActualId={leccion.id}
+        lecciones={lecciones}
+      />
     </div>
   )
 }
