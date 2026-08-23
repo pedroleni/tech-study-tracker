@@ -142,7 +142,7 @@ Sin etiquetas, el navegador ignora los saltos de línea y lo aplasta todo en una
 
 ## Ejercicios
 
-1. Abre cualquier página web, haz clic derecho y elige "Ver código fuente de la página" (o `Ctrl`/`Cmd` + `U`). Busca tres etiquetas que reconozcas y anota qué contenido envuelve cada una.
+1. Abre cualquier página web y mira su código fuente: clic derecho → "Ver código fuente de la página", o el atajo de tu navegador (`Ctrl` + `U` en Windows/Linux; en Mac es `Cmd` + `Opción` + `U` en Chrome, o `Cmd` + `U` en Safari/Firefox). Busca tres etiquetas que reconozcas y anota qué contenido envuelve cada una.
 2. Escribe, sin usar ninguna etiqueta, el texto de una receta de cocina (un título y una lista de pasos) tal cual lo pegarías en un bloc de notas plano. Después reescríbelo usando las etiquetas de esta lección. Abre las dos versiones en el navegador y compara qué se ve.
 3. Explica en dos frases, con tus propias palabras y sin tecnicismos, la diferencia entre HTML, CSS y JavaScript a alguien que no sabe nada de desarrollo web.
 
