@@ -174,6 +174,7 @@ No son etiquetas "prohibidas" — tienen sus propios casos de uso legítimos, di
 2. Escribe un párrafo de advertencia (por ejemplo, sobre un producto peligroso o una acción irreversible) usando strong para lo importante y em anidado donde haga falta énfasis extra dentro de esa importancia.
 3. Encuentra un ejemplo real (una web, una app) donde se use negrita o cursiva puramente decorativa, sin importancia ni énfasis real detrás. ¿Qué etiqueta crees que usaron: strong/em, o b/i, o CSS?
 4. Escribe una frase que contenga los tres símbolos &lt;, &gt; y &amp; de forma literal (por ejemplo, explicando la sintaxis de una etiqueta HTML) usando las entidades correctas.
+5. Prueba `<marquee>Texto</marquee>` en las herramientas de desarrollador de tu navegador (Elements/Inspector, no en tu código real: es una etiqueta obsoleta). Verla moverse en pantalla ayuda a entender por qué HTML evolucionó hacia separar contenido y presentación — el mismo argumento de fondo que distingue strong/em de b/i.
 
 ## Para profundizar
 

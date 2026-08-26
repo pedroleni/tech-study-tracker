@@ -17,7 +17,7 @@ Cada vez que el navegador procesa tu HTML, construye por debajo un segundo árbo
   "titulo": "Qué construye cada elemento en el árbol de accesibilidad",
   "roles": [
     { "etiqueta": "header, nav, main, footer", "rol": "Puntos de referencia (landmarks)", "descripcion": "Un lector de pantalla puede saltar directo a \"navegación\" o a \"contenido principal\", igual que tú saltas visualmente entre secciones de un vistazo." },
-    { "etiqueta": "h1-h6", "rol": "Una tabla de contenidos navegable", "descripcion": "Un lector de pantalla puede pedir la lista completa de encabezados de la página y saltar directo a cualquiera, sin leer todo lo demás." },
+    { "etiqueta": "h1-h6", "rol": "Una tabla de contenidos navegable", "descripcion": "El método de navegación más usado con lector de pantalla, según WebAIM: un 71,6% salta entre encabezados en vez de leer la página entera." },
     { "etiqueta": "div, span", "rol": "Nada — invisibles para el árbol", "descripcion": "No añaden ningún nodo con significado propio. Todo lo que envuelven se lee como un bloque plano, sin ninguna señal de navegación." }
   ]
 }

@@ -16,7 +16,7 @@ HTML tiene seis niveles de encabezado, `<h1>` a `<h6>`, y un elemento para todo 
   "tipo": "roles",
   "titulo": "Quién se apoya en esa jerarquía",
   "roles": [
-    { "etiqueta": "Lector de pantalla", "rol": "Navegar por niveles", "descripcion": "Puede saltar de h2 en h2 sin escuchar todo el texto de en medio — igual que tú saltas de apartado en apartado en un índice." },
+    { "etiqueta": "Lector de pantalla", "rol": "Navegar por niveles", "descripcion": "El 71,6% de usuarios de lector de pantalla navega así una página larga — por encima de buscar texto o leerla entera, según la encuesta de WebAIM." },
     { "etiqueta": "Buscador", "rol": "Entender qué pesa más", "descripcion": "Las palabras dentro de un h1 o h2 cuentan más para el posicionamiento que las mismas palabras dentro de un párrafo normal." },
     { "etiqueta": "Quien escanea la página", "rol": "Decidir en 3 segundos", "descripcion": "La mayoría de gente lee solo los encabezados antes de decidir si sigue leyendo o se va — una jerarquía clara retiene, una confusa pierde visitas." }
   ]
