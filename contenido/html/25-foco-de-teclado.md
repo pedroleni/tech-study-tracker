@@ -85,10 +85,13 @@ Sin ratón, sin pantalla táctil, quien navega solo con teclado depende de una s
 
 ```laboratorio
 {
-  "tipo": "comparador-antes-despues",
-  "antes": "<style>\n  input:focus { outline: none; }\n</style>\n<input type=\"text\" autofocus placeholder=\"Sin contorno de foco\">",
-  "despues": "<style>\n  input:focus { outline: 3px solid #2563eb; outline-offset: 2px; }\n</style>\n<input type=\"text\" autofocus placeholder=\"Con contorno de foco\">",
-  "nota": "Los dos campos reciben el foco automáticamente al cargar (autofocus), para ver el estado real de :focus sin pulsar Tab. En el de antes, outline: none deja el campo enfocado SIN ninguna pista visual de que lo está. En el de después, un contorno propio mantiene esa pista — cumpliendo el criterio WCAG 2.4.7 Focus Visible."
+  "tipo": "codigo-anotado",
+  "lenguaje": "html",
+  "codigo": "<style>\n  .malo:focus {\n    outline: none;\n  }\n\n  .bueno:focus-visible {\n    outline: 3px solid #2563eb;\n    outline-offset: 2px;\n  }\n</style>\n\n<input type=\"text\" class=\"malo\">\n<input type=\"text\" class=\"bueno\">",
+  "anotaciones": [
+    { "fragmento": ".malo:focus {\n    outline: none;\n  }", "nota": "Al llegar aquí con Tab, este campo queda enfocado SIN ninguna pista visual de que lo está — quien navega con teclado pierde de vista dónde se encuentra." },
+    { "fragmento": ".bueno:focus-visible {\n    outline: 3px solid #2563eb;\n    outline-offset: 2px;\n  }", "nota": "Un contorno propio, sobre :focus-visible en vez de :focus, cumple el criterio WCAG 2.4.7 Focus Visible sin mostrar el contorno en un simple clic de ratón." }
+  ]
 }
 ```
 
