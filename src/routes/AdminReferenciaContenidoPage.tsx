@@ -5,6 +5,7 @@ import { CodigoAnotado } from '@/components/bloques-laboratorio/CodigoAnotado'
 import { ComparadorAntesDespues } from '@/components/bloques-laboratorio/ComparadorAntesDespues'
 import { DiagramaEtiqueta } from '@/components/bloques-laboratorio/DiagramaEtiqueta'
 import { LineaDeTiempo } from '@/components/bloques-laboratorio/LineaDeTiempo'
+import { MapaDeRegiones } from '@/components/bloques-laboratorio/MapaDeRegiones'
 import { Mitos } from '@/components/bloques-laboratorio/Mitos'
 import { NotasClave } from '@/components/bloques-laboratorio/NotasClave'
 import { PrediceElResultado } from '@/components/bloques-laboratorio/PrediceElResultado'
@@ -197,7 +198,7 @@ export function AdminReferenciaContenidoPage() {
         </h1>
         <p className="mt-3 max-w-3xl text-sm text-pretty text-muted-foreground">
           Catálogo visual de componentes React organizado por tipo. El primer grupo, "Bloques de
-          laboratorio", son los 11 componentes reales que ya renderiza cualquier lección a través
+          laboratorio", son los 12 componentes reales que ya renderiza cualquier lección a través
           de un bloque <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">```laboratorio</code>{' '}
           en su Markdown (ver <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">specs/features/laboratorios.md</code>).
           El resto de grupos son prototipos de diseño de <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">referencia-contenido/</code> —
@@ -211,7 +212,7 @@ export function AdminReferenciaContenidoPage() {
       <CategoriaActivaContext.Provider value={categoriaActiva}>
       <GrupoCatalogo
         titulo="Bloques de laboratorio"
-        descripcion="Los 11 tipos reales que un autor puede usar dentro de un bloque ```laboratorio en el Markdown de una lección (src/components/bloques-laboratorio/). Validados por Zod, registrados en un lookup cerrado — no prototipos."
+        descripcion="Los 12 tipos reales que un autor puede usar dentro de un bloque ```laboratorio en el Markdown de una lección (src/components/bloques-laboratorio/). Validados por Zod, registrados en un lookup cerrado — no prototipos."
       >
         <Referencia nombre="PrediceElResultado">
           <PrediceElResultado
@@ -385,6 +386,38 @@ export function AdminReferenciaContenidoPage() {
             ogTitulo="Anatomía de una etiqueta — Tech Study Tracker"
             ogDescripcion="Qué es un elemento, qué son los atributos, y por qué unas pocas etiquetas se cierran solas y el resto no."
             imagenEtiqueta="og:image · 1200×630"
+          />
+        </Referencia>
+
+        <Referencia nombre="MapaDeRegiones">
+          <MapaDeRegiones
+            tipo="mapa-de-regiones"
+            regiones={[
+              {
+                etiqueta: 'Cabecera',
+                elemento: 'header',
+                landmark: 'banner',
+                contenido: 'Logo y nombre del sitio',
+              },
+              {
+                etiqueta: 'Navegación',
+                elemento: 'nav',
+                landmark: 'navigation',
+                contenido: 'Inicio · Blog · Contacto',
+              },
+              {
+                etiqueta: 'Contenido principal',
+                elemento: 'main',
+                landmark: 'main',
+                contenido: 'El contenido único de esta página',
+              },
+              {
+                etiqueta: 'Pie',
+                elemento: 'footer',
+                landmark: 'contentinfo',
+                contenido: '© 2026 — todos los derechos reservados',
+              },
+            ]}
           />
         </Referencia>
       </GrupoCatalogo>

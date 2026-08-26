@@ -145,6 +145,22 @@ export const esquemaVistaPreviaSocial = z.object({
   imagenEtiqueta: z.string().min(1).max(60),
 })
 
+export const esquemaMapaDeRegiones = z.object({
+  tipo: z.literal('mapa-de-regiones'),
+  titulo: z.string().min(1).max(120).optional(),
+  regiones: z
+    .array(
+      z.object({
+        etiqueta: z.string().min(1).max(40),
+        elemento: z.string().min(1).max(30),
+        landmark: z.string().min(1).max(30),
+        contenido: z.string().min(1).max(200),
+      }),
+    )
+    .min(2)
+    .max(6),
+})
+
 export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaPrediceElResultado,
   esquemaCodigoAnotado,
@@ -157,6 +173,7 @@ export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaRecursos,
   esquemaMitos,
   esquemaVistaPreviaSocial,
+  esquemaMapaDeRegiones,
 ])
 
 export type DatosPrediceElResultado = z.infer<typeof esquemaPrediceElResultado>
@@ -172,4 +189,5 @@ export type DatosRoles = z.infer<typeof esquemaRoles>
 export type DatosRecursos = z.infer<typeof esquemaRecursos>
 export type DatosMitos = z.infer<typeof esquemaMitos>
 export type DatosVistaPreviaSocial = z.infer<typeof esquemaVistaPreviaSocial>
+export type DatosMapaDeRegiones = z.infer<typeof esquemaMapaDeRegiones>
 export type DatosBloqueLaboratorio = z.infer<typeof esquemaBloqueLaboratorio>

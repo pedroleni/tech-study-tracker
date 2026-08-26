@@ -5,6 +5,7 @@ import { CodigoAnotado } from '@/components/bloques-laboratorio/CodigoAnotado'
 import { ComparadorAntesDespues } from '@/components/bloques-laboratorio/ComparadorAntesDespues'
 import { DiagramaEtiqueta } from '@/components/bloques-laboratorio/DiagramaEtiqueta'
 import { LineaDeTiempo } from '@/components/bloques-laboratorio/LineaDeTiempo'
+import { MapaDeRegiones } from '@/components/bloques-laboratorio/MapaDeRegiones'
 import { Mitos } from '@/components/bloques-laboratorio/Mitos'
 import { NotasClave } from '@/components/bloques-laboratorio/NotasClave'
 import { PrediceElResultado } from '@/components/bloques-laboratorio/PrediceElResultado'
@@ -27,4 +28,5 @@ export const registroBloquesLaboratorio: Record<string, ComponentType<any>> = {
   recursos: Recursos,
   mitos: Mitos,
   'vista-previa-social': VistaPreviaSocial,
+  'mapa-de-regiones': MapaDeRegiones,
 }

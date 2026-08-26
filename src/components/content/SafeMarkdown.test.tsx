@@ -221,6 +221,46 @@ describe('SafeMarkdown con laboratorios', () => {
     expect(screen.getByText('Decide qué pasa cuando alguien hace clic.')).toBeInTheDocument()
   })
 
+  it('renderiza mapa-de-regiones con sus landmarks', () => {
+    render(
+      <SafeMarkdown permitirLaboratorios>
+        {bloqueLaboratorio({
+          tipo: 'mapa-de-regiones',
+          regiones: [
+            {
+              etiqueta: 'Navegación',
+              elemento: 'nav',
+              landmark: 'navigation',
+              contenido: 'Inicio · Precios',
+            },
+            {
+              etiqueta: 'Contenido principal',
+              elemento: 'main',
+              landmark: 'main',
+              contenido: 'Suscríbete al boletín',
+            },
+            {
+              etiqueta: 'Pie',
+              elemento: 'footer',
+              landmark: 'contentinfo',
+              contenido: '© 2026',
+            },
+          ],
+        })}
+      </SafeMarkdown>,
+    )
+
+    expect(screen.getByText('Navegación')).toBeInTheDocument()
+    expect(screen.getByText('Contenido principal')).toBeInTheDocument()
+    expect(screen.getByText('Pie')).toBeInTheDocument()
+    expect(screen.getByText(/^<nav>$/)).toBeInTheDocument()
+    expect(screen.getByText(/^<main>$/)).toBeInTheDocument()
+    expect(screen.getByText(/^<footer>$/)).toBeInTheDocument()
+    expect(screen.getByText(/^role: navigation$/)).toBeInTheDocument()
+    expect(screen.getByText(/^role: main$/)).toBeInTheDocument()
+    expect(screen.getByText(/^role: contentinfo$/)).toBeInTheDocument()
+  })
+
   it('renderiza recursos como tarjetas de enlace y filtra URLs inseguras', () => {
     render(
       <SafeMarkdown permitirLaboratorios>
@@ -359,7 +399,7 @@ describe('SafeMarkdown con laboratorios', () => {
     expect(container.querySelector('p code')).toHaveTextContent('main')
   })
 
-  it('no tiene violaciones de accesibilidad con los once tipos', async () => {
+  it('no tiene violaciones de accesibilidad con los doce tipos', async () => {
     const markdown = [
       bloqueLaboratorio({
         tipo: 'predice-el-resultado',
@@ -439,6 +479,29 @@ describe('SafeMarkdown con laboratorios', () => {
             etiqueta: 'JavaScript',
             rol: 'Comportamiento',
             descripcion: 'Decide qué pasa cuando alguien hace clic.',
+          },
+        ],
+      }),
+      bloqueLaboratorio({
+        tipo: 'mapa-de-regiones',
+        regiones: [
+          {
+            etiqueta: 'Navegación',
+            elemento: 'nav',
+            landmark: 'navigation',
+            contenido: 'Inicio · Precios',
+          },
+          {
+            etiqueta: 'Contenido principal',
+            elemento: 'main',
+            landmark: 'main',
+            contenido: 'Suscríbete al boletín',
+          },
+          {
+            etiqueta: 'Pie',
+            elemento: 'footer',
+            landmark: 'contentinfo',
+            contenido: '© 2026',
           },
         ],
       }),

@@ -21,7 +21,7 @@ se vea más real": mockup de la tarjeta de enlace que genera WhatsApp/
 Twitter/Slack, sin cargar ninguna imagen externa real — un placeholder
 con icono y etiqueta en el hueco de `og:image`, coherente con que
 `SafeMarkdown` nunca carga imágenes remotas de contenido de autor).
-11 tipos de bloque en total, el prop `permitirLaboratorios`, y el
+12 tipos de bloque en total, el prop `permitirLaboratorios`, y el
 temario real de HTML en progreso sobre este mecanismo.
 
 ## Por qué existe esta feature
@@ -49,7 +49,7 @@ cualquier lección.
 
 ## Alcance
 
-Once tipos de bloque, cada uno con un ejemplo real ya escrito en
+Doce tipos de bloque, cada uno con un ejemplo real ya escrito en
 `contenido/html/`:
 
 1. **`predice-el-resultado`** — código + opciones + botón "Revelar" que
@@ -140,6 +140,20 @@ Once tipos de bloque, cada uno con un ejemplo real ya escrito en
     graph que se vea mas gradico y real" — los bloques `diagrama-etiqueta`
     y `codigo-anotado` ya mostraban la sintaxis de las etiquetas
     `og:*`, pero no lo que producen visualmente.
+12. **`mapa-de-regiones`** (2026-08-26) — wireframe estático de una
+    página: 2 a 6 regiones apiladas, cada una con su propio color
+    cíclico, mostrando la etiqueta HTML (`<header>`, `<nav>`...) y el
+    landmark ARIA (`banner`, `navigation`...) que genera, más un
+    resumen de qué hay dentro. Adaptación simplificada de una idea de
+    `src/components/laboratorio/LaboratorioV4Radiografia.tsx` (el
+    prototipo "Radiografía" de V1-V5, no productizado: un escáner
+    interactivo completo con capas de regiones/foco/encabezados/
+    nombres accesibles sobre una vista previa en vivo) — este bloque
+    toma solo la idea visual de "regiones apiladas y etiquetadas con
+    su landmark", sin nada interactivo ni HTML en vivo. Pedido
+    explícito: "hazlo mas visual con componentes d los laboratorios
+    del v1 al v4" tras revisar el borrador de una lección sobre
+    header/nav/main/footer.
 
 **Fuera de alcance a propósito:** el ejercicio "Escríbelo tú" con
 comprobaciones automáticas (`RetoConComprobaciones` en
@@ -324,6 +338,17 @@ export const esquemaVistaPreviaSocial = z.object({
   imagenEtiqueta: z.string().min(1).max(60),
 })
 
+export const esquemaMapaDeRegiones = z.object({
+  tipo: z.literal('mapa-de-regiones'),
+  titulo: z.string().min(1).max(120).optional(),
+  regiones: z.array(z.object({
+    etiqueta: z.string().min(1).max(40),
+    elemento: z.string().min(1).max(30),
+    landmark: z.string().min(1).max(30),
+    contenido: z.string().min(1).max(200),
+  })).min(2).max(6),
+})
+
 export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaPrediceElResultado,
   esquemaCodigoAnotado,
@@ -336,6 +361,7 @@ export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaRecursos,
   esquemaMitos,
   esquemaVistaPreviaSocial,
+  esquemaMapaDeRegiones,
 ])
 ```
 
@@ -415,6 +441,15 @@ diseño" con "feature real".
   sobre el `bg-card` del contenedor) para que se lea como "una tarjeta
   dentro de otra tarjeta" — un objeto que se está examinando, no más
   contenido de la lección. Acento esmeralda, icono `Share2`.
+- `MapaDeRegiones.tsx` — recibe `z.infer<typeof esquemaMapaDeRegiones>`.
+  Construido desde cero por Codex, adaptando la idea visual (no el
+  código) de `src/components/laboratorio/LaboratorioV4Radiografia.tsx`
+  — regiones apiladas, cada una con su propio color de un ciclo fijo
+  de 6 tonos, mostrando `<elemento>` y `role: landmark` como dos
+  etiquetas visualmente distintas (una de tag, otra de rol ARIA) para
+  no confundirlas. Estático, sin estado ni HTML en vivo — a diferencia
+  del prototipo, que sí escanea una vista previa real. Acento sky,
+  icono `LayoutTemplate`.
 - `registro.ts` — `Record<string, ComponentType<any>>` cerrado, una
   entrada por `tipo`.
 - `BloqueLaboratorio.tsx` — el punto de entrada que usa `SafeMarkdown`:
@@ -479,11 +514,11 @@ Cada componente que renderiza HTML en vivo usa
 
 ## Checklist de implementación
 
-- [x] `src/lib/laboratorio/schemas.ts` (11 esquemas + unión discriminada)
-- [x] `src/components/bloques-laboratorio/` (11 componentes + registro + punto de entrada)
+- [x] `src/lib/laboratorio/schemas.ts` (12 esquemas + unión discriminada)
+- [x] `src/components/bloques-laboratorio/` (12 componentes + registro + punto de entrada)
 - [x] `SafeMarkdown.tsx`: prop, override de `code`, `CodigoResaltado` para código normal
 - [x] `LeccionPage.tsx`: pasar el prop
-- [x] Tests: los 11 tipos renderizan con datos válidos; JSON inválido cae a código plano; `tipo` desconocido cae a código plano; comentario con bloque `laboratorio` NO se activa; 0 violaciones de accesibilidad (`axe`) con los 11 tipos a la vez
+- [x] Tests: los 12 tipos renderizan con datos válidos; JSON inválido cae a código plano; `tipo` desconocido cae a código plano; comentario con bloque `laboratorio` NO se activa; 0 violaciones de accesibilidad (`axe`) con los 12 tipos a la vez
 - [x] `contenido/html/01-*.md` y `02-*.md` reescritos con bloques reales (versión piloto; el temario real de 2026-08-21 los sustituye lección a lección)
 - [x] Contenido actualizado en producción vía el formulario de admin
 - [x] `npm run test`, `build`, `lint` en verde
@@ -536,3 +571,17 @@ Cada componente que renderiza HTML en vivo usa
   verde, escáner de seguridad sin hallazgos. Catálogo
   (`AdminReferenciaContenidoPage.tsx`) y su lista de nombres de test
   actualizados a los 11 tipos.
+- [x] `mapa-de-regiones` (2026-08-26): construido desde cero por Codex
+  sobre un prompt detallado (schema y registro ya preparados de
+  antemano por Claude), adaptando la idea visual — no el código — de
+  `LaboratorioV4Radiografia.tsx` (regiones apiladas y etiquetadas con
+  su landmark), simplificada a estático sin escaneo en vivo. Verificado
+  archivo a archivo antes de aceptarlo — `npm run build`, `lint` y la
+  suite completa (243/243) en verde, escáner de seguridad sin
+  hallazgos. Catálogo (`AdminReferenciaContenidoPage.tsx`) y su lista
+  de nombres de test actualizados a los 12 tipos. El test del catálogo
+  completo (`AdminReferenciaContenidoPage.test.tsx`) empezó a rozar el
+  timeout por defecto de Vitest (5000ms) al crecer el catálogo — se le
+  puso un timeout explícito de 20s, ya que el test en sí es legítimo
+  (monta 60+ componentes reales más una auditoría axe completa), no un
+  síntoma de regresión.

@@ -11,6 +11,22 @@
 
 Hasta ahora, todo el contenido de una lección ha vivido dentro de un único `<body>` sin dividir en regiones. Una página real sí tiene regiones — una cabecera, una navegación, un contenido principal, un pie — y HTML tiene etiquetas hechas exactamente para nombrar cada una: `<header>`, `<nav>`, `<main>`, `<footer>`, además de `<article>`, `<section>` y `<aside>` para lo que va dentro. Ninguna de estas etiquetas cambia cómo se ve la página por defecto — un `<div>` y un `<main>` con el mismo contenido se pintan exactamente igual. La diferencia está en quién más, además de un humano mirando la pantalla, puede entender la página.
 
+Así se ven esas regiones puestas una debajo de otra, con la etiqueta que las crea y el landmark que generan:
+
+```laboratorio
+{
+  "tipo": "mapa-de-regiones",
+  "titulo": "Cómo se ve una página por regiones",
+  "regiones": [
+    { "etiqueta": "Cabecera", "elemento": "header", "landmark": "banner", "contenido": "Logo y nombre del sitio" },
+    { "etiqueta": "Navegación", "elemento": "nav", "landmark": "navigation", "contenido": "Inicio · Blog · Contacto" },
+    { "etiqueta": "Contenido principal", "elemento": "main", "landmark": "main", "contenido": "El contenido único de esta página" },
+    { "etiqueta": "Contenido relacionado", "elemento": "aside", "landmark": "complementary", "contenido": "Enlaces relacionados, no esenciales" },
+    { "etiqueta": "Pie", "elemento": "footer", "landmark": "contentinfo", "contenido": "© 2026 — todos los derechos reservados" }
+  ]
+}
+```
+
 ```laboratorio
 {
   "tipo": "roles",
@@ -102,6 +118,20 @@ Cada etiqueta de esta lección crea, además de estructura visual, un **landmark
   "variante": "aviso",
   "titulo": "El landmark no es automático por el nombre de la etiqueta",
   "contenido": "header y footer solo generan banner/contentinfo cuando son hijos directos de body. Anidados dentro de article o section, dejan de ser landmarks globales y pasan a ser la cabecera o el pie de ESA sección — más sobre esto un poco más abajo."
+}
+```
+
+Un uso muy concreto de estos landmarks, que seguramente ya has usado sin darte cuenta: el enlace "Saltar al contenido" que aparece al pulsar Tab nada más cargar muchas páginas (esta lección incluida) apunta directamente al `id` del `<main>`. Sin un `<main>` real que apuntar, ese enlace no tendría destino:
+
+```laboratorio
+{
+  "tipo": "codigo-anotado",
+  "lenguaje": "html",
+  "codigo": "<a href=\"#contenido\" class=\"skip-link\">Saltar al contenido</a>\n\n<header>...</header>\n<nav>...</nav>\n\n<main id=\"contenido\">\n  ...\n</main>",
+  "anotaciones": [
+    { "fragmento": "<a href=\"#contenido\" class=\"skip-link\">Saltar al contenido</a>", "nota": "Suele ir oculto visualmente y solo aparece al recibir el foco con Tab — así no molesta a quien no lo necesita, pero está ahí para quien sí." },
+    { "fragmento": "<main id=\"contenido\">", "nota": "El destino del enlace. Sin este id (y sin que main sea un landmark real), \"saltar al contenido\" no tendría a dónde saltar." }
+  ]
 }
 ```
 

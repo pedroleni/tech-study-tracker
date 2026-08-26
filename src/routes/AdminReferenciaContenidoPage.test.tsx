@@ -16,6 +16,7 @@ const nombresComponentes = [
   'Recursos',
   'Mitos',
   'VistaPreviaSocial',
+  'MapaDeRegiones',
   'Acordeon',
   'Pestanas',
   'Pasos',
