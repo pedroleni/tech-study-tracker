@@ -136,6 +136,15 @@ export const esquemaMitos = z.object({
     .max(6),
 })
 
+export const esquemaVistaPreviaSocial = z.object({
+  tipo: z.literal('vista-previa-social'),
+  titulo: z.string().min(1).max(120).optional(),
+  dominio: z.string().min(1).max(80),
+  ogTitulo: z.string().min(1).max(140),
+  ogDescripcion: z.string().min(1).max(300),
+  imagenEtiqueta: z.string().min(1).max(60),
+})
+
 export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaPrediceElResultado,
   esquemaCodigoAnotado,
@@ -147,6 +156,7 @@ export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaRoles,
   esquemaRecursos,
   esquemaMitos,
+  esquemaVistaPreviaSocial,
 ])
 
 export type DatosPrediceElResultado = z.infer<typeof esquemaPrediceElResultado>
@@ -161,4 +171,5 @@ export type DatosLineaDeTiempo = z.infer<typeof esquemaLineaDeTiempo>
 export type DatosRoles = z.infer<typeof esquemaRoles>
 export type DatosRecursos = z.infer<typeof esquemaRecursos>
 export type DatosMitos = z.infer<typeof esquemaMitos>
+export type DatosVistaPreviaSocial = z.infer<typeof esquemaVistaPreviaSocial>
 export type DatosBloqueLaboratorio = z.infer<typeof esquemaBloqueLaboratorio>

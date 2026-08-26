@@ -10,6 +10,7 @@ import { NotasClave } from '@/components/bloques-laboratorio/NotasClave'
 import { PrediceElResultado } from '@/components/bloques-laboratorio/PrediceElResultado'
 import { Recursos } from '@/components/bloques-laboratorio/Recursos'
 import { Roles } from '@/components/bloques-laboratorio/Roles'
+import { VistaPreviaSocial } from '@/components/bloques-laboratorio/VistaPreviaSocial'
 
 // El registro es deliberadamente cerrado: el JSON solo puede escoger uno de
 // estos componentes, nunca un nombre de elemento o módulo arbitrario.
@@ -25,4 +26,5 @@ export const registroBloquesLaboratorio: Record<string, ComponentType<any>> = {
   roles: Roles,
   recursos: Recursos,
   mitos: Mitos,
+  'vista-previa-social': VistaPreviaSocial,
 }

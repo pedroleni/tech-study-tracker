@@ -15,6 +15,7 @@ const nombresComponentes = [
   'Roles',
   'Recursos',
   'Mitos',
+  'VistaPreviaSocial',
   'Acordeon',
   'Pestanas',
   'Pasos',
@@ -66,6 +67,9 @@ const nombresComponentes = [
 
 describe('AdminReferenciaContenidoPage', () => {
   it('renderiza el catálogo completo sin errores ni violaciones de accesibilidad', async () => {
+    // Monta 60+ componentes reales más una auditoría axe completa — el
+    // timeout por defecto de Vitest (5000ms) se queda corto según crece
+    // el catálogo, sin que eso indique un problema real.
     vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({ matches: true }))
     vi.spyOn(window, 'setInterval').mockImplementation(
       (() => 0) as unknown as typeof window.setInterval,
@@ -82,5 +86,5 @@ describe('AdminReferenciaContenidoPage', () => {
       rules: { 'color-contrast': { enabled: false } },
     })
     expect(resultados.violations).toEqual([])
-  })
+  }, 20_000)
 })

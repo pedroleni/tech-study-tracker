@@ -13,11 +13,16 @@ tampoco valía, hacía falta un sustituto real), y `linea-de-tiempo` +
 la sección introductoria de la lección de HTML — la primera promovida
 desde `referencia-contenido/`, el segundo construido desde cero para
 la tríada HTML/CSS/JavaScript, que no encajaba en ningún tipo
-existente), y `mitos` (2026-08-23, feedback directo de que "Lo que [X]
+existente), `mitos` (2026-08-23, feedback directo de que "Lo que [X]
 no es" —4 `callout` idénticos apilados— se veía repetitivo: pedido
-explícito de "algo más visual estilo cartas 3D"). 10 tipos de bloque en
-total, el prop `permitirLaboratorios`, y el temario real de HTML en
-progreso sobre este mecanismo.
+explícito de "algo más visual estilo cartas 3D"), y `vista-previa-social`
+(2026-08-26, pedido explícito de "un ejemplo gráfico de Open Graph que
+se vea más real": mockup de la tarjeta de enlace que genera WhatsApp/
+Twitter/Slack, sin cargar ninguna imagen externa real — un placeholder
+con icono y etiqueta en el hueco de `og:image`, coherente con que
+`SafeMarkdown` nunca carga imágenes remotas de contenido de autor).
+11 tipos de bloque en total, el prop `permitirLaboratorios`, y el
+temario real de HTML en progreso sobre este mecanismo.
 
 ## Por qué existe esta feature
 
@@ -44,7 +49,7 @@ cualquier lección.
 
 ## Alcance
 
-Diez tipos de bloque, cada uno con un ejemplo real ya escrito en
+Once tipos de bloque, cada uno con un ejemplo real ya escrito en
 `contenido/html/`:
 
 1. **`predice-el-resultado`** — código + opciones + botón "Revelar" que
@@ -121,6 +126,20 @@ Diez tipos de bloque, cada uno con un ejemplo real ya escrito en
     no repetir el mismo icono en dos lugares del mismo componente.
     Sustituye a `callout` en "Lo que [X] no es", que antes apilaba 4
     avisos idénticos ahí.
+11. **`vista-previa-social`** (2026-08-26) — mockup de la tarjeta de
+    enlace que generan WhatsApp/Twitter/Slack a partir de las
+    metaetiquetas Open Graph: dominio, título y descripción, con un
+    placeholder (icono + etiqueta de texto) en el hueco de la imagen
+    en vez de cargar una `og:image` real — coherente con que
+    `SafeMarkdown` nunca renderiza imágenes remotas de contenido de
+    autor, solo su `alt`. Construido desde cero por Codex sobre la
+    convención de tarjeta cerrada dentro de otra tarjeta (acento
+    esmeralda para el chrome del bloque, la tarjeta simulada con su
+    propio fondo distinto por encima). Pedido explícito tras revisar
+    el borrador de una lección: "hazme un ejemplo grafico de open
+    graph que se vea mas gradico y real" — los bloques `diagrama-etiqueta`
+    y `codigo-anotado` ya mostraban la sintaxis de las etiquetas
+    `og:*`, pero no lo que producen visualmente.
 
 **Fuera de alcance a propósito:** el ejercicio "Escríbelo tú" con
 comprobaciones automáticas (`RetoConComprobaciones` en
@@ -296,6 +315,15 @@ export const esquemaMitos = z.object({
   })).min(2).max(6),
 })
 
+export const esquemaVistaPreviaSocial = z.object({
+  tipo: z.literal('vista-previa-social'),
+  titulo: z.string().min(1).max(120).optional(),
+  dominio: z.string().min(1).max(80),
+  ogTitulo: z.string().min(1).max(140),
+  ogDescripcion: z.string().min(1).max(300),
+  imagenEtiqueta: z.string().min(1).max(60),
+})
+
 export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaPrediceElResultado,
   esquemaCodigoAnotado,
@@ -307,6 +335,7 @@ export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaRoles,
   esquemaRecursos,
   esquemaMitos,
+  esquemaVistaPreviaSocial,
 ])
 ```
 
@@ -376,6 +405,16 @@ diseño" con "feature real".
   Acento naranja; icono `RotateCw` en la cabecera del bloque distinto
   de `Rotate3D` en cada tarjeta, a propósito, para no repetir el mismo
   icono en dos sitios del mismo componente.
+- `VistaPreviaSocial.tsx` — recibe `z.infer<typeof esquemaVistaPreviaSocial>`.
+  Construido desde cero por Codex. No renderiza ningún `<img>` ni carga
+  ninguna URL de imagen real — el hueco de `og:image` es un
+  placeholder (icono `Image` + el texto de `imagenEtiqueta`) dentro de
+  un `aspect-[1.91/1]`, la misma proporción que recomienda Open Graph
+  para la imagen real. La tarjeta simulada vive anidada dentro del
+  chrome estándar del bloque, con su propio fondo (`bg-background`
+  sobre el `bg-card` del contenedor) para que se lea como "una tarjeta
+  dentro de otra tarjeta" — un objeto que se está examinando, no más
+  contenido de la lección. Acento esmeralda, icono `Share2`.
 - `registro.ts` — `Record<string, ComponentType<any>>` cerrado, una
   entrada por `tipo`.
 - `BloqueLaboratorio.tsx` — el punto de entrada que usa `SafeMarkdown`:
@@ -440,11 +479,11 @@ Cada componente que renderiza HTML en vivo usa
 
 ## Checklist de implementación
 
-- [x] `src/lib/laboratorio/schemas.ts` (10 esquemas + unión discriminada)
-- [x] `src/components/bloques-laboratorio/` (10 componentes + registro + punto de entrada)
+- [x] `src/lib/laboratorio/schemas.ts` (11 esquemas + unión discriminada)
+- [x] `src/components/bloques-laboratorio/` (11 componentes + registro + punto de entrada)
 - [x] `SafeMarkdown.tsx`: prop, override de `code`, `CodigoResaltado` para código normal
 - [x] `LeccionPage.tsx`: pasar el prop
-- [x] Tests: los 10 tipos renderizan con datos válidos; JSON inválido cae a código plano; `tipo` desconocido cae a código plano; comentario con bloque `laboratorio` NO se activa; 0 violaciones de accesibilidad (`axe`) con los 10 tipos a la vez
+- [x] Tests: los 11 tipos renderizan con datos válidos; JSON inválido cae a código plano; `tipo` desconocido cae a código plano; comentario con bloque `laboratorio` NO se activa; 0 violaciones de accesibilidad (`axe`) con los 11 tipos a la vez
 - [x] `contenido/html/01-*.md` y `02-*.md` reescritos con bloques reales (versión piloto; el temario real de 2026-08-21 los sustituye lección a lección)
 - [x] Contenido actualizado en producción vía el formulario de admin
 - [x] `npm run test`, `build`, `lint` en verde
@@ -486,3 +525,14 @@ Cada componente que renderiza HTML en vivo usa
   visual real (Playwright, ruta temporal sin auth revertida tras la
   captura) en claro y oscuro, en reposo y con la tarjeta volteada — 0
   errores de consola.
+- [x] `vista-previa-social` (2026-08-26): construido desde cero por
+  Codex sobre un prompt detallado (schema y registro ya preparados de
+  antemano por Claude), reutilizando la convención de chrome de
+  tarjeta de `Roles.tsx`/`Recursos.tsx` con una tarjeta simulada
+  anidada dentro — sin cargar ninguna imagen externa real, solo un
+  placeholder, coherente con que `SafeMarkdown` nunca renderiza
+  `<img>` de contenido de autor. Verificado archivo a archivo antes de
+  aceptarlo — `npm run build`, `lint` y la suite completa (242/242) en
+  verde, escáner de seguridad sin hallazgos. Catálogo
+  (`AdminReferenciaContenidoPage.tsx`) y su lista de nombres de test
+  actualizados a los 11 tipos.

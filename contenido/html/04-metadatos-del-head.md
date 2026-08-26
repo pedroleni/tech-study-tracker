@@ -104,6 +104,19 @@ Si el title es el titular, la `meta description` es el texto de debajo en un res
 }
 ```
 
+## Otras metaetiquetas que te vas a encontrar
+
+`charset`, `description` y las `og:` de Open Graph son las que vas a escribir en casi cualquier página, pero no son las únicas. Estas son las que te vas a encontrar leyendo el `head` de sitios reales, con la frecuencia con la que de verdad se usan hoy:
+
+| Metaetiqueta | Qué hace | Ejemplo |
+|---|---|---|
+| `viewport` | Controla el ancho y el zoom inicial en móvil. Ya la viste en la lección anterior — sin ella, un móvil renderiza como si fuera escritorio y luego encoge. | `<meta name="viewport" content="width=device-width, initial-scale=1">` |
+| `robots` | Le dice a los buscadores si pueden indexar la página y seguir sus enlaces. | `<meta name="robots" content="noindex, nofollow">` |
+| `author` | Quién escribió la página. Puramente informativo — no afecta al posicionamiento. | `<meta name="author" content="Ada Lovelace">` |
+| `theme-color` | El color que algunos navegadores móviles usan para pintar la barra de interfaz alrededor de la página. | `<meta name="theme-color" content="#0f172a">` |
+| `refresh` | Recarga o redirige la página tras N segundos. Desaconsejado: rompe el botón "atrás" del navegador y confunde a quien usa un lector de pantalla, que no espera que la página cambie sola. | `<meta http-equiv="refresh" content="5;url=https://ejemplo.com">` |
+| `twitter:card` | El equivalente de Twitter/X a Open Graph — usa `name`, no `property`, a diferencia de las `og:`. Solo hace falta si quieres controlar esa plataforma por separado. | `<meta name="twitter:card" content="summary_large_image">` |
+
 ## El favicon, en todos los tamaños que hacen falta
 
 Un solo `favicon.ico` cubre pestañas de escritorio, pero un móvil que "instala" tu web desde el navegador necesita un icono más grande y sin bordes redondeados por defecto — el sistema operativo se los pone él solo.
@@ -170,6 +183,18 @@ El protocolo exige solo cuatro propiedades para que una página sea un "objeto" 
 }
 ```
 
+Con esas cuatro propiedades puestas, así es exactamente lo que aparece cuando alguien pega tu enlace en un chat:
+
+```laboratorio
+{
+  "tipo": "vista-previa-social",
+  "dominio": "tech-study-tracker.vercel.app",
+  "ogTitulo": "Anatomía de una etiqueta — Tech Study Tracker",
+  "ogDescripcion": "Qué es un elemento, qué son los atributos, y por qué unas pocas etiquetas se cierran solas y el resto no.",
+  "imagenEtiqueta": "og:image · 1200×630"
+}
+```
+
 ## Enlazar CSS y JavaScript desde el head
 
 ```laboratorio
@@ -197,6 +222,16 @@ El protocolo exige solo cuatro propiedades para que una página sea un "objeto" 
   ]
 }
 ```
+
+`defer` no es el único atributo que cambia cuándo se ejecuta un script — hay tres comportamientos distintos, y elegir el que no toca puede reproducir exactamente el error del ejercicio anterior:
+
+| Atributo | ¿Cuándo se descarga? | ¿Cuándo se ejecuta? | ¿Cuándo usarlo? |
+|---|---|---|---|
+| *(ninguno)* | Bloquea el parseo del HTML mientras descarga | Inmediatamente al terminar de descargar | Casi nunca para código propio en `head` — es justo lo que rompió el ejemplo anterior |
+| `async` | En paralelo, sin bloquear el HTML | En cuanto termina de descargar, sin esperar a nada más — puede saltarse el orden con otros scripts | Scripts independientes que no tocan el DOM ni dependen de otro script: analíticas, anuncios |
+| `defer` | En paralelo, sin bloquear el HTML | Al terminar de parsear todo el HTML, y siempre en el orden en que aparecen en el documento | Scripts que sí tocan el DOM o dependen unos de otros — la opción por defecto razonable |
+
+Un detalle que se suele pasar por alto: un `<script type="module">` se comporta como si llevara `defer` puesto automáticamente, aunque no lo escribas — otra razón por la que cada vez se ve más ese `type="module"` en proyectos modernos.
 
 ## Lo que el head NO es
 

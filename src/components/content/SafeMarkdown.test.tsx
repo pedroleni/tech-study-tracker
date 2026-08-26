@@ -252,6 +252,31 @@ describe('SafeMarkdown con laboratorios', () => {
     expect(screen.queryByText('Enlace peligroso')).not.toBeInTheDocument()
   })
 
+  it('renderiza vista-previa-social con dominio, título y descripción', () => {
+    render(
+      <SafeMarkdown permitirLaboratorios>
+        {bloqueLaboratorio({
+          tipo: 'vista-previa-social',
+          dominio: 'tech-study-tracker.vercel.app',
+          ogTitulo: 'Anatomía de una etiqueta — Tech Study Tracker',
+          ogDescripcion:
+            'Qué es un elemento, qué son los atributos, y por qué unas pocas etiquetas se cierran solas.',
+          imagenEtiqueta: 'og:image · 1200×630',
+        })}
+      </SafeMarkdown>,
+    )
+
+    expect(screen.getByText('tech-study-tracker.vercel.app')).toBeInTheDocument()
+    expect(
+      screen.getByText('Anatomía de una etiqueta — Tech Study Tracker'),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        'Qué es un elemento, qué son los atributos, y por qué unas pocas etiquetas se cierran solas.',
+      ),
+    ).toBeInTheDocument()
+  })
+
   it('renderiza mitos con tarjetas volteables', () => {
     render(
       <SafeMarkdown permitirLaboratorios>
@@ -334,7 +359,7 @@ describe('SafeMarkdown con laboratorios', () => {
     expect(container.querySelector('p code')).toHaveTextContent('main')
   })
 
-  it('no tiene violaciones de accesibilidad con los diez tipos', async () => {
+  it('no tiene violaciones de accesibilidad con los once tipos', async () => {
     const markdown = [
       bloqueLaboratorio({
         tipo: 'predice-el-resultado',
@@ -441,6 +466,14 @@ describe('SafeMarkdown con laboratorios', () => {
               'Sin él el navegador activa el modo quirks, con resultados inconsistentes.',
           },
         ],
+      }),
+      bloqueLaboratorio({
+        tipo: 'vista-previa-social',
+        dominio: 'tech-study-tracker.vercel.app',
+        ogTitulo: 'Anatomía de una etiqueta — Tech Study Tracker',
+        ogDescripcion:
+          'Qué es un elemento, qué son los atributos, y por qué unas pocas etiquetas se cierran solas.',
+        imagenEtiqueta: 'og:image · 1200×630',
       }),
     ].join('\n\n')
     const { container } = render(
