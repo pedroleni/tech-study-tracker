@@ -45,8 +45,10 @@ referencia de cualquiera de estas fuentes. Cuando dos fuentes discrepen
 en un detalle, se prioriza la especificación (WHATWG/W3C) como
 desempate — es la única de las tres que es normativa, no un tutorial.
 
-**Plantilla de lección** (la que ya usan las 2 lecciones piloto —
-mantenerla):
+**Plantilla de lección — es un mínimo, no un techo (aclarado
+2026-08-26 tras feedback directo: "no te cierres a una estructura,
+esa estructura es una estructura mínima pero puedes y debes añadir
+mucha más info").** Toda lección lleva como mínimo estas secciones:
 
 ```
 ## Qué es y para qué sirve
@@ -57,6 +59,19 @@ mantenerla):
 ## Ejercicios
 ## Para profundizar
 ```
+
+Pero cuando el tema tiene varios subtemas reales con peso propio, van
+como secciones `##` propias entre "Cómo se usa" y "Lo que [X] NO es"
+— no todo tiene que aplastarse dentro de "Cómo se usa" a base de
+apilar bloques. La lección 4 (el head) es el ejemplo: además de las
+7 secciones mínimas, tiene "El título: más que un texto en la
+pestaña", "La meta description: tu anuncio en los buscadores" y
+"Cómo se ve tu enlace al compartirlo: Open Graph" como secciones
+propias, con sus propios bloques y su propia fuente citada cuando
+hace falta una específica (ogp.me para Open Graph, además de MDN y
+web.dev). El límite real no es la plantilla, es que cada bloque
+aporte algo que la prosa sola no daría — variedad de tipos de bloque
+primero, no repetir el mismo dos veces sin motivo.
 
 "Cuándo lo usarías de verdad" y "Errores típicos" son las secciones que
 el autor tiene que escribir sí o sí — no existen en la documentación
