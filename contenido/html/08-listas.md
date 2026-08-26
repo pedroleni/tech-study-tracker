@@ -82,9 +82,44 @@ La menos conocida de las tres, y la más útil cuando lo que tienes son pares cl
 }
 ```
 
+También funciona al revés: varios `<dt>` seguidos pueden compartir una única definición, cuando dos términos significan exactamente lo mismo.
+
+```laboratorio
+{
+  "tipo": "codigo-anotado",
+  "lenguaje": "html",
+  "codigo": "<dl>\n  <dt>Frontend</dt>\n  <dt>Lado del cliente</dt>\n  <dd>La parte de una aplicación que se ejecuta en el navegador del usuario.</dd>\n</dl>",
+  "anotaciones": [
+    { "fragmento": "<dt>Frontend</dt>\n  <dt>Lado del cliente</dt>", "nota": "Dos términos distintos, mismo significado — ambos dt quedan asociados a la única dd que viene después. El navegador y el lector de pantalla entienden que son sinónimos dentro de este glosario." }
+  ]
+}
+```
+
 ## Controlar el orden y el número
 
 `<ol>` tiene tres atributos propios que van más allá del "1, 2, 3" por defecto:
+
+```laboratorio
+{
+  "tipo": "diagrama-etiqueta",
+  "titulo": "Los atributos de ol, uno por uno",
+  "partes": [
+    { "texto": "<", "rol": "simbolo" },
+    { "texto": "ol", "rol": "apertura" },
+    { "texto": " ", "rol": "simbolo" },
+    { "texto": "start", "rol": "atributo-nombre" },
+    { "texto": "=", "rol": "simbolo" },
+    { "texto": "\"5\"", "rol": "atributo-valor" },
+    { "texto": " ", "rol": "simbolo" },
+    { "texto": "reversed", "rol": "atributo-nombre" },
+    { "texto": " ", "rol": "simbolo" },
+    { "texto": "type", "rol": "atributo-nombre" },
+    { "texto": "=", "rol": "simbolo" },
+    { "texto": "\"A\"", "rol": "atributo-valor" },
+    { "texto": ">", "rol": "simbolo" }
+  ]
+}
+```
 
 ```laboratorio
 {
@@ -122,6 +157,39 @@ La menos conocida de las tres, y la más útil cuando lo que tienes son pares cl
   "codigo": "<ol>\n  <li>Pela y trocea el ajo</li>\n  <li>\n    Procesa los ingredientes\n    <ul>\n      <li>Poco tiempo si lo quieres con tropezones</li>\n      <li>Más tiempo si lo quieres cremoso</li>\n    </ul>\n  </li>\n</ol>",
   "anotaciones": [
     { "fragmento": "<li>\n    Procesa los ingredientes\n    <ul>\n      <li>Poco tiempo si lo quieres con tropezones</li>\n      <li>Más tiempo si lo quieres cremoso</li>\n    </ul>\n  </li>", "nota": "La lista anidada va DENTRO del li padre, no después de él. Si la sacas fuera del li, deja de estar anidada de verdad — pasa a ser una lista nueva, independiente, al mismo nivel que la primera." }
+  ]
+}
+```
+
+## Diseñar los marcadores con CSS
+
+El atributo `type` de `<ol>` solo cambia el formato de la numeración. Todo lo demás — el color, el tamaño, la forma, o cambiar viñetas por un icono — es trabajo de CSS, no de HTML:
+
+```css
+ul.tareas {
+  list-style-type: "✓ ";
+}
+
+ol.ranking {
+  list-style-type: upper-roman;
+}
+
+ul.avisos li::marker {
+  color: crimson;
+  font-weight: bold;
+}
+```
+
+`list-style-type` acepta directamente una cadena de texto como marcador (no solo `disc`, `circle`, `decimal`...), y los mismos formatos de numeración del atributo `type` de `ol` (`A`, `a`, `i`...) también existen como valores CSS — si ambos están presentes, gana el CSS. El pseudo-elemento `::marker` apunta solo al número o viñeta de cada `li`, sin tocar el resto del contenido, así que se le puede dar color o grosor propio sin afectar al texto.
+
+```laboratorio
+{
+  "tipo": "notas-clave",
+  "items": [
+    { "titulo": "list-style-type controla el formato", "texto": "disc/circle/square para ul, decimal/upper-roman/lower-alpha para ol, o incluso una cadena de texto o emoji personalizado." },
+    { "titulo": "list-style-position", "texto": "Si el marcador queda fuera de la caja del li (outside, el valor por defecto) o dentro, alineado con el texto (inside)." },
+    { "titulo": "::marker", "texto": "Pseudo-elemento que da acceso a un subconjunto de propiedades (color, font, content) solo para el marcador, sin duplicar el contenido del li." },
+    { "titulo": "El atributo type de ol", "texto": "Sigue funcionando como valor por defecto, pero list-style-type en CSS SIEMPRE gana si ambos están presentes — igual que cualquier estilo en línea puede ganarle a un atributo HTML." }
   ]
 }
 ```
@@ -178,6 +246,10 @@ La menos conocida de las tres, y la más útil cuando lo que tienes son pares cl
     {
       "mito": "Una lista anidada puede ir justo después del li que la contiene",
       "realidad": "Tiene que ir DENTRO de ese li. Fuera de él, deja de estar anidada — pasa a ser una lista independiente al mismo nivel que la primera, no una sub-lista de uno de sus elementos."
+    },
+    {
+      "mito": "menu es una etiqueta distinta, pensada para menús de navegación",
+      "realidad": "En el HTML actual, <menu> se comporta exactamente igual que <ul> — incluso acepta los mismos hijos (li) y el mismo CSS. Viene de una versión anterior de la especificación que le daba un uso propio (menús contextuales de aplicación) que los navegadores nunca llegaron a implementar de forma consistente."
     }
   ]
 }
@@ -203,6 +275,7 @@ La menos conocida de las tres, y la más útil cuando lo que tienes son pares cl
 2. Escribe una lista de descripción (dl) con al menos tres pares término/definición sobre un tema que domines.
 3. Crea un ranking de tus tres películas o canciones favoritas usando ol con el atributo reversed, de forma que el número 1 sea tu favorita absoluta.
 4. Busca el menú de navegación de una web real (las herramientas de desarrollador te dejan inspeccionar el HTML) — ¿está construido con ul/li? ¿Lleva list-style: none o algo parecido?
+5. Coge la lista de la compra del ejercicio 1 y, solo con CSS, cambia sus marcadores por un emoji o símbolo propio usando list-style-type — sin tocar el HTML.
 
 ## Para profundizar
 
