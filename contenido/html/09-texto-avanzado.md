@@ -81,6 +81,17 @@ Más allá de párrafos, encabezados y listas, HTML tiene un puñado de etiqueta
 }
 ```
 
+Así se ve de verdad en el navegador — comillas escritas a mano frente a las que añade q por su cuenta:
+
+```laboratorio
+{
+  "tipo": "comparador-antes-despues",
+  "antes": "<p>Dicen que \"lo simple es difícil de lograr\".</p>",
+  "despues": "<p>Dicen que <q>lo simple es difícil de lograr</q>.</p>",
+  "nota": "El texto es el mismo en los dos casos. En el de antes, las comillas están escritas a mano como parte del texto; en el de después las genera el propio navegador a partir de q — por eso nunca hay que escribirlas también a mano dentro de un q, o saldrían dobles."
+}
+```
+
 El atributo `cite` es invisible para quien lee la página — solo lo leen máquinas. Si quieres que la fuente se vea, hace falta además un `<cite>` visible:
 
 ```laboratorio
@@ -103,6 +114,17 @@ El atributo `cite` es invisible para quien lee la página — solo lo leen máqu
     { "fragmento": "<abbr title=\"Hypertext Markup Language\">HTML</abbr>", "nota": "El atributo title contiene la expansión completa y NADA MÁS — ni una frase, ni una nota aparte. Un lector de pantalla puede anunciarla, y en escritorio aparece como tooltip al pasar el ratón." },
     { "fragmento": "<abbr title=\"Reverendo\">Rvdo.</abbr>", "nota": "También sirve para abreviaturas cortas de una palabra, no solo siglas — cualquier forma acortada de un término más largo." }
   ]
+}
+```
+
+Por defecto, el navegador marca visualmente que hay una expansión disponible, sin escribir ni una línea de CSS:
+
+```laboratorio
+{
+  "tipo": "comparador-antes-despues",
+  "antes": "<p>Usamos HTML para estructurar documentos web.</p>",
+  "despues": "<p>Usamos <abbr title=\"Hypertext Markup Language\">HTML</abbr> para estructurar documentos web.</p>",
+  "nota": "El navegador subraya con puntos el texto dentro de abbr y cambia el cursor al pasar por encima — la señal de que ahí hay una expansión disponible al pasar el ratón o al usar un lector de pantalla."
 }
 ```
 
@@ -207,6 +229,17 @@ Una fecha escrita como "20 de enero de 2016" es perfectamente legible para una p
     { "fragmento": "C<sub>8</sub>H<sub>10</sub>N<sub>4</sub>O<sub>2</sub>", "nota": "Fórmulas químicas: los subíndices numéricos son parte del significado, no un capricho tipográfico — sin ellos la fórmula ni siquiera se leería igual." },
     { "fragmento": "x<sup>2</sup>", "nota": "Exponentes matemáticos — el mismo caso que la fórmula química, pero por encima de la línea en vez de por debajo." }
   ]
+}
+```
+
+Sin sub ni sup, esos mismos números se leen en la línea base, como cualquier otro carácter — la posición es justo lo que aporta el significado:
+
+```laboratorio
+{
+  "tipo": "comparador-antes-despues",
+  "antes": "<p>La fórmula de la cafeína es C8H10N4O2.</p>",
+  "despues": "<p>La fórmula de la cafeína es C<sub>8</sub>H<sub>10</sub>N<sub>4</sub>O<sub>2</sub>.</p>",
+  "nota": "Sin sub, los números quedan alineados con las letras, como si fueran parte del mismo texto plano. Con sub, el navegador los desplaza automáticamente por debajo de la línea base y les reduce el tamaño — sin tocar la fuente ni el resto del párrafo."
 }
 ```
 
