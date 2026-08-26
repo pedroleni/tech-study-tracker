@@ -11,7 +11,20 @@
 
 Hasta ahora, todo el contenido de una lección ha vivido dentro de un único `<body>` sin dividir en regiones. Una página real sí tiene regiones — una cabecera, una navegación, un contenido principal, un pie — y HTML tiene etiquetas hechas exactamente para nombrar cada una: `<header>`, `<nav>`, `<main>`, `<footer>`, además de `<article>`, `<section>` y `<aside>` para lo que va dentro. Ninguna de estas etiquetas cambia cómo se ve la página por defecto — un `<div>` y un `<main>` con el mismo contenido se pintan exactamente igual. La diferencia está en quién más, además de un humano mirando la pantalla, puede entender la página.
 
-Así se ven esas regiones puestas una debajo de otra, con la etiqueta que las crea y el landmark que generan:
+Así se distribuyen esas regiones en una página real — no todas ocupan el ancho completo: `main` y `aside` van lado a lado, no una debajo de otra:
+
+```laboratorio
+{
+  "tipo": "esquema-de-pagina",
+  "header": "Logo y nombre del sitio",
+  "nav": "Inicio · Blog · Contacto",
+  "main": "El contenido único de esta página",
+  "aside": "Enlaces relacionados, no esenciales",
+  "footer": "© 2026 — todos los derechos reservados"
+}
+```
+
+Y así se ven esas mismas regiones en una lista, con la etiqueta que las crea y el landmark que generan cada una:
 
 ```laboratorio
 {

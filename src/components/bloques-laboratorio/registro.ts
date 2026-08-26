@@ -4,6 +4,7 @@ import { Callout } from '@/components/bloques-laboratorio/Callout'
 import { CodigoAnotado } from '@/components/bloques-laboratorio/CodigoAnotado'
 import { ComparadorAntesDespues } from '@/components/bloques-laboratorio/ComparadorAntesDespues'
 import { DiagramaEtiqueta } from '@/components/bloques-laboratorio/DiagramaEtiqueta'
+import { EsquemaDePagina } from '@/components/bloques-laboratorio/EsquemaDePagina'
 import { LineaDeTiempo } from '@/components/bloques-laboratorio/LineaDeTiempo'
 import { MapaDeRegiones } from '@/components/bloques-laboratorio/MapaDeRegiones'
 import { Mitos } from '@/components/bloques-laboratorio/Mitos'
@@ -29,4 +30,5 @@ export const registroBloquesLaboratorio: Record<string, ComponentType<any>> = {
   mitos: Mitos,
   'vista-previa-social': VistaPreviaSocial,
   'mapa-de-regiones': MapaDeRegiones,
+  'esquema-de-pagina': EsquemaDePagina,
 }

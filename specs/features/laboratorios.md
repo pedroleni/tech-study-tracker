@@ -21,7 +21,7 @@ se vea más real": mockup de la tarjeta de enlace que genera WhatsApp/
 Twitter/Slack, sin cargar ninguna imagen externa real — un placeholder
 con icono y etiqueta en el hueco de `og:image`, coherente con que
 `SafeMarkdown` nunca carga imágenes remotas de contenido de autor).
-12 tipos de bloque en total, el prop `permitirLaboratorios`, y el
+13 tipos de bloque en total, el prop `permitirLaboratorios`, y el
 temario real de HTML en progreso sobre este mecanismo.
 
 ## Por qué existe esta feature
@@ -49,7 +49,7 @@ cualquier lección.
 
 ## Alcance
 
-Doce tipos de bloque, cada uno con un ejemplo real ya escrito en
+Trece tipos de bloque, cada uno con un ejemplo real ya escrito en
 `contenido/html/`:
 
 1. **`predice-el-resultado`** — código + opciones + botón "Revelar" que
@@ -154,6 +154,19 @@ Doce tipos de bloque, cada uno con un ejemplo real ya escrito en
     explícito: "hazlo mas visual con componentes d los laboratorios
     del v1 al v4" tras revisar el borrador de una lección sobre
     header/nav/main/footer.
+13. **`esquema-de-pagina`** (2026-08-26) — a diferencia de
+    `mapa-de-regiones` (lista apilada), este dibuja la disposición
+    espacial real de una página: header/nav/footer a ancho completo,
+    y una fila central donde `main` (flexible) y `aside` (ancho fijo,
+    `sm:w-40`) se colocan lado a lado, no apilados. `nav` y `aside`
+    son opcionales — si faltan, esa fila desaparece o `main` ocupa
+    todo el ancho, sin hueco vacío. Feedback directo tras ver
+    `mapa-de-regiones` en la lección: "necesito mas visual donde se
+    distribuirian cada uno de los bloqueas de la estrucutura" — la
+    lista apilada no comunicaba DÓNDE se coloca cada región, solo
+    cuáles existen. Colores fijos por hueco (no cíclicos, a diferencia
+    de `mapa-de-regiones`), acento lima, icono `LayoutDashboard`
+    (distinto de `LayoutTemplate` en `mapa-de-regiones` a propósito).
 
 **Fuera de alcance a propósito:** el ejercicio "Escríbelo tú" con
 comprobaciones automáticas (`RetoConComprobaciones` en
@@ -349,6 +362,16 @@ export const esquemaMapaDeRegiones = z.object({
   })).min(2).max(6),
 })
 
+export const esquemaEsquemaDePagina = z.object({
+  tipo: z.literal('esquema-de-pagina'),
+  titulo: z.string().min(1).max(120).optional(),
+  header: z.string().min(1).max(80),
+  nav: z.string().min(1).max(80).optional(),
+  main: z.string().min(1).max(80),
+  aside: z.string().min(1).max(80).optional(),
+  footer: z.string().min(1).max(80),
+})
+
 export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaPrediceElResultado,
   esquemaCodigoAnotado,
@@ -362,6 +385,7 @@ export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaMitos,
   esquemaVistaPreviaSocial,
   esquemaMapaDeRegiones,
+  esquemaEsquemaDePagina,
 ])
 ```
 
@@ -450,6 +474,15 @@ diseño" con "feature real".
   no confundirlas. Estático, sin estado ni HTML en vivo — a diferencia
   del prototipo, que sí escanea una vista previa real. Acento sky,
   icono `LayoutTemplate`.
+- `EsquemaDePagina.tsx` — recibe `z.infer<typeof esquemaEsquemaDePagina>`.
+  Construido desde cero por Codex, complementario a `MapaDeRegiones.tsx`
+  (no lo sustituye): header/nav/footer a ancho completo, main y aside
+  lado a lado en `flex flex-row` desde `sm:`, con `main` en `flex-1` y
+  `aside` en ancho fijo. `nav` y `aside` son opcionales — sin ellos, esa
+  fila desaparece o `main` ocupa todo el ancho. Colores FIJOS por hueco
+  (header/nav/main/aside/footer siempre el mismo tono, a diferencia del
+  ciclo por índice de `MapaDeRegiones.tsx`), porque aquí los huecos son
+  fijos, no una lista arbitraria. Acento lima, icono `LayoutDashboard`.
 - `registro.ts` — `Record<string, ComponentType<any>>` cerrado, una
   entrada por `tipo`.
 - `BloqueLaboratorio.tsx` — el punto de entrada que usa `SafeMarkdown`:
@@ -514,11 +547,11 @@ Cada componente que renderiza HTML en vivo usa
 
 ## Checklist de implementación
 
-- [x] `src/lib/laboratorio/schemas.ts` (12 esquemas + unión discriminada)
-- [x] `src/components/bloques-laboratorio/` (12 componentes + registro + punto de entrada)
+- [x] `src/lib/laboratorio/schemas.ts` (13 esquemas + unión discriminada)
+- [x] `src/components/bloques-laboratorio/` (13 componentes + registro + punto de entrada)
 - [x] `SafeMarkdown.tsx`: prop, override de `code`, `CodigoResaltado` para código normal
 - [x] `LeccionPage.tsx`: pasar el prop
-- [x] Tests: los 12 tipos renderizan con datos válidos; JSON inválido cae a código plano; `tipo` desconocido cae a código plano; comentario con bloque `laboratorio` NO se activa; 0 violaciones de accesibilidad (`axe`) con los 12 tipos a la vez
+- [x] Tests: los 13 tipos renderizan con datos válidos; JSON inválido cae a código plano; `tipo` desconocido cae a código plano; comentario con bloque `laboratorio` NO se activa; 0 violaciones de accesibilidad (`axe`) con los 13 tipos a la vez
 - [x] `contenido/html/01-*.md` y `02-*.md` reescritos con bloques reales (versión piloto; el temario real de 2026-08-21 los sustituye lección a lección)
 - [x] Contenido actualizado en producción vía el formulario de admin
 - [x] `npm run test`, `build`, `lint` en verde
@@ -585,3 +618,12 @@ Cada componente que renderiza HTML en vivo usa
   puso un timeout explícito de 20s, ya que el test en sí es legítimo
   (monta 60+ componentes reales más una auditoría axe completa), no un
   síntoma de regresión.
+- [x] `esquema-de-pagina` (2026-08-26): construido desde cero por Codex
+  sobre un prompt detallado (schema y registro ya preparados de
+  antemano por Claude), complementario a `mapa-de-regiones` — feedback
+  directo de que la lista apilada de ese bloque no mostraba DÓNDE se
+  coloca cada región (main/aside lado a lado en una página real, no
+  apilados). Verificado archivo a archivo antes de aceptarlo — `npm run
+  build`, `lint` y la suite completa (245/245) en verde, escáner de
+  seguridad sin hallazgos. Catálogo (`AdminReferenciaContenidoPage.tsx`)
+  y su lista de nombres de test actualizados a los 13 tipos.

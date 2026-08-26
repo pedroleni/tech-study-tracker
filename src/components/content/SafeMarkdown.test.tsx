@@ -261,6 +261,44 @@ describe('SafeMarkdown con laboratorios', () => {
     expect(screen.getByText(/^role: contentinfo$/)).toBeInTheDocument()
   })
 
+  it('renderiza esquema-de-pagina con main y aside lado a lado', () => {
+    render(
+      <SafeMarkdown permitirLaboratorios>
+        {bloqueLaboratorio({
+          tipo: 'esquema-de-pagina',
+          header: 'Logo y nombre del sitio',
+          nav: 'Inicio · Blog · Contacto',
+          main: 'Contenido único de la página',
+          aside: 'Enlaces relacionados',
+          footer: '© 2026',
+        })}
+      </SafeMarkdown>,
+    )
+
+    expect(screen.getByText('Logo y nombre del sitio')).toBeInTheDocument()
+    expect(screen.getByText('Inicio · Blog · Contacto')).toBeInTheDocument()
+    expect(screen.getByText('Contenido único de la página')).toBeInTheDocument()
+    expect(screen.getByText('Enlaces relacionados')).toBeInTheDocument()
+    expect(screen.getByText('© 2026')).toBeInTheDocument()
+  })
+
+  it('esquema-de-pagina funciona sin nav ni aside', () => {
+    render(
+      <SafeMarkdown permitirLaboratorios>
+        {bloqueLaboratorio({
+          tipo: 'esquema-de-pagina',
+          header: 'Cabecera mínima',
+          main: 'Contenido principal',
+          footer: 'Pie mínimo',
+        })}
+      </SafeMarkdown>,
+    )
+
+    expect(screen.getByText('Cabecera mínima')).toBeInTheDocument()
+    expect(screen.getByText('Contenido principal')).toBeInTheDocument()
+    expect(screen.getByText('Pie mínimo')).toBeInTheDocument()
+  })
+
   it('renderiza recursos como tarjetas de enlace y filtra URLs inseguras', () => {
     render(
       <SafeMarkdown permitirLaboratorios>
@@ -399,7 +437,7 @@ describe('SafeMarkdown con laboratorios', () => {
     expect(container.querySelector('p code')).toHaveTextContent('main')
   })
 
-  it('no tiene violaciones de accesibilidad con los doce tipos', async () => {
+  it('no tiene violaciones de accesibilidad con los trece tipos', async () => {
     const markdown = [
       bloqueLaboratorio({
         tipo: 'predice-el-resultado',
@@ -504,6 +542,14 @@ describe('SafeMarkdown con laboratorios', () => {
             contenido: '© 2026',
           },
         ],
+      }),
+      bloqueLaboratorio({
+        tipo: 'esquema-de-pagina',
+        header: 'Logo y nombre del sitio',
+        nav: 'Inicio · Blog · Contacto',
+        main: 'Contenido único de la página',
+        aside: 'Enlaces relacionados',
+        footer: '© 2026',
       }),
       bloqueLaboratorio({
         tipo: 'recursos',
