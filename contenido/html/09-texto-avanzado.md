@@ -67,6 +67,17 @@ Más allá de párrafos, encabezados y listas, HTML tiene un puñado de etiqueta
 }
 ```
 
+Antes de nada, así se ve blockquote frente a un párrafo normal — el navegador lo indenta sin que hayas escrito ni una línea de CSS:
+
+```laboratorio
+{
+  "tipo": "comparador-antes-despues",
+  "antes": "<p>Escribir código legible no es opcional, es respeto por quien lo lea después.</p>",
+  "despues": "<blockquote>\n  <p>Escribir código legible no es opcional, es respeto por quien lo lea después.</p>\n</blockquote>",
+  "nota": "Mismo texto, mismo p por dentro — lo único que cambia es que blockquote lo envuelve. El navegador le añade sangría por defecto para señalar visualmente que es una cita extensa."
+}
+```
+
 ```laboratorio
 {
   "tipo": "predice-el-resultado",
@@ -150,6 +161,17 @@ Por defecto, el navegador marca visualmente que hay una expansión disponible, s
 }
 ```
 
+El navegador también le da un estilo propio, aunque lo importante siga siendo la etiqueta y no el aspecto:
+
+```laboratorio
+{
+  "tipo": "comparador-antes-despues",
+  "antes": "<p>Escrito por Laura Gómez — laura@ejemplo.com</p>",
+  "despues": "<address>Escrito por Laura Gómez — laura@ejemplo.com</address>",
+  "nota": "Por defecto, el navegador pone en cursiva el contenido de address — una pista visual de que es información de contacto, distinta del cuerpo del artículo. El estilo se puede sobrescribir con CSS sin problema; lo que no cambia es la semántica de la etiqueta."
+}
+```
+
 ```laboratorio
 {
   "tipo": "notas-clave",
@@ -181,6 +203,17 @@ Por defecto, el navegador marca visualmente que hay una expansión disponible, s
     { "fragmento": "<kbd>Ctrl</kbd> + <kbd>A</kbd>", "nota": "Cada tecla en su propio kbd — así un lector de pantalla puede anunciarlas por separado en vez de leer \"Control más A\" como si fuera una sola palabra." },
     { "fragmento": "<kbd>ping mozilla.org</kbd>\n<samp>PING mozilla.org: 56 data bytes\n64 bytes from 63.245.215.20: tiempo=158 ms</samp>", "nota": "kbd para lo que el usuario escribió en la terminal, samp para lo que la terminal respondió — la distinción deja claro quién \"dijo\" cada línea." }
   ]
+}
+```
+
+code, kbd, var y samp comparten algo en pantalla: el navegador les pone fuente monoespaciada por defecto, la misma familia que usan los editores de código:
+
+```laboratorio
+{
+  "tipo": "comparador-antes-despues",
+  "antes": "<p>Escribe const x = 5; y pulsa Ctrl + A para seleccionar todo.</p>",
+  "despues": "<p>Escribe <code>const x = 5;</code> y pulsa <kbd>Ctrl</kbd> + <kbd>A</kbd> para seleccionar todo.</p>",
+  "nota": "Mismo texto, pero en la versión de después el fragmento de código y las teclas cambian a una fuente monoespaciada — se distinguen del resto de la frase de un vistazo, sin depender de ningún color ni fondo."
 }
 ```
 
@@ -232,14 +265,14 @@ Una fecha escrita como "20 de enero de 2016" es perfectamente legible para una p
 }
 ```
 
-Sin sub ni sup, esos mismos números se leen en la línea base, como cualquier otro carácter — la posición es justo lo que aporta el significado:
+Sin sub ni sup, esos mismos números y símbolos se leen en la línea base, como cualquier otro carácter — la posición es justo lo que aporta el significado:
 
 ```laboratorio
 {
   "tipo": "comparador-antes-despues",
-  "antes": "<p>La fórmula de la cafeína es C8H10N4O2.</p>",
-  "despues": "<p>La fórmula de la cafeína es C<sub>8</sub>H<sub>10</sub>N<sub>4</sub>O<sub>2</sub>.</p>",
-  "nota": "Sin sub, los números quedan alineados con las letras, como si fueran parte del mismo texto plano. Con sub, el navegador los desplaza automáticamente por debajo de la línea base y les reduce el tamaño — sin tocar la fuente ni el resto del párrafo."
+  "antes": "<p>Mi cumpleaños es el 25º de mayo.</p>\n<p>La fórmula de la cafeína es C8H10N4O2.</p>\n<p>Si x2 es 9, x vale 3 ó -3.</p>",
+  "despues": "<p>Mi cumpleaños es el 25<sup>º</sup> de mayo.</p>\n<p>La fórmula de la cafeína es C<sub>8</sub>H<sub>10</sub>N<sub>4</sub>O<sub>2</sub>.</p>\n<p>Si x<sup>2</sup> es 9, x vale 3 ó -3.</p>",
+  "nota": "Los tres casos a la vez: sin sup ni sub, el ordinal, los subíndices químicos y el exponente quedan alineados con el resto del texto. Con ellos, el navegador ajusta automáticamente su posición vertical y reduce su tamaño — arriba de la línea con sup, abajo con sub."
 }
 ```
 
