@@ -99,7 +99,7 @@ No son etiquetas "prohibidas" — tienen sus propios casos de uso legítimos, di
 }
 ```
 
-## Un byte más: escribir &lt; y &amp; sin que el navegador se confunda
+## Un byte más: escribir < y & sin que el navegador se confunda
 
 ```laboratorio
 {
@@ -122,7 +122,7 @@ No son etiquetas "prohibidas" — tienen sus propios casos de uso legítimos, di
   "codigo": "<p>Para escribir un condicional usamos &lt; y &gt; alrededor de la etiqueta.</p>\n<p>Cine &amp; Palomitas — el compa&ntilde;ero cl&aacute;sico.</p>",
   "anotaciones": [
     { "fragmento": "&lt;", "nota": "El símbolo < literal. Escribirlo sin escapar confunde al navegador con el inicio de una etiqueta real." },
-    { "fragmento": "&gt;", "nota": "El símbolo > literal, la pareja de &lt;." },
+    { "fragmento": "&gt;", "nota": "El símbolo > literal, la pareja de <." },
     { "fragmento": "&amp;", "nota": "El símbolo & literal — necesario porque & también inicia las propias entidades, así que un & suelto también puede confundir al navegador." }
   ]
 }
@@ -190,7 +190,7 @@ No son etiquetas "prohibidas" — tienen sus propios casos de uso legítimos, di
     },
     {
       "titulo": "Text basics",
-      "descripcion": "Curso de web.dev sobre semántica a nivel de texto, incluidas las entidades de caracteres para símbolos reservados como &lt; y &amp;.",
+      "descripcion": "Curso de web.dev sobre semántica a nivel de texto, incluidas las entidades de caracteres para símbolos reservados como < y &.",
       "url": "https://web.dev/learn/html/text-basics",
       "etiqueta": "web.dev"
     }
