@@ -17,12 +17,28 @@ Hay una razón concreta para exigirlo: sin ese esqueleto (o con él mal puesto),
 
 ```laboratorio
 {
-  "tipo": "notas-clave",
-  "items": [
-    { "titulo": "Cada archivo .html nuevo.", "texto": "Es lo primero que escribes, antes de cualquier etiqueta de contenido. Si tu editor no lo genera solo, es la plantilla que copias siempre." },
-    { "titulo": "Cuando algo se ve distinto en cada navegador.", "texto": "Un doctype ausente o mal escrito activa el 'modo quirks': cada navegador rellena los huecos a su manera. Es lo primero que revisar antes de sospechar de tu CSS." },
-    { "titulo": "Cuando compartes o publicas código.", "texto": "El head con charset y viewport no es opcional si esperas que se vea igual en el móvil de otra persona que en tu portátil." }
-  ]
+  "tipo": "callout",
+  "variante": "info",
+  "titulo": "Cada archivo .html nuevo",
+  "contenido": "Es lo primero que escribes, antes de cualquier etiqueta de contenido. Si tu editor no lo genera solo, es la plantilla que copias siempre."
+}
+```
+
+```laboratorio
+{
+  "tipo": "callout",
+  "variante": "info",
+  "titulo": "Cuando algo se ve distinto en cada navegador",
+  "contenido": "Un doctype ausente o mal escrito activa el 'modo quirks': cada navegador rellena los huecos a su manera. Es lo primero que revisar antes de sospechar de tu CSS."
+}
+```
+
+```laboratorio
+{
+  "tipo": "callout",
+  "variante": "info",
+  "titulo": "Cuando compartes o publicas código",
+  "contenido": "El head con charset y viewport no es opcional si esperas que se vea igual en el móvil de otra persona que en tu portátil."
 }
 ```
 
@@ -99,5 +115,23 @@ Cada línea tiene un trabajo concreto:
 
 ## Para profundizar
 
-- [Basic HTML syntax (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Basic_HTML_syntax)
-- [Document structure (web.dev)](https://web.dev/learn/html/document-structure)
+```laboratorio
+{
+  "tipo": "recursos",
+  "titulo": "Fuentes de esta lección",
+  "recursos": [
+    {
+      "titulo": "Basic HTML syntax",
+      "descripcion": "El artículo de MDN sobre la sintaxis básica de HTML, incluida la estructura mínima de un documento.",
+      "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Basic_HTML_syntax",
+      "etiqueta": "MDN"
+    },
+    {
+      "titulo": "Document structure",
+      "descripcion": "El curso de web.dev sobre la estructura de un documento HTML: doctype, html, head y body en detalle.",
+      "url": "https://web.dev/learn/html/document-structure",
+      "etiqueta": "web.dev"
+    }
+  ]
+}
+```

@@ -220,8 +220,26 @@ formulario, y un pie con el aviso de copyright. Sin CSS, solo estructura.
 
 ## Para profundizar
 
-- [Estándar HTML de WHATWG — secciones](https://html.spec.whatwg.org/multipage/sections.html)
-- [Guía de referencia de landmarks del W3C](https://www.w3.org/WAI/ARIA/apg/practices/landmark-regions/)
+```laboratorio
+{
+  "tipo": "recursos",
+  "titulo": "Fuentes de esta lección",
+  "recursos": [
+    {
+      "titulo": "Estándar HTML — secciones",
+      "descripcion": "La parte del Estándar HTML del WHATWG que define header, nav, main, footer y el resto de elementos de sectioning.",
+      "url": "https://html.spec.whatwg.org/multipage/sections.html",
+      "etiqueta": "WHATWG"
+    },
+    {
+      "titulo": "Guía de referencia de landmarks",
+      "descripcion": "Guía del W3C sobre los landmarks ARIA que generan estos elementos y cómo los recorre un lector de pantalla.",
+      "url": "https://www.w3.org/WAI/ARIA/apg/practices/landmark-regions/",
+      "etiqueta": "W3C"
+    }
+  ]
+}
+```
 
 ---
 
