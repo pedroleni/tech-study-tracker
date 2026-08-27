@@ -193,7 +193,7 @@ este documento se pueda leer solo:
 
 | # | Lección | Fuentes |
 |---|---|---|
-| 51 | Filtros CSS (filter) | [Advanced styling effects (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics/Advanced_styling_effects) + [Filters (web.dev)](https://web.dev/learn/css/filters) |
+| 51 | Filtros CSS (filter) | [Advanced styling effects (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics/Advanced_styling_effects) + [Filters (web.dev)](https://web.dev/learn/css/filters) + [filter (MDN reference)](https://developer.mozilla.org/en-US/docs/Web/CSS/filter) — ninguna de las dos guías cubre hue-rotate, saturate, sepia ni backdrop-filter en profundidad; se añade la referencia dedicada |
 | 52 | Blend modes | [Advanced styling effects (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics/Advanced_styling_effects) + [Blend Modes (web.dev)](https://web.dev/learn/css/blend-modes) |
 | 53 | Recortes y máscaras: clip-path, shapes y paths | [Paths, shapes, clipping, and masking (web.dev)](https://web.dev/learn/css/paths-shapes-clipping-masking) |
 | 54 | View Transitions: transiciones entre vistas | [View Transitions for SPAs (web.dev)](https://web.dev/learn/css/view-transitions-spas) |
