@@ -204,7 +204,7 @@ este documento se pueda leer solo:
 |---|---|---|
 | 55 | Depurar CSS con DevTools | [Debugging CSS (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics/Debugging_CSS) |
 | 56 | Rendimiento CSS: containment y content-visibility | [CSS performance optimization (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Performance/CSS) + [Using CSS containment (MDN reference)](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Containment/Using) |
-| 57 | Hojas de estilo de impresión (@media print, @page) | [Printing (MDN reference)](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Media_queries/Printing) |
+| 57 | Hojas de estilo de impresión (@media print, @page) | [Printing (MDN reference)](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Media_queries/Printing) + [@page (MDN reference)](https://developer.mozilla.org/en-US/docs/Web/CSS/@page) — la guía de Printing no da ejemplos concretos de sintaxis para @page; se añade la referencia dedicada |
 | 58 | Organizar CSS a escala: metodologías y buenas prácticas | [Organizing your CSS (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics/Organizing) |
 
 ---
