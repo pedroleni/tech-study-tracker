@@ -184,7 +184,7 @@ este documento se pueda leer solo:
 | 44 | Transformaciones: translate, rotate y scale | [Using CSS transforms (MDN)](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_transforms/Using_CSS_transforms) |
 | 45 | Transiciones | [Transitions (web.dev)](https://web.dev/learn/css/transitions) |
 | 46 | Animaciones con @keyframes | [Animations (web.dev)](https://web.dev/learn/css/animations) |
-| 47 | Movimiento respetuoso: prefers-reduced-motion | [WCAG 2.2 — 2.3.3 Animation from Interactions (W3C/WAI)](https://www.w3.org/WAI/WCAG22/quickref/?showtechniques=233#animation-from-interactions), nivel AAA |
+| 47 | Movimiento respetuoso: prefers-reduced-motion | [WCAG 2.2 — 2.3.3 Animation from Interactions (W3C/WAI)](https://www.w3.org/WAI/WCAG22/quickref/?showtechniques=233#animation-from-interactions), nivel AAA + [prefers-reduced-motion (MDN reference)](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion) — WCAG define el requisito de accesibilidad, no la técnica CSS; se añade la referencia de MDN para la sintaxis real de @media |
 | 48 | Scroll snap: paginar con CSS | [CSS scroll snap (MDN reference)](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Scroll_snap) |
 | 49 | Animaciones dirigidas por scroll | [CSS scroll-driven animations (MDN reference)](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Scroll-driven_animations) |
 | 50 | Cursores y estados de puntero | [Cursors and pointers (web.dev)](https://web.dev/learn/css/cursors-and-pointers) |
