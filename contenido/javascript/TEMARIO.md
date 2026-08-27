@@ -179,6 +179,49 @@ son válidos hasta que se implementen de verdad. Misma decisión que la
 primera vez: quedan como diseño, se construyen cuando una lección
 concreta los necesite, no en abstracto.
 
+**Maqueta ampliada, mismo Artifact que las dos primeras** — los cinco
+de arriba están ya en la página, interactivos.
+
+**Tercera pasada de investigación 2026-08-28**, tras un segundo
+"¿solo necesitas esto? investiga más" — esta vez cruzado contra las
+lecciones 46 (validación de formularios), 48-51 (asincronía/promesas)
+y 57 (expresiones regulares). Tres huecos más, misma regla de siempre:
+
+- **`lineas-del-bucle-de-eventos`** — tres carriles (Pila de
+  llamadas / Cola de microtareas / Cola de macrotareas), cada paso
+  muestra qué hay en cada uno y resalta la línea de código
+  correspondiente. `consola-simulada` ya responde QUÉ orden de salida
+  produce un fragmento asíncrono (lecciones 48-50); esto responde POR
+  QUÉ — el estado real de las colas del motor. Es, además, la
+  visualización estándar para este concepto concreto en la industria
+  (la charla "What the heck is the event loop?", la herramienta
+  loupe.js) — nunca se enseña bien solo con texto. Esquema
+  aproximado: `{ tipo: 'lineas-del-bucle-de-eventos', codigo: string,
+  pasos: [{ fragmento: string, pila: string[], microtareas: string[],
+  macrotareas: string[], nota?: string }] }`.
+- **`secuencia-de-estados`** — generaliza `comparador-antes-despues`
+  más allá de exactamente DOS estados fijos (antes/después): mismo
+  iframe con `sandbox=""`, cero superficie de seguridad nueva, pero
+  para cuando una lección necesita 3 o más momentos — el caso real es
+  la lección 46 (validación de formularios: vacío → inválido →
+  válido), donde dos estados se quedan cortos. Esquema aproximado: `{
+  tipo: 'secuencia-de-estados', titulo?: string, estados: [{
+  etiqueta: string, html: string }], nota?: string }` — de 3 a 5
+  estados.
+- **`probador-de-regex`** — un patrón, un texto de prueba, y las
+  coincidencias resaltadas dentro de ese texto (índices calculados por
+  quien escribe la lección, no por una regex ejecutándose en el
+  navegador del lector). Expresiones regulares (lección 57) es de los
+  temas donde nada de lo que ya existe — ni `codigo-anotado` ni
+  `predice-el-resultado` — comunica bien "qué parte exacta del texto
+  coincide", que es la pregunta central del tema. Esquema aproximado:
+  `{ tipo: 'probador-de-regex', titulo?: string, patron: string,
+  texto: string, coincidencias: [{ desde: number, hasta: number }] }`.
+
+Ocho componentes nuevos en total, ninguno implementado todavía — se
+construyen contra una lección real, no en abstracto. Misma decisión
+sostenida en las tres pasadas.
+
 ## Módulo 1 — Fundamentos de JavaScript
 
 | # | Lección | Fuentes |
