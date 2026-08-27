@@ -229,17 +229,17 @@ sostenida en las tres pasadas.
 | 1 | ¿Qué es JavaScript y cómo se conecta a HTML? | [What is JavaScript? (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/What_is_JavaScript) + [Introduction to JavaScript (web.dev)](https://web.dev/learn/javascript/introduction) |
 | 2 | Primera toma de contacto: escribir y ejecutar código | [A first splash into JavaScript (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/A_first_splash) |
 | 3 | Qué ha ido mal: depurar los primeros errores | [What went wrong? Troubleshooting JavaScript (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/What_went_wrong) |
-| 4 | Variables: var, let y const | [Storing the information you need — Variables (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Variables) + [Variables (web.dev)](https://web.dev/learn/javascript/variables) |
-| 5 | Tipos de datos primitivos: number, string y boolean | [Data types and structures (web.dev)](https://web.dev/learn/javascript/data-types) + [Numbers (web.dev)](https://web.dev/learn/javascript/numbers) + [Booleans (web.dev)](https://web.dev/learn/javascript/booleans) |
-| 6 | null, undefined, BigInt y Symbol | [Null and undefined values (web.dev)](https://web.dev/learn/javascript/null-and-undefined) + [BigInt (web.dev)](https://web.dev/learn/javascript/bigint) + [Symbols (web.dev)](https://web.dev/learn/javascript/symbols) |
+| 4 | Variables: var, let y const | [Storing the information you need — Variables (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Variables) + [Variables (web.dev)](https://web.dev/learn/javascript/data-types/variable) |
+| 5 | Tipos de datos primitivos: number, string y boolean | [Data types and structures (web.dev)](https://web.dev/learn/javascript/data-types) + [Numbers (web.dev)](https://web.dev/learn/javascript/data-types/number) + [Booleans (web.dev)](https://web.dev/learn/javascript/data-types/boolean) |
+| 6 | null, undefined, BigInt y Symbol | [Null and undefined values (web.dev)](https://web.dev/learn/javascript/data-types/null-undefined) + [BigInt (web.dev)](https://web.dev/learn/javascript/data-types/bigint) + [Symbols (web.dev)](https://web.dev/learn/javascript/data-types/symbol) |
 | 7 | Operadores y matemáticas básicas | [Basic math in JavaScript (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Math) |
-| 8 | Comparación de valores y coerción de tipos | [Comparison operators (web.dev)](https://web.dev/learn/javascript/comparison-operators) + [Equality comparisons and sameness (MDN Guide)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Equality_comparisons_and_sameness) |
+| 8 | Comparación de valores y coerción de tipos | [Comparison operators (web.dev)](https://web.dev/learn/javascript/comparison) + [Equality comparisons and sameness (MDN Guide)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Equality_comparisons_and_sameness) |
 
 ## Módulo 2 — Cadenas de texto y control de flujo
 
 | # | Lección | Fuentes |
 |---|---|---|
-| 9 | Cadenas de texto y template literals | [Handling text — strings in JavaScript (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Strings) + [Strings (web.dev)](https://web.dev/learn/javascript/strings) |
+| 9 | Cadenas de texto y template literals | [Handling text — strings in JavaScript (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Strings) + [Strings (web.dev)](https://web.dev/learn/javascript/data-types/string) |
 | 10 | Métodos útiles de cadenas | [Useful string methods (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Useful_string_methods) |
 | 11 | Condicionales: if/else y switch | [Making decisions in your code — conditionals (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Conditionals) + [Control flow (web.dev)](https://web.dev/learn/javascript/control-flow) |
 | 12 | El operador ternario y los operadores lógicos &&, \|\| y ?? | [Making decisions in your code — conditionals (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Conditionals) + [Control flow (web.dev)](https://web.dev/learn/javascript/control-flow) |
@@ -252,11 +252,11 @@ sostenida en las tres pasadas.
 | # | Lección | Fuentes |
 |---|---|---|
 | 16 | Funciones: declaración, expresión y ámbito | [Functions — reusable blocks of code (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Functions) + [Introduction to functions (web.dev)](https://web.dev/learn/javascript/functions) |
-| 17 | Construir tu propia función y valores de retorno | [Build your own function (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Build_your_own_function) + [Function return values (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Return_values) + [The "return" keyword (web.dev)](https://web.dev/learn/javascript/return-keyword) |
+| 17 | Construir tu propia función y valores de retorno | [Build your own function (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Build_your_own_function) + [Function return values (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Return_values) + [The "return" keyword (web.dev)](https://web.dev/learn/javascript/functions/return) |
 | 18 | Parámetros: valores por defecto, rest y arguments | [Functions (MDN Guide)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Functions) |
-| 19 | Funciones flecha | [Function expressions (web.dev)](https://web.dev/learn/javascript/function-expressions) |
-| 20 | this: cómo se determina y sus trampas | [The "this" keyword (web.dev)](https://web.dev/learn/javascript/this-keyword) |
-| 21 | El operador new y las funciones constructoras | [The "new" keyword (web.dev)](https://web.dev/learn/javascript/new-keyword) |
+| 19 | Funciones flecha | [Function expressions (web.dev)](https://web.dev/learn/javascript/functions/function-expressions) |
+| 20 | this: cómo se determina y sus trampas | [The "this" keyword (web.dev)](https://web.dev/learn/javascript/functions/this) |
+| 21 | El operador new y las funciones constructoras | [The "new" keyword (web.dev)](https://web.dev/learn/javascript/functions/new) |
 | 22 | Hoisting: cómo se procesa realmente el código | [Grammar and types (MDN Guide)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Grammar_and_types) |
 | 23 | Closures (clausuras) | [Closures (MDN Guide)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Closures) |
 
@@ -265,9 +265,9 @@ sostenida en las tres pasadas.
 | # | Lección | Fuentes |
 |---|---|---|
 | 24 | Objetos: fundamentos | [Object basics (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Object_basics) + [Introduction to objects (web.dev)](https://web.dev/learn/javascript/objects) |
-| 25 | Property accessors: notación de punto y corchetes | [Property accessors (web.dev)](https://web.dev/learn/javascript/property-accessors) |
-| 26 | Property descriptors: configurar propiedades a fondo, getters y setters | [Property descriptors (web.dev)](https://web.dev/learn/javascript/property-descriptors) |
-| 27 | Prototipos y la herencia prototípica | [Prototypal inheritance (web.dev)](https://web.dev/learn/javascript/prototypal-inheritance) + [Inheritance and the prototype chain (MDN Guide)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Inheritance_and_the_prototype_chain) |
+| 25 | Property accessors: notación de punto y corchetes | [Property accessors (web.dev)](https://web.dev/learn/javascript/objects/property-accessors) |
+| 26 | Property descriptors: configurar propiedades a fondo, getters y setters | [Property descriptors (web.dev)](https://web.dev/learn/javascript/objects/property-descriptors) |
+| 27 | Prototipos y la herencia prototípica | [Prototypal inheritance (web.dev)](https://web.dev/learn/javascript/objects/prototypal-inheritance) + [Inheritance and the prototype chain (MDN Guide)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Inheritance_and_the_prototype_chain) |
 | 28 | Trabajar con objetos: copiar, comparar, congelar | [Working with objects (MDN Guide)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Working_with_objects) |
 | 29 | Desestructuración y spread/rest en objetos y arrays | [Grammar and types (MDN Guide)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Grammar_and_types) |
 
@@ -275,9 +275,9 @@ sostenida en las tres pasadas.
 
 | # | Lección | Fuentes |
 |---|---|---|
-| 30 | Colecciones indexadas: métodos de array | [Indexed collections (web.dev)](https://web.dev/learn/javascript/indexed-collections) + [Indexed collections (MDN Guide)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Indexed_collections) |
+| 30 | Colecciones indexadas: métodos de array | [Indexed collections (web.dev)](https://web.dev/learn/javascript/collections/indexed) + [Indexed collections (MDN Guide)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Indexed_collections) |
 | 31 | Métodos funcionales: map, filter y reduce | [Indexed collections (MDN Guide)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Indexed_collections) |
-| 32 | Colecciones con clave: Map y Set | [Keyed collections (web.dev)](https://web.dev/learn/javascript/keyed-collections) + [Keyed collections (MDN Guide)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Keyed_collections) |
+| 32 | Colecciones con clave: Map y Set | [Keyed collections (web.dev)](https://web.dev/learn/javascript/collections/keyed) + [Keyed collections (MDN Guide)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Keyed_collections) |
 | 33 | JSON: serializar y parsear | [Working with JSON (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/JSON) |
 
 ## Módulo 6 — Clases y programación orientada a objetos
@@ -285,9 +285,9 @@ sostenida en las tres pasadas.
 | # | Lección | Fuentes |
 |---|---|---|
 | 34 | Introducción a las clases | [Introduction to classes (web.dev)](https://web.dev/learn/javascript/classes) + [Using classes (MDN Guide)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_classes) |
-| 35 | Herencia con extends y super | [Extend classes (web.dev)](https://web.dev/learn/javascript/extend-classes) |
-| 36 | Campos y métodos de clase, encapsulación privada (#) | [Class fields and methods (web.dev)](https://web.dev/learn/javascript/class-fields) + [Private elements (MDN reference)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Private_elements) |
-| 37 | Bloques de inicialización estática | [Static initialization blocks (web.dev)](https://web.dev/learn/javascript/static-initialization-blocks) |
+| 35 | Herencia con extends y super | [Extend classes (web.dev)](https://web.dev/learn/javascript/classes/extends) |
+| 36 | Campos y métodos de clase, encapsulación privada (#) | [Class fields and methods (web.dev)](https://web.dev/learn/javascript/classes/class-fields) + [Private elements (MDN reference)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Private_elements) |
+| 37 | Bloques de inicialización estática | [Static initialization blocks (web.dev)](https://web.dev/learn/javascript/classes/static-initialization-blocks) |
 
 ## Módulo 7 — El DOM
 
