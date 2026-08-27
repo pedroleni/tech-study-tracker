@@ -106,7 +106,7 @@ Antes, aclarar un color de marca para el estado `:hover` de un botón significab
   "tipo": "comparador-antes-despues",
   "antes": "<div style=\"width: 200px; height: 80px; background: color-mix(in lch shorter hue, red 50%, blue 50%);\"></div>",
   "despues": "<div style=\"width: 200px; height: 80px; background: color-mix(in lch longer hue, red 50%, blue 50%);\"></div>",
-  "nota": "Exactamente los mismos dos colores de partida (red y blue, 50/50 cada uno) en los dos casos. Antes (shorter hue): el camino corto por la rueda de color da un morado/magenta. Después (longer hue): el camino largo, en la dirección contraria, da un verde amarillento — nada que ver con el resultado anterior."
+  "nota": "Exactamente los mismos dos colores de partida (red y blue, 50/50 cada uno) en los dos casos. Antes (shorter hue): el camino corto por la rueda de color da un magenta vivo. Después (longer hue): el camino largo, en la dirección contraria, da un verde — nada que ver con el resultado anterior."
 }
 ```
 
@@ -126,7 +126,7 @@ Antes, aclarar un color de marca para el estado `:hover` de un botón significab
     },
     {
       "mito": "shorter hue y longer hue dan resultados parecidos, solo cambia un poco el matiz",
-      "realidad": "Pueden dar colores en extremos opuestos de la rueda de color — de un morado a un verde amarillento, mezclando exactamente los mismos dos colores de partida."
+      "realidad": "Pueden dar colores en extremos opuestos de la rueda de color — de un magenta vivo a un verde, mezclando exactamente los mismos dos colores de partida."
     },
     {
       "mito": "color-mix() puede aumentar la opacidad de un color semitransparente",
