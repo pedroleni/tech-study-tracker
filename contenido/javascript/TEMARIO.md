@@ -129,8 +129,55 @@ seguridad nueva:
   string, salidas: [{ fragmento: string, salida: string, tipo?: 'log'
   | 'error' | 'warn' }] }`.
 
-Ninguno de los dos está en `esquemaBloqueLaboratorio` todavía — no
-son válidos hasta que se implementen de verdad.
+**Maqueta visual de las dos anteriores** (interactiva, no una captura):
+publicada como Artifact, mismo lenguaje visual que el resto de
+`bloques-laboratorio` (tarjeta, insignia de icono, eyebrow, tokens
+`sintaxis-*` reales). No es el componente final, sirve para validar el
+diseño antes de invertir en implementarlo.
+
+**Segunda pasada de investigación 2026-08-28**, tras feedback directo
+de "¿solo necesitas esto? investiga más" — cruzados los módulos 4
+(objetos/prototipos), 5 (arrays) y 7-8 (DOM/eventos) del temario contra
+lo que los 14 bloques existentes + los 2 de arriba NO resuelven bien.
+Tres huecos más, misma regla de oro (sin ejecución real, cero
+superficie de seguridad nueva):
+
+- **`cadena-de-nodos`** — un único componente para TRES lecciones
+  distintas del temario que comparten la misma forma de problema
+  ("una secuencia de nodos enlazados, con uno activo en cada paso"):
+  el árbol DOM y `parentElement`/`children` (lección 39), la cadena de
+  prototipos y la búsqueda de una propiedad subiendo por ella (lección
+  27), y el recorrido de un evento al propagarse — capturing bajando,
+  bubbling subiendo (lección 45). Esquema aproximado: `{ tipo:
+  'cadena-de-nodos', titulo?: string, nodos: [{ id: string, etiqueta:
+  string, padre?: string }], pasos: [{ nodoActivo: string, nota:
+  string }] }` — `padre` ausente marca la raíz; con nodos sin
+  ramificar (todos con como mucho un hijo) sirve igual para una cadena
+  lineal (prototipos, propagación) que para un árbol de verdad (DOM).
+  Deliberadamente UN componente flexible en vez de tres estrechos.
+- **`diagrama-de-referencias`** — cajas de variable con una flecha al
+  objeto al que apuntan; dos variables que apuntan al MISMO objeto
+  muestran visualmente que comparten referencia — la base de "copiar
+  no es clonar" (lección 28, `trabajar con objetos: copiar, comparar,
+  congelar`) y de por qué un closure ve cambios hechos por otra
+  llamada. Esquema aproximado: `{ tipo: 'diagrama-de-referencias',
+  titulo?: string, variables: [{ nombre: string, apuntaA: string }],
+  objetos: [{ id: string, etiqueta: string }], nota?: string }`.
+- **`tabla-comparativa`** — una tabla de referencia genérica,
+  columnas configurables — pensada para los puntos del temario donde
+  varias cosas parecidas se comparan a la vez y la prosa las hace
+  difíciles de escanear: métodos de array (map/filter/forEach/reduce/sort
+  — lecciones 30-31), combinadores de promesas (all/race/allSettled/any
+  — módulo 9), `==` frente a `===` (lección 8), o las APIs de
+  almacenamiento (lección 62). Esquema aproximado: `{ tipo:
+  'tabla-comparativa', titulo?: string, columnas: [string], filas: [{
+  etiqueta: string, valores: [string] }] }` — el más reutilizable de
+  los cinco, no ligado a ningún módulo concreto.
+
+Ninguno de los cinco está en `esquemaBloqueLaboratorio` todavía — no
+son válidos hasta que se implementen de verdad. Misma decisión que la
+primera vez: quedan como diseño, se construyen cuando una lección
+concreta los necesite, no en abstracto.
 
 ## Módulo 1 — Fundamentos de JavaScript
 
