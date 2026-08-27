@@ -159,7 +159,7 @@ este documento se pueda leer solo:
 |---|---|---|
 | 30 | El flujo normal y los valores de display | [Introduction to CSS layout (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/CSS_layout/Introduction) + [Layout (web.dev)](https://web.dev/learn/css/layout) |
 | 31 | Posicionamiento: static, relative, absolute, fixed y sticky | [Positioning (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/CSS_layout/Positioning) |
-| 32 | z-index y contextos de apilamiento | [Positioning (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/CSS_layout/Positioning) |
+| 32 | z-index y contextos de apilamiento | [Positioning (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/CSS_layout/Positioning) + [Stacking context (MDN reference)](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_positioned_layout/Stacking_context) — la página de Positioning no cubre contextos de apilamiento en profundidad, se añade la referencia dedicada |
 | 33 | Flexbox: el contenedor y sus ejes | [Flexbox (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/CSS_layout/Flexbox) + [Flexbox (web.dev)](https://web.dev/learn/css/flexbox) |
 | 34 | Flexbox: los elementos hijos | [Flexbox (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/CSS_layout/Flexbox) + [Flexbox (web.dev)](https://web.dev/learn/css/flexbox) |
 | 35 | CSS Grid: filas, columnas y áreas | [CSS grid layout (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/CSS_layout/Grids) + [Grid (web.dev)](https://web.dev/learn/css/grid) |
