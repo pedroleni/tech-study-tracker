@@ -20,9 +20,17 @@ explícito de "algo más visual estilo cartas 3D"), y `vista-previa-social`
 se vea más real": mockup de la tarjeta de enlace que genera WhatsApp/
 Twitter/Slack, sin cargar ninguna imagen externa real — un placeholder
 con icono y etiqueta en el hueco de `og:image`, coherente con que
-`SafeMarkdown` nunca carga imágenes remotas de contenido de autor).
-13 tipos de bloque en total, el prop `permitirLaboratorios`, y el
-temario real de HTML en progreso sobre este mecanismo.
+`SafeMarkdown` nunca carga imágenes remotas de contenido de autor),
+`mapa-de-regiones` y `esquema-de-pagina` (2026-08-26, inspirados en la
+idea visual — no el código — del prototipo interno "Radiografía"
+de `/admin/laboratorio`), y `capas-de-caja` (2026-08-27, mismo origen:
+pedido explícito de seguir usando esos prototipos como inspiración al
+arrancar el temario de CSS — capas anidadas de color para el modelo de
+caja, con la misma paleta que ya usan las DevTools de Chrome/Firefox
+para su propio diagrama de box model).
+14 tipos de bloque en total, el prop `permitirLaboratorios`, y el
+temario real de HTML (completo, en revisión) y de CSS (en progreso)
+sobre este mecanismo.
 
 ## Por qué existe esta feature
 
@@ -167,6 +175,19 @@ Trece tipos de bloque, cada uno con un ejemplo real ya escrito en
     cuáles existen. Colores fijos por hueco (no cíclicos, a diferencia
     de `mapa-de-regiones`), acento lima, icono `LayoutDashboard`
     (distinto de `LayoutTemplate` en `mapa-de-regiones` a propósito).
+14. **`capas-de-caja`** (2026-08-27) — el modelo de caja de CSS
+    (content, padding, border, margin) como capas anidadas de color,
+    cajas dentro de cajas de fuera a dentro. Misma idea de "radiografía
+    en capas" que `mapa-de-regiones`, aplicada esta vez al layout de
+    una sola caja en vez de a las regiones de una página entera, y con
+    la paleta ya estándar de las DevTools de Chrome/Firefox para su
+    propio inspector de box model (margin=naranja/discontinuo —no hay
+    relleno visual real que pintar—, border=amarillo, padding=verde,
+    content=azul, la única capa con el valor centrado dentro en vez de
+    en una esquina). Pedido explícito al arrancar el temario de CSS:
+    "utiliza los componentes de los laboratorios de la v1 a v4 [...]
+    la v4 radiografia me gusta mucho". Construido desde cero por Codex
+    en un único intento, sin tocar ningún otro archivo.
 
 **Fuera de alcance a propósito:** el ejercicio "Escríbelo tú" con
 comprobaciones automáticas (`RetoConComprobaciones` en
@@ -372,6 +393,15 @@ export const esquemaEsquemaDePagina = z.object({
   footer: z.string().min(1).max(80),
 })
 
+export const esquemaCapasDeCaja = z.object({
+  tipo: z.literal('capas-de-caja'),
+  titulo: z.string().min(1).max(120).optional(),
+  margin: z.string().min(1).max(24),
+  border: z.string().min(1).max(24),
+  padding: z.string().min(1).max(24),
+  content: z.string().min(1).max(40),
+})
+
 export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaPrediceElResultado,
   esquemaCodigoAnotado,
@@ -386,6 +416,7 @@ export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaVistaPreviaSocial,
   esquemaMapaDeRegiones,
   esquemaEsquemaDePagina,
+  esquemaCapasDeCaja,
 ])
 ```
 
@@ -483,6 +514,17 @@ diseño" con "feature real".
   (header/nav/main/aside/footer siempre el mismo tono, a diferencia del
   ciclo por índice de `MapaDeRegiones.tsx`), porque aquí los huecos son
   fijos, no una lista arbitraria. Acento lima, icono `LayoutDashboard`.
+- `CapasDeCaja.tsx` — recibe `z.infer<typeof esquemaCapasDeCaja>`.
+  Construido desde cero por Codex, mismo linaje visual que
+  `MapaDeRegiones.tsx`/`EsquemaDePagina.tsx` (idea de la Radiografía,
+  no su código): margin/border/padding/content como cajas anidadas de
+  fuera a dentro, con la paleta ya estándar del inspector de box model
+  de las DevTools (naranja/amarillo/verde/azul), no una paleta propia
+  del proyecto — a propósito, para que se reconozca de un vistazo.
+  `margin` lleva borde discontinuo (no hay relleno real que mostrar
+  ahí en un navegador); `content`, al ser la única capa con contenido
+  real, centra su valor en vez de ponerlo en una esquina como las
+  otras tres. Acento naranja, icono `Box`.
 - `registro.ts` — `Record<string, ComponentType<any>>` cerrado, una
   entrada por `tipo`.
 - `BloqueLaboratorio.tsx` — el punto de entrada que usa `SafeMarkdown`:
@@ -551,7 +593,7 @@ Cada componente que renderiza HTML en vivo usa
 - [x] `src/components/bloques-laboratorio/` (13 componentes + registro + punto de entrada)
 - [x] `SafeMarkdown.tsx`: prop, override de `code`, `CodigoResaltado` para código normal
 - [x] `LeccionPage.tsx`: pasar el prop
-- [x] Tests: los 13 tipos renderizan con datos válidos; JSON inválido cae a código plano; `tipo` desconocido cae a código plano; comentario con bloque `laboratorio` NO se activa; 0 violaciones de accesibilidad (`axe`) con los 13 tipos a la vez
+- [x] Tests: los 14 tipos renderizan con datos válidos; JSON inválido cae a código plano; `tipo` desconocido cae a código plano; comentario con bloque `laboratorio` NO se activa; 0 violaciones de accesibilidad (`axe`) con los 14 tipos a la vez
 - [x] `contenido/html/01-*.md` y `02-*.md` reescritos con bloques reales (versión piloto; el temario real de 2026-08-21 los sustituye lección a lección)
 - [x] Contenido actualizado en producción vía el formulario de admin
 - [x] `npm run test`, `build`, `lint` en verde
@@ -627,3 +669,14 @@ Cada componente que renderiza HTML en vivo usa
   build`, `lint` y la suite completa (245/245) en verde, escáner de
   seguridad sin hallazgos. Catálogo (`AdminReferenciaContenidoPage.tsx`)
   y su lista de nombres de test actualizados a los 13 tipos.
+- [x] `capas-de-caja` (2026-08-27): construido desde cero por Codex
+  sobre un prompt detallado (schema y registro ya preparados de
+  antemano por Claude), al arrancar el temario de CSS — pedido
+  explícito de seguir la línea visual de `mapa-de-regiones`/
+  `esquema-de-pagina` ("utiliza los laboratorios de la v1 a v4 [...]
+  la v4 radiografia me gusta mucho"), esta vez para el modelo de caja.
+  Codex no tocó ningún archivo fuera de `CapasDeCaja.tsx` en un único
+  intento. Verificado archivo a archivo antes de aceptarlo — `npm run
+  build`, `lint` y la suite completa (246/246) en verde, escáner de
+  seguridad sin hallazgos. Catálogo (`AdminReferenciaContenidoPage.tsx`)
+  y su lista de nombres de test actualizados a los 14 tipos.

@@ -171,6 +171,15 @@ export const esquemaEsquemaDePagina = z.object({
   footer: z.string().min(1).max(80),
 })
 
+export const esquemaCapasDeCaja = z.object({
+  tipo: z.literal('capas-de-caja'),
+  titulo: z.string().min(1).max(120).optional(),
+  margin: z.string().min(1).max(24),
+  border: z.string().min(1).max(24),
+  padding: z.string().min(1).max(24),
+  content: z.string().min(1).max(40),
+})
+
 export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaPrediceElResultado,
   esquemaCodigoAnotado,
@@ -185,6 +194,7 @@ export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaVistaPreviaSocial,
   esquemaMapaDeRegiones,
   esquemaEsquemaDePagina,
+  esquemaCapasDeCaja,
 ])
 
 export type DatosPrediceElResultado = z.infer<typeof esquemaPrediceElResultado>
@@ -202,4 +212,5 @@ export type DatosMitos = z.infer<typeof esquemaMitos>
 export type DatosVistaPreviaSocial = z.infer<typeof esquemaVistaPreviaSocial>
 export type DatosMapaDeRegiones = z.infer<typeof esquemaMapaDeRegiones>
 export type DatosEsquemaDePagina = z.infer<typeof esquemaEsquemaDePagina>
+export type DatosCapasDeCaja = z.infer<typeof esquemaCapasDeCaja>
 export type DatosBloqueLaboratorio = z.infer<typeof esquemaBloqueLaboratorio>

@@ -1,6 +1,7 @@
 import type { ComponentType } from 'react'
 
 import { Callout } from '@/components/bloques-laboratorio/Callout'
+import { CapasDeCaja } from '@/components/bloques-laboratorio/CapasDeCaja'
 import { CodigoAnotado } from '@/components/bloques-laboratorio/CodigoAnotado'
 import { ComparadorAntesDespues } from '@/components/bloques-laboratorio/ComparadorAntesDespues'
 import { DiagramaEtiqueta } from '@/components/bloques-laboratorio/DiagramaEtiqueta'
@@ -31,4 +32,5 @@ export const registroBloquesLaboratorio: Record<string, ComponentType<any>> = {
   'vista-previa-social': VistaPreviaSocial,
   'mapa-de-regiones': MapaDeRegiones,
   'esquema-de-pagina': EsquemaDePagina,
+  'capas-de-caja': CapasDeCaja,
 }

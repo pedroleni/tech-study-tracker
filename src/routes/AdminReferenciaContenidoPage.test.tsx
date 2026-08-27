@@ -18,6 +18,7 @@ const nombresComponentes = [
   'VistaPreviaSocial',
   'MapaDeRegiones',
   'EsquemaDePagina',
+  'CapasDeCaja',
   'Acordeon',
   'Pestanas',
   'Pasos',

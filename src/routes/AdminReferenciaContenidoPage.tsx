@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, type ReactNode } from 'react'
 
 import { Callout } from '@/components/bloques-laboratorio/Callout'
+import { CapasDeCaja } from '@/components/bloques-laboratorio/CapasDeCaja'
 import { CodigoAnotado } from '@/components/bloques-laboratorio/CodigoAnotado'
 import { ComparadorAntesDespues } from '@/components/bloques-laboratorio/ComparadorAntesDespues'
 import { DiagramaEtiqueta } from '@/components/bloques-laboratorio/DiagramaEtiqueta'
@@ -199,7 +200,7 @@ export function AdminReferenciaContenidoPage() {
         </h1>
         <p className="mt-3 max-w-3xl text-sm text-pretty text-muted-foreground">
           Catálogo visual de componentes React organizado por tipo. El primer grupo, "Bloques de
-          laboratorio", son los 13 componentes reales que ya renderiza cualquier lección a través
+          laboratorio", son los 14 componentes reales que ya renderiza cualquier lección a través
           de un bloque <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">```laboratorio</code>{' '}
           en su Markdown (ver <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">specs/features/laboratorios.md</code>).
           El resto de grupos son prototipos de diseño de <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">referencia-contenido/</code> —
@@ -213,7 +214,7 @@ export function AdminReferenciaContenidoPage() {
       <CategoriaActivaContext.Provider value={categoriaActiva}>
       <GrupoCatalogo
         titulo="Bloques de laboratorio"
-        descripcion="Los 13 tipos reales que un autor puede usar dentro de un bloque ```laboratorio en el Markdown de una lección (src/components/bloques-laboratorio/). Validados por Zod, registrados en un lookup cerrado — no prototipos."
+        descripcion="Los 14 tipos reales que un autor puede usar dentro de un bloque ```laboratorio en el Markdown de una lección (src/components/bloques-laboratorio/). Validados por Zod, registrados en un lookup cerrado — no prototipos."
       >
         <Referencia nombre="PrediceElResultado">
           <PrediceElResultado
@@ -430,6 +431,16 @@ export function AdminReferenciaContenidoPage() {
             main="El contenido único de esta página"
             aside="Enlaces relacionados, no esenciales"
             footer="© 2026 — todos los derechos reservados"
+          />
+        </Referencia>
+
+        <Referencia nombre="CapasDeCaja">
+          <CapasDeCaja
+            tipo="capas-de-caja"
+            margin="16px"
+            border="2px solid"
+            padding="12px"
+            content="320 × 180"
           />
         </Referencia>
       </GrupoCatalogo>

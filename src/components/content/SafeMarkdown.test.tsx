@@ -299,6 +299,25 @@ describe('SafeMarkdown con laboratorios', () => {
     expect(screen.getByText('Pie mínimo')).toBeInTheDocument()
   })
 
+  it('renderiza capas-de-caja con las cuatro capas anidadas del modelo de caja', () => {
+    render(
+      <SafeMarkdown permitirLaboratorios>
+        {bloqueLaboratorio({
+          tipo: 'capas-de-caja',
+          margin: '16px',
+          border: '2px solid',
+          padding: '12px',
+          content: '320 × 180',
+        })}
+      </SafeMarkdown>,
+    )
+
+    expect(screen.getByText('16px')).toBeInTheDocument()
+    expect(screen.getByText('2px solid')).toBeInTheDocument()
+    expect(screen.getByText('12px')).toBeInTheDocument()
+    expect(screen.getByText('320 × 180')).toBeInTheDocument()
+  })
+
   it('renderiza recursos como tarjetas de enlace y filtra URLs inseguras', () => {
     render(
       <SafeMarkdown permitirLaboratorios>
@@ -437,7 +456,7 @@ describe('SafeMarkdown con laboratorios', () => {
     expect(container.querySelector('p code')).toHaveTextContent('main')
   })
 
-  it('no tiene violaciones de accesibilidad con los trece tipos', async () => {
+  it('no tiene violaciones de accesibilidad con los catorce tipos', async () => {
     const markdown = [
       bloqueLaboratorio({
         tipo: 'predice-el-resultado',
@@ -583,6 +602,13 @@ describe('SafeMarkdown con laboratorios', () => {
         ogDescripcion:
           'Qué es un elemento, qué son los atributos, y por qué unas pocas etiquetas se cierran solas.',
         imagenEtiqueta: 'og:image · 1200×630',
+      }),
+      bloqueLaboratorio({
+        tipo: 'capas-de-caja',
+        margin: '16px',
+        border: '2px solid',
+        padding: '12px',
+        content: '320 × 180',
       }),
     ].join('\n\n')
     const { container } = render(
