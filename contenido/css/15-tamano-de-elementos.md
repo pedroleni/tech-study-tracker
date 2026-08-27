@@ -106,9 +106,9 @@ Antes de escribir un solo `width`, cada elemento ya tiene un tamaño: su tamaño
 ```laboratorio
 {
   "tipo": "comparador-antes-despues",
-  "antes": "<style>\n  .caja {\n    width: 220px;\n    height: 80px;\n    border: 2px solid #7c3aed;\n    padding: 8px;\n    font-family: sans-serif;\n    overflow: visible;\n  }\n</style>\n<div class=\"caja\">Este texto es deliberadamente largo para no caber en una caja de solo 80px de alto, así se ve qué pasa con lo que sobra.</div>",
-  "despues": "<style>\n  .caja {\n    width: 220px;\n    height: 80px;\n    border: 2px solid #7c3aed;\n    padding: 8px;\n    font-family: sans-serif;\n    overflow: auto;\n  }\n</style>\n<div class=\"caja\">Este texto es deliberadamente largo para no caber en una caja de solo 80px de alto, así se ve qué pasa con lo que sobra.</div>",
-  "nota": "Mismo texto, misma caja de 80px de alto. Antes (overflow: visible, por defecto): el texto se sale visiblemente por debajo del borde de la caja. Después (overflow: auto): la caja se queda dentro de su tamaño fijado y aparece una barra de scroll para llegar al resto del texto."
+  "antes": "<style>\n  .caja {\n    box-sizing: border-box;\n    width: 220px;\n    height: 60px;\n    border: 2px solid #7c3aed;\n    padding: 8px;\n    font-family: sans-serif;\n    overflow: visible;\n  }\n</style>\n<div class=\"caja\">Este texto es deliberadamente largo para no caber en una caja de solo 60px de alto, así se ve qué pasa con lo que sobra.</div>",
+  "despues": "<style>\n  .caja {\n    box-sizing: border-box;\n    width: 220px;\n    height: 60px;\n    border: 2px solid #7c3aed;\n    padding: 8px;\n    font-family: sans-serif;\n    overflow: auto;\n  }\n</style>\n<div class=\"caja\">Este texto es deliberadamente largo para no caber en una caja de solo 60px de alto, así se ve qué pasa con lo que sobra.</div>",
+  "nota": "Mismo texto, misma caja de 60px de alto (box-sizing: border-box, así que padding y border ya están incluidos en esos 60px). Antes (overflow: visible, por defecto): el texto se sale visiblemente por debajo del borde de la caja. Después (overflow: auto): la caja se queda dentro de su tamaño fijado y aparece una barra de scroll para llegar al resto del texto."
 }
 ```
 
