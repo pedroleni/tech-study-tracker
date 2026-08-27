@@ -218,13 +218,14 @@ reparto de bloques:
 | # | Lección | Fuentes |
 |---|---|---|
 | 69 | Depurar JavaScript con DevTools | [JavaScript debugging and error handling (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Debugging_JavaScript) |
-| 70 | Retos finales: generador de historias y galería de imágenes | [Challenge: Silly story generator (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Silly_story_generator) + [Challenge: Building a house data UI (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/House_data_UI) |
+| 70 | Documentar código con JSDoc | [Use JSDoc: Getting Started with JSDoc 3 (proyecto JSDoc)](https://jsdoc.app/about-getting-started) |
+| 71 | Retos finales: generador de historias y galería de imágenes | [Challenge: Silly story generator (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Silly_story_generator) + [Challenge: Building a house data UI (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/House_data_UI) |
 
 ---
 
 ## Notas de alcance
 
-- **70 lecciones, 13 módulos.** Más grande que CSS (58) y más del
+- **71 lecciones, 13 módulos.** Más grande que CSS (58) y más del
   doble que HTML (31), a propósito: JavaScript no es solo una
   tecnología de la plataforma web, es un lenguaje de programación
   completo — control de flujo, funciones, closures, prototipos,
@@ -261,7 +262,15 @@ reparto de bloques:
   futuro, no una lección suelta que no le haría justicia — mismo
   criterio que CSS aplicó al dejar fuera Houdini más allá de
   `@property`.
-- **Los retos ("Challenge") de MDN se agrupan en la lección 70 final**,
+- **JSDoc (lección 70) sí entra, a pesar de sonar "cosa de
+  TypeScript".** Es sintaxis de comentarios pura — ninguna herramienta
+  de TypeScript hace falta para escribirla ni para beneficiarse de
+  ella (autocompletado y chequeo de tipos ya en editores como VS Code
+  sobre archivos `.js` normales). El chequeo de tipos vía `tsc
+  --checkJs` es opcional y posterior; la propia sintaxis y su valor
+  como documentación son JavaScript del todo, con fuente oficial del
+  proyecto JSDoc, no de TypeScript.
+- **Los retos ("Challenge") de MDN se agrupan en la lección 71 final**,
   a diferencia de HTML/CSS donde los "Test your skills" se
   incorporaban como preguntas dentro de `## Ejercicios` de cada
   lección — aquí, dos de los retos de MDN Learn (generador de
