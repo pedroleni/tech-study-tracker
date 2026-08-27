@@ -77,9 +77,9 @@
 ```laboratorio
 {
   "tipo": "comparador-antes-despues",
-  "antes": "<style>\n  .contenedor { line-height: 20px; font-family: sans-serif; font-size: 14px; width: 200px; }\n  .grande { font-size: 26px; display: block; }\n</style>\n<div class=\"contenedor\">\n  <span class=\"grande\">Texto grande que ocupa dos líneas completas</span>\n</div>",
-  "despues": "<style>\n  .contenedor { line-height: 1.4; font-family: sans-serif; font-size: 14px; width: 200px; }\n  .grande { font-size: 26px; display: block; }\n</style>\n<div class=\"contenedor\">\n  <span class=\"grande\">Texto grande que ocupa dos líneas completas</span>\n</div>",
-  "nota": "El texto grande (26px) hereda el line-height del contenedor en los dos casos. Antes (line-height: 20px): hereda literalmente 20px, MENOS que su propio tamaño de letra — las dos líneas quedan apretadas, casi tocándose. Después (line-height: 1.4, sin unidad): se recalcula sobre 26px (26 × 1.4 ≈ 36px) — las mismas dos líneas quedan con un espacio cómodo entre ellas."
+  "antes": "<style>\n  .contenedor { line-height: 20px; font-family: sans-serif; font-size: 14px; width: 200px; }\n  .grande { font-size: 26px; display: block; }\n</style>\n<div class=\"contenedor\">\n  <span class=\"grande\">Texto grande que ocupa varias líneas completas</span>\n</div>",
+  "despues": "<style>\n  .contenedor { line-height: 1.4; font-family: sans-serif; font-size: 14px; width: 200px; }\n  .grande { font-size: 26px; display: block; }\n</style>\n<div class=\"contenedor\">\n  <span class=\"grande\">Texto grande que ocupa varias líneas completas</span>\n</div>",
+  "nota": "El texto grande (26px) hereda el line-height del contenedor en los dos casos. Antes (line-height: 20px): hereda literalmente 20px, MENOS que su propio tamaño de letra — las líneas quedan apretadas, casi tocándose. Después (line-height: 1.4, sin unidad): se recalcula sobre 26px (26 × 1.4 ≈ 36px) — las mismas líneas quedan con un espacio cómodo entre ellas."
 }
 ```
 
