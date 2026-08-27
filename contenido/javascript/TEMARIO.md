@@ -85,6 +85,53 @@ reparto de bloques:
   privados) — más útil en JS que en CSS, donde la sintaxis por línea
   suele ser más simple.
 
+## Componentes nuevos a considerar (diseño, sin implementar todavía)
+
+Investigado 2026-08-27 contra el código real (`src/lib/laboratorio/schemas.ts`,
+`src/components/bloques-laboratorio/`, `src/components/codigo/resaltador.ts`)
+antes de proponer nada — no de memoria. Decisión tomada con el usuario:
+quedan documentados aquí, se implementan cuando una lección concreta
+los necesite de verdad, no en abstracto.
+
+**Lo que ya funciona sin tocar nada:** el tokenizador tiene un modo
+`'js'` completo y ya resalta el contenido de un `<script>` dentro de
+HTML automáticamente (igual que hace con `<style>`→CSS) — así que
+`codigo-anotado` y `comparador-antes-despues` ya muestran JS bien
+coloreado en cuanto se envuelve en un `<script>`, sin ningún cambio de
+esquema. `predice-el-resultado` ya cubre razonablemente bien "¿qué
+imprime esto?" o "¿en qué orden se ejecuta esto?", sin necesitar
+ejecución real.
+
+**El límite que no tiene vuelta:** el iframe de
+`comparador-antes-despues` usa `sandbox=""` (vacío, el más
+restrictivo posible) — cero scripts, a propósito, una barrera de
+seguridad deliberada. Cualquier diseño de aquí en adelante la respeta;
+un REPL con JS ejecutándose de verdad sería un cambio de arquitectura
+real (superficie nueva, aunque aislada) que necesitaría una decisión
+explícita aparte, no algo a colar dentro de este temario.
+
+Dos huecos reales encontrados, los dos deliberadamente **sin
+ejecución real** — solo contenido autor-escrito, cero superficie de
+seguridad nueva:
+
+- **`traza-de-ejecucion`** — secuencia de pasos para closures,
+  hoisting, recursión, o el orden pila-de-llamadas/cola de
+  microtareas: cada paso destaca una línea del código y describe el
+  estado (variables, profundidad de pila) en ese punto. Esquema
+  aproximado: `{ tipo: 'traza-de-ejecucion', codigo: string, pasos:
+  [{ fragmento: string, estado: string, nota?: string }] }` — mismo
+  patrón de `fragmento` que ya usa `codigo-anotado` para localizar la
+  línea, reutilizando esa lógica de búsqueda en el código.
+- **`consola-simulada`** — código junto a una consola falsa con cada
+  salida emparejada a la línea que la produce, en orden — clave para
+  distinguir código síncrono de microtarea de macrotarea en
+  asincronía. Esquema aproximado: `{ tipo: 'consola-simulada', codigo:
+  string, salidas: [{ fragmento: string, salida: string, tipo?: 'log'
+  | 'error' | 'warn' }] }`.
+
+Ninguno de los dos está en `esquemaBloqueLaboratorio` todavía — no
+son válidos hasta que se implementen de verdad.
+
 ## Módulo 1 — Fundamentos de JavaScript
 
 | # | Lección | Fuentes |
