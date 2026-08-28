@@ -314,7 +314,7 @@ sostenida en las tres pasadas.
 | # | Lección | Fuentes |
 |---|---|---|
 | 48 | Introducción a JavaScript asíncrono | [Introducing asynchronous JavaScript (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Async_JS/Introducing) |
-| 49 | Promesas: then, catch y finally | [How to use promises (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Async_JS/Promises) + [Promises (MDN Guide)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises) |
+| 49 | Promesas: then, catch y finally | [How to use promises (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Async_JS/Promises) + [Promises (MDN Guide)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises) + [Promise.prototype.finally() (MDN reference)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/finally) — ninguna de las dos guías cubre finally() pese a prometerlo en el título; se añade la referencia dedicada |
 | 50 | async/await | [Promises (MDN Guide)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises) |
 | 51 | Implementar una API basada en promesas | [Implementing a promise-based API (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Async_JS/Implementing_a_promise-based_API) |
 | 52 | Peticiones de red con fetch() | [Making network requests with JavaScript (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Network_requests) |
