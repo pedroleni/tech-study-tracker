@@ -306,7 +306,7 @@ sostenida en las tres pasadas.
 |---|---|---|
 | 44 | Introducción a los eventos | [Introduction to events (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Events) |
 | 45 | Propagación y delegación de eventos: bubbling y capturing | [Event bubbling (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Event_bubbling) |
-| 46 | Eventos de formulario y validación con JS | [Sending forms through JavaScript (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Forms/Sending_forms_through_JavaScript) |
+| 46 | Eventos de formulario y validación con JS | [Constraint validation (MDN reference)](https://developer.mozilla.org/en-US/docs/Web/API/Constraint_validation) — la fuente citada originalmente ("Sending forms through JavaScript") trata en realidad de enviar formularios con FormData/fetch, tema de la lección 47; se sustituye por la referencia real de la Constraint Validation API, que sí cubre la validación prometida en el título |
 | 47 | Enviar datos de formulario con fetch | [Sending and retrieving form data (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Forms/Sending_and_retrieving_form_data) |
 
 ## Módulo 9 — Asincronía
