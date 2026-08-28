@@ -354,7 +354,7 @@ sostenida en las tres pasadas.
 
 | # | Lección | Fuentes |
 |---|---|---|
-| 69 | Depurar JavaScript con DevTools | [JavaScript debugging and error handling (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Debugging_JavaScript) |
+| 69 | Depurar JavaScript con DevTools | [JavaScript debugging and error handling (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Debugging_JavaScript) + [debugger (MDN reference)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/debugger) — se añade la referencia dedicada a la sentencia debugger, no cubierta por la guía principal |
 | 70 | Documentar código con JSDoc | [Use JSDoc: Getting Started with JSDoc 3 (proyecto JSDoc)](https://jsdoc.app/about-getting-started) |
 | 71 | Retos finales: generador de historias y galería de imágenes | [Challenge: Silly story generator (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Silly_story_generator) + [Challenge: Building a house data UI (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/House_data_UI) |
 
