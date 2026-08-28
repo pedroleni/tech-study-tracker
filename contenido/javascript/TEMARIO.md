@@ -278,7 +278,7 @@ sostenida en las tres pasadas.
 | 30 | Colecciones indexadas: métodos de array | [Indexed collections (web.dev)](https://web.dev/learn/javascript/collections/indexed) + [Indexed collections (MDN Guide)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Indexed_collections) |
 | 31 | Métodos funcionales: map, filter y reduce | [Indexed collections (MDN Guide)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Indexed_collections) |
 | 32 | Colecciones con clave: Map y Set | [Keyed collections (web.dev)](https://web.dev/learn/javascript/collections/keyed) + [Keyed collections (MDN Guide)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Keyed_collections) |
-| 33 | JSON: serializar y parsear | [Working with JSON (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/JSON) |
+| 33 | JSON: serializar y parsear | [Working with JSON (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/JSON) + [JSON.stringify() (MDN reference)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify) — se añade la referencia dedicada solo para el tercer argumento (indentación), no cubierto por la guía principal |
 
 ## Módulo 6 — Clases y programación orientada a objetos
 
