@@ -294,7 +294,7 @@ sostenida en las tres pasadas.
 | # | Lección | Fuentes |
 |---|---|---|
 | 38 | Introducción al scripting del DOM | [DOM scripting introduction (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/DOM_scripting) |
-| 39 | El árbol DOM y cómo recorrerlo | [DOM scripting introduction (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/DOM_scripting) |
+| 39 | El árbol DOM y cómo recorrerlo | [Node (MDN reference)](https://developer.mozilla.org/en-US/docs/Web/API/Node) + [Element (MDN reference)](https://developer.mozilla.org/en-US/docs/Web/API/Element) — la guía introductoria solo cubre la terminología del árbol de forma conceptual, sin las propiedades reales de recorrido (parentNode, children, nextElementSibling...); se sustituye por las referencias dedicadas de MDN |
 | 40 | Seleccionar elementos: getElementById, querySelector y compañía | [DOM scripting introduction (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/DOM_scripting) |
 | 41 | Leer y modificar contenido, atributos y estilos | [DOM scripting introduction (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/DOM_scripting) |
 | 42 | Crear, insertar y eliminar nodos | [DOM scripting introduction (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/DOM_scripting) + [Challenge: Image gallery (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Image_gallery) |
