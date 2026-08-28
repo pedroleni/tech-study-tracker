@@ -318,7 +318,7 @@ sostenida en las tres pasadas.
 | 50 | async/await | [Promises (MDN Guide)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises) + [async function (MDN reference)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function) — se añade la referencia dedicada para el hecho de que una función async siempre devuelve una promesa, con ejemplo concreto |
 | 51 | Implementar una API basada en promesas | [Implementing a promise-based API (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Async_JS/Implementing_a_promise-based_API) |
 | 52 | Peticiones de red con fetch() | [Making network requests with JavaScript (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Network_requests) |
-| 53 | Web Workers: JavaScript en un hilo aparte | [Introducing workers (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Async_JS/Introducing_workers) |
+| 53 | Web Workers: JavaScript en un hilo aparte | [Introducing workers (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Async_JS/Introducing_workers) + [Worker: terminate() (MDN reference)](https://developer.mozilla.org/en-US/docs/Web/API/Worker/terminate) — se añade la referencia dedicada, no cubierta por la guía principal |
 
 ## Módulo 10 — JavaScript moderno
 
