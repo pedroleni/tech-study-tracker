@@ -336,7 +336,7 @@ sostenida en las tres pasadas.
 | # | Lección | Fuentes |
 |---|---|---|
 | 60 | try/catch/finally y el objeto Error | [JavaScript debugging and error handling (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Debugging_JavaScript) + [Control flow and error handling (MDN Guide)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Control_flow_and_error_handling) |
-| 61 | Crear errores personalizados | [Control flow and error handling (MDN Guide)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Control_flow_and_error_handling) |
+| 61 | Crear errores personalizados | [Error (MDN reference)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error) — la guía citada originalmente no cubre en absoluto extender Error con class, pese a ser el tema central del título; se sustituye por la referencia real de MDN |
 
 ## Módulo 12 — APIs del navegador
 
