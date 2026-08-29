@@ -498,3 +498,20 @@ sostenida en las tres pasadas.
   `cargando` sea `true`) y la propia historia de cómo se diagnosticó se
   convirtieron en la sección más valiosa de la lección — un bug
   encontrado de verdad vale más que uno inventado para la ocasión.
+- **Proyecto avanzado 3: buscador con TypeScript (78, 2026-08-30)**:
+  tercer escalón de la serie de proyectos avanzados, tras un simple
+  "sigue" del usuario. Deliberadamente el más pequeño en funcionalidad
+  (solo búsqueda, sin pestañas ni paginación) porque la complejidad
+  nueva está en los tipos, no en la interfaz: `EstadoBusqueda` como
+  unión discriminada (estados imposibles de representar, no solo
+  "poco probables"), comprobación de exhaustividad con un helper
+  `casoImposible(valor: never)` — verificada de verdad añadiendo un
+  quinto caso a la unión sin tocar el switch y confirmando que
+  `npm run typecheck` falla en la línea exacta — y un genérico
+  `obtenerJSON<T>()`. Encontró otro gotcha real de tooling durante la
+  construcción: `erasableSyntaxOnly` en `tsconfig.json` (la misma
+  restricción del soporte nativo de TypeScript de Node.js) rechaza los
+  parámetros de constructor (`constructor(public status: number)`)
+  porque esa sintaxis obliga a generar código, no solo borrar tipos.
+  Repositorio:
+  [github.com/pedroleni/buscador-personajes-ts](https://github.com/pedroleni/buscador-personajes-ts).
