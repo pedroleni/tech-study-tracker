@@ -30,9 +30,21 @@ En el proyecto anterior serviste los archivos con `python3 -m http.server` — s
   "tipo": "roles",
   "titulo": "Lo que Vite da que un servidor estático no",
   "roles": [
-    { "etiqueta": "npm run dev", "rol": "Recarga instantánea", "descripcion": "Guardas un archivo y el navegador se actualiza solo, sin recargar la página entera ni perder el estado de lo que estabas mirando." },
-    { "etiqueta": "npm run build", "rol": "Optimización real", "descripcion": "Minifica el JS y el CSS, y les da nombres con hash para que el navegador pueda cachearlos agresivamente sin servir una versión vieja por error." },
-    { "etiqueta": "import.meta.env", "rol": "Variables de entorno", "descripcion": "Valores que cambian según dónde se ejecute el proyecto (tu ordenador, un servidor de pruebas, producción) sin tocar el código." }
+    {
+      "etiqueta": "npm run dev",
+      "rol": "Recarga instantánea",
+      "descripcion": "Guardas un archivo y el navegador se actualiza solo, sin recargar la página entera ni perder el estado de lo que estabas mirando."
+    },
+    {
+      "etiqueta": "npm run build",
+      "rol": "Optimización real",
+      "descripcion": "Minifica el JS y el CSS, y les da nombres con hash para que el navegador pueda cachearlos agresivamente sin servir una versión vieja por error."
+    },
+    {
+      "etiqueta": "import.meta.env",
+      "rol": "Variables de entorno",
+      "descripcion": "Valores que cambian según dónde se ejecute el proyecto (tu ordenador, un servidor de pruebas, producción) sin tocar el código."
+    }
   ]
 }
 ```
@@ -66,11 +78,17 @@ Más piezas que el gestor de tareas, porque hay más que coordinar: red, estado,
 ```laboratorio
 {
   "tipo": "codigo-anotado",
-  "lenguaje": "javascript",
-  "codigo": "export async function cargarPersonajes() {\n  const { paginaActual, busqueda, vistaActual, favoritos } = obtenerEstado();\n  establecerCargando(true);\n\n  try {\n    if (vistaActual === 'favoritos') {\n      const personajes = await obtenerPersonajesPorId([...favoritos]);\n      establecerResultados(personajes, 1);\n      return;\n    }\n\n    const { personajes, totalPaginas } = await buscarPersonajes({ pagina: paginaActual, nombre: busqueda });\n    establecerResultados(personajes, totalPaginas);\n  } catch (error) {\n    establecerError(error.message);\n  }\n}",
+  "lenguaje": "html",
+  "codigo": "<script>\nexport async function cargarPersonajes() {\n  const { paginaActual, busqueda, vistaActual, favoritos } = obtenerEstado();\n  establecerCargando(true);\n\n  try {\n    if (vistaActual === 'favoritos') {\n      const personajes = await obtenerPersonajesPorId([...favoritos]);\n      establecerResultados(personajes, 1);\n      return;\n    }\n\n    const { personajes, totalPaginas } = await buscarPersonajes({ pagina: paginaActual, nombre: busqueda });\n    establecerResultados(personajes, totalPaginas);\n  } catch (error) {\n    establecerError(error.message);\n  }\n}\n</script>",
   "anotaciones": [
-    { "fragmento": "const { paginaActual, busqueda, vistaActual, favoritos } = obtenerEstado();", "nota": "acciones.js es el ÚNICO archivo que importa tanto de api.js como de estado.js a la vez — es la capa de orquestación, ni estado.js sabe hacer fetch ni api.js sabe qué es 'la página actual'." },
-    { "fragmento": "const personajes = await obtenerPersonajesPorId([...favoritos]);\n      establecerResultados(personajes, 1);", "nota": "Los favoritos no se guardan como objetos completos — solo IDs (ver almacenamiento.js). Al ver la pestaña Favoritos, se vuelve a pedir a la API los datos de esos IDs. Es la API la única fuente de verdad de 'cómo es' un personaje." }
+    {
+      "fragmento": "const { paginaActual, busqueda, vistaActual, favoritos } = obtenerEstado();",
+      "nota": "acciones.js es el ÚNICO archivo que importa tanto de api.js como de estado.js a la vez — es la capa de orquestación, ni estado.js sabe hacer fetch ni api.js sabe qué es 'la página actual'."
+    },
+    {
+      "fragmento": "const personajes = await obtenerPersonajesPorId([...favoritos]);\n      establecerResultados(personajes, 1);",
+      "nota": "Los favoritos no se guardan como objetos completos — solo IDs (ver almacenamiento.js). Al ver la pestaña Favoritos, se vuelve a pedir a la API los datos de esos IDs. Es la API la única fuente de verdad de 'cómo es' un personaje."
+    }
   ]
 }
 ```
@@ -80,11 +98,17 @@ Más piezas que el gestor de tareas, porque hay más que coordinar: red, estado,
 ```laboratorio
 {
   "tipo": "codigo-anotado",
-  "lenguaje": "javascript",
-  "codigo": "export async function obtenerPersonajesPorId(ids) {\n  if (ids.length === 0) return [];\n\n  const respuesta = await fetchConReintento(`${BASE_URL}/character/${ids.join(',')}`);\n  if (respuesta.status === 404) return [];\n  if (!respuesta.ok) {\n    throw new Error(`La API respondió con un error (${respuesta.status})`);\n  }\n\n  const datos = await respuesta.json();\n  return normalizarAArray(datos);\n}",
+  "lenguaje": "html",
+  "codigo": "<script>\nexport async function obtenerPersonajesPorId(ids) {\n  if (ids.length === 0) return [];\n\n  const respuesta = await fetchConReintento(`${BASE_URL}/character/${ids.join(',')}`);\n  if (respuesta.status === 404) return [];\n  if (!respuesta.ok) {\n    throw new Error(`La API respondió con un error (${respuesta.status})`);\n  }\n\n  const datos = await respuesta.json();\n  return normalizarAArray(datos);\n}\n</script>",
   "anotaciones": [
-    { "fragmento": "const respuesta = await fetchConReintento(`${BASE_URL}/character/${ids.join(',')}`);", "nota": "/character/1 devuelve UN objeto; /character/1,2 devuelve un ARRAY de objetos — la misma ruta, dos formas distintas según cuántos ids pidas. Un detalle real de muchas APIs que hay que descubrir leyendo la documentación, no adivinando." },
-    { "fragmento": "return normalizarAArray(datos);", "nota": "En vez de comprobar Array.isArray(datos) en cada sitio donde se use este dato, se normaliza UNA VEZ aquí — y esa función es lo bastante pura y aislada como para tener sus propios tests en utilidades.test.js, sin necesitar mockear fetch." }
+    {
+      "fragmento": "const respuesta = await fetchConReintento(`${BASE_URL}/character/${ids.join(',')}`);",
+      "nota": "/character/1 devuelve UN objeto; /character/1,2 devuelve un ARRAY de objetos — la misma ruta, dos formas distintas según cuántos ids pidas. Un detalle real de muchas APIs que hay que descubrir leyendo la documentación, no adivinando."
+    },
+    {
+      "fragmento": "return normalizarAArray(datos);",
+      "nota": "En vez de comprobar Array.isArray(datos) en cada sitio donde se use este dato, se normaliza UNA VEZ aquí — y esa función es lo bastante pura y aislada como para tener sus propios tests en utilidades.test.js, sin necesitar mockear fetch."
+    }
   ]
 }
 ```
@@ -107,8 +131,8 @@ La causa real estaba en `vista.js`: `renderizar()` reconstruía la rejilla de ta
 ```laboratorio
 {
   "tipo": "comparador-antes-despues",
-  "antes": "export function renderizar() {\n  const estado = obtenerEstado();\n  pintarMensajeEstado(estado);\n  pintarRejilla(estado);\n  pintarPaginacion(estado);\n  pintarPestañas(estado);\n}",
-  "despues": "export function renderizar() {\n  const estado = obtenerEstado();\n  pintarMensajeEstado(estado);\n  if (!estado.cargando) {\n    pintarRejilla(estado);\n  }\n  pintarPaginacion(estado);\n  pintarPestañas(estado);\n}",
+  "antes": "<script>\nexport function renderizar() {\n  const estado = obtenerEstado();\n  pintarMensajeEstado(estado);\n  pintarRejilla(estado);\n  pintarPaginacion(estado);\n  pintarPestañas(estado);\n}\n</script>",
+  "despues": "<script>\nexport function renderizar() {\n  const estado = obtenerEstado();\n  pintarMensajeEstado(estado);\n  if (!estado.cargando) {\n    pintarRejilla(estado);\n  }\n  pintarPaginacion(estado);\n  pintarPestañas(estado);\n}\n</script>",
   "nota": "Con el de antes, cada acción disparaba DOS renders (uno al empezar a cargar, otro al terminar) — y cada render de la rejilla destruye y recrea hasta 20 <img> con la misma src, disparando otras tantas peticiones de imagen abandonadas a mitad de carga. Con varias acciones seguidas eso saturaba la conexión al mismo host que la propia API. La solución: no tocar la rejilla mientras cargando sea true — se deja el contenido anterior visible hasta que hay datos nuevos de verdad."
 }
 ```
@@ -117,9 +141,18 @@ La causa real estaba en `vista.js`: `renderizar()` reconstruía la rejilla de ta
 {
   "tipo": "notas-clave",
   "items": [
-    { "titulo": "El mensaje de error no siempre dice la causa real.", "texto": "\"Bloqueado por CORS\" fue lo que reportó el navegador — la causa real no tenía nada que ver con CORS, sino con una conexión saturada por peticiones de imagen redundantes. Cuando un error no encaja con lo que el código hace explícitamente, sospecha de efectos secundarios menos obvios." },
-    { "titulo": "Renderizar de más tiene un coste real, no solo estético.", "texto": "El patrón estado→render es correcto, pero \"redibujar todo en cada cambio\" sin más criterio puede ser caro de verdad cuando lo que se redibuja incluye recursos de red (imágenes), no solo texto." },
-    { "titulo": "Reproducirlo con calma, no solo una vez.", "texto": "El fallo no aparecía en pruebas sueltas y sencillas — solo con varias acciones encadenadas seguidas. Aislar la secuencia exacta que lo reproduce de forma fiable fue el paso que de verdad llevó a la causa." }
+    {
+      "titulo": "El mensaje de error no siempre dice la causa real.",
+      "texto": "\"Bloqueado por CORS\" fue lo que reportó el navegador — la causa real no tenía nada que ver con CORS, sino con una conexión saturada por peticiones de imagen redundantes. Cuando un error no encaja con lo que el código hace explícitamente, sospecha de efectos secundarios menos obvios."
+    },
+    {
+      "titulo": "Renderizar de más tiene un coste real, no solo estético.",
+      "texto": "El patrón estado→render es correcto, pero \"redibujar todo en cada cambio\" sin más criterio puede ser caro de verdad cuando lo que se redibuja incluye recursos de red (imágenes), no solo texto."
+    },
+    {
+      "titulo": "Reproducirlo con calma, no solo una vez.",
+      "texto": "El fallo no aparecía en pruebas sueltas y sencillas — solo con varias acciones encadenadas seguidas. Aislar la secuencia exacta que lo reproduce de forma fiable fue el paso que de verdad llevó a la causa."
+    }
   ]
 }
 ```
@@ -129,10 +162,13 @@ La causa real estaba en `vista.js`: `renderizar()` reconstruía la rejilla de ta
 ```laboratorio
 {
   "tipo": "codigo-anotado",
-  "lenguaje": "javascript",
-  "codigo": "async function fetchConReintento(url) {\n  try {\n    return await fetch(url);\n  } catch (primerError) {\n    await new Promise((resolve) => setTimeout(resolve, 500));\n    try {\n      return await fetch(url);\n    } catch (segundoError) {\n      throw new Error(`No se pudo conectar con la API: ${segundoError.message}`);\n    }\n  }\n}",
+  "lenguaje": "html",
+  "codigo": "<script>\nasync function fetchConReintento(url) {\n  try {\n    return await fetch(url);\n  } catch (primerError) {\n    await new Promise((resolve) => setTimeout(resolve, 500));\n    try {\n      return await fetch(url);\n    } catch (segundoError) {\n      throw new Error(`No se pudo conectar con la API: ${segundoError.message}`);\n    }\n  }\n}\n</script>",
   "anotaciones": [
-    { "fragmento": "try {\n    return await fetch(url);\n  } catch (primerError) {", "nota": "Solo se reintenta cuando fetch() LANZA (un fallo de conexión) — nunca cuando responde con un error real (404, 500). Repetir una petición que ya sabemos que dará 404 no cambia nada; repetir una que falló por un corte de red sí puede funcionar la segunda vez." }
+    {
+      "fragmento": "try {\n    return await fetch(url);\n  } catch (primerError) {",
+      "nota": "Solo se reintenta cuando fetch() LANZA (un fallo de conexión) — nunca cuando responde con un error real (404, 500). Repetir una petición que ya sabemos que dará 404 no cambia nada; repetir una que falló por un corte de red sí puede funcionar la segunda vez."
+    }
   ]
 }
 ```
@@ -143,9 +179,18 @@ La causa real estaba en `vista.js`: `renderizar()` reconstruía la rejilla de ta
 {
   "tipo": "notas-clave",
   "items": [
-    { "titulo": "¿npm run test pasa?", "texto": "Los tests de utilidades.js (debounce y normalizarAArray) no dependen de red ni de DOM — deberían pasar en cuanto la lógica esté bien, sin necesitar el navegador abierto." },
-    { "titulo": "¿npm run build y npm run preview funcionan igual que npm run dev?", "texto": "Es fácil que algo funcione en desarrollo y se rompa en el build de producción (una variable de entorno mal referenciada es la causa más común) — pruébalo con los tres comandos, no solo con dev." },
-    { "titulo": "¿Buscar, favoritear y paginar seguidos no rompe nada?", "texto": "Es exactamente la secuencia que expuso el bug de este proyecto — repítela varias veces seguidas como prueba de estrés." }
+    {
+      "titulo": "¿npm run test pasa?",
+      "texto": "Los tests de utilidades.js (debounce y normalizarAArray) no dependen de red ni de DOM — deberían pasar en cuanto la lógica esté bien, sin necesitar el navegador abierto."
+    },
+    {
+      "titulo": "¿npm run build y npm run preview funcionan igual que npm run dev?",
+      "texto": "Es fácil que algo funcione en desarrollo y se rompa en el build de producción (una variable de entorno mal referenciada es la causa más común) — pruébalo con los tres comandos, no solo con dev."
+    },
+    {
+      "titulo": "¿Buscar, favoritear y paginar seguidos no rompe nada?",
+      "texto": "Es exactamente la secuencia que expuso el bug de este proyecto — repítela varias veces seguidas como prueba de estrés."
+    }
   ]
 }
 ```

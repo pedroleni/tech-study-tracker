@@ -30,8 +30,16 @@ Los bloques `editor-en-vivo` de esta web viven dentro de un `<iframe sandbox="al
   "tipo": "roles",
   "titulo": "Lo que un origen opaco no puede hacer",
   "roles": [
-    { "etiqueta": "Módulos ES", "rol": "import/export entre varios archivos", "descripcion": "Necesitan que el navegador resuelva rutas reales entre archivos servidos — un único iframe con todo el JS pegado no es lo mismo." },
-    { "etiqueta": "localStorage", "rol": "Persistencia real", "descripcion": "Un documento con origen opaco no tiene almacenamiento propio — el navegador lo deshabilita directamente (lo viste de primera mano en la lección 62)." }
+    {
+      "etiqueta": "Módulos ES",
+      "rol": "import/export entre varios archivos",
+      "descripcion": "Necesitan que el navegador resuelva rutas reales entre archivos servidos — un único iframe con todo el JS pegado no es lo mismo."
+    },
+    {
+      "etiqueta": "localStorage",
+      "rol": "Persistencia real",
+      "descripcion": "Un documento con origen opaco no tiene almacenamiento propio — el navegador lo deshabilita directamente (lo viste de primera mano en la lección 62)."
+    }
   ]
 }
 ```
@@ -47,10 +55,26 @@ Cuatro archivos en `src/`, cada uno con una única responsabilidad — el princi
   "tipo": "roles",
   "titulo": "Una responsabilidad por archivo",
   "roles": [
-    { "etiqueta": "estado.js", "rol": "La única fuente de verdad", "descripcion": "Guarda las tareas y el filtro activo. Nadie más los guarda por su cuenta — todo el mundo pregunta aquí." },
-    { "etiqueta": "almacenamiento.js", "rol": "Persistencia", "descripcion": "Leer y escribir en localStorage. No sabe nada de tareas ni de DOM, solo de guardar y recuperar." },
-    { "etiqueta": "vista.js", "rol": "Pintar el DOM", "descripcion": "Lee el estado y reconstruye la lista. Nunca decide nada por su cuenta, solo refleja lo que ya es verdad." },
-    { "etiqueta": "main.js", "rol": "Conectar todo", "descripcion": "Escucha clics y envíos de formulario, y llama a las funciones de estado.js. No pinta nada ni guarda nada directamente." }
+    {
+      "etiqueta": "estado.js",
+      "rol": "La única fuente de verdad",
+      "descripcion": "Guarda las tareas y el filtro activo. Nadie más los guarda por su cuenta — todo el mundo pregunta aquí."
+    },
+    {
+      "etiqueta": "almacenamiento.js",
+      "rol": "Persistencia",
+      "descripcion": "Leer y escribir en localStorage. No sabe nada de tareas ni de DOM, solo de guardar y recuperar."
+    },
+    {
+      "etiqueta": "vista.js",
+      "rol": "Pintar el DOM",
+      "descripcion": "Lee el estado y reconstruye la lista. Nunca decide nada por su cuenta, solo refleja lo que ya es verdad."
+    },
+    {
+      "etiqueta": "main.js",
+      "rol": "Conectar todo",
+      "descripcion": "Escucha clics y envíos de formulario, y llama a las funciones de estado.js. No pinta nada ni guarda nada directamente."
+    }
   ]
 }
 ```
@@ -73,12 +97,21 @@ Todo cuelga de un array `tareas` y un `filtroActual`, ninguno de los dos exporta
 ```laboratorio
 {
   "tipo": "codigo-anotado",
-  "lenguaje": "javascript",
-  "codigo": "let tareas = [];\nlet filtroActual = 'todas';\nconst suscriptores = [];\n\nexport function inicializarEstado(tareasIniciales) {\n  tareas = tareasIniciales;\n  notificar();\n}\n\nexport function añadirTarea(texto) {\n  const textoLimpio = texto.trim();\n  if (!textoLimpio) return;\n  tareas.push({\n    id: crypto.randomUUID(),\n    texto: textoLimpio,\n    completada: false,\n    creadaEn: new Date().toISOString(),\n  });\n  notificar();\n}\n\nexport function suscribir(fn) {\n  suscriptores.push(fn);\n  return () => {\n    const indice = suscriptores.indexOf(fn);\n    if (indice !== -1) suscriptores.splice(indice, 1);\n  };\n}\n\nfunction notificar() {\n  for (const fn of suscriptores) fn();\n}",
+  "lenguaje": "html",
+  "codigo": "<script>\nlet tareas = [];\nlet filtroActual = 'todas';\nconst suscriptores = [];\n\nexport function inicializarEstado(tareasIniciales) {\n  tareas = tareasIniciales;\n  notificar();\n}\n\nexport function añadirTarea(texto) {\n  const textoLimpio = texto.trim();\n  if (!textoLimpio) return;\n  tareas.push({\n    id: crypto.randomUUID(),\n    texto: textoLimpio,\n    completada: false,\n    creadaEn: new Date().toISOString(),\n  });\n  notificar();\n}\n\nexport function suscribir(fn) {\n  suscriptores.push(fn);\n  return () => {\n    const indice = suscriptores.indexOf(fn);\n    if (indice !== -1) suscriptores.splice(indice, 1);\n  };\n}\n\nfunction notificar() {\n  for (const fn of suscriptores) fn();\n}\n</script>",
   "anotaciones": [
-    { "fragmento": "let tareas = [];\nlet filtroActual = 'todas';\nconst suscriptores = [];", "nota": "Variables de módulo, no exportadas. Solo son accesibles desde dentro de este archivo — exactamente el mismo aislamiento que daba una closure (lección 23), pero a nivel de archivo entero en vez de función." },
-    { "fragmento": "tareas.push({\n    id: crypto.randomUUID(),\n    texto: textoLimpio,\n    completada: false,\n    creadaEn: new Date().toISOString(),\n  });\n  notificar();", "nota": "Cada función que cambia el estado termina en notificar() — es lo que dispara el repintado en vista.js sin que este archivo sepa que vista.js existe." },
-    { "fragmento": "export function suscribir(fn) {\n  suscriptores.push(fn);\n  return () => {\n    const indice = suscriptores.indexOf(fn);\n    if (indice !== -1) suscriptores.splice(indice, 1);\n  };\n}", "nota": "Un patrón real de pub/sub en miniatura: cualquiera puede suscribirse sin que estado.js necesite conocer a sus suscriptores de antemano. La función devuelta permite cancelar la suscripción — el mismo patrón que devuelve addEventListener con AbortController." }
+    {
+      "fragmento": "let tareas = [];\nlet filtroActual = 'todas';\nconst suscriptores = [];",
+      "nota": "Variables de módulo, no exportadas. Solo son accesibles desde dentro de este archivo — exactamente el mismo aislamiento que daba una closure (lección 23), pero a nivel de archivo entero en vez de función."
+    },
+    {
+      "fragmento": "tareas.push({\n    id: crypto.randomUUID(),\n    texto: textoLimpio,\n    completada: false,\n    creadaEn: new Date().toISOString(),\n  });\n  notificar();",
+      "nota": "Cada función que cambia el estado termina en notificar() — es lo que dispara el repintado en vista.js sin que este archivo sepa que vista.js existe."
+    },
+    {
+      "fragmento": "export function suscribir(fn) {\n  suscriptores.push(fn);\n  return () => {\n    const indice = suscriptores.indexOf(fn);\n    if (indice !== -1) suscriptores.splice(indice, 1);\n  };\n}",
+      "nota": "Un patrón real de pub/sub en miniatura: cualquiera puede suscribirse sin que estado.js necesite conocer a sus suscriptores de antemano. La función devuelta permite cancelar la suscripción — el mismo patrón que devuelve addEventListener con AbortController."
+    }
   ]
 }
 ```
@@ -90,11 +123,17 @@ El archivo más corto, y el que de verdad no se podía enseñar en vivo hasta ah
 ```laboratorio
 {
   "tipo": "codigo-anotado",
-  "lenguaje": "javascript",
-  "codigo": "const CLAVE = 'gestor-de-tareas:v1';\n\nexport function cargarTareas() {\n  try {\n    const guardado = localStorage.getItem(CLAVE);\n    return guardado ? JSON.parse(guardado) : [];\n  } catch (error) {\n    console.error('No se pudieron leer las tareas guardadas:', error);\n    return [];\n  }\n}\n\nexport function guardarTareas(tareas) {\n  try {\n    localStorage.setItem(CLAVE, JSON.stringify(tareas));\n  } catch (error) {\n    console.error('No se pudieron guardar las tareas:', error);\n  }\n}",
+  "lenguaje": "html",
+  "codigo": "<script>\nconst CLAVE = 'gestor-de-tareas:v1';\n\nexport function cargarTareas() {\n  try {\n    const guardado = localStorage.getItem(CLAVE);\n    return guardado ? JSON.parse(guardado) : [];\n  } catch (error) {\n    console.error('No se pudieron leer las tareas guardadas:', error);\n    return [];\n  }\n}\n\nexport function guardarTareas(tareas) {\n  try {\n    localStorage.setItem(CLAVE, JSON.stringify(tareas));\n  } catch (error) {\n    console.error('No se pudieron guardar las tareas:', error);\n  }\n}\n</script>",
   "anotaciones": [
-    { "fragmento": "const CLAVE = 'gestor-de-tareas:v1';", "nota": "El :v1 al final no es decorativo — si algún día cambias la forma de los datos guardados, subir a :v2 evita que un usuario con datos viejos reciba un JSON.parse() con una forma que tu código ya no espera." },
-    { "fragmento": "try {\n    const guardado = localStorage.getItem(CLAVE);\n    return guardado ? JSON.parse(guardado) : [];\n  } catch (error) {", "nota": "Un try/catch de verdad, no decorativo: localStorage puede lanzar (modo privado de Safari, cuota llena) y un JSON corrupto también. Sin esto, un error aquí tumbaría toda la aplicación al cargar." }
+    {
+      "fragmento": "const CLAVE = 'gestor-de-tareas:v1';",
+      "nota": "El :v1 al final no es decorativo — si algún día cambias la forma de los datos guardados, subir a :v2 evita que un usuario con datos viejos reciba un JSON.parse() con una forma que tu código ya no espera."
+    },
+    {
+      "fragmento": "try {\n    const guardado = localStorage.getItem(CLAVE);\n    return guardado ? JSON.parse(guardado) : [];\n  } catch (error) {",
+      "nota": "Un try/catch de verdad, no decorativo: localStorage puede lanzar (modo privado de Safari, cuota llena) y un JSON corrupto también. Sin esto, un error aquí tumbaría toda la aplicación al cargar."
+    }
   ]
 }
 ```
@@ -106,11 +145,17 @@ El patrón "estado → render": en vez de buscar el `<li>` exacto que cambió y 
 ```laboratorio
 {
   "tipo": "codigo-anotado",
-  "lenguaje": "javascript",
-  "codigo": "export function renderizar() {\n  const visibles = obtenerTareasVisibles();\n  const todas = obtenerTodasLasTareas();\n\n  lista.textContent = '';\n  for (const tarea of visibles) {\n    lista.appendChild(crearElementoTarea(tarea));\n  }\n\n  mensajeVacio.hidden = visibles.length > 0;\n\n  const pendientes = todas.filter((tarea) => !tarea.completada).length;\n  contador.textContent = `${pendientes} ${pendientes === 1 ? 'tarea pendiente' : 'tareas pendientes'}`;\n}",
+  "lenguaje": "html",
+  "codigo": "<script>\nexport function renderizar() {\n  const visibles = obtenerTareasVisibles();\n  const todas = obtenerTodasLasTareas();\n\n  lista.textContent = '';\n  for (const tarea of visibles) {\n    lista.appendChild(crearElementoTarea(tarea));\n  }\n\n  mensajeVacio.hidden = visibles.length > 0;\n\n  const pendientes = todas.filter((tarea) => !tarea.completada).length;\n  contador.textContent = `${pendientes} ${pendientes === 1 ? 'tarea pendiente' : 'tareas pendientes'}`;\n}\n</script>",
   "anotaciones": [
-    { "fragmento": "lista.textContent = '';\n  for (const tarea of visibles) {\n    lista.appendChild(crearElementoTarea(tarea));\n  }", "nota": "Vaciar y reconstruir, no mutar in situ. No hay ningún camino en el que la lista visible pueda desincronizarse del estado — siempre es exactamente lo que obtenerTareasVisibles() diga en ese instante." },
-    { "fragmento": "const pendientes = todas.filter((tarea) => !tarea.completada).length;\n  contador.textContent = `${pendientes} ${pendientes === 1 ? 'tarea pendiente' : 'tareas pendientes'}`;", "nota": "El contador cuenta sobre TODAS las tareas, no solo las visibles — si filtras por \"completadas\", el contador de pendientes debe seguir siendo el real, no el de la vista filtrada." }
+    {
+      "fragmento": "lista.textContent = '';\n  for (const tarea of visibles) {\n    lista.appendChild(crearElementoTarea(tarea));\n  }",
+      "nota": "Vaciar y reconstruir, no mutar in situ. No hay ningún camino en el que la lista visible pueda desincronizarse del estado — siempre es exactamente lo que obtenerTareasVisibles() diga en ese instante."
+    },
+    {
+      "fragmento": "const pendientes = todas.filter((tarea) => !tarea.completada).length;\n  contador.textContent = `${pendientes} ${pendientes === 1 ? 'tarea pendiente' : 'tareas pendientes'}`;",
+      "nota": "El contador cuenta sobre TODAS las tareas, no solo las visibles — si filtras por \"completadas\", el contador de pendientes debe seguir siendo el real, no el de la vista filtrada."
+    }
   ]
 }
 ```
@@ -122,11 +167,17 @@ El único archivo que sabe que existen tanto `estado.js` como `vista.js` como `a
 ```laboratorio
 {
   "tipo": "codigo-anotado",
-  "lenguaje": "javascript",
-  "codigo": "suscribir(() => {\n  renderizar();\n  guardarTareas(obtenerTodasLasTareas());\n});\n\ninicializarEstado(cargarTareas());\n\nlista.addEventListener('click', (evento) => {\n  const elementoTarea = evento.target.closest('.tarea');\n  if (!elementoTarea) return;\n  const id = elementoTarea.dataset.id;\n\n  if (evento.target.matches('.tarea-checkbox')) {\n    alternarCompletada(id);\n  } else if (evento.target.matches('.tarea-borrar')) {\n    borrarTarea(id);\n  }\n});",
+  "lenguaje": "html",
+  "codigo": "<script>\nsuscribir(() => {\n  renderizar();\n  guardarTareas(obtenerTodasLasTareas());\n});\n\ninicializarEstado(cargarTareas());\n\nlista.addEventListener('click', (evento) => {\n  const elementoTarea = evento.target.closest('.tarea');\n  if (!elementoTarea) return;\n  const id = elementoTarea.dataset.id;\n\n  if (evento.target.matches('.tarea-checkbox')) {\n    alternarCompletada(id);\n  } else if (evento.target.matches('.tarea-borrar')) {\n    borrarTarea(id);\n  }\n});\n</script>",
   "anotaciones": [
-    { "fragmento": "suscribir(() => {\n  renderizar();\n  guardarTareas(obtenerTodasLasTareas());\n});\n\ninicializarEstado(cargarTareas());", "nota": "La suscripción va ANTES de inicializarEstado() a propósito: inicializarEstado() ya notifica a los suscriptores, así que si te suscribieras después, te perderías el primer render." },
-    { "fragmento": "lista.addEventListener('click', (evento) => {\n  const elementoTarea = evento.target.closest('.tarea');\n  if (!elementoTarea) return;\n  const id = elementoTarea.dataset.id;", "nota": "Un único listener en la lista completa (delegación, lección 45), no uno por tarea — funciona igual para tareas que ni existían cuando se registró el listener, porque vista.js las reconstruye constantemente." }
+    {
+      "fragmento": "suscribir(() => {\n  renderizar();\n  guardarTareas(obtenerTodasLasTareas());\n});\n\ninicializarEstado(cargarTareas());",
+      "nota": "La suscripción va ANTES de inicializarEstado() a propósito: inicializarEstado() ya notifica a los suscriptores, así que si te suscribieras después, te perderías el primer render."
+    },
+    {
+      "fragmento": "lista.addEventListener('click', (evento) => {\n  const elementoTarea = evento.target.closest('.tarea');\n  if (!elementoTarea) return;\n  const id = elementoTarea.dataset.id;",
+      "nota": "Un único listener en la lista completa (delegación, lección 45), no uno por tarea — funciona igual para tareas que ni existían cuando se registró el listener, porque vista.js las reconstruye constantemente."
+    }
   ]
 }
 ```
@@ -136,8 +187,8 @@ El único archivo que sabe que existen tanto `estado.js` como `vista.js` como `a
 ```laboratorio
 {
   "tipo": "comparador-antes-despues",
-  "antes": "lista.addEventListener('click', (evento) => {\n  if (evento.target.classList.contains('borrar')) {\n    evento.target.closest('li').remove();\n    return;\n  }\n  if (evento.target.tagName === 'LI') {\n    evento.target.classList.toggle('completada');\n  }\n});",
-  "despues": "lista.addEventListener('click', (evento) => {\n  const elementoTarea = evento.target.closest('.tarea');\n  if (!elementoTarea) return;\n  const id = elementoTarea.dataset.id;\n  if (evento.target.matches('.tarea-checkbox')) {\n    alternarCompletada(id);\n  } else if (evento.target.matches('.tarea-borrar')) {\n    borrarTarea(id);\n  }\n});",
+  "antes": "<script>\nlista.addEventListener('click', (evento) => {\n  if (evento.target.classList.contains('borrar')) {\n    evento.target.closest('li').remove();\n    return;\n  }\n  if (evento.target.tagName === 'LI') {\n    evento.target.classList.toggle('completada');\n  }\n});\n</script>",
+  "despues": "<script>\nlista.addEventListener('click', (evento) => {\n  const elementoTarea = evento.target.closest('.tarea');\n  if (!elementoTarea) return;\n  const id = elementoTarea.dataset.id;\n  if (evento.target.matches('.tarea-checkbox')) {\n    alternarCompletada(id);\n  } else if (evento.target.matches('.tarea-borrar')) {\n    borrarTarea(id);\n  }\n});\n</script>",
   "nota": "El de antes es el proyecto sencillo del sandbox: el DOM ES el estado — borrar un <li> del DOM es la única forma de \"olvidar\" esa tarea, no hay ningún array por detrás. El de después llama a funciones de estado.js; el DOM es solo un reflejo que se puede reconstruir en cualquier momento (y por eso persiste en localStorage: hay algo real que guardar, más allá de lo que se ve en pantalla)."
 }
 ```
@@ -148,9 +199,18 @@ El único archivo que sabe que existen tanto `estado.js` como `vista.js` como `a
 {
   "tipo": "notas-clave",
   "items": [
-    { "titulo": "¿Ningún archivo hace el trabajo de otro?", "texto": "vista.js no debería tocar el array de tareas directamente, ni estado.js debería tocar el DOM. Si te encuentras haciéndolo, es una señal de que algo está en el archivo equivocado." },
-    { "titulo": "¿Sobrevive a recargar la página?", "texto": "Añade tareas, recarga con F5, y comprueba que siguen ahí — es la prueba real de que almacenamiento.js funciona, algo que nunca pudiste comprobar en el sandbox." },
-    { "titulo": "¿Un JSON corrupto en localStorage no rompe la app?", "texto": "Abre las DevTools, escribe localStorage.setItem('gestor-de-tareas:v1', 'esto no es json') a mano, y recarga — con el try/catch bien puesto, la app debería arrancar vacía, no romperse." }
+    {
+      "titulo": "¿Ningún archivo hace el trabajo de otro?",
+      "texto": "vista.js no debería tocar el array de tareas directamente, ni estado.js debería tocar el DOM. Si te encuentras haciéndolo, es una señal de que algo está en el archivo equivocado."
+    },
+    {
+      "titulo": "¿Sobrevive a recargar la página?",
+      "texto": "Añade tareas, recarga con F5, y comprueba que siguen ahí — es la prueba real de que almacenamiento.js funciona, algo que nunca pudiste comprobar en el sandbox."
+    },
+    {
+      "titulo": "¿Un JSON corrupto en localStorage no rompe la app?",
+      "texto": "Abre las DevTools, escribe localStorage.setItem('gestor-de-tareas:v1', 'esto no es json') a mano, y recarga — con el try/catch bien puesto, la app debería arrancar vacía, no romperse."
+    }
   ]
 }
 ```
