@@ -166,6 +166,16 @@ El navegador nunca se rinde ante HTML roto: si falta una etiqueta de cierre o un
 3. Escribe un enlace con la comilla de cierre del href olvidada a propósito, y observa en el Inspector qué pasó con el resto del documento.
 4. Abre el Inspector/Elements de una web real y compara la estructura que ves ahí con el código fuente (Ver código fuente) — ¿coinciden exactamente?
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Este párrafo tiene un strong sin cerrar (ejercicio 1) — mira en la vista previa hasta dónde llega la negrita. Después prueba el ejercicio 3: quita la comilla de cierre de un href y observa qué pasa con el resto del documento.",
+  "html": "<p>Este texto es normal <strong>y este está en negrita, pero falta cerrar la etiqueta y sigue así con todo lo que viene después.</p>\n<p>Un párrafo más para ver hasta dónde llega.</p>",
+  "pestañaInicial": "html"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

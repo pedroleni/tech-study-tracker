@@ -199,6 +199,16 @@
 3. Explica con tus palabras qué pasaría si envías una contraseña con method="get" en vez de "post".
 4. Escribe un botón de envío usando button (con algo de HTML dentro, como un icono o una palabra en negrita) en vez de input type="submit".
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe dos campos con su label asociado mediante for/id (ejercicio 2) — haz clic en el texto del label en la vista previa y comprueba que el foco salta al campo. Después escribe el botón de envío con button en vez de input type=\"submit\" (ejercicio 4).",
+  "html": "<!-- Empieza aquí -->",
+  "pestañaInicial": "html"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

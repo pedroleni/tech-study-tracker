@@ -324,6 +324,16 @@ Sin sub ni sup, esos mismos números y símbolos se leen en la línea base, como
 4. Documenta un atajo de teclado que uses a menudo (por ejemplo, para copiar o buscar) usando kbd, y describe con var el nombre de una variable de un fragmento de código que hayas escrito últimamente.
 5. Escribe la fecha de hoy con time y datetime en al menos dos de los formatos de precisión distinta que aparecen en esta lección.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe la cita del ejercicio 1 con blockquote y cite, y el párrafo con dos abreviaturas del ejercicio 2. Pasa el ratón por encima de la abreviatura en la vista previa para ver el tooltip con su expansión.",
+  "html": "<!-- Empieza aquí -->",
+  "pestañaInicial": "html"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

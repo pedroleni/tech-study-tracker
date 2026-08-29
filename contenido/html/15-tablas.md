@@ -168,6 +168,17 @@ Una tabla HTML es para datos que se leen de verdad en dos direcciones a la vez �
 3. Reescribe una tabla mal hecha (con td para las cabeceras y cellpadding) usando th y CSS para el espaciado, sin ningún atributo obsoleto.
 4. Piensa en un conjunto de datos que NO deberías representar como tabla — ¿qué estructura (lista, tarjetas) comunicaría mejor esa relación?
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe la tabla de 3x3 del ejercicio 1 usando th solo en las cabeceras. Después añade un colspan que agrupe dos columnas y un rowspan que abarque dos filas (ejercicio 2).",
+  "html": "<!-- Empieza aquí -->",
+  "css": "table { border-collapse: collapse; }\nth, td { border: 1px solid #999; padding: 6px 10px; }",
+  "pestañaInicial": "html"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

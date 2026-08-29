@@ -113,6 +113,16 @@ Cada línea tiene un trabajo concreto:
 2. Quita el `<!doctype html>` de una página que ya tengas y ábrela en el navegador. ¿Ves algún cambio visual? Ahora inspecciona el `<body>` con las herramientas de desarrollador y compara lo que calcula con y sin doctype.
 3. Busca en un proyecto real (tuyo o de código abierto) el `<head>` de su página principal. ¿Qué metaetiquetas tiene además de charset, viewport y title? Anota una que no conocías y para qué sirve.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Escribe el esqueleto de memoria",
+  "consigna": "Borra el comentario y escribe desde cero las cinco piezas del ejercicio 1: doctype, html con lang, head con charset y viewport, title, y body con algo de contenido dentro.",
+  "html": "<!-- Empieza aquí -->",
+  "pestañaInicial": "html"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

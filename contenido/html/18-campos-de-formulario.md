@@ -192,6 +192,16 @@
 3. Escribe un input type="range" para elegir un precio máximo, con min, max, step y value.
 4. Reescribe un campo que solo tenga placeholder (sin label) añadiéndole un label real, sin quitar el placeholder.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe el formulario de contacto del ejercicio 1 con los tipos de input adecuados para nombre, correo, teléfono y mensaje. Fíjate en la vista previa qué teclado/comportamiento sugiere cada tipo.",
+  "html": "<!-- Empieza aquí -->",
+  "pestañaInicial": "html"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

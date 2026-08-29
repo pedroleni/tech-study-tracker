@@ -134,6 +134,17 @@ Cuando quieres dar contexto extra SOLO a quien usa lector de pantalla, sin mostr
 3. Escribe un ejemplo donde el CSS reordene visualmente dos elementos con order, y explica qué orden anunciaría un lector de pantalla.
 4. Activa el lector de pantalla de tu sistema operativo (VoiceOver, Narrador, Orca...) y navega una página real usando solo la lista de encabezados — ¿tiene sentido la estructura?
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Reescribe esta página hecha solo de divs con las etiquetas semánticas que correspondan (ejercicio 1). Después escribe la clase .solo-lector-pantalla del ejercicio 2 en la pestaña CSS — recorta el texto visualmente sin quitarlo del DOM.",
+  "html": "<div class=\"cabecera\"><div class=\"titulo\">Mi blog</div></div>\n<div class=\"menu\"><div>Inicio</div><div>Artículos</div></div>\n<div class=\"contenido\"><div class=\"post\">Un texto cualquiera</div></div>\n<div class=\"pie\">© 2026</div>",
+  "css": "/* prueba: .solo-lector-pantalla { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; } */",
+  "pestañaInicial": "html"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

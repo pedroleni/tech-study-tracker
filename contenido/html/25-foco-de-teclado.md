@@ -150,6 +150,17 @@ WCAG respalda esto con normativa concreta, no solo con una recomendación de est
 3. Escribe CSS para un estilo de :focus-visible propio, claramente visible tanto en tema claro como oscuro.
 4. Navega una web real usando solo Tab y Mayús+Tab — ¿el foco sigue un orden lógico? ¿Se ve siempre con claridad dónde está?
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe un formulario de 3 campos (ejercicio 1) y haz clic en la vista previa antes de pulsar Tab para comprobar que el orden coincide con el del HTML. Después escribe tu propio estilo de :focus-visible en la pestaña CSS (ejercicio 3).",
+  "html": "<!-- Empieza aquí -->",
+  "css": "/* prueba: :focus-visible { outline: 3px solid #2563eb; outline-offset: 2px; } */",
+  "pestañaInicial": "html"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

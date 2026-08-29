@@ -251,6 +251,16 @@ Así se ve la diferencia en el propio texto del enlace — mismo destino, muy di
 4. Busca en una web real un enlace que abra en pestaña nueva — ¿avisa de alguna forma en el texto? Si inspeccionas el código, ¿lleva rel="noopener"?
 5. Escribe un enlace de descarga a un PDF ficticio usando download, indicando el tamaño del archivo directamente en el texto visible del enlace.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe los tres enlaces del ejercicio 1 con textos distintos entre sí, evitando \"haz clic aquí\". Si te sobra tiempo, escribe también la barra de navegación de 4 secciones del ejercicio 3.",
+  "html": "<!-- Empieza aquí -->",
+  "pestañaInicial": "html"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio
