@@ -182,6 +182,21 @@ se **traslada** aquí como proyecto final (cambio de `technology_id`, no
 duplicado — deja de aparecer bajo JavaScript), más 2-3 proyectos nuevos
 más pequeños usando el editor en vivo con el campo `ts`.
 
+**Convención de "Requisitos" en el README de cada repo de proyecto**
+(retrofiteada ya a los 3 repos existentes —`gestor-de-tareas-js`,
+`explorador-personajes`, `buscador-personajes-ts`— tras detectar que
+ninguno indicaba qué hacía falta instalado antes de `npm install`): todo
+repo de proyecto nuevo incluye una sección `## Requisitos` antes de
+`## Cómo ejecutarlo` con, como mínimo, la versión de Node.js que exige su
+`vite` (`engines.node` del propio paquete, no una versión inventada — para
+`vite@8` es `^20.19.0 || >=22.12.0`). El repo de TypeScript añade además
+una nota aclarando que la versión de TypeScript del proyecto (`~6.0.2`,
+clásica) vive en su propio `node_modules` vía `npm install`, sin relación
+con qué versión de TypeScript tenga instalada el alumno en global — evita
+la confusión de "por qué aquí usáis una versión vieja" cuando en realidad
+es un detalle de aislamiento por proyecto, no una recomendación de qué
+versión usar en general.
+
 ## Esquema (Zod)
 
 Cambio sobre el `esquemaEditorEnVivo` ya existente en
