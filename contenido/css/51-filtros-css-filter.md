@@ -218,6 +218,17 @@
 3. Explica la diferencia entre `drop-shadow()` y `box-shadow` con un ejemplo propio.
 4. Explica por qué `backdrop-filter: blur(10px)` sobre un `background: white` totalmente opaco no produce ningún efecto visible.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Aplica blur(6px) y grayscale(50%) a la vez sobre esta imagen (ejercicio 1). Escribe también un efecto de vidrio esmerilado con backdrop-filter: blur() sobre el panel semitransparente (ejercicio 2).",
+  "html": "<img class=\"foto\" src=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='160'%3E%3Crect width='240' height='160' fill='%23e07a3f'/%3E%3C/svg%3E\" alt=\"\">\n<div class=\"fondo\">\n  <div class=\"panel-cristal\">Panel con backdrop-filter</div>\n</div>",
+  "css": ".foto { /* filter: blur(6px) grayscale(50%); */ }\n.fondo { background: linear-gradient(45deg, #7c3aed, #ec4899); padding: 40px; }\n.panel-cristal { background: rgb(255 255 255 / 0.2); padding: 16px; color: white; /* backdrop-filter: blur(8px); */ }",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

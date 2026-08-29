@@ -158,6 +158,17 @@ El navegador ya cambia el cursor solo en los casos obvios: una I sobre texto sel
 3. Explica qué ocurre con `:hover` en un elemento con `pointer-events: none`.
 4. Escribe una regla `touch-action: manipulation` y explica a qué equivale exactamente.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Cambia el cursor a grab en reposo y a grabbing mientras se arrastra, con :active (ejercicio 1). Escribe también touch-action: manipulation y comprueba a qué equivale (ejercicio 4).",
+  "html": "<div class=\"arrastrable\">Arrástrame</div>",
+  "css": ".arrastrable {\n  width: 140px; padding: 12px; background: #eee; text-align: center;\n  /* cursor: grab; */\n}\n.arrastrable:active { /* cursor: grabbing; */ }",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

@@ -140,6 +140,17 @@ Un grid dentro de otro grid es, por defecto, completamente independiente — no 
 3. Escribe una regla que anule el gap heredado de un subgrid, fijando uno propio de 0.
 4. Explica el problema de alineación que resuelve `subgrid` en un layout de tarjetas con títulos de distinta longitud.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Haz que este elemento abarque las columnas 2 a 6 del grid padre y herede esas columnas con grid-template-columns: subgrid (ejercicio 1). Fija un gap propio de 0 que anule el heredado (ejercicio 3).",
+  "html": "<div class=\"grid-padre\">\n  <div class=\"subgrid-hijo\">Contenido con subgrid</div>\n</div>",
+  "css": ".grid-padre { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; border: 1px dashed #999; padding: 8px; }\n.subgrid-hijo {\n  grid-column: 2 / 7;\n  display: grid;\n  /* grid-template-columns: subgrid; */\n  background: #eee;\n}",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

@@ -180,6 +180,17 @@ Un enlace tiene, como mínimo, cuatro estados distintos: sin visitar, visitado, 
 3. Escribe una regla que quite el subrayado de un enlace en su estado normal, pero lo recupere en `:hover` y `:focus`.
 4. Escribe una regla con `:focus-visible` que muestre un contorno solo al navegar con teclado, sin mostrarlo al hacer clic con el ratón.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe las cuatro pseudo-clases de enlace en orden LVHA (ejercicio 1). Quita el subrayado en estado normal y recupéralo en :hover y :focus (ejercicio 3). Escribe un :focus-visible que solo se vea al navegar con teclado (ejercicio 4).",
+  "html": "<p><a href=\"#\">Un enlace de prueba</a></p>",
+  "css": "/* Escribe aquí tus pseudo-clases de enlace, en orden LVHA */",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

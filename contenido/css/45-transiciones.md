@@ -173,6 +173,17 @@ Una transición suaviza el cambio entre dos valores de una propiedad — en vez 
 3. Explica por qué `display` no se puede transicionar directamente.
 4. Reescribe `transition: all 300ms;` especificando solo las propiedades concretas que realmente cambian en tu ejemplo.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe una transición de background-color de 300ms con ease-in-out (ejercicio 1). Dale a este botón una transición rápida al entrar en :hover y lenta al salir (ejercicio 2).",
+  "html": "<button class=\"boton-transicion\">Pasa el ratón por encima</button>",
+  "css": ".boton-transicion {\n  background: #7c3aed;\n  color: white;\n  border: none;\n  padding: 10px 20px;\n  border-radius: 8px;\n  cursor: pointer;\n}\n.boton-transicion:hover { background: #a78bfa; }",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

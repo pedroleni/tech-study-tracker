@@ -170,6 +170,17 @@
 3. Explica por qué `top: 20px` en un elemento `relative` lo mueve hacia abajo, no hacia arriba.
 4. Escribe una regla con `position: sticky` que fije un encabezado en la parte superior de su contenedor al hacer scroll.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Cambia esta caja de static a absolute y observa qué pasa con sus hermanos (ejercicio 1). Convierte el contenedor en el contexto de posicionamiento de sus hijos absolutos, sin sacarlo del flujo (ejercicio 2). Escribe un position: sticky para el encabezado (ejercicio 4).",
+  "html": "<div class=\"contenedor\">\n  <div class=\"caja-1\">Caja 1</div>\n  <div class=\"caja-2\">Caja 2 (prueba position aquí)</div>\n  <div class=\"caja-3\">Caja 3</div>\n</div>\n<div class=\"scroll\">\n  <h3 class=\"encabezado-sticky\">Encabezado</h3>\n  <p>Contenido largo para poder hacer scroll y ver el sticky en acción, repite este texto varias veces si hace falta más altura, repite este texto varias veces si hace falta más altura.</p>\n</div>",
+  "css": ".contenedor { border: 1px dashed #999; padding: 8px; }\n.caja-1, .caja-2, .caja-3 { background: #eee; margin-bottom: 4px; padding: 6px; }\n.scroll { height: 150px; overflow-y: auto; border: 1px solid #999; }",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

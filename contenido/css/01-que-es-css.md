@@ -161,6 +161,17 @@ HTML no sabe nada de estilo — literalmente. Un `<h1>` no es "grande y en negri
 3. Reescribe un elemento con estilo en línea (`style="..."`) moviendo esa misma regla a una hoja interna con `<style>`.
 4. Comenta una línea de CSS real (una declaración cualquiera) sin borrarla, usando `/* */`.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe una regla que ponga en azul todos los párrafos (ejercicio 1). Cuando la tengas, comenta esa línea con /* */ sin borrarla (ejercicio 4) y comprueba que el párrafo vuelve a su color por defecto.",
+  "html": "<p>Un párrafo de prueba.</p>\n<p>Otro párrafo más.</p>",
+  "css": "/* Escribe aquí tu regla */",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

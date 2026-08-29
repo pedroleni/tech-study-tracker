@@ -163,6 +163,17 @@ Un color de marca repetido en veinte sitios distintos del CSS significa veinte c
 3. Escribe dos reglas: una que declare `--tema` en `:root`, y otra que la redefina solo dentro de una clase `.oscuro` — explica qué elementos verían el nuevo valor.
 4. Explica la diferencia real entre que una variable no exista y que exista pero tenga un valor inválido, en relación con el fallback de `var()`.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Declara --espaciado en :root y úsala en el padding de las tres cajas (ejercicio 1). Escribe una regla que use var(--color-alerta, orange) — fíjate que se usa el naranja porque la variable no existe (ejercicio 2). Redefine --tema solo dentro de .oscuro y observa qué cajas cambian (ejercicio 3).",
+  "html": "<div class=\"caja\">Caja 1</div>\n<div class=\"caja\">Caja 2</div>\n<div class=\"caja alerta\">Alerta</div>\n<div class=\"oscuro\"><div class=\"caja\">Caja dentro de .oscuro</div></div>",
+  "css": ":root { --tema: #f4f1ea; }\n.caja { background: var(--tema); margin-bottom: 8px; /* añade aquí --espaciado */ }\n.alerta { border: 2px solid var(--color-alerta, orange); }\n.oscuro { /* redefine --tema aquí */ }",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

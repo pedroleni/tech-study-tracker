@@ -148,6 +148,17 @@
 3. Explica qué pasaría si se omite el descriptor `inherits` en una regla `@property` que por lo demás está bien escrita.
 4. Escribe una animación de `@keyframes` que cambie una custom property registrada de tipo `<color>` de un color a otro, y explica por qué esa transición se ve suave solo gracias a `@property`.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Registra --opacidad-marca con @property, tipo <number>, sin herencia, valor inicial 1 (ejercicio 1). Después escribe una animación de @keyframes que cambie una custom property de tipo <color> registrada de esta forma, y comprueba que la transición se ve suave (ejercicio 4).",
+  "html": "<div class=\"caja\">Observa la opacidad y el color</div>",
+  "css": "@property --opacidad-marca {\n  syntax: '<number>';\n  inherits: false;\n  initial-value: 1;\n}\n.caja {\n  opacity: var(--opacidad-marca);\n  background: #7c3aed;\n  color: white;\n  padding: 16px;\n}",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

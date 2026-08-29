@@ -178,6 +178,17 @@
 3. Escribe una regla con el shorthand `font` que fije tamaño, interlineado y familia tipográfica en una sola línea.
 4. Explica por qué `font-weight: 600` puede no verse distinto de `font-weight: 400` en una fuente concreta, y qué lo solucionaría.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe un font stack con dos fuentes preferidas y un genérico al final (ejercicio 1). Escribe también una regla con el shorthand font que fije tamaño, interlineado y familia en una sola línea (ejercicio 3).",
+  "html": "<p class=\"texto\">Un párrafo de prueba para el font stack y el shorthand font.</p>",
+  "css": ".texto {\n  /* escribe aquí tu font-family y tu shorthand font */\n}",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

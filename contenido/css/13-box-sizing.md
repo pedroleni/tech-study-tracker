@@ -156,6 +156,17 @@ La lección anterior mostró que padding y border se suman al `width` declarado,
 3. Escribe el patrón de reset de dos reglas que aplica `border-box` a toda una página, incluidos los pseudo-elementos.
 4. Explica por qué una caja sin padding ni border se ve exactamente igual en `content-box` que en `border-box`.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Calcula primero a mano el área de contenido de esta caja con box-sizing: border-box, width 250px, padding 25px, border 5px (ejercicio 1). Cambia después a content-box y comprueba que el ancho total pasa a 310px (ejercicio 2). Escribe el reset de dos reglas del ejercicio 3.",
+  "html": "<div class=\"caja\">Caja de prueba</div>",
+  "css": ".caja {\n  box-sizing: border-box;\n  width: 250px;\n  padding: 25px;\n  border: 5px solid #333;\n}",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

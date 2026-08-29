@@ -189,6 +189,17 @@ Una página pensada para pantalla casi nunca funciona bien impresa tal cual: la 
 3. Escribe una regla que muestre la URL de cada enlace entre paréntesis, solo al imprimir.
 4. Escribe una regla `break-inside: avoid` para evitar que una tarjeta se parta entre dos páginas.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe una regla @media print que oculte el elemento .nav (ejercicio 1). Prueba con Ctrl+P / Cmd+P en tu propio navegador para ver una vista previa de impresión real — la vista previa del editor no simula el modo impresión.",
+  "html": "<nav class=\"nav\">Menú de navegación (no debería imprimirse)</nav>\n<main>Contenido principal que sí se imprime</main>",
+  "css": "/* @media print { .nav { display: none; } } */",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

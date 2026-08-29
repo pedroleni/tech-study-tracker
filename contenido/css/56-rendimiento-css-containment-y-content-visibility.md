@@ -185,6 +185,17 @@ No toda propiedad CSS cuesta lo mismo cambiar. El navegador procesa una página 
 3. Explica la diferencia entre `contain: content` y `contain: strict`.
 4. Explica por qué `will-change` no debería añadirse a un elemento "por si acaso" en el futuro.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Reescribe esta animación para mover opacity y transform en vez de top y left, logrando el mismo efecto visual (ejercicio 1).",
+  "html": "<div class=\"caja-mover\">Muévete con transform, no con top/left</div>",
+  "css": "@keyframes mover-mal { from { top: 0; opacity: 0; } to { top: 20px; opacity: 1; } }\n.caja-mover { position: relative; background: #7c3aed; color: white; padding: 12px; width: fit-content; animation: mover-mal 1s infinite alternate; }",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

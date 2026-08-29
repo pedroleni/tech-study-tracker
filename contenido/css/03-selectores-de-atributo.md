@@ -191,6 +191,17 @@ Un selector de atributo alcanza elementos por lo que ya tienen escrito en el HTM
 3. Escribe un selector que seleccione todas las imágenes cuyo atributo alt esté vacío (alt="").
 4. Explica la diferencia real entre [href*="es"] y [href^="es"] con un ejemplo de una URL que coincida con uno pero no con el otro.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe un selector para cualquier enlace con el atributo target (ejercicio 1), otro para los que empiezan por mailto: (ejercicio 2), y otro para las imágenes con alt vacío (ejercicio 3).",
+  "html": "<a href=\"https://ejemplo.com\" target=\"_blank\">Externo</a>\n<a href=\"mailto:hola@ejemplo.com\">Escríbenos</a>\n<img src=\"foto.jpg\" alt=\"\">\n<img src=\"otra.jpg\" alt=\"Un paisaje\">",
+  "css": "/* Escribe aquí tus selectores de atributo */",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

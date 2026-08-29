@@ -189,6 +189,17 @@
 3. Explica la diferencia entre `animation-direction: alternate` y `animation-direction: reverse`.
 4. Escribe una regla que pause una animación con `animation-play-state`, pensada para controlarse después desde JavaScript.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe un @keyframes llamado aparecer que vaya de opacity 0 a 1 (ejercicio 1) y aplícalo a esta caja con duración 400ms y animation-fill-mode: forwards (ejercicio 2).",
+  "html": "<div class=\"caja-anima\">Debería aparecer con la animación</div>",
+  "css": "/* @keyframes aparecer {\n  from { opacity: 0; }\n  to { opacity: 1; }\n} */\n.caja-anima {\n  background: #7c3aed; color: white; padding: 16px;\n  /* animation: aparecer 400ms forwards; */\n}",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

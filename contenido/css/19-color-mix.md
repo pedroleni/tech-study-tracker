@@ -157,6 +157,17 @@ Antes, aclarar un color de marca para el estado `:hover` de un botón significab
 3. Explica qué color resultaría de `color-mix(in srgb, red 40%, blue 40%)` y por qué no es una mezcla opaca al 50/50.
 4. Explica la diferencia visual entre `color-mix(in lch shorter hue, red, blue)` y `color-mix(in lch longer hue, red, blue)`.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe color-mix(in oklab, #16a34a 70%, white 30%) — ejercicio 1. Después genera una variante con 25% de opacidad de --color-marca usando color-mix() en vez del canal alfa (ejercicio 2).",
+  "html": "<div class=\"muestra\"></div>\n<div class=\"marca-transparente\">Texto sobre fondo con opacidad vía color-mix</div>",
+  "css": ":root { --color-marca: #16a34a; }\n.muestra { height: 50px; /* prueba color-mix() aquí */ }\n.marca-transparente { padding: 12px; /* prueba color-mix(in srgb, var(--color-marca) 25%, transparent) */ }",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

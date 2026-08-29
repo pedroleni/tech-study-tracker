@@ -157,6 +157,17 @@ Flexbox reparte espacio en una dimensión a la vez. Grid piensa en las dos a la 
 3. Escribe un layout de header, sidebar, content y footer usando `grid-template-areas`.
 4. Explica la diferencia real entre `auto-fill` y `auto-fit` cuando hay menos elementos de los que caben en el contenedor.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Crea tres columnas iguales con fr (ejercicio 1). Escribe una cuadrícula responsive de tarjetas de al menos 200px cada una, sin usar ninguna media query (ejercicio 2). Escribe el layout header/sidebar/content/footer con grid-template-areas (ejercicio 3).",
+  "html": "<div class=\"tres-columnas\">\n  <div>A</div><div>B</div><div>C</div>\n</div>\n<div class=\"cuadricula-responsive\">\n  <div>1</div><div>2</div><div>3</div><div>4</div>\n</div>",
+  "css": ".tres-columnas { display: grid; /* grid-template-columns aquí */ gap: 8px; margin-bottom: 16px; }\n.tres-columnas > div { background: #eee; padding: 12px; }\n.cuadricula-responsive { display: grid; /* grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); */ gap: 8px; }\n.cuadricula-responsive > div { background: #ddd; padding: 12px; }",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

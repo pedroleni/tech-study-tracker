@@ -182,6 +182,17 @@ Un fondo puede ser un color plano, una imagen, un degradado, o varias capas de l
 3. Escribe una regla con dos imágenes de fondo en capas, donde la segunda de la lista quede visible por debajo de la primera.
 4. Explica por qué siempre conviene declarar un `background-color` de respaldo junto a un `background-image`.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe un fondo repetido solo en horizontal con background-repeat-x (ejercicio 1). Haz que una imagen de fondo llene por completo esta caja de 300×150px con background-size: cover (ejercicio 2). Añade un background-color de respaldo (ejercicio 4).",
+  "html": "<div class=\"franja\"></div>\n<div class=\"caja-fondo\"></div>",
+  "css": ".franja { height: 40px; background-image: radial-gradient(circle, #999 3px, transparent 3px); background-size: 20px 20px; /* repite solo en horizontal */ }\n.caja-fondo { width: 300px; height: 150px; background-color: #333; background-image: linear-gradient(45deg, #f59e0b, #ef4444); }",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

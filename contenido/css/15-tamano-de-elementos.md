@@ -182,6 +182,17 @@ Antes de escribir un solo `width`, cada elemento ya tiene un tamaño: su tamaño
 3. Explica la diferencia práctica entre usar `width: 100%` y `max-width: 100%` en una imagen dentro de un contenedor más grande que la propia imagen.
 4. Escribe una regla que haga que una caja con overflow se pueda desplazar solo verticalmente, nunca horizontalmente.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe una regla con padding: 15% dentro de este contenedor de 300px y comprueba en la vista previa que el resultado coincide con tu cálculo (ejercicio 2). Prueba también la diferencia entre width: 100% y max-width: 100% en la imagen (ejercicio 3).",
+  "html": "<div class=\"contenedor\">\n  <div class=\"caja\">Caja con padding %</div>\n</div>\n<div style=\"width: 500px; border: 1px dashed #999;\">\n  <img class=\"foto\" src=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='120'%3E%3Crect width='300' height='120' fill='%23ccc'/%3E%3C/svg%3E\" alt=\"\">\n</div>",
+  "css": ".contenedor { width: 300px; border: 1px dashed #999; }\n.caja { background: #eee; }\n.foto { /* prueba width: 100% y luego max-width: 100% */ }",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

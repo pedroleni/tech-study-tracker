@@ -191,6 +191,17 @@ Una media query responde al viewport completo — nunca sabe si el componente qu
 3. Explica por qué `container-name: tarjeta;`, por sí solo, no activa ninguna consulta.
 4. Escribe un botón cuyo `padding` use unidades `cqi` en vez de un valor fijo, y explica qué cambia frente a usar `rem`.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Convierte este contenedor en un contenedor de consultas por ancho llamado tarjeta (ejercicio 1). Escribe un @container que aplique estilos cuando mida más de 30em (ejercicio 2).",
+  "html": "<div class=\"contenedor-tarjeta\">\n  <div class=\"tarjeta\">Contenido de la tarjeta</div>\n</div>",
+  "css": ".contenedor-tarjeta {\n  /* container-type: inline-size;\n  container-name: tarjeta; */\n  resize: horizontal;\n  overflow: auto;\n  border: 1px dashed #999;\n  width: 200px;\n}\n.tarjeta { background: #eee; padding: 12px; }\n/* @container tarjeta (width > 30em) { .tarjeta { background: lightgreen; } } */",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

@@ -155,6 +155,17 @@ Los blend modes deciden cómo se combinan los colores de dos capas superpuestas 
 3. Explica qué problema resuelve `isolation: isolate`.
 4. Explica la diferencia entre `multiply` y `difference` con un ejemplo propio.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe mix-blend-mode: multiply sobre el círculo superpuesto a la imagen de fondo (ejercicio 1). Prueba después background-blend-mode: overlay combinando color e imagen (ejercicio 2).",
+  "html": "<div class=\"lienzo\">\n  <div class=\"circulo\"></div>\n</div>\n<div class=\"caja-blend-fondo\"></div>",
+  "css": ".lienzo { position: relative; width: 200px; height: 150px; background: linear-gradient(45deg, #f59e0b, #10b981); }\n.circulo { position: absolute; top: 20px; left: 20px; width: 100px; height: 100px; border-radius: 50%; background: #7c3aed; /* mix-blend-mode: multiply; */ }\n.caja-blend-fondo { width: 200px; height: 100px; margin-top: 12px; background-color: #7c3aed; background-image: linear-gradient(45deg, #f59e0b, transparent); /* background-blend-mode: overlay; */ }",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

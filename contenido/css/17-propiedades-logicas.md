@@ -165,6 +165,17 @@
 3. Escribe una regla con `border-start-start-radius` que redondee solo una esquina de una caja, y explica a qué esquina física corresponde en un documento ltr normal.
 4. Explica la diferencia real entre `text-align: right` y `text-align: end`, con un ejemplo de HTML donde las dos produzcan resultados distintos.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Reescribe margin-top/margin-right/padding-left usando solo propiedades lógicas (ejercicio 1). Cambia después dir=\"rtl\" en el contenedor de abajo y observa cómo se comporta margin-inline-end frente a margin-right (ejercicio 2).",
+  "html": "<div class=\"contenedor\">\n  <div class=\"caja\">Caja de prueba</div>\n</div>\n<div dir=\"rtl\" class=\"contenedor\">\n  <div class=\"caja\">Caja en RTL</div>\n</div>",
+  "css": ".contenedor { border: 1px dashed #999; padding: 8px; margin-bottom: 8px; }\n.caja { background: #eee; padding: 4px; }",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

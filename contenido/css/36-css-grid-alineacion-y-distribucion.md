@@ -140,6 +140,17 @@ La lección anterior definió filas, columnas y áreas. Esta responde una pregun
 3. Escribe una regla que haga que un solo elemento de un grid, con `justify-items: center` en el contenedor, vuelva a estirarse para llenar su celda completa.
 4. Explica por qué `justify-content` no tiene ningún efecto en un grid cuyas columnas están definidas en `fr` y llenan todo el contenedor.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Centra todos los elementos del grid, horizontal y verticalmente, dentro de sus celdas (ejercicio 1). Distribuye estas columnas de tamaño fijo con espacio igual entre ellas (ejercicio 2).",
+  "html": "<div class=\"grid-centrado\">\n  <div>1</div><div>2</div><div>3</div>\n</div>\n<div class=\"grid-distribuido\">\n  <div>A</div><div>B</div><div>C</div>\n</div>",
+  "css": ".grid-centrado { display: grid; grid-template-columns: repeat(3, 100px); height: 120px; border: 1px dashed #999; }\n.grid-centrado > div { background: #7c3aed; color: white; width: 40px; height: 40px; }\n.grid-distribuido { display: grid; grid-template-columns: repeat(3, 80px); border: 1px dashed #999; }\n.grid-distribuido > div { background: #eee; padding: 8px; }",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

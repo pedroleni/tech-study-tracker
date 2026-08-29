@@ -213,6 +213,17 @@
 3. Escribe un `mask-image` con un `linear-gradient` que desvanezca un elemento de izquierda a derecha.
 4. Escribe una regla `shape-outside: circle(50%)` sobre un elemento flotante, y explica qué cambia respecto a no usarla.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe clip-path: circle(50%) sobre esta imagen cuadrada (ejercicio 1). Dibuja después un triángulo simple con clip-path: polygon() (ejercicio 2).",
+  "html": "<img class=\"foto-cuadrada\" src=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Crect width='150' height='150' fill='%233b82f6'/%3E%3C/svg%3E\" alt=\"\">\n<div class=\"triangulo\"></div>",
+  "css": ".foto-cuadrada { width: 150px; height: 150px; /* clip-path: circle(50%); */ }\n.triangulo { width: 120px; height: 120px; background: #f59e0b; /* clip-path: polygon(50% 0%, 0% 100%, 100% 100%); */ }",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

@@ -161,6 +161,17 @@ Un contador CSS numera elementos automáticamente — sin necesitar una `<ol>`, 
 3. Escribe una regla con `counters()` que numere una lista anidada como "1", "1.1", "1.2", "2".
 4. Explica por qué un contador de párrafos que solo se reinicia una vez, al principio de la página, sigue contando en global en vez de reiniciarse en cada nueva sección — y cómo solucionarlo.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe counter-reset, counter-increment y counter() para numerar cada h2 automáticamente como \"1. \", \"2. \" (ejercicio 1). Prueba también que un contador avance de 5 en 5 (ejercicio 2).",
+  "html": "<article>\n  <h2>Primer apartado</h2>\n  <h2>Segundo apartado</h2>\n  <h2>Tercer apartado</h2>\n</article>",
+  "css": "article { counter-reset: apartado; }\nh2::before {\n  counter-increment: apartado;\n  content: counter(apartado) '. ';\n}",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio
