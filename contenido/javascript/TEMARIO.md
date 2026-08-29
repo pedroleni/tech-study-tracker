@@ -475,3 +475,26 @@ sostenida en las tres pasadas.
   página. La lección usa `codigo-anotado`/`comparador-antes-despues`
   para explicar el código en vez de `editor-en-vivo` — no hay nada que
   ejecutar en vivo aquí.
+- **Proyecto avanzado 2: explorador de personajes con Vite (77,
+  2026-08-30)**: pedido explícito de seguir subiendo el nivel "usando
+  Vite por ejemplo". Mismo patrón de arquitectura que el `76`, escalado
+  a seis capas (`utilidades`/`api`/`estado`/`almacenamiento`/`acciones`/
+  `vista` + `main.js`) contra una API real con paginación y búsqueda
+  (rickandmortyapi.com, sin clave, CORS abierto verificado con `curl`),
+  scaffoldeado con `npm create vite@latest` de verdad — variables de
+  entorno (`import.meta.env`), `npm run dev`/`build`/`preview` los tres
+  verificados con Playwright, y tests con Vitest para la lógica pura
+  (`debounce`, la normalización de la respuesta inconsistente de la
+  API). Repositorio:
+  [github.com/pedroleni/explorador-personajes](https://github.com/pedroleni/explorador-personajes).
+  Durante la construcción de la propia solución apareció un bug real
+  (no fabricado para la lección): `renderizar()` reconstruía la rejilla
+  de tarjetas —y por tanto hasta 20 `<img>`— en cada cambio de estado,
+  incluido "empieza a cargar", disparando el doble de peticiones de
+  imagen de las necesarias por acción; con varias acciones seguidas
+  (buscar, favoritear, paginar) eso saturaba la conexión al mismo host
+  que la API y producía fallos de red intermitentes que el navegador
+  reportaba como CORS sin serlo. El fix (no tocar la rejilla mientras
+  `cargando` sea `true`) y la propia historia de cómo se diagnosticó se
+  convirtieron en la sección más valiosa de la lección — un bug
+  encontrado de verdad vale más que uno inventado para la ocasión.
