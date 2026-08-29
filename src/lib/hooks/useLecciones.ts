@@ -8,6 +8,7 @@ import {
   createLeccion,
   deleteLeccion,
   listLecciones,
+  listProyectos,
   updateLeccion,
 } from '@/lib/queries/lecciones'
 
@@ -17,6 +18,15 @@ export function useLecciones(technologyId: string) {
     queryKey: queryKeys.leccionesForTechnology(user?.id ?? null, technologyId),
     queryFn: () => listLecciones(technologyId),
     enabled: !loading && Boolean(technologyId),
+  })
+}
+
+export function useProyectos() {
+  const { user, loading } = useAuth()
+  return useQuery({
+    queryKey: queryKeys.proyectos(user?.id ?? null),
+    queryFn: listProyectos,
+    enabled: !loading,
   })
 }
 

@@ -19,6 +19,7 @@ const nombresComponentes = [
   'MapaDeRegiones',
   'EsquemaDePagina',
   'CapasDeCaja',
+  'EditorEnVivo',
   'Acordeon',
   'Pestanas',
   'Pasos',
@@ -73,7 +74,22 @@ describe('AdminReferenciaContenidoPage', () => {
     // Monta 60+ componentes reales más una auditoría axe completa — el
     // timeout por defecto de Vitest (5000ms) se queda corto según crece
     // el catálogo, sin que eso indique un problema real.
-    vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({ matches: true }))
+    // { matches: true } a secas basta para el resto del catálogo, pero
+    // EditorEnVivo monta un EditorView de CodeMirror de verdad, que además
+    // necesita addEventListener/addListener en el objeto devuelto (ver
+    // src/test/setup.ts) — el stub global no aplica aquí porque este test
+    // lo sobrescribe con uno más simple pensado solo para el modo oscuro.
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn().mockReturnValue({
+        matches: true,
+        addListener: () => {},
+        removeListener: () => {},
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        dispatchEvent: () => false,
+      }),
+    )
     vi.spyOn(window, 'setInterval').mockImplementation(
       (() => 0) as unknown as typeof window.setInterval,
     )

@@ -6,6 +6,7 @@ import { CodigoAnotado } from '@/components/bloques-laboratorio/CodigoAnotado'
 import { ComparadorAntesDespues } from '@/components/bloques-laboratorio/ComparadorAntesDespues'
 import { DiagramaEtiqueta } from '@/components/bloques-laboratorio/DiagramaEtiqueta'
 import { EsquemaDePagina } from '@/components/bloques-laboratorio/EsquemaDePagina'
+import { EditorEnVivo } from '@/components/bloques-laboratorio/EditorEnVivo'
 import { LineaDeTiempo } from '@/components/bloques-laboratorio/LineaDeTiempo'
 import { MapaDeRegiones } from '@/components/bloques-laboratorio/MapaDeRegiones'
 import { Mitos } from '@/components/bloques-laboratorio/Mitos'
@@ -33,4 +34,5 @@ export const registroBloquesLaboratorio: Record<string, ComponentType<any>> = {
   'mapa-de-regiones': MapaDeRegiones,
   'esquema-de-pagina': EsquemaDePagina,
   'capas-de-caja': CapasDeCaja,
+  'editor-en-vivo': EditorEnVivo,
 }

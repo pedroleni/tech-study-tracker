@@ -17,6 +17,7 @@ import { ForgotPasswordPage } from '@/routes/ForgotPasswordPage'
 import { LoginPage } from '@/routes/LoginPage'
 import { LeccionPage } from '@/routes/LeccionPage'
 import { PublicHomePage } from '@/routes/PublicHomePage'
+import { ProyectosPage } from '@/routes/ProyectosPage'
 import { RegisterPage } from '@/routes/RegisterPage'
 import { ResetPasswordPage } from '@/routes/ResetPasswordPage'
 import { TechnologyPage } from '@/routes/TechnologyPage'
@@ -29,6 +30,7 @@ function App() {
           <Route element={<AppShell />}>
             <Route index element={<PublicHomePage />} />
             <Route path="/categorias/:id" element={<CategoryPage />} />
+            <Route path="/proyectos" element={<ProyectosPage />} />
             <Route path="/tecnologias/:id" element={<TechnologyPage />} />
             <Route path="/tecnologias/:id/:leccionSlug" element={<LeccionPage />} />
             <Route path="/login" element={<LoginPage />} />

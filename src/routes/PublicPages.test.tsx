@@ -40,6 +40,7 @@ const leccion = {
     '# Efectos\n\nTexto seguro <script>alert(1)</script>\n\n![Píxel remoto](https://tracker.example/pixel.gif)',
   orden: 10,
   status: 'publicado' as const,
+  esProyecto: false,
   createdAt: '2026-08-14T10:00:00.000Z',
   updatedAt: '2026-08-14T10:00:00.000Z',
 }

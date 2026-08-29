@@ -1,8 +1,8 @@
 import { supabase } from '@/lib/supabaseClient'
-import type { Leccion } from '@/types'
+import type { Leccion, Proyecto } from '@/types'
 
-import { mapLeccion } from './mappers'
-import type { LeccionPatch, NewLeccionInput } from './mappers'
+import { mapLeccion, mapProyecto } from './mappers'
+import type { LeccionPatch, NewLeccionInput, ProyectoRow } from './mappers'
 
 export type LeccionLookup =
   | { id: string; technologyId?: never; slug?: never }
@@ -17,6 +17,7 @@ function toNewLeccionPayload(input: NewLeccionInput) {
     resumen: input.resumen,
     contenido: input.contenido,
     orden: input.orden,
+    es_proyecto: input.esProyecto,
   }
 }
 
@@ -29,7 +30,19 @@ function toLeccionPatch(patch: LeccionPatch) {
     ...(patch.contenido !== undefined && { contenido: patch.contenido }),
     ...(patch.orden !== undefined && { orden: patch.orden }),
     ...(patch.status !== undefined && { status: patch.status }),
+    ...(patch.esProyecto !== undefined && { es_proyecto: patch.esProyecto }),
   }
+}
+
+export async function listProyectos(): Promise<Proyecto[]> {
+  const { data, error } = await supabase
+    .from('lecciones')
+    .select('*, technology:technologies!inner(id, name, icon, status)')
+    .eq('es_proyecto', true)
+    .order('orden', { ascending: true })
+    .order('created_at', { ascending: true })
+  if (error) throw error
+  return (data as ProyectoRow[]).map(mapProyecto)
 }
 
 export async function listLecciones(technologyId: string): Promise<Leccion[]> {

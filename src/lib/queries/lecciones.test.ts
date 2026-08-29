@@ -7,7 +7,7 @@ vi.mock('@/lib/supabaseClient', () => ({
 }))
 
 import type { NewLeccionInput } from './mappers'
-import { createLeccion, getLeccion, listLecciones, updateLeccion } from './lecciones'
+import { createLeccion, getLeccion, listLecciones, listProyectos, updateLeccion } from './lecciones'
 
 const leccionRow = {
   id: 'leccion-1',
@@ -19,6 +19,7 @@ const leccionRow = {
   contenido: '# Fundamentos',
   orden: 10,
   status: 'borrador' as const,
+  es_proyecto: false,
   created_at: '2026-08-14T08:00:00.000Z',
   updated_at: '2026-08-14T08:00:00.000Z',
 }
@@ -33,6 +34,7 @@ const leccion = {
   contenido: '# Fundamentos',
   orden: 10,
   status: 'borrador' as const,
+  esProyecto: false,
   createdAt: '2026-08-14T08:00:00.000Z',
   updatedAt: '2026-08-14T08:00:00.000Z',
 }
@@ -45,6 +47,7 @@ const newLeccion: NewLeccionInput = {
   resumen: 'La base de HTML.',
   contenido: '# Fundamentos',
   orden: 10,
+  esProyecto: false,
 }
 
 describe('lesson queries', () => {
@@ -105,23 +108,57 @@ describe('lesson queries', () => {
       resumen: 'La base de HTML.',
       contenido: '# Fundamentos',
       orden: 10,
+      es_proyecto: false,
     })
   })
 
   it('updates only supplied editable fields and never reparents the lesson', async () => {
-    const updatedRow = { ...leccionRow, status: 'publicado' as const }
+    const updatedRow = { ...leccionRow, status: 'publicado' as const, es_proyecto: true }
     const single = vi.fn().mockResolvedValue({ data: updatedRow, error: null })
     const select = vi.fn().mockReturnValue({ single })
     const eq = vi.fn().mockReturnValue({ select })
     const update = vi.fn().mockReturnValue({ eq })
     supabaseMock.from.mockReturnValue({ update })
 
-    await expect(updateLeccion('leccion-1', { status: 'publicado' })).resolves.toEqual({
+    await expect(
+      updateLeccion('leccion-1', { status: 'publicado', esProyecto: true }),
+    ).resolves.toEqual({
       ...leccion,
       status: 'publicado',
+      esProyecto: true,
     })
-    expect(update).toHaveBeenCalledWith({ status: 'publicado' })
+    expect(update).toHaveBeenCalledWith({ status: 'publicado', es_proyecto: true })
     expect(eq).toHaveBeenCalledWith('id', 'leccion-1')
+  })
+
+  it('lists only project lessons with their technology presentation data', async () => {
+    const projectRow = {
+      ...leccionRow,
+      es_proyecto: true,
+      technology: {
+        id: 'technology-1',
+        name: 'HTML',
+        icon: 'html5',
+        status: 'completado' as const,
+      },
+    }
+    const secondOrder = vi.fn().mockResolvedValue({ data: [projectRow], error: null })
+    const firstOrder = vi.fn().mockReturnValue({ order: secondOrder })
+    const eq = vi.fn().mockReturnValue({ order: firstOrder })
+    const select = vi.fn().mockReturnValue({ eq })
+    supabaseMock.from.mockReturnValue({ select })
+
+    await expect(listProyectos()).resolves.toEqual([
+      {
+        ...leccion,
+        esProyecto: true,
+        technology: { id: 'technology-1', name: 'HTML', icon: 'html5', status: 'completado' },
+      },
+    ])
+    expect(select).toHaveBeenCalledWith(
+      '*, technology:technologies!inner(id, name, icon, status)',
+    )
+    expect(eq).toHaveBeenCalledWith('es_proyecto', true)
   })
 
   it('propagates Supabase errors unchanged', async () => {

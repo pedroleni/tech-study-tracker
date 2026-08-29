@@ -102,6 +102,7 @@ describe('admin pages', () => {
 
     expect(screen.getByLabelText('Slug')).toHaveValue('arbol-del-dom')
     expect(screen.getByLabelText('Estado')).toBeDisabled()
+    fireEvent.click(screen.getByLabelText('Es un proyecto'))
     fireEvent.click(screen.getByRole('button', { name: 'Crear borrador' }))
     await waitFor(() =>
       expect(onSubmit).toHaveBeenCalledWith(
@@ -109,6 +110,7 @@ describe('admin pages', () => {
           slug: 'arbol-del-dom',
           titulo: 'Árbol del DOM',
           status: 'borrador',
+          esProyecto: true,
         }),
       ),
     )
@@ -118,7 +120,8 @@ describe('admin pages', () => {
     expect(results.violations).toEqual([])
   })
 
-  it('freezes an existing lesson slug when its title changes', () => {
+  it('freezes an existing lesson slug and saves its project flag when editing', async () => {
+    const onSubmit = vi.fn().mockResolvedValue(undefined)
     render(
       <LeccionForm
         leccion={{
@@ -131,11 +134,12 @@ describe('admin pages', () => {
           contenido: '',
           orden: 10,
           status: 'borrador',
+          esProyecto: true,
           createdAt: '2026-08-14T10:00:00.000Z',
           updatedAt: '2026-08-14T10:00:00.000Z',
         }}
         pending={false}
-        onSubmit={vi.fn().mockResolvedValue(undefined)}
+        onSubmit={onSubmit}
       />,
     )
 
@@ -144,5 +148,11 @@ describe('admin pages', () => {
     })
     expect(screen.getByLabelText('Slug')).toHaveValue('enlace-estable')
     expect(screen.getByLabelText('Estado')).toBeEnabled()
+    expect(screen.getByLabelText('Es un proyecto')).toBeChecked()
+    fireEvent.click(screen.getByLabelText('Es un proyecto'))
+    fireEvent.click(screen.getByRole('button', { name: 'Guardar cambios' }))
+    await waitFor(() =>
+      expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ esProyecto: false })),
+    )
   })
 })

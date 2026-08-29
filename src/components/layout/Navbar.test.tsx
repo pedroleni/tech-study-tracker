@@ -42,6 +42,7 @@ describe('Navbar', () => {
     renderNavbar()
 
     expect(screen.getByText('Tech Study Tracker')).toBeInTheDocument()
+    expect(screen.getAllByRole('link', { name: 'Proyectos' }).length).toBeGreaterThan(0)
     expect(screen.queryByRole('button', { name: 'Cerrar sesión' })).not.toBeInTheDocument()
   })
 

@@ -3,6 +3,7 @@ import type {
   Comment,
   Favorite,
   Leccion,
+  Proyecto,
   Profile,
   Technology,
   UserLeccionProgress,
@@ -41,8 +42,18 @@ interface LeccionRow {
   contenido: string
   orden: number
   status: Leccion['status']
+  es_proyecto: boolean
   created_at: string
   updated_at: string
+}
+
+export interface ProyectoRow extends LeccionRow {
+  technology: {
+    id: string
+    name: string
+    icon: string | null
+    status: Technology['status']
+  }
 }
 
 interface ProfileRow {
@@ -118,8 +129,16 @@ export function mapLeccion(row: LeccionRow): Leccion {
     contenido: row.contenido,
     orden: row.orden,
     status: row.status,
+    esProyecto: row.es_proyecto,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+  }
+}
+
+export function mapProyecto(row: ProyectoRow): Proyecto {
+  return {
+    ...mapLeccion(row),
+    technology: row.technology,
   }
 }
 
@@ -182,11 +201,21 @@ export type TechnologyPatch = Partial<
 
 export type NewLeccionInput = Pick<
   Leccion,
-  'technologyId' | 'slug' | 'modulo' | 'titulo' | 'resumen' | 'contenido' | 'orden'
+  | 'technologyId'
+  | 'slug'
+  | 'modulo'
+  | 'titulo'
+  | 'resumen'
+  | 'contenido'
+  | 'orden'
+  | 'esProyecto'
 >
 
 export type LeccionPatch = Partial<
-  Pick<Leccion, 'slug' | 'modulo' | 'titulo' | 'resumen' | 'contenido' | 'orden' | 'status'>
+  Pick<
+    Leccion,
+    'slug' | 'modulo' | 'titulo' | 'resumen' | 'contenido' | 'orden' | 'status' | 'esProyecto'
+  >
 >
 
 export interface NewCommentInput {

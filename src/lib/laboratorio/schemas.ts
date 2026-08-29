@@ -180,6 +180,24 @@ export const esquemaCapasDeCaja = z.object({
   content: z.string().min(1).max(40),
 })
 
+// Editor en vivo: la lección deja de describir un resultado y deja probarlo
+// de verdad. Al menos uno de html/css/js debe traer contenido — un bloque
+// con los tres vacíos no tiene sentido y `refine` lo rechaza en vez de
+// dejarlo caer en un editor completamente en blanco.
+export const esquemaEditorEnVivo = z
+  .object({
+    tipo: z.literal('editor-en-vivo'),
+    titulo: z.string().min(1).max(140).optional(),
+    consigna: z.string().min(1).max(600).optional(),
+    html: z.string().max(4000).default(''),
+    css: z.string().max(4000).default(''),
+    js: z.string().max(4000).default(''),
+    pestañaInicial: z.enum(['html', 'css', 'js']).default('html'),
+  })
+  .refine((datos) => datos.html.trim() || datos.css.trim() || datos.js.trim(), {
+    message: 'editor-en-vivo necesita contenido inicial en html, css o js',
+  })
+
 export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaPrediceElResultado,
   esquemaCodigoAnotado,
@@ -195,6 +213,7 @@ export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaMapaDeRegiones,
   esquemaEsquemaDePagina,
   esquemaCapasDeCaja,
+  esquemaEditorEnVivo,
 ])
 
 export type DatosPrediceElResultado = z.infer<typeof esquemaPrediceElResultado>
@@ -213,4 +232,5 @@ export type DatosVistaPreviaSocial = z.infer<typeof esquemaVistaPreviaSocial>
 export type DatosMapaDeRegiones = z.infer<typeof esquemaMapaDeRegiones>
 export type DatosEsquemaDePagina = z.infer<typeof esquemaEsquemaDePagina>
 export type DatosCapasDeCaja = z.infer<typeof esquemaCapasDeCaja>
+export type DatosEditorEnVivo = z.infer<typeof esquemaEditorEnVivo>
 export type DatosBloqueLaboratorio = z.infer<typeof esquemaBloqueLaboratorio>
