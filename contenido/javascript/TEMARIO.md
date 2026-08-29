@@ -457,3 +457,21 @@ sostenida en las tres pasadas.
   duplicados), `75` generador de contraseñas (construcción de alfabeto
   + `Math.random()`, sin botón de copiar por la restricción de
   `navigator.clipboard` ya explicada).
+- **Proyecto avanzado (`76`, 2026-08-30)**: pedido explícito tras
+  revisar los 4 proyectos de sandbox — "muy sencillos, necesito algo
+  más completo, con arquitectura". Mismo gestor de tareas del proyecto
+  `72`, pero reconstruido con arquitectura real: 4 módulos ES separados
+  por responsabilidad (`estado.js`/`almacenamiento.js`/`vista.js`/
+  `main.js`), patrón estado→render, y persistencia de verdad en
+  localStorage — exactamente las dos cosas que el sandbox de
+  `editor-en-vivo` no puede dar (un origen opaco no puede resolver
+  módulos entre archivos ni usar localStorage). Vive fuera del sandbox,
+  en un repositorio real:
+  [github.com/pedroleni/gestor-de-tareas-js](https://github.com/pedroleni/gestor-de-tareas-js)
+  (rama `main` = punto de partida con TODOs, rama `solucion` =
+  implementación completa) — la solución se verificó de verdad
+  sirviéndola con un servidor HTTP local y probando con Playwright
+  añadir/completar/filtrar/borrar tareas y que sobrevivan a recargar la
+  página. La lección usa `codigo-anotado`/`comparador-antes-despues`
+  para explicar el código en vez de `editor-en-vivo` — no hay nada que
+  ejecutar en vivo aquí.
