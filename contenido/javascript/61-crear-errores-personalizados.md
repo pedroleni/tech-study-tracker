@@ -145,6 +145,17 @@ Cierra el módulo de manejo de errores. `Error` es, por dentro, una clase normal
 3. Añade una propiedad adicional a tu error personalizado, más allá de `message`.
 4. Relanza un error nuevo conservando el original con la opción `cause`, y accede a él desde `error.cause`.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Crea una clase de error personalizada que extienda Error, con su propio this.name (ejercicio 1). Lánzala y captúrala, comprobando instanceof (ejercicio 2). Relanza un error nuevo conservando el original con cause (ejercicio 4).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nclass ErrorDeValidacion extends Error {\n  constructor(mensaje) {\n    super(mensaje);\n    this.name = 'ErrorDeValidacion';\n  }\n}\n\ntry {\n  throw new ErrorDeValidacion('El campo es obligatorio');\n} catch (error) {\n  mostrar('instanceof ErrorDeValidacion: ' + (error instanceof ErrorDeValidacion));\n  mostrar('instanceof Error: ' + (error instanceof Error));\n}\n\ntry {\n  try {\n    JSON.parse('esto no es JSON válido');\n  } catch (original) {\n    throw new Error('Fallo al procesar la configuración', { cause: original });\n  }\n} catch (error) {\n  mostrar('Error: ' + error.message);\n  mostrar('Causa original: ' + error.cause.message);\n}",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

@@ -164,6 +164,17 @@ Un array guarda varios valores bajo un solo nombre, en un orden concreto. A dife
 3. Usa `splice()` para quitar exactamente un elemento de un array, localizado primero con `indexOf()`.
 4. Convierte una cadena de texto separada por comas en un array con `split()`, y vuelve a unirla con `join()`.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Crea un array con al menos tres tipos de datos distintos (ejercicio 1). Usa push() y pop(), y explica qué devuelve cada uno (ejercicio 2). Usa splice() para quitar un elemento localizado con indexOf() (ejercicio 3).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nconst mezcla = [1, 'dos', true, { cuatro: 4 }];\nmostrar(mezcla);\n\nconst numeros = [1, 2, 3];\nmostrar('push devuelve: ' + numeros.push(4));\nmostrar('pop devuelve: ' + numeros.pop());\nmostrar(numeros);",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

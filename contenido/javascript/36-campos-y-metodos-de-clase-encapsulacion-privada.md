@@ -151,6 +151,17 @@ Dos formas de ir más allá de un campo o método normal de instancia: `static` 
 3. Implementa el patrón de "brand check" (`#campo in objeto`) para comprobar si un objeto es una instancia real de tu clase.
 4. Explica en tus propias palabras la diferencia entre el `SyntaxError` y el `TypeError` al trabajar con campos privados.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Crea una clase con un campo static que cuente instancias creadas (ejercicio 1). Añade un método privado llamado solo desde otro público (ejercicio 2). Implementa un brand check con #campo in objeto (ejercicio 3).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nclass Usuario {\n  static contador = 0;\n  #id;\n  constructor() {\n    Usuario.contador++;\n    this.#id = Usuario.contador;\n  }\n  #generarEtiqueta() {\n    return 'Usuario #' + this.#id;\n  }\n  mostrarEtiqueta() {\n    return this.#generarEtiqueta();\n  }\n  static esUsuario(objeto) {\n    return #id in objeto;\n  }\n}\nconst u1 = new Usuario();\nconst u2 = new Usuario();\nmostrar(u1.mostrarEtiqueta());\nmostrar(u2.mostrarEtiqueta());\nmostrar('Total: ' + Usuario.contador);\nmostrar('¿u1 es Usuario? ' + Usuario.esUsuario(u1));",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

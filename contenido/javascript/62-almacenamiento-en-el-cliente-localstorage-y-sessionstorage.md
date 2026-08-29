@@ -156,6 +156,17 @@ Abre el módulo de APIs del navegador. `localStorage` y `sessionStorage` guardan
 3. Compara el comportamiento de `localStorage` y `sessionStorage` cerrando y reabriendo la pestaña.
 4. Comprueba que `localStorage.getItem()` sobre una clave inexistente devuelve `null`, no `undefined`.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Guarda un valor con localStorage.setItem(), recupéralo y bórralo (ejercicio 1). Este editor vive dentro de un iframe con sandbox=\"allow-scripts\" (sin allow-same-origin) — el mismo mecanismo de seguridad de todos los ejemplos en vivo de este curso. Un efecto secundario real de eso es que localStorage está deshabilitado aquí (origen opaco, sin almacenamiento propio): verás el error real que lanza el navegador. Copia este mismo código en un archivo .html normal en tu ordenador para verlo funcionar de verdad.",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\ntry {\n  localStorage.setItem('color-favorito', 'azul');\n  mostrar('Guardado: ' + localStorage.getItem('color-favorito'));\n  localStorage.removeItem('color-favorito');\n  mostrar('Tras removeItem: ' + localStorage.getItem('color-favorito'));\n} catch (error) {\n  mostrar('No se pudo usar localStorage aquí: ' + error.message);\n  mostrar('(Esto es el sandbox del editor, no un error en tu código)');\n}",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

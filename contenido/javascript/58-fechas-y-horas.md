@@ -145,6 +145,17 @@
 3. Usa `Date.now()` para obtener el número de milisegundos actual desde el epoch.
 4. Calcula cuántos días quedan hasta una fecha futura, restando dos valores de `getTime()` y dividiendo entre los milisegundos de un día.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Crea una fecha con new Date(año, mes, día) y comprueba getMonth() (recuerda el 0-indexado, ejercicio 1). Usa Date.now() para obtener los milisegundos actuales (ejercicio 3). Calcula cuántos días quedan hasta una fecha futura (ejercicio 4).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nconst fecha = new Date(2026, 11, 25);\nmostrar('Mes (0-indexado): ' + fecha.getMonth());\nmostrar('Día de la semana: ' + fecha.getDay());\n\nmostrar('Ahora: ' + Date.now());\n\nconst msPorDia = 1000 * 60 * 60 * 24;\nconst diasRestantes = Math.ceil((fecha.getTime() - Date.now()) / msPorDia);\nmostrar('Días hasta Navidad 2026: ' + diasRestantes);",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

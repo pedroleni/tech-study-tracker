@@ -143,6 +143,17 @@ La lección anterior ya presentó la notación de punto y de corchetes. Esta pro
 3. Explica por qué `datos.10` sería un error de sintaxis, mientras que `datos['10']` no lo es.
 4. Escribe un acceso con optional chaining (`?.`) a una propiedad que podría no existir, sin que lance ningún error.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe un objeto con una clave que contenga un espacio y accede con corchetes (ejercicio 1). Construye el nombre de una propiedad dinámicamente concatenando (ejercicio 2). Usa optional chaining en una propiedad que podría no existir (ejercicio 4).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nconst datos = { 'nombre completo': 'Ada Lovelace' };\nmostrar(datos['nombre completo']);\n\nconst prefijo = 'color';\nconst objeto = { colorFavorito: 'azul' };\nconst clave = prefijo + 'Favorito';\nmostrar(objeto[clave]);\n\nconst usuario = { perfil: null };\nmostrar(usuario.perfil?.direccion?.calle);",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

@@ -227,6 +227,17 @@ Cierra el módulo de objetos con tres sintaxis relacionadas, todas basadas en `[
 3. Combina dos objetos con spread donde ambos tengan una clave repetida, y comprueba experimentalmente cuál gana.
 4. Escribe una función con un parámetro rest, y demuestra que es un array real usando `sort()` o `map()` directamente sobre él.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Desestructura un array con un valor por defecto y un elemento saltado (ejercicio 1). Desestructura un objeto renombrando una variable y usando rest (ejercicio 2). Combina dos objetos con spread donde ambos tengan una clave repetida (ejercicio 3).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nconst [primero, , tercero = 'valor por defecto'] = [1, 2];\nmostrar({ primero, tercero });\n\nconst { nombre: nombreUsuario, ...resto } = { nombre: 'Ada', edad: 30, ciudad: 'Londres' };\nmostrar({ nombreUsuario, resto });\n\nconst combinado = { ...{ color: 'rojo' }, ...{ color: 'azul' } };\nmostrar(combinado);",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

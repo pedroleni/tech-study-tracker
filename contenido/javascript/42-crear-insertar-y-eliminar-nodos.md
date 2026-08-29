@@ -151,6 +151,17 @@ Hasta ahora, todo lo visto en el módulo operaba sobre elementos que ya existía
 3. Elimina un elemento con `remove()`, y reescribe el mismo efecto usando `removeChild()` desde su padre.
 4. Duplica un elemento con hijos usando `cloneNode(true)`, e inserta la copia junto al original.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Crea un elemento con createElement(), configúralo e insértalo (ejercicio 1). Mueve un elemento existente de un contenedor a otro con appendChild() (ejercicio 2). Elimina un elemento con remove() (ejercicio 3).",
+  "html": "<div id=\"origen\"><p class=\"mover\">Muéveme</p></div>\n<div id=\"destino\"></div>\n<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nconst nuevo = document.createElement('p');\nnuevo.textContent = 'Elemento nuevo';\nnuevo.setAttribute('data-creado', 'true');\ndocument.body.appendChild(nuevo);\nmostrar('Elemento creado e insertado');\n\nconst elementoAMover = document.querySelector('.mover');\ndocument.getElementById('destino').appendChild(elementoAMover);\nmostrar('Elemento movido a #destino');",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

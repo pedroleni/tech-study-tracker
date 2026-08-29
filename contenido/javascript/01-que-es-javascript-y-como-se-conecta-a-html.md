@@ -164,6 +164,17 @@ Cada vez que una página web hace algo más que quedarse ahí, quieta, mostrando
 3. Predice el resultado de `"5" + 3` y de `"5" - 3`, y explica la diferencia.
 4. Explica en una frase de dónde viene el nombre "JavaScript" y por qué resulta engañoso.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe un script que cree un párrafo con createElement y lo añada al final del body (ejercicio 1). Después, en la consola de tu propio navegador (F12), predice y comprueba el resultado de \"5\" + 3 y de \"5\" - 3 (ejercicio 3).",
+  "html": "<h1>Página de prueba</h1>",
+  "js": "// Ejercicio 1: crea un párrafo y añádelo al body\n\n\n// Ejercicio 3 (compruébalo tú, aquí solo lo mostramos):\nconsole.log('\"5\" + 3 =', \"5\" + 3);\nconsole.log('\"5\" - 3 =', \"5\" - 3);",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

@@ -132,6 +132,17 @@ Cierra el módulo de clases. Un campo `static campo = valor;` solo permite una �
 3. Declara dos bloques `static` en la misma clase, y comprueba el orden exacto en que se ejecutan.
 4. Explica por qué un campo `static` declarado después de un bloque no está disponible dentro de él.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Crea una clase con un campo static inicializado dentro de un bloque static {} con lógica condicional (ejercicio 1). Demuestra con mostrar() que se ejecuta antes de crear cualquier instancia (ejercicio 2).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nclass Config {\n  static modo;\n  static {\n    mostrar('Ejecutando el bloque static, antes de cualquier instancia');\n    Config.modo = new Date().getFullYear() >= 2026 ? 'moderno' : 'clasico';\n  }\n}\nmostrar('Modo: ' + Config.modo);\nnew Config();",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

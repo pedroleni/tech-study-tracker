@@ -155,6 +155,17 @@ Un iterador es cualquier objeto con un método `next()` que devuelve `{ value, d
 3. Crea un objeto propio con `[Symbol.iterator]()` como generador, y recórrelo con `for...of`.
 4. Demuestra que llamar a una función generadora no ejecuta su cuerpo hasta la primera llamada a `next()`.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe un iterador manual con next() que devuelva { value, done } (ejercicio 1). Reescríbelo como función generadora con function* y yield (ejercicio 2).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nfunction crearIteradorManual(max) {\n  let actual = 0;\n  return {\n    next() {\n      return actual < max ? { value: actual++, done: false } : { value: undefined, done: true };\n    },\n  };\n}\nconst it = crearIteradorManual(3);\nmostrar(it.next());\nmostrar(it.next());\n\nfunction* generador(max) {\n  for (let i = 0; i < max; i++) yield i;\n}\nfor (const valor of generador(3)) {\n  mostrar('generador: ' + valor);\n}",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

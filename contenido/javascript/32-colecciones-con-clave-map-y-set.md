@@ -169,6 +169,17 @@
 3. Deduplica un array con elementos repetidos usando `new Set()` y el spread.
 4. Explica en tus propias palabras dos ventajas reales de `Map` sobre un objeto normal usado como colección.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Crea un Map con al menos tres entradas y recórrelo con for...of (ejercicio 1). Deduplica un array con new Set() y el spread (ejercicio 3).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nconst capitales = new Map([\n  ['España', 'Madrid'],\n  ['Francia', 'París'],\n  ['Italia', 'Roma'],\n]);\nfor (const [pais, capital] of capitales) {\n  mostrar(pais + ' -> ' + capital);\n}\n\nconst conRepetidos = [1, 2, 2, 3, 3, 3];\nconst unicos = [...new Set(conRepetidos)];\nmostrar(unicos);",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

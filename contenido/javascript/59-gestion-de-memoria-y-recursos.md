@@ -181,6 +181,17 @@ Cierra el módulo de JavaScript moderno. La memoria se libera sola, automáticam
 3. Crea una clase con `[Symbol.dispose]()`, y libérala automáticamente con una declaración `using`.
 4. Demuestra que `using` libera un recurso incluso cuando el código dentro del bloque lanza un error.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Usa un WeakMap para asociar datos a un objeto sin impedir que se libere (ejercicio 2). Crea una clase con [Symbol.dispose]() y libérala automáticamente con using (ejercicio 3) — using es una función muy reciente: si tu navegador todavía no la soporta, verás un error de sintaxis, que es información real sobre el soporte actual.",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nconst metadatos = new WeakMap();\nlet elemento = {};\nmetadatos.set(elemento, { creado: Date.now() });\nmostrar(metadatos.get(elemento));\n\nclass Recurso {\n  constructor(nombre) { this.nombre = nombre; mostrar('Abriendo ' + nombre); }\n  [Symbol.dispose]() { mostrar('Cerrando ' + this.nombre); }\n}\n\ntry {\n  eval('{ using recurso = new Recurso(\"archivo.txt\"); mostrar(\"Usando \" + recurso.nombre); }');\n} catch (error) {\n  mostrar('using no soportado todavía en este navegador: ' + error.message);\n}",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

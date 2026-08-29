@@ -172,6 +172,17 @@ La última lección del temario. Dos retos que no introducen nada nuevo — comb
 3. Implementa un filtro sobre un array de datos usando el patrón "valor vacío = cualquier valor" con `&&`.
 4. Construye el DOM de un resultado usando `createElement()`/`appendChild()`/`textContent`, sin usar `innerHTML` en ningún momento.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Construye un generador de historias combinando arrays, una función de selección aleatoria, y replace() sobre una plantilla (ejercicio 1). Construye el resultado en el DOM con createElement()/appendChild()/textContent, sin usar innerHTML en ningún momento (ejercicio 4).",
+  "html": "<button id=\"generar\">Generar historia</button>\n<div id=\"resultado\"></div>",
+  "js": "const nombres = ['Ada', 'Grace', 'Alan', 'Margaret'];\nconst lugares = ['un bosque encantado', 'una nave espacial', 'una biblioteca infinita'];\nconst plantilla = '{nombre} se adentró en {lugar} y nada volvió a ser igual.';\n\nfunction elegirAlAzar(lista) {\n  return lista[Math.floor(Math.random() * lista.length)];\n}\n\ndocument.getElementById('generar').addEventListener('click', () => {\n  const historia = plantilla\n    .replace('{nombre}', elegirAlAzar(nombres))\n    .replace('{lugar}', elegirAlAzar(lugares));\n\n  const contenedor = document.getElementById('resultado');\n  contenedor.textContent = '';\n  const parrafo = document.createElement('p');\n  parrafo.textContent = historia;\n  contenedor.appendChild(parrafo);\n});",
+  "pestañaInicial": "html"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

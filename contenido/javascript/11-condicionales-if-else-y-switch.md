@@ -169,6 +169,17 @@ Casi todo programa real necesita ejecutar código distinto según una condición
 3. Explica por qué declarar `let` dentro de dos `case` sin llaves propias lanza un error.
 4. Reescribe `if (x === 5 || 7 || 10)` para que compruebe correctamente los tres valores contra `x`.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe un switch con tres case y un default, con break en cada uno (ejercicio 1). Reescribe if (x === 5 || 7 || 10) para que compruebe correctamente los tres valores (ejercicio 4).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nconst dia = 'martes';\nswitch (dia) {\n  // escribe tus 3 case y un default\n}\n\nconst x = 7;\nif (x === 5 || x === 7 || x === 10) {\n  mostrar('x coincide con uno de los tres valores');\n}",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

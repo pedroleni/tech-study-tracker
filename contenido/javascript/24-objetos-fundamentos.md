@@ -158,6 +158,17 @@ Un objeto agrupa datos (propiedades) y comportamiento (métodos) relacionados ba
 3. Añade una propiedad nueva a un objeto ya creado, después de su declaración inicial.
 4. Explica por qué `persona[variable]` puede devolver algo distinto que `persona.variable`.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Crea un objeto con al menos dos propiedades y un método que use this (ejercicio 1). Accede a una con notación de punto y a otra con corchetes usando una variable (ejercicio 2). Añade una propiedad nueva después de la declaración (ejercicio 3).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nconst libro = {\n  titulo: 'Cien años de soledad',\n  autor: 'García Márquez',\n  resumen() {\n    return this.titulo + ' de ' + this.autor;\n  },\n};\nmostrar(libro.resumen());\n\nconst clave = 'autor';\nmostrar(libro.titulo);\nmostrar(libro[clave]);\n\nlibro.año = 1967;\nmostrar(libro);",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

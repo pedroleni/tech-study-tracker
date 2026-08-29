@@ -154,6 +154,17 @@ Una API del navegador (como `fetch` o `Date`) ya está disponible sin hacer nada
 3. Usa `fetch()` para consumir una API RESTful pública, y procesa su respuesta JSON.
 4. Construye elementos del DOM a partir de los datos de una API de terceros, usando `createElement()`/`appendChild()`.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Construye una URL con parámetros de búsqueda codificados (ejercicio 2). Usa fetch() para consumir una API RESTful pública y procesa su JSON (ejercicio 3). Construye elementos del DOM a partir de los datos, sin usar innerHTML (ejercicio 4).",
+  "html": "<div id=\"resultado\"></div>\n<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nconst parametros = new URLSearchParams({ nombre: 'pikachu' });\nmostrar('URL construida: /pokemon?' + parametros.toString());\n\nfetch('https://pokeapi.co/api/v2/pokemon/' + parametros.get('nombre'))\n  .then((respuesta) => respuesta.json())\n  .then((datos) => {\n    const contenedor = document.getElementById('resultado');\n    const titulo = document.createElement('h3');\n    titulo.textContent = datos.name;\n    contenedor.appendChild(titulo);\n  });",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

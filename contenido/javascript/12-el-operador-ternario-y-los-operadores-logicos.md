@@ -148,6 +148,17 @@ El operador ternario condensa un `if`/`else` corto en una sola línea. Los opera
 3. Escribe una condición con `&&` que compruebe dos condiciones a la vez.
 4. Explica qué devuelve `&&` cuando ambas expresiones son truthy, no solo si el resultado final es `true` o `false`.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe un ternario que asigne 'Mayor de edad' o 'Menor de edad' según edad (ejercicio 1). Compara cantidad || 42 y cantidad ?? 42 cuando cantidad vale 0 (ejercicio 2).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nconst edad = 20;\n// const resultado = edad >= 18 ? ... : ...;\n\nconst cantidad = 0;\nmostrar('cantidad || 42 -> ' + (cantidad || 42));\nmostrar('cantidad ?? 42 -> ' + (cantidad ?? 42));",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

@@ -165,6 +165,17 @@ Buscar dentro de un texto, extraer un trozo, cambiar mayúsculas, reemplazar una
 3. Escribe una condición que compruebe si un string termina en `.js` con `endsWith()`.
 4. Explica la diferencia entre `replace()` y `replaceAll()`.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Obtén el último carácter de un string sin saber su longitud de antemano en el código (ejercicio 1). Extrae los caracteres del índice 2 al 5 con slice() (ejercicio 2). Comprueba si termina en .js con endsWith() (ejercicio 3).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nconst texto = 'JavaScript';\nmostrar(texto.at(-1));\nmostrar(texto.slice(2, 5));\nmostrar('script.js'.endsWith('.js'));",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

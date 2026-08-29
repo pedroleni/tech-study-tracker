@@ -183,6 +183,17 @@ Antes de escribir mucho más código, conviene saber leer lo que pasa cuando alg
 3. Encuentra el error en `} else if (intentos = 10) {`.
 4. Explica cómo usarías `console.log()` para comprobar por qué una variable no tiene el valor esperado.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Este código tiene dos errores a propósito, uno de los ejercicios de la lección: un selector que no coincide con la clase real, y una asignación (=) donde debería haber una comparación (===). Encuéntralos y arréglalos, viendo el mensaje de error en la salida de abajo.",
+  "html": "<p class=\"lowOrHi\">Adivina el número</p>\n<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nlet intentos = 10;\nconst elemento = document.querySelector('lowOrHi'); // ejercicio 2: falta algo en el selector\nmostrar('Elemento encontrado: ' + elemento);\n\nif (intentos = 10) { // ejercicio 3: esto no compara, asigna\n  mostrar('Quedan ' + intentos + ' intentos');\n}",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

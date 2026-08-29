@@ -181,6 +181,17 @@ Dos operadores ya adelantados de forma ligera en lecciones anteriores (property 
 3. Compara `||` y `??` sobre un valor `0` o una cadena vacía `''`, y explica la diferencia de resultado.
 4. Combina `?.` y `??` en una sola expresión para dar un valor por defecto ante un dato que podría faltar.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Usa ?. para acceder a una propiedad anidada que podría no existir (ejercicio 1). Usa ?.() para llamar a un método que podría no existir (ejercicio 2). Compara || y ?? sobre 0 (ejercicio 3).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nconst usuario = { perfil: { nombre: 'Ada' } };\nmostrar(usuario.perfil?.direccion?.calle);\n\nconst objeto = {};\nmostrar(objeto.metodoQueNoExiste?.());\n\nconst cantidad = 0;\nmostrar('cantidad || 10 -> ' + (cantidad || 10));\nmostrar('cantidad ?? 10 -> ' + (cantidad ?? 10));",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

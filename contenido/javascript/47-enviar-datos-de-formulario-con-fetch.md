@@ -155,6 +155,17 @@ Cierra el módulo de eventos, conectando con lo visto en la lección anterior: u
 3. Envía un `FormData` con `fetch()` usando `method: 'POST'`, interceptando antes el envío con `preventDefault()`.
 4. Envuelve la llamada a `fetch()` en `try/catch`, y provoca un error (por ejemplo, con una URL inválida) para comprobar que se captura.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Construye un FormData a partir de este form real, y lee uno de sus valores con get() (ejercicio 2). Intercepta el envío con preventDefault() y envuelve el fetch en try/catch (ejercicios 3 y 4) — como no hay un servidor real detrás, verás el error de red capturado, que es exactamente lo que pide comprobar el ejercicio.",
+  "html": "<form id=\"form\">\n  <input name=\"nombre\" value=\"Ada\">\n  <input name=\"email\" value=\"ada@ejemplo.com\">\n  <button type=\"submit\">Enviar</button>\n</form>\n<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\ndocument.getElementById('form').addEventListener('submit', async (evento) => {\n  evento.preventDefault();\n  const datos = new FormData(evento.target);\n  mostrar('nombre: ' + datos.get('nombre'));\n  try {\n    await fetch('https://servidor-de-ejemplo-que-no-existe.invalid/enviar', {\n      method: 'POST',\n      body: datos,\n    });\n  } catch (error) {\n    mostrar('Error capturado con try/catch: ' + error.message);\n  }\n});",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

@@ -131,6 +131,17 @@ Abre el módulo del DOM. El **scripting del DOM** es manipular con JavaScript la
 3. Comprueba en la consola que `document === window.document` da `true`.
 4. Usa `document.querySelector()` para seleccionar un elemento cualquiera de una página, y modifica su `textContent`.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Muestra window.innerWidth, document.title y navigator.language (ejercicio 1, aquí en la salida en vez de la consola). Selecciona un elemento con querySelector() y modifica su textContent (ejercicio 4).",
+  "html": "<title>Página de prueba</title>\n<p id=\"saludo\">Texto original</p>\n<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nmostrar('Ancho de ventana: ' + window.innerWidth);\nmostrar('Título: ' + document.title);\nmostrar('Idioma: ' + navigator.language);\nmostrar('document === window.document: ' + (document === window.document));\n\ndocument.querySelector('#saludo').textContent = 'Texto modificado por JS';",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

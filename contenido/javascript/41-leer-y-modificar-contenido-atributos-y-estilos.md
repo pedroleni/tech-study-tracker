@@ -168,6 +168,18 @@ Con un elemento ya seleccionado (visto en la lección anterior), esta cubre las 
 3. Cambia el color y el padding de un elemento usando su propiedad `style`.
 4. Implementa un interruptor de tema (claro/oscuro) usando `classList.toggle()` sobre `document.body`.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Lee y modifica el textContent de un elemento (ejercicio 1). Usa setAttribute/getAttribute sobre un data-* (ejercicio 2). Implementa un interruptor de tema con classList.toggle() (ejercicio 4).",
+  "html": "<p id=\"texto\" data-estado=\"inicial\">Texto original</p>\n<button id=\"interruptor\">Cambiar tema</button>\n<pre id=\"salida\"></pre>",
+  "css": "body.oscuro { background: #1a1a1a; color: white; }",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nconst parrafo = document.getElementById('texto');\nmostrar('Antes: ' + parrafo.textContent);\nparrafo.textContent = 'Texto modificado';\nmostrar('Después: ' + parrafo.textContent);\n\nmostrar('data-estado: ' + parrafo.getAttribute('data-estado'));\nparrafo.setAttribute('data-estado', 'modificado');\n\ndocument.getElementById('interruptor').addEventListener('click', () => {\n  document.body.classList.toggle('oscuro');\n});",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

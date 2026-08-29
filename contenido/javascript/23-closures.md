@@ -180,6 +180,17 @@ Una closure es una función empaquetada junto con las variables de su entorno �
 3. Reescribe un bucle con `var` que tenga el problema clásico de closures, usando `let` para arreglarlo.
 4. Explica la diferencia entre que una closure "copie" un valor y que mantenga una "referencia viva" a él.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe una función que devuelva otra función interna capturando una variable externa (ejercicio 1). Escribe un contador con closures y demuestra que dos instancias mantienen su propio estado (ejercicio 2).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nfunction crearContador() {\n  let cuenta = 0;\n  return function () {\n    cuenta++;\n    return cuenta;\n  };\n}\n\nconst contadorA = crearContador();\nconst contadorB = crearContador();\nmostrar('A: ' + contadorA());\nmostrar('A: ' + contadorA());\nmostrar('B: ' + contadorB());",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

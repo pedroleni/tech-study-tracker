@@ -142,6 +142,17 @@
 3. Llama a esa misma función SIN `new`, y explica qué le pasa a `this` en ese caso.
 4. Explica por qué se recomienda escribir las funciones constructoras con mayúscula inicial.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe una función constructora Coche que reciba una marca y la guarde en this (ejercicio 1). Créala con new y comprueba la propiedad (ejercicio 2). Llámala SIN new y observa qué pasa (ejercicio 3).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nfunction Coche(marca) {\n  this.marca = marca;\n}\nconst miCoche = new Coche('Toyota');\nmostrar(miCoche.marca);\n\ntry {\n  const otroCoche = Coche('Ford');\n  mostrar(typeof otroCoche);\n} catch (error) {\n  mostrar('Error sin new: ' + error.message);\n}",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

@@ -146,6 +146,17 @@ Dos bucles con nombres parecidos, propósitos distintos: `for...of` recorre los 
 3. Añade una propiedad extra a un array y demuestra con `for...in` que aparece en el recorrido.
 4. Escribe un `for...of` con desestructuración que recorra clave y valor de un objeto usando `Object.entries()`.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe un for...of que recorra los valores de un array de nombres (ejercicio 1). Escribe un for...in que recorra las claves de un objeto (ejercicio 2). Recorre clave y valor con Object.entries() (ejercicio 4).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nconst nombres = ['Ada', 'Grace', 'Alan'];\nfor (const nombre of nombres) {\n  mostrar(nombre);\n}\n\nconst persona = { nombre: 'Ada', edad: 30, ciudad: 'Londres' };\nfor (const clave in persona) {\n  mostrar(clave + ': ' + persona[clave]);\n}",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

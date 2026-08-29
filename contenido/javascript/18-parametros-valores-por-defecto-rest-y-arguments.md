@@ -150,6 +150,17 @@ Tres formas de dar más flexibilidad a los parámetros de una función: un valor
 3. Explica por qué `multiplicar(5, 0)` no activa el valor por defecto de `b`, aunque `0` sea falsy.
 4. Explica la diferencia entre `arguments` y un rest parameter.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe una función con un parámetro por defecto (ejercicio 1). Escribe una función con un rest parameter que sume una cantidad indefinida de números (ejercicio 2). Comprueba que multiplicar(5, 0) no activa el valor por defecto de b (ejercicio 3).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nfunction saludar(nombre = 'invitado') {\n  mostrar('Hola, ' + nombre);\n}\nsaludar();\n\nfunction sumarTodo(...numeros) {\n  return numeros.reduce((total, n) => total + n, 0);\n}\nmostrar(sumarTodo(1, 2, 3, 4));",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

@@ -159,6 +159,17 @@ Una `Promise` es un objeto que representa el estado de una operación asíncrona
 3. Comprueba `respuesta.ok` dentro de un `then()`, lanzando un error si la respuesta no fue exitosa.
 4. Añade un `finally()` al final de una cadena, y demuestra que se ejecuta tanto si la promesa se cumple como si se rechaza.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Usa fetch().then() sobre una URL real (ejercicio 1). Comprueba respuesta.ok dentro de un then(), lanzando un error si no fue exitosa (ejercicio 3). Añade un finally() al final (ejercicio 4).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nmostrar('Petición iniciada (promesa pending)...');\nfetch('https://pokeapi.co/api/v2/pokemon/pikachu')\n  .then((respuesta) => {\n    if (!respuesta.ok) throw new Error('Respuesta no exitosa: ' + respuesta.status);\n    return respuesta.json();\n  })\n  .then((datos) => mostrar('Nombre: ' + datos.name + ', peso: ' + datos.weight))\n  .catch((error) => mostrar('Error: ' + error.message))\n  .finally(() => mostrar('finally: esto se ejecuta siempre'));",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

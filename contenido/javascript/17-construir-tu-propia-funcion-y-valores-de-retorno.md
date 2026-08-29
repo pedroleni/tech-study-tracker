@@ -171,6 +171,17 @@ Antes de escribir una función, conviene planificar qué debe hacer y qué pará
 3. Escribe una función con un `return` anticipado dentro de un `if`, seguido de más código después del `if`.
 4. Explica por qué el código escrito justo después de un `return` nunca llega a ejecutarse.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe una función que reciba un número y devuelva su cuadrado con return (ejercicio 1). Escribe una función sin return explícito y observa qué devuelve (ejercicio 2). Escribe un return anticipado dentro de un if (ejercicio 3).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nfunction cuadrado(numero) {\n  return numero * numero;\n}\nmostrar(cuadrado(5));\n\nfunction sinReturn() {\n  const x = 1;\n}\nmostrar(sinReturn());",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

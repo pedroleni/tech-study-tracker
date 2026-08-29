@@ -157,6 +157,17 @@ Abre el módulo de clases. `class` no es un mecanismo nuevo — es una sintaxis 
 3. Añade un campo público a una clase (fuera del constructor), y demuestra que cada instancia lo calcula de forma independiente.
 4. Añade un campo privado (`#campo`) a una clase, y demuestra que es inaccesible desde fuera.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe una clase con constructor y al menos un método, y crea dos instancias (ejercicio 1). Intenta llamarla sin new y observa el error (ejercicio 2). Añade un campo privado con #campo (ejercicio 4).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nclass Persona {\n  #edad;\n  constructor(nombre, edad) {\n    this.nombre = nombre;\n    this.#edad = edad;\n  }\n  saludar() {\n    return 'Hola, soy ' + this.nombre;\n  }\n}\nconst ada = new Persona('Ada', 30);\nconst grace = new Persona('Grace', 40);\nmostrar(ada.saludar());\nmostrar(grace.saludar());\n\ntry {\n  Persona('Sin new', 1);\n} catch (error) {\n  mostrar('Error sin new: ' + error.message);\n}",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

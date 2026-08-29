@@ -154,6 +154,17 @@ Antes de ejecutar una sola línea, el motor de JavaScript ya "sabe" qué variabl
 3. Explica por qué se puede llamar a una función declarada antes de que aparezca en el código.
 4. Explica en tus propias palabras qué es la zona muerta temporal.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Demuestra que var da undefined al usarse antes de su declaración (ejercicio 1). Escribe el mismo ejemplo con let y observa la diferencia (ejercicio 2). Comprueba que una función declarada se puede llamar antes de aparecer en el código (ejercicio 3).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nmostrar('var antes: ' + variableVar);\nvar variableVar = 'valor';\n\nsaludarAntes();\nfunction saludarAntes() {\n  mostrar('Esta función se llamó antes de su posición en el código');\n}\n\ntry {\n  mostrar(variableLet);\n  let variableLet = 'valor';\n} catch (error) {\n  mostrar('Error con let: ' + error.message);\n}",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

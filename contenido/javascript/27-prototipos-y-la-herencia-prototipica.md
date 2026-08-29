@@ -181,6 +181,17 @@ Cada objeto tiene un vínculo interno a otro objeto: su **prototipo**. Cuando se
 3. Usa `Object.getPrototypeOf()` para comprobar el prototipo de una instancia creada con `new`.
 4. Explica por qué añadir un método a `Constructor.prototype` después de crear instancias afecta también a las que ya existían.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Crea un objeto base con una propiedad, y otro que lo herede con Object.create() (ejercicio 1). Demuestra el shadowing asignando una propiedad con el mismo nombre (ejercicio 2).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nconst animal = { sonido: 'algún sonido' };\nconst perro = Object.create(animal);\nmostrar(perro.sonido);\n\nperro.sonido = 'guau';\nmostrar('perro.sonido: ' + perro.sonido);\nmostrar('animal.sonido: ' + animal.sonido);",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

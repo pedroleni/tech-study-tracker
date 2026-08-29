@@ -145,6 +145,17 @@ Cuatro formas de encontrar elementos en el DOM: dos modernas basadas en selector
 3. Compara el comportamiento de `getElementsByTagName()` y `querySelectorAll()` al añadir un elemento nuevo al DOM después de hacer la consulta.
 4. Explica por qué se recomienda copiar un `HTMLCollection` (por ejemplo con `Array.from()`) antes de añadir o quitar elementos mientras se recorre.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Usa querySelector() con un selector compuesto (ejercicio 1). Usa querySelectorAll() y recorre el resultado con forEach() (ejercicio 2).",
+  "html": "<div id=\"panel\">\n  <p class=\"item\">Uno</p>\n  <p class=\"item\">Dos</p>\n  <p class=\"item\">Tres</p>\n</div>\n<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nconst primero = document.querySelector('#panel .item');\nmostrar('Primer item: ' + primero.textContent);\n\ndocument.querySelectorAll('.item').forEach((item, indice) => {\n  mostrar(indice + ': ' + item.textContent);\n});",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

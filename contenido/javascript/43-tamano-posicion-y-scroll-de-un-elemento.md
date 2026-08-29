@@ -145,6 +145,17 @@ Cierra el módulo del DOM. Saber qué contiene un elemento (visto en las leccion
 3. Implementa la detección de "scroll hasta el final" comparando `scrollTop + clientHeight` con `scrollHeight`.
 4. Usa `scrollIntoView({ behavior: 'smooth' })` para desplazarte suavemente hasta un elemento concreto de la página.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Usa getBoundingClientRect() sobre este elemento (ejercicio 1). Asigna un valor a scrollTop de un contenedor con overflow (ejercicio 2). Implementa la detección de scroll hasta el final (ejercicio 3).",
+  "html": "<div id=\"contenedor\" style=\"height: 100px; overflow-y: auto; border: 1px solid #999;\">\n  <div style=\"height: 400px; padding: 8px;\">Contenido largo para hacer scroll</div>\n</div>\n<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nconst contenedor = document.getElementById('contenedor');\nmostrar(contenedor.getBoundingClientRect());\n\ncontenedor.addEventListener('scroll', () => {\n  const alFinal = contenedor.scrollTop + contenedor.clientHeight >= contenedor.scrollHeight - 1;\n  if (alFinal) mostrar('¡Llegaste al final!');\n});\n\n// contenedor.scrollTop = 100; // prueba a descomentar esto",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

@@ -143,6 +143,17 @@
 3. Sobrescribe un método heredado, y usa `super.metodo()` para extender (no reemplazar) el comportamiento del padre.
 4. Explica en tus propias palabras qué ocurre si una subclase no define su propio constructor.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Crea una clase padre y una subclase con extends que herede un método (ejercicio 1). Escribe un constructor en la subclase que llame a super() (ejercicio 2). Sobrescribe un método y usa super.metodo() (ejercicio 3).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nclass Animal {\n  constructor(nombre) {\n    this.nombre = nombre;\n  }\n  describir() {\n    return this.nombre + ' es un animal';\n  }\n}\nclass Perro extends Animal {\n  constructor(nombre, raza) {\n    super(nombre);\n    this.raza = raza;\n  }\n  describir() {\n    return super.describir() + ' de raza ' + this.raza;\n  }\n}\nconst rex = new Perro('Rex', 'Labrador');\nmostrar(rex.describir());",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

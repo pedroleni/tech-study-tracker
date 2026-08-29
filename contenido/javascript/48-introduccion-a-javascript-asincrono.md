@@ -154,6 +154,17 @@ Abre el módulo de asincronía. JavaScript es de un solo hilo: solo puede hacer 
 3. Escribe una cadena de dos o tres callbacks anidados que se pasen un resultado entre sí.
 4. Explica en tus propias palabras qué hace difícil de mantener el callback hell.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Usa setTimeout() para programar una tarea y comprueba el orden real de ejecución frente al código síncrono (ejercicio 2). Escribe una cadena de dos o tres callbacks anidados (ejercicio 3).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nmostrar('1: código síncrono, línea 1');\nsetTimeout(() => mostrar('3: esto se ejecuta después, aunque el timeout sea 0ms'), 0);\nmostrar('2: código síncrono, línea 2');\n\nsetTimeout(() => {\n  mostrar('Paso A');\n  setTimeout(() => {\n    mostrar('Paso B, anidado dentro de A');\n  }, 200);\n}, 200);",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

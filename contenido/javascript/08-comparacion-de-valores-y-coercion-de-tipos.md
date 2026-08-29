@@ -165,6 +165,17 @@
 3. Escribe un ejemplo que demuestre por qué `NaN === NaN` es `false`.
 4. Explica para qué sirve `Object.is()`, y en qué se diferencia de `===` en el caso de `NaN`.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Compara \"0\" == 0 con \"0\" === 0 (ejercicio 1). Comprueba por qué null == 0 es false (ejercicio 2). Demuestra por qué NaN === NaN es false, y compáralo con Object.is() (ejercicios 3 y 4).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nmostrar('\"0\" == 0  -> ' + (\"0\" == 0));\nmostrar('\"0\" === 0 -> ' + (\"0\" === 0));\n\nmostrar('null == 0 -> ' + (null == 0));\n\nmostrar('NaN === NaN -> ' + (NaN === NaN));\nmostrar('Object.is(NaN, NaN) -> ' + Object.is(NaN, NaN));",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

@@ -176,6 +176,17 @@ Un string es texto entre comillas — simples, dobles, o backticks. Las dos prim
 3. Escribe un string multilínea usando backticks, sin ningún `\n`.
 4. Explica la diferencia entre `String(10)` y `new String(10)`.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe un string con una comilla simple dentro usando comillas dobles (ejercicio 1). Escribe un template literal que interpole una operación matemática (ejercicio 2). Escribe un string multilínea con backticks (ejercicio 3).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nconst frase = \"El coche de Ana's era rápido\";\nmostrar(frase);\n\nmostrar(`El doble de 21 es ${21 * 2}`);\n\nconst multilinea = `Primera línea\nSegunda línea`;\nmostrar(multilinea);",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio
