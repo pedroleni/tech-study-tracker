@@ -97,6 +97,71 @@ describe('tokenizar CSS y JavaScript', () => {
   })
 })
 
+describe('tokenizar SQL', () => {
+  it('separa palabras clave, identificadores, cadenas, números y puntuación', () => {
+    const tokens = tokenizar("SELECT nombre, salario FROM empleados WHERE id = 1", 'sql')
+
+    // Incluye los espacios: 'texto' está en la lista de tipos pedidos, y los
+    // espacios entre palabras se tokenizan como 'texto' (verificado
+    // ejecutando el tokenizador real antes de escribir este test, no
+    // asumido por analogía con el test de HTML).
+    expect(tiposYTextos(tokens, ['palabraClave', 'texto', 'numero', 'puntuacion'])).toEqual([
+      ['palabraClave', 'SELECT'],
+      ['texto', ' '],
+      ['texto', 'nombre'],
+      ['puntuacion', ','],
+      ['texto', ' '],
+      ['texto', 'salario'],
+      ['texto', ' '],
+      ['palabraClave', 'FROM'],
+      ['texto', ' '],
+      ['texto', 'empleados'],
+      ['texto', ' '],
+      ['palabraClave', 'WHERE'],
+      ['texto', ' '],
+      ['texto', 'id'],
+      ['texto', ' '],
+      ['puntuacion', '='],
+      ['texto', ' '],
+      ['numero', '1'],
+    ])
+  })
+
+  it('reconoce palabras clave en minúsculas igual que en mayúsculas', () => {
+    const tokens = tokenizar('select nombre from empleados', 'sql')
+
+    expect(tokens.filter((t) => t.tipo === 'palabraClave').map((t) => t.texto)).toEqual([
+      'select',
+      'from',
+    ])
+  })
+
+  it('reconoce cadenas con \'\' como escape de comilla simple', () => {
+    const tokens = tokenizar("SELECT 'no lo hagas' FROM t", 'sql')
+
+    expect(tokens.some((t) => t.tipo === 'cadena' && t.texto === "'no lo hagas'")).toBe(true)
+  })
+
+  it("una cadena con comilla escapada ('') no se corta a mitad", () => {
+    const tokens = tokenizar("SELECT 'don''t' FROM t", 'sql')
+
+    expect(tokens.some((t) => t.tipo === 'cadena' && t.texto === "'don''t'")).toBe(true)
+  })
+
+  it('reconoce comentarios de línea con --', () => {
+    const tokens = tokenizar('SELECT 1 -- una nota\nFROM t', 'sql')
+
+    expect(tokens.some((t) => t.tipo === 'comentario' && t.texto === '-- una nota')).toBe(true)
+  })
+
+  it('reconoce funciones agregadas seguidas de paréntesis como palabra clave, y funciones propias como funcion', () => {
+    const tokens = tokenizar('SELECT COUNT(*), mi_funcion(x) FROM t', 'sql')
+
+    expect(tokens.some((t) => t.tipo === 'palabraClave' && t.texto === 'COUNT')).toBe(true)
+    expect(tokens.some((t) => t.tipo === 'funcion' && t.texto === 'mi_funcion')).toBe(true)
+  })
+})
+
 describe('resistencia al código roto', () => {
   // Dentro de un editor, el código está mal formado la mayor parte del tiempo:
   // el tokenizador tiene que aguantarlo sin colgarse y sin perder caracteres.
@@ -113,6 +178,9 @@ describe('resistencia al código roto', () => {
     { nombre: 'cadena JS sin cerrar', codigo: 'const a = "sin final', lenguaje: 'js' },
     { nombre: 'JS con escapes', codigo: 'const a = "com\\"illa" // fin', lenguaje: 'js' },
     { nombre: 'cadena vacía', codigo: '', lenguaje: 'html' },
+    { nombre: 'cadena SQL sin cerrar', codigo: "SELECT 'sin final", lenguaje: 'sql' },
+    { nombre: 'comentario SQL sin salto final', codigo: 'SELECT 1 -- nota', lenguaje: 'sql' },
+    { nombre: 'comilla escapada SQL', codigo: "SELECT 'don''t stop'", lenguaje: 'sql' },
   ]
 
   it.each(CASOS)('no pierde ni un carácter con $nombre', ({ codigo, lenguaje }) => {

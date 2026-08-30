@@ -11,7 +11,7 @@
  * código a medio escribir —que es el estado normal dentro de un editor.
  */
 
-export type Lenguaje = 'html' | 'css' | 'js' | 'texto'
+export type Lenguaje = 'html' | 'css' | 'js' | 'sql' | 'texto'
 
 export type TipoToken =
   | 'texto'
@@ -359,6 +359,91 @@ function tokenizarJs(codigo: string, salida: Token[]) {
   }
 }
 
+// ---------------------------------------------------------------- SQL
+
+const PALABRAS_CLAVE_SQL = new Set([
+  'SELECT', 'FROM', 'WHERE', 'JOIN', 'INNER', 'LEFT', 'RIGHT', 'FULL', 'OUTER', 'ON',
+  'GROUP', 'BY', 'ORDER', 'HAVING', 'AS', 'AND', 'OR', 'NOT', 'IN', 'LIKE', 'BETWEEN',
+  'IS', 'NULL', 'DISTINCT', 'LIMIT', 'OFFSET', 'ASC', 'DESC', 'UNION', 'ALL', 'EXISTS',
+  'CASE', 'WHEN', 'THEN', 'ELSE', 'END', 'WITH', 'INSERT', 'INTO', 'VALUES', 'UPDATE',
+  'SET', 'DELETE', 'CREATE', 'TABLE', 'ALTER', 'DROP', 'PRIMARY', 'KEY', 'FOREIGN',
+  'REFERENCES', 'DEFAULT', 'UNIQUE', 'CHECK', 'INDEX', 'VIEW', 'COUNT', 'SUM', 'AVG',
+  'MIN', 'MAX',
+])
+
+/**
+ * Avanza sobre una cadena SQL respetando el escape estándar: '' dentro de
+ * la cadena representa una comilla simple literal, no un cierre (a
+ * diferencia de JS, SQL no usa barra invertida para escapar).
+ */
+function finDeCadenaSql(codigo: string, inicio: number) {
+  let i = inicio + 1
+  while (i < codigo.length) {
+    if (codigo[i] === "'" && codigo[i + 1] === "'") {
+      i += 2
+      continue
+    }
+    if (codigo[i] === "'") return i + 1
+    i += 1
+  }
+  return codigo.length
+}
+
+function tokenizarSql(codigo: string, salida: Token[]) {
+  let i = 0
+
+  while (i < codigo.length) {
+    const caracter = codigo[i]
+
+    if (codigo.startsWith('--', i)) {
+      const salto = codigo.indexOf('\n', i)
+      const fin = salto === -1 ? codigo.length : salto
+      empujar(salida, 'comentario', codigo.slice(i, fin))
+      i = fin
+      continue
+    }
+    if (caracter === "'") {
+      const fin = finDeCadenaSql(codigo, i)
+      empujar(salida, 'cadena', codigo.slice(i, fin))
+      i = fin
+      continue
+    }
+    if (/\s/.test(caracter)) {
+      const espacios = /^\s+/.exec(codigo.slice(i))![0]
+      empujar(salida, 'texto', espacios)
+      i += espacios.length
+      continue
+    }
+
+    const numero = /^\d+\.?\d*/.exec(codigo.slice(i))
+    if (numero) {
+      empujar(salida, 'numero', numero[0])
+      i += numero[0].length
+      continue
+    }
+
+    // SQL es insensible a mayúsculas en sus palabras clave (a diferencia de
+    // JS) — se compara en mayúsculas, pero se conserva el texto tal cual lo
+    // escribió quien redactó la consulta.
+    const identificador = /^[A-Za-z_][\w]*/.exec(codigo.slice(i))
+    if (identificador) {
+      const palabra = identificador[0]
+      const siguiente = codigo.slice(i + palabra.length).match(/^\s*\(/)
+      const tipo: TipoToken = PALABRAS_CLAVE_SQL.has(palabra.toUpperCase())
+        ? 'palabraClave'
+        : siguiente
+          ? 'funcion'
+          : 'texto'
+      empujar(salida, tipo, palabra)
+      i += palabra.length
+      continue
+    }
+
+    empujar(salida, 'puntuacion', caracter)
+    i += 1
+  }
+}
+
 // ---------------------------------------------------------------- API
 
 export function tokenizar(codigo: string, lenguaje: Lenguaje = 'html'): Token[] {
@@ -368,6 +453,7 @@ export function tokenizar(codigo: string, lenguaje: Lenguaje = 'html'): Token[] 
   if (lenguaje === 'html') tokenizarHtml(codigo, salida)
   else if (lenguaje === 'css') tokenizarCss(codigo, salida)
   else if (lenguaje === 'js') tokenizarJs(codigo, salida)
+  else if (lenguaje === 'sql') tokenizarSql(codigo, salida)
   else empujar(salida, 'texto', codigo)
 
   return salida
