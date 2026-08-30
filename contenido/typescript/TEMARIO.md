@@ -218,9 +218,12 @@ pueda leer solo:
 |---|---|---|
 | 53 | Proyecto: lista de tareas tipada, de cero (editor en vivo) | Aplicación directa de Módulos 2-5 (tipos, narrowing, uniones discriminadas) en un ejercicio sandbox nuevo |
 | 54 | Proyecto: validar datos de una API con Zod — cuando un tipo no basta | Continúa el reto #3 de la lección 78 (ya lo planteaba sin resolverlo); fuente técnica: [Utility Types](https://www.typescriptlang.org/docs/handbook/utility-types.html) (para tipar la salida de Zod con `z.infer`) |
-| 55 | Proyecto avanzado: Buscador de personajes con TypeScript | **Trasladada** desde `contenido/javascript/78-proyecto-avanzado-buscador-typescript.md` (cambio de `technology_id`, no reescritura) — pasa a ser el capstone de este temario |
+| 55 | Proyecto avanzado: Buscador de personajes con TypeScript | **Trasladada** desde `contenido/javascript/78-proyecto-avanzado-buscador-typescript.md` (cambio de `technology_id`, no reescritura) — capstone heredado de este temario |
+| 56 | Proyecto avanzado: Bus de eventos tipado | Aplicación real de Módulo 5 (narrowing) + Módulo 7 (genéricos) + Módulo 11 (mapped types) — repo nuevo, [github.com/pedroleni/bus-eventos-ts](https://github.com/pedroleni/bus-eventos-ts) |
+| 57 | Proyecto avanzado: Cliente tipado con Zod | Cierra el reto de la lección 54 contra una API real (PokeAPI) — repo nuevo, [github.com/pedroleni/cliente-tipado-zod](https://github.com/pedroleni/cliente-tipado-zod) |
+| 58 | Proyecto avanzado: Máquina de estados tipada | Aplicación real de Módulo 5 (uniones discriminadas) + Módulo 7 (genéricos) + Módulo 9 (indexed access types) — repo nuevo, [github.com/pedroleni/maquina-estados-ts](https://github.com/pedroleni/maquina-estados-ts) |
 
-**Total: 55 lecciones en 13 módulos** — por encima de la horquilla
+**Total: 58 lecciones en 13 módulos** — por encima de la horquilla
 orientativa de la spec (~12 módulos / 40-48 lecciones), mismo patrón que
 CSS al ampliarse tras "hazlo más completo": los operadores de
 manipulación de tipos (Módulo 9) y los tipos avanzados (Módulo 11) dan
@@ -228,12 +231,25 @@ para más lecciones de las estimadas inicialmente sin rellenar con nada
 artificial — cada fila de la tabla es un concepto real y verificado del
 Handbook, no una subdivisión forzada.
 
-## Pendiente antes de escribir la primera lección
+**Ampliado 2026-08-30**, tras pedido directo de "ahora toca proyectos de
+typescript": 3 proyectos avanzados nuevos (56-58), nativos de TypeScript
+(no heredados de JavaScript como el 55), cada uno con su propio repo real
+en GitHub (rama `main` con TODOs, rama `solucion` completa), verificados
+con el compilador real y en navegador antes de escribir la lección.
+Encontraron gotchas reales al construirse: `Record<string, unknown>` como
+constraint no acepta un mapa de eventos cerrado (56); y la máquina de
+estados (58) tropezó, sin buscarlo, con el mismo límite de
+`erasableSyntaxOnly` sobre el atajo de parámetro de constructor que ya
+había aparecido en la lección 78/55 — dos proyectos independientes
+chocando con el mismo límite por costumbre, sin que nadie lo forzara, es
+la prueba más real de que merecía su propia lección dedicada (Módulo 8,
+lección 36).
 
-- [ ] Crear la tecnología "TypeScript" vía el flujo de admin, misma
+## Pendiente
+
+- [x] Crear la tecnología "TypeScript" vía el flujo de admin, misma
   categoría que JavaScript.
-- [ ] Confirmar el orden de publicación (¿de un tirón como HTML/CSS/JS,
-  o módulo a módulo con revisión intermedia?).
-- [ ] Trasladar la lección 78 (Módulo 13, fila 55) una vez exista la
-  tecnología — actualizar también `contenido/javascript/TEMARIO.md`
-  señalando el traslado.
+- [x] Confirmar el orden de publicación: de un tirón, como HTML/CSS/JS.
+- [x] Trasladar la lección 78 (ahora 55) — hecho, `contenido/javascript/TEMARIO.md`
+  actualizado señalando el traslado.
+- [x] 3 proyectos avanzados nuevos (56-58) — hecho, ver arriba.
