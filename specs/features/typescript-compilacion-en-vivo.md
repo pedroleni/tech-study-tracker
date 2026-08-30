@@ -1,8 +1,10 @@
 # TypeScript: temario propio + compilación real en el editor en vivo
 
-**Estado:** ⏳ pendiente — diseñado siguiendo `superpowers:brainstorming`
-(dos rondas de decisiones de alcance con el usuario), spec por escribir el
-plan de implementación (`writing-plans`) antes de tocar código.
+**Estado:** 🚧 en curso — mecanismo implementado y verificado (esquema,
+`typescript-en-vivo`+`@typescript/vfs`, `public/ts-libs/`, `compilar.ts`,
+pestaña `ts` + panel de diagnósticos en `EditorEnVivo.tsx`); pendiente el
+temario y las lecciones (sección "5. Temario de TypeScript" más abajo), que
+se ejecutan después sin plan formal, igual que la ronda de HTML/CSS/JS.
 
 **Configuración manual requerida:** ninguna todavía. La tecnología
 "TypeScript" se crea vía el flujo de admin ya existente (no hace falta
@@ -290,20 +292,39 @@ Retrocompatible: los bloques ya publicados sin `ts` siguen validando
 
 ## Checklist de implementación
 
-- [ ] Esquema Zod: campo `ts` + `refine` actualizado — Claude
-- [ ] `src/lib/typescript-en-vivo/compilar.ts` — Codex
-- [ ] Script/paso para poblar `public/ts-libs/` desde
-  `node_modules/typescript/lib/` vía `knownLibFilesForCompilerOptions`
-- [ ] `EditorEnVivo.tsx`: pestaña `ts` + panel de diagnósticos + carga
+- [x] Esquema Zod: campo `ts` + `refine` actualizado — Claude, TDD
+  (`schemas.test.ts`)
+- [x] `src/lib/typescript-en-vivo/compilar.ts` — Codex, con un fix real de
+  Claude después: `@typescript/vfs` tipa toda su superficie contra
+  `typeof import('typescript')` (el nombre real del paquete), no contra el
+  alias `typescript-en-vivo` — un único cast (`TsReal`) al cargar el módulo
+  lo resuelve. Ver el comentario en el propio fichero y en el plan.
+- [x] Script `scripts/dev/generar-ts-libs.mjs` para poblar `public/ts-libs/`
+  desde `node_modules/typescript-en-vivo/lib/` vía
+  `knownLibFilesForCompilerOptions` — Codex (60 ficheros copiados, 4
+  históricos saltados, documentado)
+- [x] `EditorEnVivo.tsx`: pestaña `ts` + panel de diagnósticos + carga
   perezosa del compilador — Codex
-- [ ] `npm install typescript@6.0.3 @typescript/vfs@1.6.4` (sandbox de
-  Codex sin acceso a red — lo ejecuta Claude después, como con CodeMirror)
-- [ ] Tests unitarios de `compilarTypeScript()` (código válido, error de
-  tipos, error de sintaxis)
-- [ ] Verificación visual (Playwright): un bloque con error de tipos
-  muestra el panel y no ejecuta; al corregirlo, el iframe se actualiza
-- [ ] `npm run build`/`lint`/`test` en verde, revisar impacto en tamaño de
-  bundle (mitigado por carga perezosa)
+- [x] `npm install` de `typescript-en-vivo` (alias exacto de
+  `typescript@6.0.3`) + `@typescript/vfs@1.6.4` — Claude (sandbox de Codex
+  sin acceso a red). Incluyó un fix real: `typescript` y `typescript-en-vivo`
+  comparten el mismo `bin: tsc`, y npm solo enlaza uno de los dos en
+  `node_modules/.bin/tsc` según el orden de instalación — el script `build`
+  ahora usa la ruta explícita `node_modules/typescript/bin/tsc` para no
+  depender de esa carrera.
+- [x] Tests unitarios de `compilarEnEntorno()` con el compilador real (no
+  mocks): error de tipos, código válido, tipos del DOM, exhaustividad con
+  `never`, transiciones a/desde código vacío — 5/5 en verde
+- [x] Verificación visual (Playwright, credenciales reales de admin,
+  `/admin/referencia-contenido`): un bloque con error de tipos muestra el
+  panel en rojo con línea:columna y no ejecuta; al corregirlo en el propio
+  editor CodeMirror, el panel pasa a "Sin errores de tipos." y la vista
+  previa se actualiza; verificado también en modo oscuro. Cero errores de
+  consola/página.
+- [x] `npm run build`/`lint`/`test` en verde (259/259 tests). Bundle:
+  `typescript-en-vivo` sale en su propio chunk de ~1MB gzip gracias al
+  `import()` dinámico — confirmado en el output real de `vite build`, no
+  solo en el código.
 - [ ] Tecnología "TypeScript" creada vía admin, misma categoría que
   JavaScript
 - [ ] `contenido/typescript/TEMARIO.md` — investigación de fuentes +
@@ -311,6 +332,9 @@ Retrocompatible: los bloques ya publicados sin `ts` siguen validando
 - [ ] Lecciones de TypeScript escritas módulo a módulo
 - [ ] Lección 78 trasladada desde JavaScript (cambio de `technology_id`,
   actualización de `contenido/javascript/TEMARIO.md`)
-- [ ] `specs/features/README.md` — fila añadida, estado actualizado al
-  cerrar
-- [ ] Spot-check de seguridad final (checkpoints de arriba)
+- [x] `specs/features/README.md` — fila añadida, estado actualizado
+- [x] Spot-check de seguridad final: `typescript`/`@typescript/vfs` son
+  oficiales de `microsoft/TypeScript` y `microsoft/TypeScript-Website`;
+  `sandbox="allow-scripts"` sin `allow-same-origin` sin cambios; sin
+  `eval`/`dangerouslySetInnerHTML`/`new Function` en el código nuevo; sin
+  migraciones nuevas (sin superficie RLS nueva)

@@ -455,8 +455,8 @@ export function AdminReferenciaContenidoPage() {
             js={
               "document.querySelector('#saludo').addEventListener('click', () => {\n  document.querySelector('#resultado').textContent = '¡Hola!';\n});"
             }
-            ts=""
-            pestañaInicial="html"
+            ts={'const x: number = "hola";'}
+            pestañaInicial="ts"
           />
         </Referencia>
       </GrupoCatalogo>
