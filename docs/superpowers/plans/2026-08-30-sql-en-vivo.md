@@ -314,10 +314,16 @@ Crear `scripts/dev/generar-sql-wasm.mjs`:
 
 import { createRequire } from 'node:module'
 import { copyFileSync, mkdirSync } from 'node:fs'
-import { dirname, join } from 'node:path'
+import { join } from 'node:path'
 
 const require = createRequire(import.meta.url)
-const origen = join(dirname(require.resolve('sql.js/package.json')), 'dist', 'sql-wasm.wasm')
+// A diferencia de typescript-en-vivo (generar-ts-libs.mjs), sql.js declara
+// un "exports" cerrado en su package.json que NO expone el subpath
+// "./package.json" - require.resolve('sql.js/package.json') falla con
+// ERR_PACKAGE_PATH_NOT_EXPORTED (encontrado ejecutando esto de verdad, no
+// una suposición). Sí expone "./dist/*", así que se resuelve el propio
+// .wasm directamente, sin pasar por la carpeta del paquete.
+const origen = require.resolve('sql.js/dist/sql-wasm.wasm')
 const directorioDestino = join(process.cwd(), 'public')
 const destino = join(directorioDestino, 'sql-wasm.wasm')
 
