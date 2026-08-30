@@ -439,8 +439,20 @@ export interface ResultadoCompilacionTs {
   diagnosticos: DiagnosticoTs[]
 }
 
+// @typescript/vfs tipa TODA su superficie (createVirtualTypeScriptEnvironment,
+// knownLibFilesForCompilerOptions, VirtualTypeScriptEnvironment.languageService
+// y los Diagnostic que devuelve...) contra `typeof import('typescript')` — el
+// nombre REAL del paquete — no contra el alias `typescript-en-vivo`. En tiempo
+// de ejecución es exactamente el mismo código; TypeScript los trata como
+// identidades nominales distintas por cómo se referencian a sí mismos sus
+// propios .d.ts (problema conocido al convivir dos instalaciones de
+// "typescript" bajo nombres de paquete distintos — confirmado con `tsc -b`
+// real durante la implementación, no una suposición). Este único cast, justo
+// al cargar el módulo, evita repetirlo en cada llamada a @typescript/vfs.
+type TsReal = typeof import('typescript')
+
 export interface EntornoTypeScript {
-  ts: typeof import('typescript-en-vivo')
+  ts: TsReal
   entorno: import('@typescript/vfs').VirtualTypeScriptEnvironment
 }
 
@@ -455,7 +467,11 @@ async function cargarLibPorFetch(nombre: string): Promise<string> {
 export async function crearEntornoTypeScript(
   cargarLib: (nombre: string) => Promise<string> = cargarLibPorFetch,
 ): Promise<EntornoTypeScript> {
-  const [ts, vfs] = await Promise.all([import('typescript-en-vivo'), import('@typescript/vfs')])
+  const [tsModulo, vfs] = await Promise.all([
+    import('typescript-en-vivo'),
+    import('@typescript/vfs'),
+  ])
+  const ts = tsModulo as unknown as TsReal
 
   // convertCompilerOptionsFromJson es la única vía soportada para pasar de
   // nombres "amigables" (lib: ["DOM"]) a CompilerOptions ya resueltas
@@ -522,10 +538,7 @@ export function compilarEnEntorno(
   return { js, diagnosticos }
 }
 
-function mapearDiagnostico(
-  diagnostico: import('typescript-en-vivo').Diagnostic,
-  ts: typeof import('typescript-en-vivo'),
-): DiagnosticoTs {
+function mapearDiagnostico(diagnostico: import('typescript').Diagnostic, ts: TsReal): DiagnosticoTs {
   const mensaje = ts.flattenDiagnosticMessageText(diagnostico.messageText, '\n')
   const severidad: DiagnosticoTs['severidad'] =
     diagnostico.category === ts.DiagnosticCategory.Error ? 'error' : 'aviso'
@@ -547,6 +560,10 @@ Expected: PASS (5/5). Nota: este test carga el compilador real y los ~60 fichero
 
 Run: `npm run build && npm run lint && npm run test`
 Expected: los tres en verde (el script `build` ya usa la ruta explícita a `typescript/bin/tsc` desde la Task 2 — sigue compilando con la devDependency `5.9.3` del proyecto, no con `typescript-en-vivo`).
+
+Dos correcciones reales que salieron al ejecutar esto por primera vez (ya incluidas en el código de arriba y en `eslint.config.js`, no algo que quede pendiente):
+- `tsc -b` fallaba con dos errores de tipos en este fichero — el cast `TsReal` de arriba los resuelve (ver el comentario en el código: es un choque de identidades nominales, no un error real).
+- `npm run lint` fallaba con miles de errores en los `.d.ts` de `public/ts-libs/` generados en la Task 3 — añadir `'public/ts-libs'` a `ignores` en `eslint.config.js` (junto a `'dist'`) lo arregla; son ficheros vendorizados, no código propio.
 
 - [ ] **Step 6: Commit**
 
