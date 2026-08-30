@@ -327,8 +327,9 @@ Retrocompatible: los bloques ya publicados sin `ts` siguen validando
   solo en el código.
 - [ ] Tecnología "TypeScript" creada vía admin, misma categoría que
   JavaScript
-- [ ] `contenido/typescript/TEMARIO.md` — investigación de fuentes +
-  planificación de los ~12 módulos / 40-48 lecciones
+- [x] `contenido/typescript/TEMARIO.md` — investigación de fuentes (índice
+  completo del Handbook verificado en vivo) + planificación de 13 módulos
+  / 55 lecciones
 - [ ] Lecciones de TypeScript escritas módulo a módulo
 - [ ] Lección 78 trasladada desde JavaScript (cambio de `technology_id`,
   actualización de `contenido/javascript/TEMARIO.md`)
