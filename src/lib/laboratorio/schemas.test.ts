@@ -74,8 +74,11 @@ describe('esquemaSqlAnotado', () => {
   })
 
   it('rechaza un bloque sin esquemaSql', () => {
-    const { esquemaSql: _esquemaSql, ...sinEsquema } = base
-    const resultado = esquemaSqlAnotado.safeParse(sinEsquema)
+    const resultado = esquemaSqlAnotado.safeParse({
+      tipo: base.tipo,
+      consulta: base.consulta,
+      anotaciones: base.anotaciones,
+    })
 
     expect(resultado.success).toBe(false)
   })
