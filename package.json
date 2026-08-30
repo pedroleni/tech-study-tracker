@@ -11,6 +11,7 @@
     "test:watch": "vitest",
     "lint": "eslint .",
     "generar-ts-libs": "node scripts/dev/generar-ts-libs.mjs",
+    "generar-sql-wasm": "node scripts/dev/generar-sql-wasm.mjs",
     "codex:task": "bash scripts/dev/codex-task.sh",
     "codex:monitor": "node scripts/dev/codex-monitor.mjs"
   },
