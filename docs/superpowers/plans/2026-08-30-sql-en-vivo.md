@@ -601,7 +601,7 @@ export function compararResultados(a: ResultadoConsulta, b: ResultadoConsulta): 
 - [ ] **Step 4: Ejecutar los tests y comprobar que pasan**
 
 Run: `npm run test -- motor.test.ts`
-Expected: PASS (12/12). Nota: cada `ejecutarConsulta` crea y destruye una `Database` de sql.js real — es normal que tarde algo más que un test unitario típico, no es un fallo.
+Expected: PASS (11/11 — 6 en `describe('ejecutarConsulta', ...)` + 5 en `describe('compararResultados', ...)`; la primera versión de este plan decía "12/12" por un error de conteo, corregido tras la implementación real). Nota: cada `ejecutarConsulta` crea y destruye una `Database` de sql.js real — es normal que tarde algo más que un test unitario típico, no es un fallo.
 
 - [ ] **Step 5: `npm run build`, `lint` y la suite completa en verde**
 
