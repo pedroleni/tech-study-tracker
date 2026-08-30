@@ -14,6 +14,8 @@ import { NotasClave } from '@/components/bloques-laboratorio/NotasClave'
 import { PrediceElResultado } from '@/components/bloques-laboratorio/PrediceElResultado'
 import { Recursos } from '@/components/bloques-laboratorio/Recursos'
 import { Roles } from '@/components/bloques-laboratorio/Roles'
+import { SqlAnotado } from '@/components/bloques-laboratorio/SqlAnotado'
+import { SqlEnVivo } from '@/components/bloques-laboratorio/SqlEnVivo'
 import { VistaPreviaSocial } from '@/components/bloques-laboratorio/VistaPreviaSocial'
 import { Acordeon } from '@/components/referencia-contenido/Acordeon'
 import { AntesDespuesDeslizante } from '@/components/referencia-contenido/AntesDespuesDeslizante'
@@ -201,7 +203,7 @@ export function AdminReferenciaContenidoPage() {
         </h1>
         <p className="mt-3 max-w-3xl text-sm text-pretty text-muted-foreground">
           Catálogo visual de componentes React organizado por tipo. El primer grupo, "Bloques de
-          laboratorio", son los 15 componentes reales que ya renderiza cualquier lección a través
+          laboratorio", son los 17 componentes reales que ya renderiza cualquier lección a través
           de un bloque <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">```laboratorio</code>{' '}
           en su Markdown (ver <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">specs/features/laboratorios.md</code>).
           El resto de grupos son prototipos de diseño de <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">referencia-contenido/</code> —
@@ -215,7 +217,7 @@ export function AdminReferenciaContenidoPage() {
       <CategoriaActivaContext.Provider value={categoriaActiva}>
       <GrupoCatalogo
         titulo="Bloques de laboratorio"
-        descripcion="Los 15 tipos reales que un autor puede usar dentro de un bloque ```laboratorio en el Markdown de una lección (src/components/bloques-laboratorio/). Validados por Zod, registrados en un lookup cerrado — no prototipos."
+        descripcion="Los 17 tipos reales que un autor puede usar dentro de un bloque ```laboratorio en el Markdown de una lección (src/components/bloques-laboratorio/). Validados por Zod, registrados en un lookup cerrado — no prototipos."
       >
         <Referencia nombre="PrediceElResultado">
           <PrediceElResultado
@@ -457,6 +459,40 @@ export function AdminReferenciaContenidoPage() {
             }
             ts={'const x: number = "hola";'}
             pestañaInicial="ts"
+          />
+        </Referencia>
+
+        <Referencia nombre="SqlAnotado">
+          <SqlAnotado
+            tipo="sql-anotado"
+            esquemaSql={
+              "CREATE TABLE departamentos (id INTEGER PRIMARY KEY, nombre TEXT);\nCREATE TABLE empleados (id INTEGER PRIMARY KEY, nombre TEXT, departamento_id INTEGER, salario REAL);\nINSERT INTO departamentos VALUES (1, 'Ingeniería'), (2, 'Ventas');\nINSERT INTO empleados VALUES (1, 'Ana', 1, 55000), (2, 'Luis', 1, 62000), (3, 'Marta', 2, 48000);"
+            }
+            consulta={
+              'SELECT d.nombre AS departamento, COUNT(*) AS empleados\nFROM empleados e\nJOIN departamentos d ON d.id = e.departamento_id\nGROUP BY d.nombre'
+            }
+            anotaciones={[
+              {
+                fragmento: 'JOIN departamentos d ON d.id = e.departamento_id',
+                nota: 'Une cada empleado con su departamento por id.',
+              },
+              {
+                fragmento: 'GROUP BY d.nombre',
+                nota: 'Agrupa antes de agregar — sin esto, COUNT trataría la tabla entera como un único grupo.',
+              },
+            ]}
+          />
+        </Referencia>
+
+        <Referencia nombre="SqlEnVivo">
+          <SqlEnVivo
+            tipo="sql-en-vivo"
+            consigna='Muestra el nombre y el salario de los empleados de "Ingeniería", ordenados de mayor a menor salario.'
+            esquemaSql={
+              "CREATE TABLE departamentos (id INTEGER PRIMARY KEY, nombre TEXT);\nCREATE TABLE empleados (id INTEGER PRIMARY KEY, nombre TEXT, departamento_id INTEGER, salario REAL);\nINSERT INTO departamentos VALUES (1, 'Ingeniería'), (2, 'Ventas');\nINSERT INTO empleados VALUES (1, 'Ana', 1, 55000), (2, 'Luis', 1, 62000), (3, 'Marta', 2, 48000);"
+            }
+            consultaInicial=""
+            consultaSolucion="SELECT nombre, salario FROM empleados WHERE departamento_id = 1 ORDER BY salario DESC"
           />
         </Referencia>
       </GrupoCatalogo>

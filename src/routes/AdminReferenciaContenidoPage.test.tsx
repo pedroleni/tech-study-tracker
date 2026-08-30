@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { act, render, screen } from '@testing-library/react'
 import { axe } from 'vitest-axe'
 import { describe, expect, it, vi } from 'vitest'
 
@@ -20,6 +20,8 @@ const nombresComponentes = [
   'EsquemaDePagina',
   'CapasDeCaja',
   'EditorEnVivo',
+  'SqlAnotado',
+  'SqlEnVivo',
   'Acordeon',
   'Pestanas',
   'Pasos',
@@ -93,7 +95,16 @@ describe('AdminReferenciaContenidoPage', () => {
     vi.spyOn(window, 'setInterval').mockImplementation(
       (() => 0) as unknown as typeof window.setInterval,
     )
+    // SqlAnotado/SqlEnVivo cargan sql.js con fetch('/sql-wasm.wasm') al montar
+    // — no existe servidor en este entorno de test, así que se stubea para
+    // que rechace de inmediato y los dos componentes se asienten en su
+    // estado de error antes de la aserción de accesibilidad, en vez de
+    // dejar una actualización de estado pendiente fuera de act().
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('fetch no disponible en test')))
     const { container } = render(<AdminReferenciaContenidoPage />)
+    await act(async () => {
+      await Promise.resolve()
+    })
 
     expect(screen.getByRole('heading', { name: 'Componentes de contenido' })).toBeInTheDocument()
     for (const nombre of nombresComponentes) {
