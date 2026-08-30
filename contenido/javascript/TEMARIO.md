@@ -515,3 +515,9 @@ sostenida en las tres pasadas.
   porque esa sintaxis obliga a generar código, no solo borrar tipos.
   Repositorio:
   [github.com/pedroleni/buscador-personajes-ts](https://github.com/pedroleni/buscador-personajes-ts).
+  **Trasladada 2026-08-30** a `contenido/typescript/55-proyecto-avanzado-buscador-de-personajes-con-typescript.md`
+  como capstone del Módulo 13 (Proyectos) del temario de TypeScript
+  (`contenido/typescript/TEMARIO.md`) — sigue requiriendo haber hecho los
+  proyectos 76 y 77 de este temario de JavaScript, pero su tema real
+  (TypeScript) pertenece al otro catálogo. El fichero y la lección en
+  producción cambiaron de `technology_id`, no se duplicó contenido.

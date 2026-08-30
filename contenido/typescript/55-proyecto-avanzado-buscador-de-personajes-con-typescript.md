@@ -2,9 +2,10 @@
 
 - **Módulo:** Proyectos
 - **Slug:** `proyecto-avanzado-buscador-de-personajes-con-typescript` (autogenerado del título)
-- **Orden:** 510
+- **Orden:** 55
 - **Repositorio:** [github.com/pedroleni/buscador-personajes-ts](https://github.com/pedroleni/buscador-personajes-ts)
-- **Requiere:** Los proyectos "Gestor de tareas" (76) y "Explorador de personajes con Vite" (77)
+- **Requiere:** Los proyectos "Gestor de tareas" (76) y "Explorador de personajes con Vite" (77) del temario de JavaScript
+- **Nota:** Trasladada desde `contenido/javascript/78-proyecto-avanzado-buscador-typescript.md` — es el capstone de este temario de TypeScript, no de JavaScript. Contenido idéntico al original, solo cambia dónde vive.
 
 ---
 
@@ -84,7 +85,7 @@ En los dos proyectos anteriores, el estado tenía `cargando`, `error` y `persona
     },
     {
       "fragmento": "return respuesta.json();",
-      "nota": "Límite real de este patrón: TypeScript CONFÍA en que el <T> que le pasas es correcto — no comprueba la respuesta real contra ese tipo. Si la API cambiara de forma sin avisar, esto no lo detectaría; para eso haría falta una librería de validación en runtime como Zod."
+      "nota": "Límite real de este patrón: TypeScript CONFÍA en que el <T> que le pasas es correcto — no comprueba la respuesta real contra ese tipo. Si la API cambiara de forma sin avisar, esto no lo detectaría; para eso haría falta una librería de validación en runtime como Zod (ver la lección anterior de este mismo módulo)."
     }
   ]
 }
@@ -97,7 +98,7 @@ En los dos proyectos anteriores, el estado tenía `cargando`, `error` y `persona
   "tipo": "comparador-antes-despues",
   "antes": "<script>\nclass ErrorHttp extends Error {\n  constructor(public status: number, mensaje: string) {\n    super(mensaje);\n    this.name = 'ErrorHttp';\n  }\n}\n</script>",
   "despues": "<script>\nclass ErrorHttp extends Error {\n  status: number;\n\n  constructor(status: number, mensaje: string) {\n    super(mensaje);\n    this.name = 'ErrorHttp';\n    this.status = status;\n  }\n}\n</script>",
-  "nota": "El de antes es sintaxis de TypeScript perfectamente válida en general — pero con erasableSyntaxOnly activado en tsconfig.json (la misma restricción del soporte nativo de TypeScript de Node.js), no compila: ese azúcar sintáctico de \"parámetro de constructor\" obliga al compilador a GENERAR código (this.status = status), no solo borrar anotaciones de tipo. Herramientas que solo quitan tipos sin compilar de verdad no pueden con eso. El de después declara y asigna la propiedad a mano, y sí es \"solo tipos\" de principio a fin."
+  "nota": "El de antes es sintaxis válida en general — pero con erasableSyntaxOnly activado (lección dedicada en el Módulo 8) no compila: ese azúcar de \"parámetro de constructor\" obliga a GENERAR código (this.status = status), no solo borrar tipos. El de después asigna la propiedad a mano, y sí es \"solo tipos\" de principio a fin."
 }
 ```
 
@@ -127,7 +128,7 @@ En los dos proyectos anteriores, el estado tenía `cargando`, `error` y `persona
 
 1. Añade un quinto caso real y útil a `EstadoBusqueda`: `{ tipo: 'sin-resultados' }`, distinto de `'listo'` con un array vacío — y actualiza el `switch` para que compile de nuevo.
 2. Tipa una función `filtrarPorEspecie(personajes: Personaje[], especie: string): Personaje[]` y añádele sus propios tests.
-3. Sustituye el `as Promise<T>` de `obtenerJSON` por una validación real con Zod (ya lo viste en las lecciones de HTML/CSS de este mismo curso, en el sistema de bloques `laboratorio`) — así el tipo declarado y los datos reales quedan comprobados de verdad, no solo prometidos.
+3. Sustituye el `as Promise<T>` de `obtenerJSON` por una validación real con Zod — como en la lección anterior de este módulo, así el tipo declarado y los datos reales quedan comprobados de verdad, no solo prometidos.
 
 ## Para profundizar
 
