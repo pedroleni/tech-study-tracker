@@ -15,6 +15,7 @@ import { PrediceElResultado } from '@/components/bloques-laboratorio/PrediceElRe
 import { Recursos } from '@/components/bloques-laboratorio/Recursos'
 import { Roles } from '@/components/bloques-laboratorio/Roles'
 import { SqlAnotado } from '@/components/bloques-laboratorio/SqlAnotado'
+import { SqlEnVivo } from '@/components/bloques-laboratorio/SqlEnVivo'
 import { VistaPreviaSocial } from '@/components/bloques-laboratorio/VistaPreviaSocial'
 
 // El registro es deliberadamente cerrado: el JSON solo puede escoger uno de
@@ -37,4 +38,5 @@ export const registroBloquesLaboratorio: Record<string, ComponentType<any>> = {
   'capas-de-caja': CapasDeCaja,
   'editor-en-vivo': EditorEnVivo,
   'sql-anotado': SqlAnotado,
+  'sql-en-vivo': SqlEnVivo,
 }
