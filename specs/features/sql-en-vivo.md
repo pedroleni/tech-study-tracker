@@ -1,7 +1,10 @@
 # SQL: nueva tecnología + ejecución real de consultas en el navegador (sql.js/WASM)
 
-**Estado:** ⏳ pendiente — diseño cerrado y validado con un prototipo
-interactivo (ver "Validación" más abajo); implementación no empezada.
+**Estado:** 🚧 en curso — mecanismo implementado y verificado (esquema,
+motor `motor.ts` con `sql.js` real, tokenizador SQL, `TablaResultado`,
+`SqlAnotado`, `SqlEnVivo`, verificación visual con Playwright en claro y
+oscuro); pendiente el temario y las lecciones (`contenido/sql/`, fuera de
+alcance de la implementación de mecanismo).
 
 **Configuración manual requerida:** ninguna. La tecnología "SQL" (y más
 adelante "PostgreSQL", como track separado) se crea vía el flujo de admin
@@ -302,28 +305,44 @@ suficiente para una consulta de nivel curso con CTEs.
 
 ## Checklist de implementación
 
-- [ ] Esquema Zod: `esquemaSqlAnotado` + `esquemaSqlEnVivo` — Claude, TDD
-  (`schemas.test.ts`)
-- [ ] `src/lib/sql-en-vivo/motor.ts` + tests con el motor real (sin
-  mocks) — Codex
-- [ ] `scripts/dev/generar-sql-wasm.mjs` — Codex
-- [ ] `npm install sql.js@1.14.2 @codemirror/lang-sql@6.10.0` — Claude
-  (sandbox de Codex sin acceso a red)
-- [ ] Nuevo caso `sql` en `resaltador.ts` + tests del invariante —
-  Codex
-- [ ] `SqlAnotado.tsx`, `SqlEnVivo.tsx`, `TablaResultado.tsx` — Codex,
-  con especial atención al checkpoint de renderizado-como-texto de
-  arriba
-- [ ] `registro.ts` — altas
-- [ ] Verificación visual (Playwright, credenciales reales de admin):
+- [x] Esquema Zod: `esquemaSqlAnotado` + `esquemaSqlEnVivo` — Claude, TDD
+  (`schemas.test.ts`, 15/15 tests)
+- [x] `src/lib/sql-en-vivo/motor.ts` + tests con el motor real (sin
+  mocks) — Codex, con un fix real de Codex después: `typeof Database`
+  sobre un `Database` importado con `import type` no compila (TS2693,
+  no tiene binding en espacio de valores) — corregido a
+  `SqlJsStatic['Database']`, sin necesidad de importar `Database` en
+  absoluto. 11 tests (el plan decía "12/12" por un error de conteo,
+  corregido)
+- [x] `scripts/dev/generar-sql-wasm.mjs` — Codex, con un fix real
+  encontrado por Codex: `sql.js` declara un `exports` cerrado en su
+  `package.json` que no expone `./package.json` (a diferencia de
+  `typescript-en-vivo`) — corregido a resolver `sql.js/dist/sql-wasm.wasm`
+  directamente, que sí está expuesto vía `./dist/*`
+- [x] `npm install sql.js@1.14.2 @codemirror/lang-sql@6.10.0
+  @types/sql.js@1.4.11` — Claude (sandbox de Codex sin acceso a red)
+- [x] Nuevo caso `sql` en `resaltador.ts` + tests del invariante —
+  Codex, sin correcciones (47/47 tests)
+- [x] `SqlAnotado.tsx`, `SqlEnVivo.tsx`, `TablaResultado.tsx` — Codex,
+  siguiendo el checkpoint de renderizado-como-texto; confirmado sin
+  `dangerouslySetInnerHTML` en ningún punto (solo aparece dentro de un
+  comentario que explica por qué evitarlo)
+- [x] `registro.ts` — altas `sql-anotado`/`sql-en-vivo`
+- [x] Añadidas al catálogo de referencia (`AdminReferenciaContenidoPage`),
+  mismo patrón que `EditorEnVivo` cuando se lanzó — permite verificación
+  visual real sin necesitar contenido/tecnología todavía
+- [x] Verificación visual (Playwright, credenciales reales de admin):
   ambos bloques en modo claro/oscuro, un ejercicio correcto (✅), uno
-  incorrecto (❌), y una consulta con error real de SQLite
-- [ ] `npm run build`/`lint`/`test` en verde
+  incorrecto (❌), y una consulta con error real de SQLite (`no such
+  table: tabla_falsa`) — cero errores de consola/página
+- [x] `npm run build`/`lint`/`test` en verde (42 ficheros, 297 tests)
 - [ ] Categoría "Bases de datos" creada vía admin
 - [ ] Tecnología "SQL" creada vía admin, categoría "Bases de datos"
 - [ ] `contenido/sql/TEMARIO.md` — investigación de fuentes + planificación
 - [ ] Lecciones de SQL escritas módulo a módulo
-- [ ] `specs/features/README.md` — fila añadida, estado actualizado
-- [ ] Spot-check de seguridad final: `sql.js`/`@codemirror/lang-sql` son
-  los paquetes oficiales; sin `dangerouslySetInnerHTML` en
-  `TablaResultado`; sin migraciones nuevas (sin superficie RLS nueva)
+- [x] `specs/features/README.md` — fila añadida, estado actualizado
+- [x] Spot-check de seguridad final: `sql.js`/`@codemirror/lang-sql`/
+  `@types/sql.js` son los paquetes oficiales (`sql-js/sql.js`,
+  DefinitelyTyped, equipo de CodeMirror); sin `dangerouslySetInnerHTML`
+  real en `TablaResultado` ni en ningún componente nuevo; sin
+  migraciones nuevas (sin superficie RLS nueva)
