@@ -2,7 +2,7 @@
 
 - **Módulo:** Enums y alternativas
 - **Slug:** `enums-numericos-y-de-cadena` (autogenerado del título)
-- **Orden:** 25
+- **Orden:** 250
 - **Fuentes:** [Enums](https://www.typescriptlang.org/docs/handbook/enums.html) — ver `contenido/typescript/TEMARIO.md` #25
 
 ---

@@ -2,7 +2,7 @@
 
 - **Módulo:** Genéricos
 - **Slug:** `constraints-en-genericos` (autogenerado del título)
-- **Orden:** 29
+- **Orden:** 290
 - **Fuentes:** [Generics](https://www.typescriptlang.org/docs/handbook/2/generics.html) — ver `contenido/typescript/TEMARIO.md` #29
 
 ---

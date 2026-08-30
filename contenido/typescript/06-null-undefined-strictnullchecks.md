@@ -2,7 +2,7 @@
 
 - **Módulo:** Tipos primitivos y valores
 - **Slug:** `null-undefined-strictnullchecks` (autogenerado del título)
-- **Orden:** 6
+- **Orden:** 60
 - **Fuentes:** [Everyday Types](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html) — ver `contenido/typescript/TEMARIO.md` #6
 
 ---

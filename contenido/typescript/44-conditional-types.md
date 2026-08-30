@@ -2,7 +2,7 @@
 
 - **Módulo:** Tipos avanzados
 - **Slug:** `conditional-types` (autogenerado del título)
-- **Orden:** 44
+- **Orden:** 440
 - **Fuentes:** [Conditional Types](https://www.typescriptlang.org/docs/handbook/2/conditional-types.html) — ver `contenido/typescript/TEMARIO.md` #44
 
 ---

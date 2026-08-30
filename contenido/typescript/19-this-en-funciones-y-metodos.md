@@ -2,7 +2,7 @@
 
 - **Módulo:** Funciones tipadas
 - **Slug:** `this-en-funciones-y-metodos` (autogenerado del título)
-- **Orden:** 19
+- **Orden:** 190
 - **Fuentes:** [More on Functions](https://www.typescriptlang.org/docs/handbook/2/functions.html) — ver `contenido/typescript/TEMARIO.md` #19
 
 ---

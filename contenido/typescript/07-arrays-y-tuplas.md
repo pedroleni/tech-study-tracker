@@ -2,7 +2,7 @@
 
 - **Módulo:** Tipos primitivos y valores
 - **Slug:** `arrays-y-tuplas` (autogenerado del título)
-- **Orden:** 7
+- **Orden:** 70
 - **Fuentes:** [Everyday Types](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html) — ver `contenido/typescript/TEMARIO.md` #7
 
 ---

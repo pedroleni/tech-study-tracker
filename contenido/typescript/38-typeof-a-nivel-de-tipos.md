@@ -2,7 +2,7 @@
 
 - **Módulo:** Operadores de manipulación de tipos
 - **Slug:** `typeof-a-nivel-de-tipos` (autogenerado del título)
-- **Orden:** 38
+- **Orden:** 380
 - **Fuentes:** [Typeof Type Operator](https://www.typescriptlang.org/docs/handbook/2/typeof-types.html) — ver `contenido/typescript/TEMARIO.md` #38
 
 ---

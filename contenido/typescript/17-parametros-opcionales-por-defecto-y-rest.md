@@ -2,7 +2,7 @@
 
 - **Módulo:** Funciones tipadas
 - **Slug:** `parametros-opcionales-por-defecto-y-rest` (autogenerado del título)
-- **Orden:** 17
+- **Orden:** 170
 - **Fuentes:** [More on Functions](https://www.typescriptlang.org/docs/handbook/2/functions.html) — ver `contenido/typescript/TEMARIO.md` #17
 
 ---

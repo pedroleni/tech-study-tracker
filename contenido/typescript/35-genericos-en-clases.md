@@ -2,7 +2,7 @@
 
 - **Módulo:** Clases tipadas
 - **Slug:** `genericos-en-clases` (autogenerado del título)
-- **Orden:** 35
+- **Orden:** 350
 - **Fuentes:** [Classes](https://www.typescriptlang.org/docs/handbook/2/classes.html) + [Generics](https://www.typescriptlang.org/docs/handbook/2/generics.html) — ver `contenido/typescript/TEMARIO.md` #35
 
 ---

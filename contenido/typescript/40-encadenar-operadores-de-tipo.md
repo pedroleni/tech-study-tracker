@@ -2,7 +2,7 @@
 
 - **Módulo:** Operadores de manipulación de tipos
 - **Slug:** `encadenar-operadores-de-tipo` (autogenerado del título)
-- **Orden:** 40
+- **Orden:** 400
 - **Fuentes:** [Creating Types from Types](https://www.typescriptlang.org/docs/handbook/2/types-from-types.html) — ver `contenido/typescript/TEMARIO.md` #40
 
 ---

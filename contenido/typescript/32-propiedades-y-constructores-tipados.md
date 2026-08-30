@@ -2,7 +2,7 @@
 
 - **Módulo:** Clases tipadas
 - **Slug:** `propiedades-y-constructores-tipados` (autogenerado del título)
-- **Orden:** 32
+- **Orden:** 320
 - **Fuentes:** [Classes](https://www.typescriptlang.org/docs/handbook/2/classes.html) — ver `contenido/typescript/TEMARIO.md` #32
 
 ---

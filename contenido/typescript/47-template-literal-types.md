@@ -2,7 +2,7 @@
 
 - **Módulo:** Tipos avanzados
 - **Slug:** `template-literal-types` (autogenerado del título)
-- **Orden:** 47
+- **Orden:** 470
 - **Fuentes:** [Template Literal Types](https://www.typescriptlang.org/docs/handbook/2/template-literal-types.html) — ver `contenido/typescript/TEMARIO.md` #47
 
 ---

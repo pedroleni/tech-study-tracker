@@ -2,7 +2,7 @@
 
 - **Módulo:** Clases tipadas
 - **Slug:** `modificadores-de-acceso` (autogenerado del título)
-- **Orden:** 33
+- **Orden:** 330
 - **Fuentes:** [Classes](https://www.typescriptlang.org/docs/handbook/2/classes.html) — ver `contenido/typescript/TEMARIO.md` #33
 
 ---

@@ -2,7 +2,7 @@
 
 - **Módulo:** Utility types
 - **Slug:** `utility-types-partial-pick-omit` (autogenerado del título)
-- **Orden:** 41
+- **Orden:** 410
 - **Fuentes:** [Utility Types](https://www.typescriptlang.org/docs/handbook/utility-types.html) — ver `contenido/typescript/TEMARIO.md` #41
 
 ---

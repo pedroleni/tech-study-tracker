@@ -2,7 +2,7 @@
 
 - **Módulo:** Operadores de manipulación de tipos
 - **Slug:** `keyof` (autogenerado del título)
-- **Orden:** 37
+- **Orden:** 370
 - **Fuentes:** [Keyof Type Operator](https://www.typescriptlang.org/docs/handbook/2/keyof-types.html) — ver `contenido/typescript/TEMARIO.md` #37
 
 ---

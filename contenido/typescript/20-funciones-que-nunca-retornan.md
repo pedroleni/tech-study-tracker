@@ -2,7 +2,7 @@
 
 - **Módulo:** Funciones tipadas
 - **Slug:** `funciones-que-nunca-retornan` (autogenerado del título)
-- **Orden:** 20
+- **Orden:** 200
 - **Fuentes:** [More on Functions](https://www.typescriptlang.org/docs/handbook/2/functions.html) — ver `contenido/typescript/TEMARIO.md` #20
 
 ---

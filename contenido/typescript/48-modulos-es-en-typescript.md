@@ -2,7 +2,7 @@
 
 - **Módulo:** Módulos, declaraciones y configuración
 - **Slug:** `modulos-es-en-typescript` (autogenerado del título)
-- **Orden:** 48
+- **Orden:** 480
 - **Fuentes:** [Modules](https://www.typescriptlang.org/docs/handbook/2/modules.html) + [Modules — Introduction](https://www.typescriptlang.org/docs/handbook/modules/introduction.html) — ver `contenido/typescript/TEMARIO.md` #48
 
 ---

@@ -2,7 +2,7 @@
 
 - **Módulo:** Genéricos
 - **Slug:** `valores-por-defecto-en-tipos-genericos` (autogenerado del título)
-- **Orden:** 30
+- **Orden:** 300
 - **Fuentes:** [Generics](https://www.typescriptlang.org/docs/handbook/2/generics.html) — ver `contenido/typescript/TEMARIO.md` #30
 
 ---

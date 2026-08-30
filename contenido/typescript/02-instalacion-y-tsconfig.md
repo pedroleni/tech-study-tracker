@@ -2,7 +2,7 @@
 
 - **Módulo:** Por qué TypeScript y primeros pasos
 - **Slug:** `instalacion-y-tsconfig` (autogenerado del título)
-- **Orden:** 2
+- **Orden:** 20
 - **Fuentes:** [TypeScript Tooling in 5 minutes](https://www.typescriptlang.org/docs/handbook/typescript-tooling-in-5-minutes.html) + [What is a tsconfig.json](https://www.typescriptlang.org/docs/handbook/tsconfig-json.html) — ver `contenido/typescript/TEMARIO.md` #2
 
 ---

@@ -2,7 +2,7 @@
 
 - **Módulo:** Utility types
 - **Slug:** `returntype-y-parameters` (autogenerado del título)
-- **Orden:** 43
+- **Orden:** 430
 - **Fuentes:** [Utility Types](https://www.typescriptlang.org/docs/handbook/utility-types.html) — ver `contenido/typescript/TEMARIO.md` #43
 
 ---

@@ -2,7 +2,7 @@
 
 - **Módulo:** Tipos primitivos y valores
 - **Slug:** `any-unknown-never` (autogenerado del título)
-- **Orden:** 8
+- **Orden:** 80
 - **Fuentes:** [Everyday Types](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html) — ver `contenido/typescript/TEMARIO.md` #8
 
 ---

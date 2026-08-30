@@ -2,7 +2,7 @@
 
 - **Módulo:** Proyectos
 - **Slug:** `proyecto-validar-con-zod` (autogenerado del título)
-- **Orden:** 54
+- **Orden:** 540
 - **Fuentes:** [Utility Types — z.infer](https://www.typescriptlang.org/docs/handbook/utility-types.html) (para tipar la salida de Zod) + continúa el reto #3 planteado, sin resolver, en la lección `proyecto-avanzado-buscador-de-personajes-con-typescript` de este mismo temario — ver `contenido/typescript/TEMARIO.md` #54
 
 ---

@@ -2,7 +2,7 @@
 
 - **Módulo:** Módulos, declaraciones y configuración
 - **Slug:** `declaration-merging` (autogenerado del título)
-- **Orden:** 52
+- **Orden:** 520
 - **Fuentes:** [Declaration Merging](https://www.typescriptlang.org/docs/handbook/declaration-merging.html) — ver `contenido/typescript/TEMARIO.md` #52
 
 ---

@@ -2,7 +2,7 @@
 
 - **Módulo:** Tipos primitivos y valores
 - **Slug:** `tipos-primitivos` (autogenerado del título)
-- **Orden:** 5
+- **Orden:** 50
 - **Fuentes:** [Everyday Types](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html) — ver `contenido/typescript/TEMARIO.md` #5
 
 ---

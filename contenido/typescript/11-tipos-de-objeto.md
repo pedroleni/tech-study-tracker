@@ -2,7 +2,7 @@
 
 - **Módulo:** Objetos y alias de tipos
 - **Slug:** `tipos-de-objeto` (autogenerado del título)
-- **Orden:** 11
+- **Orden:** 110
 - **Fuentes:** [Object Types](https://www.typescriptlang.org/docs/handbook/2/objects.html) — ver `contenido/typescript/TEMARIO.md` #11
 
 ---

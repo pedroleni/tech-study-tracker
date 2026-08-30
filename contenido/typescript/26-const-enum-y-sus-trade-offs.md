@@ -2,7 +2,7 @@
 
 - **Módulo:** Enums y alternativas
 - **Slug:** `const-enum-y-sus-trade-offs` (autogenerado del título)
-- **Orden:** 26
+- **Orden:** 260
 - **Fuentes:** [Enums](https://www.typescriptlang.org/docs/handbook/enums.html) — ver `contenido/typescript/TEMARIO.md` #26
 
 ---

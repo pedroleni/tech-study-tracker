@@ -2,7 +2,7 @@
 
 - **Módulo:** Clases tipadas
 - **Slug:** `erasablesyntaxonly` (autogenerado del título)
-- **Orden:** 36
+- **Orden:** 360
 - **Fuentes:** Comportamiento real de la opción `erasableSyntaxOnly` de `tsconfig.json`, ya verificado de primera mano construyendo el proyecto de la lección `proyecto-avanzado-buscador-de-personajes-con-typescript` de este mismo temario (Módulo 13) — ver `contenido/typescript/TEMARIO.md` #36
 
 ---

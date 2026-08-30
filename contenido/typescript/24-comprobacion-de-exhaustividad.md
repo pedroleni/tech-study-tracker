@@ -2,7 +2,7 @@
 
 - **Módulo:** Narrowing y uniones discriminadas
 - **Slug:** `comprobacion-de-exhaustividad` (autogenerado del título)
-- **Orden:** 24
+- **Orden:** 240
 - **Fuentes:** [Narrowing](https://www.typescriptlang.org/docs/handbook/2/narrowing.html) — ver `contenido/typescript/TEMARIO.md` #24
 
 ---

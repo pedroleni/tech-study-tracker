@@ -2,7 +2,7 @@
 
 - **Módulo:** Genéricos
 - **Slug:** `funciones-genericas` (autogenerado del título)
-- **Orden:** 28
+- **Orden:** 280
 - **Fuentes:** [Generics](https://www.typescriptlang.org/docs/handbook/2/generics.html) — ver `contenido/typescript/TEMARIO.md` #28
 
 ---

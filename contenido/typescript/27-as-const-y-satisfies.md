@@ -2,7 +2,7 @@
 
 - **Módulo:** Enums y alternativas
 - **Slug:** `as-const-y-satisfies` (autogenerado del título)
-- **Orden:** 27
+- **Orden:** 270
 - **Fuentes:** [Everyday Types](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html) + [TypeScript 4.9 — satisfies](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-9.html) + [Google TypeScript Style Guide — enums](https://google.github.io/styleguide/tsguide.html) — ver `contenido/typescript/TEMARIO.md` #27
 
 ---

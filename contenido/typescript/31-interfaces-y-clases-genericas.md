@@ -2,7 +2,7 @@
 
 - **Módulo:** Genéricos
 - **Slug:** `interfaces-y-clases-genericas` (autogenerado del título)
-- **Orden:** 31
+- **Orden:** 310
 - **Fuentes:** [Generics](https://www.typescriptlang.org/docs/handbook/2/generics.html) — ver `contenido/typescript/TEMARIO.md` #31
 
 ---

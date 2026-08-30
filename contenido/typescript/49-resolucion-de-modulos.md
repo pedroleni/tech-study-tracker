@@ -2,7 +2,7 @@
 
 - **Módulo:** Módulos, declaraciones y configuración
 - **Slug:** `resolucion-de-modulos` (autogenerado del título)
-- **Orden:** 49
+- **Orden:** 490
 - **Fuentes:** [Modules — Theory](https://www.typescriptlang.org/docs/handbook/modules/theory.html) — ver `contenido/typescript/TEMARIO.md` #49
 
 ---

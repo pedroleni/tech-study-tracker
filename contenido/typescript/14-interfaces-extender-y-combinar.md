@@ -2,7 +2,7 @@
 
 - **Módulo:** Objetos y alias de tipos
 - **Slug:** `interfaces-extender-y-combinar` (autogenerado del título)
-- **Orden:** 14
+- **Orden:** 140
 - **Fuentes:** [Object Types](https://www.typescriptlang.org/docs/handbook/2/objects.html) — ver `contenido/typescript/TEMARIO.md` #14
 
 ---

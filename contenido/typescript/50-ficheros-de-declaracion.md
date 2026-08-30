@@ -2,7 +2,7 @@
 
 - **Módulo:** Módulos, declaraciones y configuración
 - **Slug:** `ficheros-de-declaracion` (autogenerado del título)
-- **Orden:** 50
+- **Orden:** 500
 - **Fuentes:** [Declaration Files — Introduction](https://www.typescriptlang.org/docs/handbook/declaration-files/introduction.html) + [By Example](https://www.typescriptlang.org/docs/handbook/declaration-files/by-example.html) — ver `contenido/typescript/TEMARIO.md` #50
 
 ---

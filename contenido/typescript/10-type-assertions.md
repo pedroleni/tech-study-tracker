@@ -2,7 +2,7 @@
 
 - **Módulo:** Tipos primitivos y valores
 - **Slug:** `type-assertions` (autogenerado del título)
-- **Orden:** 10
+- **Orden:** 100
 - **Fuentes:** [Everyday Types](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html) — ver `contenido/typescript/TEMARIO.md` #10
 
 ---

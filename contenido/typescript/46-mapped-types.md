@@ -2,7 +2,7 @@
 
 - **Módulo:** Tipos avanzados
 - **Slug:** `mapped-types` (autogenerado del título)
-- **Orden:** 46
+- **Orden:** 460
 - **Fuentes:** [Mapped Types](https://www.typescriptlang.org/docs/handbook/2/mapped-types.html) — ver `contenido/typescript/TEMARIO.md` #46
 
 ---

@@ -2,7 +2,7 @@
 
 - **Módulo:** Narrowing y uniones discriminadas
 - **Slug:** `uniones-discriminadas` (autogenerado del título)
-- **Orden:** 23
+- **Orden:** 230
 - **Fuentes:** [Narrowing](https://www.typescriptlang.org/docs/handbook/2/narrowing.html) — ver `contenido/typescript/TEMARIO.md` #23
 
 ---

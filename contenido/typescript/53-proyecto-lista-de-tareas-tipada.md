@@ -2,7 +2,7 @@
 
 - **Módulo:** Proyectos
 - **Slug:** `proyecto-lista-de-tareas-tipada` (autogenerado del título)
-- **Orden:** 53
+- **Orden:** 530
 - **Fuentes:** Aplicación directa de los Módulos 2-5 de este temario (tipos primitivos, objetos, uniones, narrowing y uniones discriminadas) — ver `contenido/typescript/TEMARIO.md` #53
 
 ---

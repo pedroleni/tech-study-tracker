@@ -2,7 +2,7 @@
 
 - **Módulo:** Utility types
 - **Slug:** `utility-types-record-exclude-extract` (autogenerado del título)
-- **Orden:** 42
+- **Orden:** 420
 - **Fuentes:** [Utility Types](https://www.typescriptlang.org/docs/handbook/utility-types.html) — ver `contenido/typescript/TEMARIO.md` #42
 
 ---

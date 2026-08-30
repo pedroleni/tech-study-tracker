@@ -2,7 +2,7 @@
 
 - **Módulo:** Clases tipadas
 - **Slug:** `clases-abstractas-e-implements` (autogenerado del título)
-- **Orden:** 34
+- **Orden:** 340
 - **Fuentes:** [Classes](https://www.typescriptlang.org/docs/handbook/2/classes.html) — ver `contenido/typescript/TEMARIO.md` #34
 
 ---

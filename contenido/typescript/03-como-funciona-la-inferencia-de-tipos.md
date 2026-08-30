@@ -2,7 +2,7 @@
 
 - **Módulo:** Por qué TypeScript y primeros pasos
 - **Slug:** `como-funciona-la-inferencia-de-tipos` (autogenerado del título)
-- **Orden:** 3
+- **Orden:** 30
 - **Fuentes:** [The Basics](https://www.typescriptlang.org/docs/handbook/2/basic-types.html) — ver `contenido/typescript/TEMARIO.md` #3
 
 ---

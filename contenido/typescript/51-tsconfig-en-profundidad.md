@@ -2,7 +2,7 @@
 
 - **Módulo:** Módulos, declaraciones y configuración
 - **Slug:** `tsconfig-en-profundidad` (autogenerado del título)
-- **Orden:** 51
+- **Orden:** 510
 - **Fuentes:** [TSConfig Reference](https://www.typescriptlang.org/tsconfig/) + [Choosing Compiler Options](https://www.typescriptlang.org/docs/handbook/modules/guides/choosing-compiler-options.html) — ver `contenido/typescript/TEMARIO.md` #51
 
 ---

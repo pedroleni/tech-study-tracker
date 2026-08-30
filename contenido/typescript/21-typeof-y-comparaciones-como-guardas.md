@@ -2,7 +2,7 @@
 
 - **Módulo:** Narrowing y uniones discriminadas
 - **Slug:** `typeof-y-comparaciones-como-guardas` (autogenerado del título)
-- **Orden:** 21
+- **Orden:** 210
 - **Fuentes:** [Narrowing](https://www.typescriptlang.org/docs/handbook/2/narrowing.html) — ver `contenido/typescript/TEMARIO.md` #21
 
 ---

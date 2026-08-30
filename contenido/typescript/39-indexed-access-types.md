@@ -2,7 +2,7 @@
 
 - **Módulo:** Operadores de manipulación de tipos
 - **Slug:** `indexed-access-types` (autogenerado del título)
-- **Orden:** 39
+- **Orden:** 390
 - **Fuentes:** [Indexed Access Types](https://www.typescriptlang.org/docs/handbook/2/indexed-access-types.html) — ver `contenido/typescript/TEMARIO.md` #39
 
 ---

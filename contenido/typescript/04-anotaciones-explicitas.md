@@ -2,7 +2,7 @@
 
 - **Módulo:** Por qué TypeScript y primeros pasos
 - **Slug:** `anotaciones-explicitas` (autogenerado del título)
-- **Orden:** 4
+- **Orden:** 40
 - **Fuentes:** [The Basics](https://www.typescriptlang.org/docs/handbook/2/basic-types.html) — ver `contenido/typescript/TEMARIO.md` #4
 
 ---

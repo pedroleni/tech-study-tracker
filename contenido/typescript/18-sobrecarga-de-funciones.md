@@ -2,7 +2,7 @@
 
 - **Módulo:** Funciones tipadas
 - **Slug:** `sobrecarga-de-funciones` (autogenerado del título)
-- **Orden:** 18
+- **Orden:** 180
 - **Fuentes:** [More on Functions](https://www.typescriptlang.org/docs/handbook/2/functions.html) — ver `contenido/typescript/TEMARIO.md` #18
 
 ---

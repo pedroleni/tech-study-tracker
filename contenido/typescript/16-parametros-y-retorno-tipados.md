@@ -2,7 +2,7 @@
 
 - **Módulo:** Funciones tipadas
 - **Slug:** `parametros-y-retorno-tipados` (autogenerado del título)
-- **Orden:** 16
+- **Orden:** 160
 - **Fuentes:** [More on Functions](https://www.typescriptlang.org/docs/handbook/2/functions.html) — ver `contenido/typescript/TEMARIO.md` #16
 
 ---

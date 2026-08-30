@@ -2,7 +2,7 @@
 
 - **Módulo:** Tipos avanzados
 - **Slug:** `infer` (autogenerado del título)
-- **Orden:** 45
+- **Orden:** 450
 - **Fuentes:** [Conditional Types](https://www.typescriptlang.org/docs/handbook/2/conditional-types.html) — ver `contenido/typescript/TEMARIO.md` #45
 
 ---

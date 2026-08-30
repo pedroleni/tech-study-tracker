@@ -2,7 +2,7 @@
 
 - **Módulo:** Proyectos
 - **Slug:** `proyecto-avanzado-buscador-de-personajes-con-typescript` (autogenerado del título)
-- **Orden:** 55
+- **Orden:** 550
 - **Repositorio:** [github.com/pedroleni/buscador-personajes-ts](https://github.com/pedroleni/buscador-personajes-ts)
 - **Requiere:** Los proyectos "Gestor de tareas" (76) y "Explorador de personajes con Vite" (77) del temario de JavaScript
 - **Nota:** Trasladada desde `contenido/javascript/78-proyecto-avanzado-buscador-typescript.md` — es el capstone de este temario de TypeScript, no de JavaScript. Contenido idéntico al original, solo cambia dónde vive.

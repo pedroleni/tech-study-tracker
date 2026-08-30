@@ -2,7 +2,7 @@
 
 - **Módulo:** Objetos y alias de tipos
 - **Slug:** `uniones-de-tipos` (autogenerado del título)
-- **Orden:** 13
+- **Orden:** 130
 - **Fuentes:** [Everyday Types](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html) — ver `contenido/typescript/TEMARIO.md` #13
 
 ---

@@ -2,7 +2,7 @@
 
 - **Módulo:** Por qué TypeScript y primeros pasos
 - **Slug:** `que-problema-resuelve-typescript` (autogenerado del título)
-- **Orden:** 1
+- **Orden:** 10
 - **Fuentes:** [TypeScript for JS Programmers](https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes.html) + [TS for the New Programmer](https://www.typescriptlang.org/docs/handbook/typescript-from-scratch.html) — ver `contenido/typescript/TEMARIO.md` #1
 
 ---

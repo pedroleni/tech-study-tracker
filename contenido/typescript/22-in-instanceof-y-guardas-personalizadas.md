@@ -2,7 +2,7 @@
 
 - **Módulo:** Narrowing y uniones discriminadas
 - **Slug:** `in-instanceof-y-guardas-personalizadas` (autogenerado del título)
-- **Orden:** 22
+- **Orden:** 220
 - **Fuentes:** [Narrowing](https://www.typescriptlang.org/docs/handbook/2/narrowing.html) — ver `contenido/typescript/TEMARIO.md` #22
 
 ---

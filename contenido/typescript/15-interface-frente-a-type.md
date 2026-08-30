@@ -2,7 +2,7 @@
 
 - **Módulo:** Objetos y alias de tipos
 - **Slug:** `interface-frente-a-type` (autogenerado del título)
-- **Orden:** 15
+- **Orden:** 150
 - **Fuentes:** [Object Types](https://www.typescriptlang.org/docs/handbook/2/objects.html) + [Google TypeScript Style Guide — Type Aliases](https://google.github.io/styleguide/tsguide.html) — ver `contenido/typescript/TEMARIO.md` #15
 
 ---
