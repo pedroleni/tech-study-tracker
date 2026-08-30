@@ -200,6 +200,34 @@ export const esquemaEditorEnVivo = z
     { message: 'editor-en-vivo necesita contenido inicial en html, css, js o ts' },
   )
 
+// Ejecutan de verdad la consulta contra sql.js (motor real, WASM) — nunca
+// muestran un resultado tecleado a mano. Ver specs/features/sql-en-vivo.md.
+export const esquemaSqlAnotado = z.object({
+  tipo: z.literal('sql-anotado'),
+  titulo: z.string().min(1).max(140).optional(),
+  esquemaSql: z.string().min(1).max(3000),
+  consulta: z.string().min(1).max(1500),
+  anotaciones: z
+    .array(
+      z.object({
+        fragmento: z.string().min(1),
+        nota: z.string().min(1).max(500),
+      }),
+    )
+    .min(1)
+    .max(8),
+})
+
+// consultaSolucion es opcional: si falta, el bloque es puramente
+// exploratorio (se ejecuta y se muestra el resultado real, sin ✅/❌).
+export const esquemaSqlEnVivo = z.object({
+  tipo: z.literal('sql-en-vivo'),
+  consigna: z.string().min(1).max(600).optional(),
+  esquemaSql: z.string().min(1).max(3000),
+  consultaInicial: z.string().max(1500).default(''),
+  consultaSolucion: z.string().max(1500).optional(),
+})
+
 export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaPrediceElResultado,
   esquemaCodigoAnotado,
@@ -216,6 +244,8 @@ export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaEsquemaDePagina,
   esquemaCapasDeCaja,
   esquemaEditorEnVivo,
+  esquemaSqlAnotado,
+  esquemaSqlEnVivo,
 ])
 
 export type DatosPrediceElResultado = z.infer<typeof esquemaPrediceElResultado>
@@ -235,4 +265,6 @@ export type DatosMapaDeRegiones = z.infer<typeof esquemaMapaDeRegiones>
 export type DatosEsquemaDePagina = z.infer<typeof esquemaEsquemaDePagina>
 export type DatosCapasDeCaja = z.infer<typeof esquemaCapasDeCaja>
 export type DatosEditorEnVivo = z.infer<typeof esquemaEditorEnVivo>
+export type DatosSqlAnotado = z.infer<typeof esquemaSqlAnotado>
+export type DatosSqlEnVivo = z.infer<typeof esquemaSqlEnVivo>
 export type DatosBloqueLaboratorio = z.infer<typeof esquemaBloqueLaboratorio>
