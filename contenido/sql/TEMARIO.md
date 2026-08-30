@@ -201,5 +201,11 @@ real con motores de producción, no un detalle a esconder.
 - [x] Crear la categoría "Bases de datos" vía el flujo de admin.
 - [x] Crear la tecnología "SQL" vía el flujo de admin, categoría "Bases
   de datos".
-- [ ] Confirmar el orden de publicación (¿todas de golpe, como Node.js,
-  o por módulos?).
+- [x] Confirmar el orden de publicación — todas de golpe, como Node.js.
+
+## Estado
+
+Las 45 lecciones están escritas, validadas (esquema Zod + ejecución real
+contra `sql.js` de cada `esquemaSql`/consulta) y publicadas. Pendiente:
+el track de "PostgreSQL" (tecnología separada, después de este, mismo
+patrón que JavaScript/TypeScript).

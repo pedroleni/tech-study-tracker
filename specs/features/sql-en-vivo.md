@@ -1,10 +1,9 @@
 # SQL: nueva tecnología + ejecución real de consultas en el navegador (sql.js/WASM)
 
-**Estado:** 🚧 en curso — mecanismo implementado y verificado (esquema,
-motor `motor.ts` con `sql.js` real, tokenizador SQL, `TablaResultado`,
-`SqlAnotado`, `SqlEnVivo`, verificación visual con Playwright en claro y
-oscuro); pendiente el temario y las lecciones (`contenido/sql/`, fuera de
-alcance de la implementación de mecanismo).
+**Estado:** ✅ implementada — mecanismo (esquema, motor `motor.ts` con
+`sql.js` real, tokenizador SQL, `TablaResultado`, `SqlAnotado`,
+`SqlEnVivo`) y contenido (categoría "Bases de datos", tecnología "SQL",
+45 lecciones en 11 módulos) completos, verificados y publicados.
 
 **Configuración manual requerida:** ninguna. La tecnología "SQL" (y más
 adelante "PostgreSQL", como track separado) se crea vía el flujo de admin
@@ -336,10 +335,16 @@ suficiente para una consulta de nivel curso con CTEs.
   incorrecto (❌), y una consulta con error real de SQLite (`no such
   table: tabla_falsa`) — cero errores de consola/página
 - [x] `npm run build`/`lint`/`test` en verde (42 ficheros, 297 tests)
-- [ ] Categoría "Bases de datos" creada vía admin
-- [ ] Tecnología "SQL" creada vía admin, categoría "Bases de datos"
-- [ ] `contenido/sql/TEMARIO.md` — investigación de fuentes + planificación
-- [ ] Lecciones de SQL escritas módulo a módulo
+- [x] Categoría "Bases de datos" creada vía admin
+- [x] Tecnología "SQL" creada vía admin, categoría "Bases de datos"
+- [x] `contenido/sql/TEMARIO.md` — investigación de fuentes (SQLite Language
+  Reference + páginas puntuales) + planificación de 11 módulos / 45
+  lecciones
+- [x] 45 lecciones de SQL escritas y publicadas — cada consulta ejecutada
+  de verdad contra `sql.js` antes de publicarse (no asumida), incluidos
+  varios hallazgos reales documentados en el propio contenido (`PRAGMA
+  foreign_keys`, desbordamiento de `date()` en fin de mes, límites de
+  `ALTER TABLE`)
 - [x] `specs/features/README.md` — fila añadida, estado actualizado
 - [x] Spot-check de seguridad final: `sql.js`/`@codemirror/lang-sql`/
   `@types/sql.js` son los paquetes oficiales (`sql-js/sql.js`,
