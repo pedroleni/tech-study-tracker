@@ -25,6 +25,7 @@ en el chat, que no queda buscable ni versionado.
 
 | Fecha | Archivo | Alcance | Resultado |
 |---|---|---|---|
+| 2026-08-31 | [2026-08-31-sql-en-vivo.md](2026-08-31-sql-en-vivo.md) | Feature completa "SQL en vivo": ejecución real de SQL en el navegador vía sql.js/WASM, 3 deps npm nuevas, `motor.ts`, `SqlAnotado`/`SqlEnVivo`, `TablaResultado`, tokenizador SQL en `resaltador.ts` | 0 hallazgos en los 8 dominios (agent-env, secrets, code-vulns, supply-chain, injection, auth-crypto, infrastructure, prompt-injection); risk score 0/100 |
 | 2026-08-19 | [2026-08-19-bloques-laboratorio.md](2026-08-19-bloques-laboratorio.md) | Bloques interactivos en lecciones (`predice-el-resultado`, `codigo-anotado`, `comparador-antes-despues`) vía `SafeMarkdown`, compartido con comentarios de cualquier usuario | 0 High/Medium; 209 tests, build y lint verdes; verificado en producción con las 2 lecciones piloto de HTML |
 | 2026-08-19 | [2026-08-19-scanners-grep-macos.md](2026-08-19-scanners-grep-macos.md) | Tooling: `grep -P` sin soporte en macOS, silenciado en los 5 scanners de `scripts/security/` — incluye un fix anterior (PR #14) que quedó a medias | 2 HIGH + 1 MEDIUM, los 3 arreglados en PR #30; verificado que los 5 scanners ahora detectan en local lo mismo que CI |
 | 2026-08-18 | [2026-08-18-progress.md](2026-08-18-progress.md) | Progreso personal: tabla `user_technology_progress` (RLS) + primera función RPC del proyecto (`security invoker`) | 0 High/Medium; 150 tests, build y lint verdes; verificado con curl real en producción, 12/12 casos (3 identidades) |
