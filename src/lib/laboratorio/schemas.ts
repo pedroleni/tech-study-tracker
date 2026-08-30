@@ -181,9 +181,9 @@ export const esquemaCapasDeCaja = z.object({
 })
 
 // Editor en vivo: la lección deja de describir un resultado y deja probarlo
-// de verdad. Al menos uno de html/css/js debe traer contenido — un bloque
-// con los tres vacíos no tiene sentido y `refine` lo rechaza en vez de
-// dejarlo caer en un editor completamente en blanco.
+// de verdad. Al menos uno de html/css/js/ts debe traer contenido — un
+// bloque con los cuatro vacíos no tiene sentido y `refine` lo rechaza en
+// vez de dejarlo caer en un editor completamente en blanco.
 export const esquemaEditorEnVivo = z
   .object({
     tipo: z.literal('editor-en-vivo'),
@@ -192,11 +192,13 @@ export const esquemaEditorEnVivo = z
     html: z.string().max(4000).default(''),
     css: z.string().max(4000).default(''),
     js: z.string().max(4000).default(''),
-    pestañaInicial: z.enum(['html', 'css', 'js']).default('html'),
+    ts: z.string().max(4000).default(''),
+    pestañaInicial: z.enum(['html', 'css', 'js', 'ts']).default('html'),
   })
-  .refine((datos) => datos.html.trim() || datos.css.trim() || datos.js.trim(), {
-    message: 'editor-en-vivo necesita contenido inicial en html, css o js',
-  })
+  .refine(
+    (datos) => datos.html.trim() || datos.css.trim() || datos.js.trim() || datos.ts.trim(),
+    { message: 'editor-en-vivo necesita contenido inicial en html, css, js o ts' },
+  )
 
 export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaPrediceElResultado,
