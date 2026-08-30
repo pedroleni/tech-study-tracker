@@ -10,6 +10,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint .",
+    "generar-ts-libs": "node scripts/dev/generar-ts-libs.mjs",
     "codex:task": "bash scripts/dev/codex-task.sh",
     "codex:monitor": "node scripts/dev/codex-monitor.mjs"
   },
