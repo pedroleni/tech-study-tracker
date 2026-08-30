@@ -455,6 +455,7 @@ export function AdminReferenciaContenidoPage() {
             js={
               "document.querySelector('#saludo').addEventListener('click', () => {\n  document.querySelector('#resultado').textContent = '¡Hola!';\n});"
             }
+            ts=""
             pestañaInicial="html"
           />
         </Referencia>
