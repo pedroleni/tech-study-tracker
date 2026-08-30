@@ -17,7 +17,7 @@
 - `sql.js@1.14.2` exacto (no `^`) — verificado empíricamente antes de este plan: bundla SQLite 3.49.1, soporta JOIN/GROUP BY/CTE(`WITH`)/funciones de ventana/transacciones, y da errores reales (`no such table: x`). MIT, cero dependencias runtime.
 - `@types/sql.js@1.4.11` exacto, como devDependency — `sql.js` no trae sus propios tipos.
 - `@codemirror/lang-sql@6.10.0` exacto — oficial del equipo de CodeMirror, misma major 6.x que `@codemirror/lang-css`/`lang-html`/`lang-javascript` ya instalados.
-- Import de `sql.js` verificado empíricamente con `tsc --strict`: `import initSqlJs from 'sql.js'` + `import type { Database, QueryExecResult, SqlValue } from 'sql.js'` (el paquete usa `export =`, esos tres tipos se importan como named imports directamente, no hace falta `import initSqlJs = require(...)`).
+- Import de `sql.js` verificado empíricamente con `tsc --strict`: `import initSqlJs from 'sql.js'` + `import type { Database, QueryExecResult, SqlValue } from 'sql.js'` (el paquete usa `export =`, esos tres tipos se importan como named imports directamente, no hace falta `import initSqlJs = require(...)`). **Ojo** (encontrado en la implementación real, no en esa verificación): `typeof Database` sobre un `Database` importado con `import type` falla con `TS2693` — un tipo importado con `import type` no tiene binding en espacio de valores, y `typeof` lo necesita. La solución real usada en `motor.ts` es `SqlJsStatic['Database']` en vez de `typeof Database` (ver Task 4) — no hace falta importar `Database` en absoluto.
 - **Nada de CDN en runtime**: `sql-wasm.wasm` se genera una vez con un script y se comitea en `public/sql-wasm.wasm` (primer binario comiteado del repo — 658 KB).
 - **Cada ejecución de consulta recrea la base de datos desde `esquemaSql`** — nunca una `Database` compartida entre la consulta del alumno y la de verificación, ni entre dos pulsaciones seguidas (ver Architecture arriba). Esto vive en `motor.ts`, ninguna otra capa debe crear una `Database` directamente.
 - **Los valores de resultado se renderizan como hijos de JSX (texto), nunca `dangerouslySetInnerHTML`** — el alumno controla el contenido de las celdas a través de literales de cadena en su propia consulta (`SELECT '<img src=x onerror=...>' AS x` es SQL válido). Checkpoint de seguridad real de la spec.
@@ -527,7 +527,7 @@ Crear `src/lib/sql-en-vivo/motor.ts`:
 // ejecuciones. Esto es deliberado: un UPDATE/DELETE en un intento del
 // alumno no debe contaminar el siguiente intento, ni la comparación con
 // la consulta solución.
-import type { Database, QueryExecResult, SqlValue } from 'sql.js'
+import type { QueryExecResult, SqlJsStatic, SqlValue } from 'sql.js'
 
 export interface ResultadoConsultaOk {
   ok: true
@@ -542,8 +542,12 @@ export interface ResultadoConsultaError {
 
 export type ResultadoConsulta = ResultadoConsultaOk | ResultadoConsultaError
 
+// SqlJsStatic['Database'] en vez de `typeof Database` con un `Database`
+// importado por separado: un tipo con `import type` no tiene binding en
+// espacio de valores, y `typeof` lo necesita (TS2693, encontrado en la
+// implementación real) - SqlJsStatic ya expone el tipo del constructor.
 export interface MotorSql {
-  DatabaseCtor: typeof Database
+  DatabaseCtor: SqlJsStatic['Database']
 }
 
 async function cargarWasmPorFetch(): Promise<ArrayBuffer> {
