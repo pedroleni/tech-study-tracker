@@ -7,9 +7,15 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import type { DatosEditorEnVivo } from '@/lib/laboratorio/schemas'
+import {
+  compilarEnEntorno,
+  crearEntornoTypeScript,
+  type DiagnosticoTs,
+  type EntornoTypeScript,
+} from '@/lib/typescript-en-vivo/compilar'
 import { cn } from '@/lib/utils'
 
-type Lenguaje = 'html' | 'css' | 'js'
+type Lenguaje = 'html' | 'css' | 'js' | 'ts'
 
 const LENGUAJES: Array<{
   id: Lenguaje
@@ -19,6 +25,7 @@ const LENGUAJES: Array<{
   { id: 'html', etiqueta: 'HTML', extension: lenguajeHtml() },
   { id: 'css', etiqueta: 'CSS', extension: lenguajeCss() },
   { id: 'js', etiqueta: 'JavaScript', extension: lenguajeJavascript() },
+  { id: 'ts', etiqueta: 'TypeScript', extension: lenguajeJavascript({ typescript: true }) },
 ]
 
 const estilosTemaAplicacion = {
@@ -164,17 +171,59 @@ function EditorCodigo({
   )
 }
 
+function PanelDiagnosticosTs({
+  estado,
+  diagnosticos,
+}: {
+  estado: 'cargando' | 'listo' | 'error'
+  diagnosticos: DiagnosticoTs[]
+}) {
+  if (estado === 'cargando') {
+    return <p className="text-sm text-muted-foreground">Cargando el compilador de TypeScript…</p>
+  }
+  if (estado === 'error') {
+    return (
+      <p className="text-sm text-red-600 dark:text-red-400">
+        No se pudo cargar el compilador de TypeScript. Recarga la página para intentarlo de nuevo.
+      </p>
+    )
+  }
+  if (diagnosticos.length === 0) {
+    return <p className="text-sm text-green-600 dark:text-green-400">Sin errores de tipos.</p>
+  }
+  return (
+    <ul className="space-y-1 rounded-lg border bg-muted/40 p-3 text-sm">
+      {diagnosticos.map((diagnostico, indice) => (
+        <li
+          key={indice}
+          className={
+            diagnostico.severidad === 'error'
+              ? 'text-red-600 dark:text-red-400'
+              : 'text-amber-600 dark:text-amber-400'
+          }
+        >
+          <span className="font-mono text-xs">
+            {diagnostico.linea}:{diagnostico.columna}
+          </span>{' '}
+          {diagnostico.mensaje}
+        </li>
+      ))}
+    </ul>
+  )
+}
+
 export function EditorEnVivo({
   titulo = 'Prueba el código y observa el resultado.',
   consigna,
   html: htmlOriginal,
   css: cssOriginal,
   js: jsOriginal,
+  ts: tsOriginal,
   pestañaInicial,
 }: DatosEditorEnVivo) {
   const originales = useMemo(
-    () => ({ html: htmlOriginal, css: cssOriginal, js: jsOriginal }),
-    [cssOriginal, htmlOriginal, jsOriginal],
+    () => ({ html: htmlOriginal, css: cssOriginal, js: jsOriginal, ts: tsOriginal }),
+    [cssOriginal, htmlOriginal, jsOriginal, tsOriginal],
   )
   const lenguajesDisponibles = useMemo(
     () => LENGUAJES.filter(({ id }) => originales[id].trim().length > 0),
@@ -188,14 +237,51 @@ export function EditorEnVivo({
   const [srcDoc, setSrcDoc] = useState(() =>
     construirDocumento(originales.html, originales.css, originales.js),
   )
+  const usaTypeScript = lenguajesDisponibles.some(({ id }) => id === 'ts')
+  const [estadoCompiladorTs, setEstadoCompiladorTs] = useState<'cargando' | 'listo' | 'error'>(
+    'cargando',
+  )
+  const [diagnosticosTs, setDiagnosticosTs] = useState<DiagnosticoTs[]>([])
+  const entornoTsRef = useRef<EntornoTypeScript | null>(null)
+
+  useEffect(() => {
+    if (!usaTypeScript) return
+    let cancelado = false
+    crearEntornoTypeScript()
+      .then((entorno) => {
+        if (cancelado) return
+        entornoTsRef.current = entorno
+        setEstadoCompiladorTs('listo')
+      })
+      .catch(() => {
+        if (!cancelado) setEstadoCompiladorTs('error')
+      })
+    return () => {
+      cancelado = true
+    }
+  }, [usaTypeScript])
 
   useEffect(() => {
     const temporizador = window.setTimeout(() => {
-      setSrcDoc(construirDocumento(codigo.html, codigo.css, codigo.js))
+      if (!usaTypeScript) {
+        setSrcDoc(construirDocumento(codigo.html, codigo.css, codigo.js))
+        return
+      }
+      // Con ts presente, su JS compilado sustituye a codigo.js por completo
+      // (los dos campos no están pensados para combinarse en un mismo bloque).
+      if (estadoCompiladorTs !== 'listo' || !entornoTsRef.current) return
+      const { js, diagnosticos } = compilarEnEntorno(entornoTsRef.current, codigo.ts)
+      setDiagnosticosTs(diagnosticos)
+      const hayErrores = diagnosticos.some((d) => d.severidad === 'error')
+      if (!hayErrores) {
+        setSrcDoc(construirDocumento(codigo.html, codigo.css, js))
+      }
+      // Si hay errores, no se toca srcDoc: la vista previa se queda en el
+      // último resultado válido en vez de mostrar un iframe roto.
     }, 200)
 
     return () => window.clearTimeout(temporizador)
-  }, [codigo])
+  }, [codigo, usaTypeScript, estadoCompiladorTs])
 
   const lenguajeActivo =
     lenguajesDisponibles.find(({ id }) => id === pestanaActiva) ??
@@ -273,6 +359,9 @@ export function EditorEnVivo({
                 setCodigo((actual) => ({ ...actual, [lenguajeActivo.id]: valor }))
               }
             />
+          )}
+          {usaTypeScript && pestanaActiva === 'ts' && (
+            <PanelDiagnosticosTs estado={estadoCompiladorTs} diagnosticos={diagnosticosTs} />
           )}
         </div>
 
