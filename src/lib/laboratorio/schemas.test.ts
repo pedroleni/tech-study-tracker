@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest'
 
-import { esquemaBloqueLaboratorio, esquemaEditorEnVivo, esquemaSqlAnotado, esquemaSqlEnVivo } from './schemas'
+import {
+  esquemaBloqueLaboratorio,
+  esquemaEditorEnVivo,
+  esquemaGitAnotado,
+  esquemaGitEnVivo,
+  esquemaSqlAnotado,
+  esquemaSqlEnVivo,
+} from './schemas'
 
 describe('esquemaEditorEnVivo', () => {
   it('acepta un bloque que solo trae contenido en ts', () => {
@@ -238,6 +245,134 @@ describe('esquemaBloqueLaboratorio con los tipos de SQL', () => {
     const enVivo = esquemaBloqueLaboratorio.safeParse({
       tipo: 'sql-en-vivo',
       esquemaSql: 'CREATE TABLE t (id INTEGER);',
+    })
+
+    expect(anotado.success).toBe(true)
+    expect(enVivo.success).toBe(true)
+  })
+})
+
+describe('esquemaGitAnotado', () => {
+  it('acepta un bloque válido con pasos de comando y anotaciones', () => {
+    const resultado = esquemaGitAnotado.safeParse({
+      tipo: 'git-anotado',
+      esquemaGit: ["init .", "add a.txt", "commit -m 'v1'"],
+      comando: 'log --oneline',
+      anotaciones: [{ fragmento: 'log', nota: 'Muestra el historial real.' }],
+    })
+    expect(resultado.success).toBe(true)
+    if (resultado.success) expect(resultado.data.mostrarGrafo).toBe(false)
+  })
+
+  it('acepta un paso de escritura de fichero junto a comandos', () => {
+    const resultado = esquemaGitAnotado.safeParse({
+      tipo: 'git-anotado',
+      esquemaGit: [
+        'init .',
+        { escribir: { ruta: 'a.txt', contenido: 'hola\n' } },
+        'add a.txt',
+      ],
+      comando: 'status',
+      anotaciones: [{ fragmento: 'status', nota: 'x' }],
+    })
+    expect(resultado.success).toBe(true)
+  })
+
+  it('acepta mostrarGrafo explícito', () => {
+    const resultado = esquemaGitAnotado.safeParse({
+      tipo: 'git-anotado',
+      esquemaGit: ['init .'],
+      comando: 'log --oneline',
+      mostrarGrafo: true,
+      anotaciones: [{ fragmento: 'log', nota: 'x' }],
+    })
+    expect(resultado.success).toBe(true)
+    if (resultado.success) expect(resultado.data.mostrarGrafo).toBe(true)
+  })
+
+  it('rechaza esquemaGit vacío', () => {
+    const resultado = esquemaGitAnotado.safeParse({
+      tipo: 'git-anotado',
+      esquemaGit: [],
+      comando: 'log --oneline',
+      anotaciones: [{ fragmento: 'log', nota: 'x' }],
+    })
+    expect(resultado.success).toBe(false)
+  })
+
+  it('rechaza sin ninguna anotación', () => {
+    const resultado = esquemaGitAnotado.safeParse({
+      tipo: 'git-anotado',
+      esquemaGit: ['init .'],
+      comando: 'log --oneline',
+      anotaciones: [],
+    })
+    expect(resultado.success).toBe(false)
+  })
+
+  it('rechaza un paso de escritura mal formado (sin ruta)', () => {
+    const resultado = esquemaGitAnotado.safeParse({
+      tipo: 'git-anotado',
+      esquemaGit: [{ escribir: { contenido: 'x' } }],
+      comando: 'status',
+      anotaciones: [{ fragmento: 'status', nota: 'x' }],
+    })
+    expect(resultado.success).toBe(false)
+  })
+})
+
+describe('esquemaGitEnVivo', () => {
+  it('acepta un bloque válido con comandoSolucion', () => {
+    const resultado = esquemaGitEnVivo.safeParse({
+      tipo: 'git-en-vivo',
+      esquemaGit: ["init .", "add a.txt", "commit -m 'v1'"],
+      comandoInicial: 'status',
+      comandoSolucion: 'log --oneline',
+    })
+    expect(resultado.success).toBe(true)
+  })
+
+  it('comandoInicial por defecto es cadena vacía', () => {
+    const resultado = esquemaGitEnVivo.parse({
+      tipo: 'git-en-vivo',
+      esquemaGit: ['init .'],
+    })
+    expect(resultado.comandoInicial).toBe('')
+    expect(resultado.mostrarGrafo).toBe(false)
+  })
+
+  it('acepta consigna y mostrarGrafo opcionales', () => {
+    const resultado = esquemaGitEnVivo.safeParse({
+      tipo: 'git-en-vivo',
+      consigna: 'Resuelve el conflicto.',
+      esquemaGit: ['init .'],
+      comandoInicial: 'status',
+      mostrarGrafo: true,
+    })
+    expect(resultado.success).toBe(true)
+  })
+
+  it('acepta pasos de escritura de fichero', () => {
+    const resultado = esquemaGitEnVivo.safeParse({
+      tipo: 'git-en-vivo',
+      esquemaGit: ['init .', { escribir: { ruta: 'a.txt', contenido: 'x\n' } }],
+      comandoInicial: 'status',
+    })
+    expect(resultado.success).toBe(true)
+  })
+})
+
+describe('esquemaBloqueLaboratorio con los tipos de Git', () => {
+  it('discrimina git-anotado y git-en-vivo dentro de la unión', () => {
+    const anotado = esquemaBloqueLaboratorio.safeParse({
+      tipo: 'git-anotado',
+      esquemaGit: ['init .'],
+      comando: 'log --oneline',
+      anotaciones: [{ fragmento: 'log', nota: 'nota' }],
+    })
+    const enVivo = esquemaBloqueLaboratorio.safeParse({
+      tipo: 'git-en-vivo',
+      esquemaGit: ['init .'],
     })
 
     expect(anotado.success).toBe(true)

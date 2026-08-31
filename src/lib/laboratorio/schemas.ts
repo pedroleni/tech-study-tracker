@@ -247,6 +247,51 @@ export const esquemaSqlEnVivo = z.object({
   consultaSolucion: z.string().max(1500).optional(),
 })
 
+// Ejecutan de verdad comandos contra wasm-git (libgit2 real vía WASM) —
+// nunca muestran una salida de terminal escrita a mano. Ver
+// specs/features/git-en-vivo.md.
+//
+// Un paso de esquemaGit es normalmente un comando git (sin el prefijo
+// "git", ya implícito — "init .", "add a.txt"...). wasm-git no tiene
+// ningún comando para escribir contenido de ficheros (eso no es una
+// operación de git), así que un paso también puede ser {escribir: {...}}
+// para preparar el estado del repositorio antes del comando destacado.
+const esquemaPasoGit = z.union([
+  z.string().min(1).max(200),
+  z.object({
+    escribir: z.object({
+      ruta: z.string().min(1).max(100),
+      contenido: z.string().max(2000),
+    }),
+  }),
+])
+
+export const esquemaGitAnotado = z.object({
+  tipo: z.literal('git-anotado'),
+  titulo: z.string().min(1).max(140).optional(),
+  esquemaGit: z.array(esquemaPasoGit).min(1).max(15),
+  comando: z.string().min(1).max(200),
+  mostrarGrafo: z.boolean().default(false),
+  anotaciones: z
+    .array(
+      z.object({
+        fragmento: z.string().min(1),
+        nota: z.string().min(1).max(500),
+      }),
+    )
+    .min(1)
+    .max(8),
+})
+
+export const esquemaGitEnVivo = z.object({
+  tipo: z.literal('git-en-vivo'),
+  consigna: z.string().min(1).max(600).optional(),
+  esquemaGit: z.array(esquemaPasoGit).min(1).max(15),
+  comandoInicial: z.string().max(200).default(''),
+  comandoSolucion: z.string().max(200).optional(),
+  mostrarGrafo: z.boolean().default(false),
+})
+
 export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaPrediceElResultado,
   esquemaCodigoAnotado,
@@ -265,6 +310,8 @@ export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaEditorEnVivo,
   esquemaSqlAnotado,
   esquemaSqlEnVivo,
+  esquemaGitAnotado,
+  esquemaGitEnVivo,
 ])
 
 export type DatosPrediceElResultado = z.infer<typeof esquemaPrediceElResultado>
@@ -286,4 +333,6 @@ export type DatosCapasDeCaja = z.infer<typeof esquemaCapasDeCaja>
 export type DatosEditorEnVivo = z.infer<typeof esquemaEditorEnVivo>
 export type DatosSqlAnotado = z.infer<typeof esquemaSqlAnotado>
 export type DatosSqlEnVivo = z.infer<typeof esquemaSqlEnVivo>
+export type DatosGitAnotado = z.infer<typeof esquemaGitAnotado>
+export type DatosGitEnVivo = z.infer<typeof esquemaGitEnVivo>
 export type DatosBloqueLaboratorio = z.infer<typeof esquemaBloqueLaboratorio>
