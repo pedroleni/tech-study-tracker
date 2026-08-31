@@ -8,7 +8,7 @@
 // ejecuciones. Esto es deliberado: un UPDATE/DELETE en un intento del
 // alumno no debe contaminar el siguiente intento, ni la comparación con
 // la consulta solución.
-import type { QueryExecResult, SqlJsStatic, SqlValue } from 'sql.js'
+import type { QueryExecResult, SqlJsStatic } from 'sql.js'
 
 import type { ResultadoConsulta } from './comparar'
 

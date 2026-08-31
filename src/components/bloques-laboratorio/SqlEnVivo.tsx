@@ -1,11 +1,17 @@
 import { sql } from '@codemirror/lang-sql'
 import { basicSetup, EditorView } from 'codemirror'
 import { CircleCheck, CircleX, Play, RotateCcw } from 'lucide-react'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { TablaResultado } from '@/components/bloques-laboratorio/TablaResultado'
 import type { DatosSqlEnVivo } from '@/lib/laboratorio/schemas'
+import {
+  crearMotorPostgres,
+  ejecutarConsultaPostgres,
+  type IdentidadSimulada,
+  type MotorPostgres,
+} from '@/lib/postgres-en-vivo/motor'
 import {
   compararResultados,
   crearMotorSql,
@@ -120,22 +126,33 @@ function EditorSql({ valor, onChange }: { valor: string; onChange: (valor: strin
 
 export function SqlEnVivo({
   consigna,
+  motor: tipoMotor,
+  extensiones,
+  identidadSimulada,
   esquemaSql,
   consultaInicial,
   consultaSolucion,
 }: DatosSqlEnVivo) {
   const [consulta, setConsulta] = useState(consultaInicial)
-  const [motor, setMotor] = useState<MotorSql | null>(null)
+  const [identidad, setIdentidad] = useState<IdentidadSimulada | undefined>(identidadSimulada?.[0])
+  const [motorSql, setMotorSql] = useState<MotorSql | null>(null)
+  const [motorPostgres, setMotorPostgres] = useState<MotorPostgres | null>(null)
   const [estadoMotor, setEstadoMotor] = useState<'cargando' | 'listo' | 'error'>('cargando')
   const [resultado, setResultado] = useState<ResultadoConsulta | null>(null)
 
   useEffect(() => {
     let cancelado = false
-    crearMotorSql()
-      .then((motorCargado) => {
-        if (cancelado) return
-        setMotor(motorCargado)
-        setEstadoMotor('listo')
+    const carga =
+      tipoMotor === 'postgres'
+        ? crearMotorPostgres().then((m) => {
+            if (!cancelado) setMotorPostgres(m)
+          })
+        : crearMotorSql().then((m) => {
+            if (!cancelado) setMotorSql(m)
+          })
+    carga
+      .then(() => {
+        if (!cancelado) setEstadoMotor('listo')
       })
       .catch(() => {
         if (!cancelado) setEstadoMotor('error')
@@ -143,26 +160,66 @@ export function SqlEnVivo({
     return () => {
       cancelado = true
     }
-  }, [])
+  }, [tipoMotor])
 
   useEffect(() => {
-    if (!motor) return
+    if (estadoMotor !== 'listo') return
+    let cancelado = false
     const temporizador = window.setTimeout(() => {
       const texto = consulta.trim()
       if (!texto) {
         setResultado(null)
         return
       }
-      setResultado(ejecutarConsulta(motor, esquemaSql, texto))
+      if (tipoMotor === 'postgres' && motorPostgres) {
+        ejecutarConsultaPostgres(motorPostgres, esquemaSql, texto, { extensiones, identidad }).then(
+          (resultadoEjecucion) => {
+            if (!cancelado) setResultado(resultadoEjecucion)
+          },
+        )
+      } else if (motorSql) {
+        setResultado(ejecutarConsulta(motorSql, esquemaSql, texto))
+      }
     }, RETRASO_EJECUCION_MS)
 
-    return () => window.clearTimeout(temporizador)
-  }, [consulta, motor, esquemaSql])
+    return () => {
+      cancelado = true
+      window.clearTimeout(temporizador)
+    }
+  }, [consulta, motorSql, motorPostgres, esquemaSql, tipoMotor, extensiones, identidad, estadoMotor])
 
-  const solucion = useMemo(() => {
-    if (!motor || !consultaSolucion) return null
-    return ejecutarConsulta(motor, esquemaSql, consultaSolucion)
-  }, [motor, esquemaSql, consultaSolucion])
+  // solucionEjecutada, no solucion: cuando no hay consultaSolucion, el
+  // efecto de abajo no toca este estado en absoluto (nunca lo pone a
+  // null "por dentro" de un effect — eso dispara cascading renders,
+  // ver react-hooks/set-state-in-effect). El valor final se deriva en
+  // el render, justo debajo.
+  const [solucionEjecutada, setSolucionEjecutada] = useState<ResultadoConsulta | null>(null)
+
+  useEffect(() => {
+    if (!consultaSolucion) return
+    let cancelado = false
+    // IIFE async: incluso la rama sqlite (ejecutarConsulta es síncrona)
+    // pasa por un await para que el setState quede dentro de una
+    // continuación async, nunca directamente en el cuerpo del efecto
+    // (react-hooks/set-state-in-effect lo marca como error si no).
+    void (async () => {
+      const resultadoEjecucion =
+        tipoMotor === 'postgres' && motorPostgres
+          ? await ejecutarConsultaPostgres(motorPostgres, esquemaSql, consultaSolucion, {
+              extensiones,
+              identidad,
+            })
+          : motorSql
+            ? ejecutarConsulta(motorSql, esquemaSql, consultaSolucion)
+            : null
+      if (!cancelado && resultadoEjecucion) setSolucionEjecutada(resultadoEjecucion)
+    })()
+    return () => {
+      cancelado = true
+    }
+  }, [motorSql, motorPostgres, esquemaSql, consultaSolucion, tipoMotor, extensiones, identidad])
+
+  const solucion = consultaSolucion ? solucionEjecutada : null
 
   const coincide =
     resultado?.ok === true && solucion?.ok === true && compararResultados(resultado, solucion)
@@ -210,6 +267,29 @@ export function SqlEnVivo({
 
       {estadoMotor === 'listo' && (
         <>
+          {identidadSimulada && identidadSimulada.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2">
+              <label htmlFor="sql-en-vivo-identidad" className="text-sm font-medium">
+                Estás conectado como
+              </label>
+              <select
+                id="sql-en-vivo-identidad"
+                value={identidad?.valor ?? ''}
+                onChange={(evento) => {
+                  const elegida = identidadSimulada.find((i) => i.valor === evento.target.value)
+                  setIdentidad(elegida)
+                }}
+                className="h-9 rounded-lg border border-input bg-background px-3 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+              >
+                {identidadSimulada.map((opcion) => (
+                  <option key={opcion.valor} value={opcion.valor}>
+                    {opcion.etiqueta}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
           <EditorSql valor={consulta} onChange={setConsulta} />
 
           <div className="space-y-1">
