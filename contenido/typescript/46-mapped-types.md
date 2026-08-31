@@ -16,7 +16,8 @@ Un mapped type recorre las claves de un tipo existente (con `keyof`) y construye
   "tipo": "editor-en-vivo",
   "titulo": "Reimplementando Partial con un mapped type",
   "consigna": "Compara MiPartial con Partial<Usuario> de la lección 41 — deberían comportarse igual.",
-  "ts": "type MiPartial<T> = {\n  [Clave in keyof T]?: T[Clave];\n};\n\ninterface Usuario {\n  id: number;\n  nombre: string;\n}\n\ntype UsuarioParcial = MiPartial<Usuario>;\n\nconst u: UsuarioParcial = { nombre: 'Ada' }; // válido, id puede faltar\nconsole.log(u);",
+  "html": "<pre id=\"salida\"></pre>",
+  "ts": "type MiPartial<T> = {\n  [Clave in keyof T]?: T[Clave];\n};\n\ninterface Usuario {\n  id: number;\n  nombre: string;\n}\n\ntype UsuarioParcial = MiPartial<Usuario>;\n\nconst u: UsuarioParcial = { nombre: 'Ada' }; // válido, id puede faltar\ndocument.getElementById('salida')!.textContent = JSON.stringify(u);",
   "pestañaInicial": "ts"
 }
 ```

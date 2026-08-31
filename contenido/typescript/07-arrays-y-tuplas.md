@@ -16,7 +16,8 @@ Un array tipado (`number[]` o, equivalente, `Array<number>`) dice que TODOS los 
   "tipo": "editor-en-vivo",
   "titulo": "Array frente a tupla",
   "consigna": "Añade un elemento más a la tupla `coordenada` y observa el error — una tupla tiene longitud fija, un array no.",
-  "ts": "const numeros: number[] = [1, 2, 3];\nnumeros.push(4); // permitido, un array puede crecer\n\nconst coordenada: [number, number] = [40.4, -3.7];\n// coordenada.push(100); // probaría a añadir un tercer elemento\n\nconsole.log(numeros, coordenada);",
+  "html": "<pre id=\"salida\"></pre>",
+  "ts": "const numeros: number[] = [1, 2, 3];\nnumeros.push(4); // permitido, un array puede crecer\n\nconst coordenada: [number, number] = [40.4, -3.7];\n// coordenada.push(100); // probaría a añadir un tercer elemento\n\ndocument.getElementById('salida')!.textContent = `${JSON.stringify(numeros)} ${JSON.stringify(coordenada)}`;",
   "pestañaInicial": "ts"
 }
 ```

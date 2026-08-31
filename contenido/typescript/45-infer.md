@@ -16,7 +16,8 @@
   "tipo": "editor-en-vivo",
   "titulo": "Reimplementando ReturnType con infer",
   "consigna": "Cambia la función `crearPunto` para que devuelva un string en vez de un objeto, y observa cómo MiReturnType lo sigue automáticamente.",
-  "ts": "type MiReturnType<F> = F extends (...args: any[]) => infer R ? R : never;\n\nfunction crearPunto() {\n  return { x: 0, y: 0 };\n}\n\ntype Punto = MiReturnType<typeof crearPunto>; // { x: number; y: number }\n\nconst p: Punto = { x: 1, y: 2 };\nconsole.log(p);",
+  "html": "<pre id=\"salida\"></pre>",
+  "ts": "type MiReturnType<F> = F extends (...args: any[]) => infer R ? R : never;\n\nfunction crearPunto() {\n  return { x: 0, y: 0 };\n}\n\ntype Punto = MiReturnType<typeof crearPunto>; // { x: number; y: number }\n\nconst p: Punto = { x: 1, y: 2 };\ndocument.getElementById('salida')!.textContent = JSON.stringify(p);",
   "pestañaInicial": "ts"
 }
 ```

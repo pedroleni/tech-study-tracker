@@ -48,7 +48,8 @@ ni expresar si te falta un caso.
   "tipo": "editor-en-vivo",
   "titulo": "Quita 'cancelado' de la tabla y observa el error",
   "consigna": "Borra la línea `cancelado: {},` de la tabla y mira el panel de diagnósticos — el mensaje señala exactamente qué estado falta.",
-  "ts": "type TablaTransiciones<Estado extends string, Evento extends string> = Record<\n  Estado,\n  Partial<Record<Evento, Estado>>\n>;\n\ntype EstadoPedido = 'pendiente' | 'pagado' | 'enviado' | 'entregado' | 'cancelado';\ntype EventoPedido = 'pagar' | 'enviar' | 'entregar' | 'cancelar';\n\nconst tablaPedido: TablaTransiciones<EstadoPedido, EventoPedido> = {\n  pendiente: { pagar: 'pagado', cancelar: 'cancelado' },\n  pagado: { enviar: 'enviado', cancelar: 'cancelado' },\n  enviado: { entregar: 'entregado' },\n  entregado: {},\n  cancelado: {},\n};\n\nconsole.log(tablaPedido);",
+  "html": "<pre id=\"salida\"></pre>",
+  "ts": "type TablaTransiciones<Estado extends string, Evento extends string> = Record<\n  Estado,\n  Partial<Record<Evento, Estado>>\n>;\n\ntype EstadoPedido = 'pendiente' | 'pagado' | 'enviado' | 'entregado' | 'cancelado';\ntype EventoPedido = 'pagar' | 'enviar' | 'entregar' | 'cancelar';\n\nconst tablaPedido: TablaTransiciones<EstadoPedido, EventoPedido> = {\n  pendiente: { pagar: 'pagado', cancelar: 'cancelado' },\n  pagado: { enviar: 'enviado', cancelar: 'cancelado' },\n  enviado: { entregar: 'entregado' },\n  entregado: {},\n  cancelado: {},\n};\n\ndocument.getElementById('salida')!.textContent = JSON.stringify(tablaPedido, null, 2);",
   "pestañaInicial": "ts"
 }
 ```

@@ -16,7 +16,8 @@ Un template literal type usa la misma sintaxis de backticks que un template lite
   "tipo": "editor-en-vivo",
   "titulo": "Todas las combinaciones, generadas automáticamente",
   "consigna": "Añade 'verde' a la unión Color y observa (razonando sobre el tipo, o probando una asignación nueva) que EventoColor gana automáticamente 'click-verde' y 'hover-verde'.",
-  "ts": "type Color = 'rojo' | 'azul';\ntype Accion = 'click' | 'hover';\n\ntype EventoColor = `${Accion}-${Color}`;\n// 'click-rojo' | 'click-azul' | 'hover-rojo' | 'hover-azul'\n\nconst evento: EventoColor = 'click-rojo';\nconsole.log(evento);",
+  "html": "<pre id=\"salida\"></pre>",
+  "ts": "type Color = 'rojo' | 'azul';\ntype Accion = 'click' | 'hover';\n\ntype EventoColor = `${Accion}-${Color}`;\n// 'click-rojo' | 'click-azul' | 'hover-rojo' | 'hover-azul'\n\nconst evento: EventoColor = 'click-rojo';\ndocument.getElementById('salida')!.textContent = evento;",
   "pestañaInicial": "ts"
 }
 ```

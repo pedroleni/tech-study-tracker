@@ -16,7 +16,8 @@
   "tipo": "editor-en-vivo",
   "titulo": "El tipo de una variable, extraído con typeof",
   "consigna": "Cambia `otraConfiguracion.puerto` por un string y observa el error — su tipo se extrajo directamente de `configuracion`.",
-  "ts": "const configuracion = {\n  puerto: 3000,\n  host: 'localhost',\n};\n\ntype Configuracion = typeof configuracion; // { puerto: number; host: string }\n\nconst otraConfiguracion: Configuracion = {\n  puerto: 8080,\n  host: '0.0.0.0',\n};\n\nconsole.log(otraConfiguracion);",
+  "html": "<pre id=\"salida\"></pre>",
+  "ts": "const configuracion = {\n  puerto: 3000,\n  host: 'localhost',\n};\n\ntype Configuracion = typeof configuracion; // { puerto: number; host: string }\n\nconst otraConfiguracion: Configuracion = {\n  puerto: 8080,\n  host: '0.0.0.0',\n};\n\ndocument.getElementById('salida')!.textContent = JSON.stringify(otraConfiguracion, null, 2);",
   "pestañaInicial": "ts"
 }
 ```

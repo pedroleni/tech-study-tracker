@@ -16,7 +16,8 @@ Un tipo literal no describe una categoría de valores (como `string`), sino un v
   "tipo": "editor-en-vivo",
   "titulo": "Un tipo literal en acción",
   "consigna": "Cambia el valor asignado a `estado` por algo que no sea 'pendiente' y observa el error.",
-  "ts": "let estado: 'pendiente' = 'pendiente';\n\nconsole.log(estado);",
+  "html": "<pre id=\"salida\"></pre>",
+  "ts": "let estado: 'pendiente' = 'pendiente';\n\ndocument.getElementById('salida')!.textContent = estado;",
   "pestañaInicial": "ts"
 }
 ```

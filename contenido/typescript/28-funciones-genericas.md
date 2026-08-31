@@ -27,7 +27,8 @@ Un genérico es una variable de tipo — un marcador de posición, casi siempre 
   "tipo": "editor-en-vivo",
   "titulo": "El mismo genérico, con tipos distintos según la llamada",
   "consigna": "Llama a `primero` con un array de strings y observa (en el panel o pasando el ratón) que T se infiere como string esa vez.",
-  "ts": "function primero<T>(lista: T[]): T {\n  return lista[0];\n}\n\nconst numero = primero([1, 2, 3]); // T: number\nconst texto = primero(['a', 'b']); // T: string\n\nconsole.log(numero, texto);",
+  "html": "<pre id=\"salida\"></pre>",
+  "ts": "function primero<T>(lista: T[]): T {\n  return lista[0];\n}\n\nconst numero = primero([1, 2, 3]); // T: number\nconst texto = primero(['a', 'b']); // T: string\n\ndocument.getElementById('salida')!.textContent = `${numero} ${texto}`;",
   "pestañaInicial": "ts"
 }
 ```

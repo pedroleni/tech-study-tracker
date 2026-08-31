@@ -16,7 +16,8 @@ Un conditional type usa la sintaxis `T extends U ? X : Y` — igual que un opera
   "tipo": "editor-en-vivo",
   "titulo": "Un conditional type simple",
   "consigna": "Cambia el tipo de `resultado2` a `EsString<boolean>` y observa que se resuelve a 'no'.",
-  "ts": "type EsString<T> = T extends string ? 'si' : 'no';\n\ntype Resultado1 = EsString<'hola'>; // 'si'\ntype Resultado2 = EsString<42>; // 'no'\n\nconst valor: Resultado1 = 'si';\nconsole.log(valor);",
+  "html": "<pre id=\"salida\"></pre>",
+  "ts": "type EsString<T> = T extends string ? 'si' : 'no';\n\ntype Resultado1 = EsString<'hola'>; // 'si'\ntype Resultado2 = EsString<42>; // 'no'\n\nconst valor: Resultado1 = 'si';\ndocument.getElementById('salida')!.textContent = valor;",
   "pestañaInicial": "ts"
 }
 ```

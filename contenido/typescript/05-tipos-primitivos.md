@@ -16,7 +16,8 @@
   "tipo": "editor-en-vivo",
   "titulo": "Prueba los tres tipos primitivos",
   "consigna": "Cambia el valor de cualquiera de las tres constantes por uno de un tipo distinto (por ejemplo, edad = 'treinta') y observa el panel de diagnósticos.",
-  "ts": "const nombre: string = 'Ada Lovelace';\nconst edad: number = 36;\nconst programadora: boolean = true;\n\nconsole.log(nombre, edad, programadora);",
+  "html": "<pre id=\"salida\"></pre>",
+  "ts": "const nombre: string = 'Ada Lovelace';\nconst edad: number = 36;\nconst programadora: boolean = true;\n\ndocument.getElementById('salida')!.textContent = `${nombre} ${edad} ${programadora}`;",
   "pestañaInicial": "ts"
 }
 ```

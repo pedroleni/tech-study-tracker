@@ -16,7 +16,8 @@ TypeScript no obliga a escribir el tipo de cada variable a mano. En la mayoría 
   "tipo": "editor-en-vivo",
   "titulo": "Observa qué tipo infiere TypeScript",
   "consigna": "Pasa el ratón sobre \"edad\" en tu editor (o revisa el panel de diagnósticos) e intenta asignarle un string en la última línea — sin cambiar el código, léelo primero.",
-  "ts": "const edad = 32;\nconst nombre = 'Ada';\nconst activo = true;\n\n// Intenta descomentar la siguiente línea:\n// edad = 'treinta y dos';\n\nconsole.log(edad, nombre, activo);",
+  "html": "<pre id=\"salida\"></pre>",
+  "ts": "const edad = 32;\nconst nombre = 'Ada';\nconst activo = true;\n\n// Intenta descomentar la siguiente línea:\n// edad = 'treinta y dos';\n\ndocument.getElementById('salida')!.textContent = `${edad} ${nombre} ${activo}`;",
   "pestañaInicial": "ts"
 }
 ```
