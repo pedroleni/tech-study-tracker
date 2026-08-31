@@ -43,7 +43,7 @@ const estilosTemaAplicacion = {
     fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
   },
   '.cm-content': {
-    minHeight: '22rem',
+    minHeight: '6rem',
     padding: '0.75rem 0',
     caretColor: 'var(--foreground)',
     whiteSpace: 'pre',
@@ -368,7 +368,7 @@ export function EditorEnVivo({
         <div className="min-w-0 space-y-2">
           <h4 className="text-sm font-semibold">Vista previa</h4>
           <iframe
-            className="block h-72 w-full max-w-full rounded-lg border bg-white sm:h-96"
+            className="block h-40 w-full max-w-full rounded-lg border bg-white sm:h-56"
             sandbox="allow-scripts allow-forms"
             srcDoc={srcDoc}
             title="Vista previa del editor en vivo"
