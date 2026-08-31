@@ -13,6 +13,7 @@
     "generar-ts-libs": "node scripts/dev/generar-ts-libs.mjs",
     "generar-sql-wasm": "node scripts/dev/generar-sql-wasm.mjs",
     "generar-pglite-wasm": "node scripts/dev/generar-pglite-wasm.mjs",
+    "generar-wasmgit-assets": "node scripts/dev/generar-wasmgit-assets.mjs",
     "codex:task": "bash scripts/dev/codex-task.sh",
     "codex:monitor": "node scripts/dev/codex-monitor.mjs"
   },
