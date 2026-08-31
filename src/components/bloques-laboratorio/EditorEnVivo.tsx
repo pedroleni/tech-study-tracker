@@ -369,7 +369,7 @@ export function EditorEnVivo({
           <h4 className="text-sm font-semibold">Vista previa</h4>
           <iframe
             className="block h-72 w-full max-w-full rounded-lg border bg-white sm:h-96"
-            sandbox="allow-scripts"
+            sandbox="allow-scripts allow-forms"
             srcDoc={srcDoc}
             title="Vista previa del editor en vivo"
           />

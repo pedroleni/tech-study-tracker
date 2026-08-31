@@ -97,7 +97,7 @@ describe('SafeMarkdown con laboratorios', () => {
     expect(screen.queryByRole('button', { name: 'JavaScript' })).not.toBeInTheDocument()
     expect(screen.getByTitle('Vista previa del editor en vivo')).toHaveAttribute(
       'sandbox',
-      'allow-scripts',
+      'allow-scripts allow-forms',
     )
   })
 

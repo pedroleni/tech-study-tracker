@@ -61,14 +61,23 @@ y una vista previa real en un iframe.
   del prototipo de Artifact, que usó CodeMirror 5 concatenado a mano por
   una restricción de esa plataforma (sin bundler para un HTML suelto) que
   no existe aquí: el pipeline real de Vite ya resuelve ESM/npm sin más.
-- **Vista previa**: `<iframe sandbox="allow-scripts" srcDoc={...} />`
+- **Vista previa**: `<iframe sandbox="allow-scripts allow-forms" srcDoc={...} />`
   — nunca `allow-same-origin` junto a `allow-scripts`, para que el iframe
   reciba un origen opaco sin acceso a cookies/localStorage/sesión de la
   página que lo contiene (mismo patrón que CodePen/JSFiddle/StackBlitz).
   Distinto del resto de bloques de `bloques-laboratorio/`, que usan
   `sandbox=""` a secas — aquí el JS del propio ejercicio necesita
   ejecutarse, así que la superficie que sustituye a "sin scripts" es el
-  origen opaco, no la ausencia de sandbox.
+  origen opaco, no la ausencia de sandbox. `allow-forms` se añadió tras
+  detectar (2026-09-01) que sin él Chrome bloquea la sumisión de
+  cualquier `<form>` del ejercicio incluso cuando el JS del alumno llama
+  a `event.preventDefault()` correctamente — el sandbox corta la
+  sumisión nativa a un nivel que un script no puede anular, dejando
+  "bloqueados" los proyectos con formulario (lista de tareas, buscador
+  de Pokémon, etc.). `allow-forms` no toca el aislamiento de origen: sin
+  `allow-same-origin`, un formulario dentro del iframe solo puede
+  enviarse contra su propio documento opaco, nunca contra la página
+  real.
 - Reconstrucción de `srcDoc` debounced (~200ms) en cada `change` de
   cualquiera de los tres editores — no en cada tecla suelta.
 - Solo tres pestañas para las que haya contenido no vacío en los datos del
