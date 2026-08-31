@@ -177,12 +177,27 @@ producción real añade por encima — RLS, JSONB, extensiones,
 | 44 | `ROW_NUMBER`, `RANK`, `DENSE_RANK` | [Window Functions](https://sqlite.org/windowfunctions.html) |
 | 45 | `PARTITION BY` y frames: totales acumulados | [Window Functions](https://sqlite.org/windowfunctions.html) |
 
-**Total: 45 lecciones en 11 módulos.** Sin módulo de "Proyectos" separado
-(a diferencia de JS/TS/Node.js): cada lección ya trae su propio ejercicio
-ejecutable vía `sql-en-vivo`, con verificación de resultado cuando
-aplica — el patrón de "proyecto final con su propio repo" tiene sentido
-cuando hace falta un entorno completo (servidor, build, dependencias);
-una consulta SQL no lo necesita.
+**Total: 45 lecciones en 11 módulos**, más un Módulo 12 — Proyectos
+(lecciones 46-49) añadido después. Cada lección de los 11 módulos ya
+trae su propio ejercicio ejecutable vía `sql-en-vivo`, con verificación
+de resultado cuando aplica — eso no cambia. La razón original para no
+tener proyectos ("una consulta SQL suelta no necesita un entorno
+completo") seguía siendo cierta, pero un proyecto que combina SQL real
+con código de aplicación real alrededor (una transacción atómica que
+deja de serlo si se quita `db.transaction()`, una vista cuyo cálculo se
+consume desde TypeScript, una CTE recursiva que alimenta una API) sí
+justifica un repo propio — el mismo criterio que ya se aplicó en
+Node.js y PostgreSQL. Motor: `better-sqlite3` contra SQLite real, sin
+Docker ni servidor (a diferencia de los proyectos de PostgreSQL).
+
+## Módulo 12 — Proyectos
+
+| # | Lección | Repositorio |
+|---|---|---|
+| 46 | Proyecto avanzado: inventario transaccional | [inventario-transaccional-sqlite](https://github.com/pedroleni/inventario-transaccional-sqlite) |
+| 47 | Proyecto avanzado: analítica de ventas con funciones de ventana | [analitica-ventas-funciones-ventana](https://github.com/pedroleni/analitica-ventas-funciones-ventana) |
+| 48 | Proyecto avanzado: catálogo jerárquico con CTE recursiva | [catalogo-jerarquico-cte-recursiva](https://github.com/pedroleni/catalogo-jerarquico-cte-recursiva) |
+| 49 | Proyecto avanzado: reportes de ventas con vistas SQL | [reportes-ventas-vistas-sql](https://github.com/pedroleni/reportes-ventas-vistas-sql) |
 
 ## Nota técnica: claves foráneas no se validan por defecto en SQLite
 
