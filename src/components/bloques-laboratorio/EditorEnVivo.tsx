@@ -43,7 +43,7 @@ const estilosTemaAplicacion = {
     fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
   },
   '.cm-content': {
-    minHeight: '15rem',
+    minHeight: '22rem',
     padding: '0.75rem 0',
     caretColor: 'var(--foreground)',
     whiteSpace: 'pre',
@@ -320,7 +320,7 @@ export function EditorEnVivo({
 
       {consigna && <p className="text-sm text-pretty text-muted-foreground">{consigna}</p>}
 
-      <div className="grid min-w-0 gap-4 lg:grid-cols-2">
+      <div className="grid min-w-0 gap-4">
         <div className="min-w-0 space-y-2">
           {lenguajesDisponibles.length > 1 ? (
             <div
@@ -368,7 +368,7 @@ export function EditorEnVivo({
         <div className="min-w-0 space-y-2">
           <h4 className="text-sm font-semibold">Vista previa</h4>
           <iframe
-            className="block h-72 w-full max-w-full rounded-lg border bg-white lg:h-full lg:min-h-72"
+            className="block h-72 w-full max-w-full rounded-lg border bg-white sm:h-96"
             sandbox="allow-scripts"
             srcDoc={srcDoc}
             title="Vista previa del editor en vivo"
