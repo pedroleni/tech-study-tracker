@@ -465,6 +465,7 @@ export function AdminReferenciaContenidoPage() {
         <Referencia nombre="SqlAnotado">
           <SqlAnotado
             tipo="sql-anotado"
+            motor="sqlite"
             esquemaSql={
               "CREATE TABLE departamentos (id INTEGER PRIMARY KEY, nombre TEXT);\nCREATE TABLE empleados (id INTEGER PRIMARY KEY, nombre TEXT, departamento_id INTEGER, salario REAL);\nINSERT INTO departamentos VALUES (1, 'Ingeniería'), (2, 'Ventas');\nINSERT INTO empleados VALUES (1, 'Ana', 1, 55000), (2, 'Luis', 1, 62000), (3, 'Marta', 2, 48000);"
             }
@@ -487,6 +488,7 @@ export function AdminReferenciaContenidoPage() {
         <Referencia nombre="SqlEnVivo">
           <SqlEnVivo
             tipo="sql-en-vivo"
+            motor="sqlite"
             consigna='Muestra el nombre y el salario de los empleados de "Ingeniería", ordenados de mayor a menor salario.'
             esquemaSql={
               "CREATE TABLE departamentos (id INTEGER PRIMARY KEY, nombre TEXT);\nCREATE TABLE empleados (id INTEGER PRIMARY KEY, nombre TEXT, departamento_id INTEGER, salario REAL);\nINSERT INTO departamentos VALUES (1, 'Ingeniería'), (2, 'Ventas');\nINSERT INTO empleados VALUES (1, 'Ana', 1, 55000), (2, 'Luis', 1, 62000), (3, 'Marta', 2, 48000);"

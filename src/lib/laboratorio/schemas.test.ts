@@ -146,6 +146,87 @@ describe('esquemaSqlEnVivo', () => {
   })
 })
 
+describe('esquemaSqlEnVivo — extensión Postgres', () => {
+  const base = {
+    tipo: 'sql-en-vivo' as const,
+    esquemaSql: 'CREATE TABLE t (id int);',
+    consultaInicial: '',
+  }
+
+  it('motor por defecto es sqlite (retrocompatible)', () => {
+    const resultado = esquemaSqlEnVivo.safeParse(base)
+
+    expect(resultado.success).toBe(true)
+    if (resultado.success) expect(resultado.data.motor).toBe('sqlite')
+  })
+
+  it('acepta motor: postgres', () => {
+    const resultado = esquemaSqlEnVivo.safeParse({ ...base, motor: 'postgres' })
+
+    expect(resultado.success).toBe(true)
+    if (resultado.success) expect(resultado.data.motor).toBe('postgres')
+  })
+
+  it('rechaza un motor que no sea sqlite ni postgres', () => {
+    const resultado = esquemaSqlEnVivo.safeParse({ ...base, motor: 'mysql' })
+
+    expect(resultado.success).toBe(false)
+  })
+
+  it('extensiones es opcional y solo acepta pgcrypto/uuid_ossp', () => {
+    const sinExtensiones = esquemaSqlEnVivo.safeParse(base)
+    expect(sinExtensiones.success).toBe(true)
+    if (sinExtensiones.success) expect(sinExtensiones.data.extensiones).toBeUndefined()
+
+    const conExtensiones = esquemaSqlEnVivo.safeParse({
+      ...base,
+      extensiones: ['pgcrypto', 'uuid_ossp'],
+    })
+    expect(conExtensiones.success).toBe(true)
+    if (conExtensiones.success) {
+      expect(conExtensiones.data.extensiones).toEqual(['pgcrypto', 'uuid_ossp'])
+    }
+
+    const invalida = esquemaSqlEnVivo.safeParse({ ...base, extensiones: ['postgis'] })
+    expect(invalida.success).toBe(false)
+  })
+
+  it('identidadSimulada es opcional, necesita al menos 2 y como mucho 4', () => {
+    const sinIdentidad = esquemaSqlEnVivo.safeParse(base)
+    expect(sinIdentidad.success).toBe(true)
+    if (sinIdentidad.success) expect(sinIdentidad.data.identidadSimulada).toBeUndefined()
+
+    const dos = [
+      { etiqueta: 'Ana', valor: 'ana' },
+      { etiqueta: 'Roberto', valor: 'roberto' },
+    ]
+    const conDos = esquemaSqlEnVivo.safeParse({ ...base, identidadSimulada: dos })
+    expect(conDos.success).toBe(true)
+    if (conDos.success) expect(conDos.data.identidadSimulada).toEqual(dos)
+
+    const conUna = esquemaSqlEnVivo.safeParse({ ...base, identidadSimulada: [dos[0]] })
+    expect(conUna.success).toBe(false)
+
+    const cinco = Array.from({ length: 5 }, (_, i) => ({ etiqueta: `u${i}`, valor: `v${i}` }))
+    const conCinco = esquemaSqlEnVivo.safeParse({ ...base, identidadSimulada: cinco })
+    expect(conCinco.success).toBe(false)
+  })
+})
+
+describe('esquemaSqlAnotado — extensión Postgres', () => {
+  it('motor por defecto es sqlite (retrocompatible)', () => {
+    const resultado = esquemaSqlAnotado.safeParse({
+      tipo: 'sql-anotado',
+      esquemaSql: 'CREATE TABLE t (id int);',
+      consulta: 'SELECT * FROM t;',
+      anotaciones: [{ fragmento: 'SELECT', nota: 'x' }],
+    })
+
+    expect(resultado.success).toBe(true)
+    if (resultado.success) expect(resultado.data.motor).toBe('sqlite')
+  })
+})
+
 describe('esquemaBloqueLaboratorio con los tipos de SQL', () => {
   it('discrimina sql-anotado y sql-en-vivo dentro de la unión', () => {
     const anotado = esquemaBloqueLaboratorio.safeParse({

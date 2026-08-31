@@ -202,9 +202,25 @@ export const esquemaEditorEnVivo = z
 
 // Ejecutan de verdad la consulta contra sql.js (motor real, WASM) — nunca
 // muestran un resultado tecleado a mano. Ver specs/features/sql-en-vivo.md.
+const esquemaMotorSql = z.enum(['sqlite', 'postgres']).default('sqlite')
+const esquemaExtensionPostgres = z.array(z.enum(['pgcrypto', 'uuid_ossp'])).optional()
+const esquemaIdentidadSimulada = z
+  .array(
+    z.object({
+      etiqueta: z.string().min(1).max(60),
+      valor: z.string().min(1).max(60),
+    }),
+  )
+  .min(2)
+  .max(4)
+  .optional()
+
 export const esquemaSqlAnotado = z.object({
   tipo: z.literal('sql-anotado'),
   titulo: z.string().min(1).max(140).optional(),
+  motor: esquemaMotorSql,
+  extensiones: esquemaExtensionPostgres,
+  identidadSimulada: esquemaIdentidadSimulada,
   esquemaSql: z.string().min(1).max(3000),
   consulta: z.string().min(1).max(1500),
   anotaciones: z
@@ -223,6 +239,9 @@ export const esquemaSqlAnotado = z.object({
 export const esquemaSqlEnVivo = z.object({
   tipo: z.literal('sql-en-vivo'),
   consigna: z.string().min(1).max(600).optional(),
+  motor: esquemaMotorSql,
+  extensiones: esquemaExtensionPostgres,
+  identidadSimulada: esquemaIdentidadSimulada,
   esquemaSql: z.string().min(1).max(3000),
   consultaInicial: z.string().max(1500).default(''),
   consultaSolucion: z.string().max(1500).optional(),
