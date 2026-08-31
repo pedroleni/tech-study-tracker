@@ -6,14 +6,26 @@ import { Button } from '@/components/ui/button'
 import { TablaResultado } from '@/components/bloques-laboratorio/TablaResultado'
 import type { DatosSqlAnotado } from '@/lib/laboratorio/schemas'
 import {
+  crearMotorPostgres,
+  ejecutarConsultaPostgres,
+  type IdentidadSimulada,
+} from '@/lib/postgres-en-vivo/motor'
+import {
   crearMotorSql,
   ejecutarConsulta,
-  type MotorSql,
   type ResultadoConsulta,
 } from '@/lib/sql-en-vivo/motor'
 import { cn } from '@/lib/utils'
 
-export function SqlAnotado({ titulo, esquemaSql, consulta, anotaciones }: DatosSqlAnotado) {
+export function SqlAnotado({
+  titulo,
+  motor: tipoMotor,
+  extensiones,
+  identidadSimulada,
+  esquemaSql,
+  consulta,
+  anotaciones,
+}: DatosSqlAnotado) {
   const idNota = useId()
   const anotacionesValidas = useMemo(
     () =>
@@ -34,26 +46,37 @@ export function SqlAnotado({ titulo, esquemaSql, consulta, anotaciones }: DatosS
   const activa = anotacionesValidas[anotacionActiva]
 
   const [resultado, setResultado] = useState<ResultadoConsulta | null>(null)
+  const [identidad] = useState<IdentidadSimulada | undefined>(identidadSimulada?.[0])
 
   useEffect(() => {
     let cancelado = false
-    crearMotorSql()
-      .then((motor: MotorSql) => {
-        if (cancelado) return
-        setResultado(ejecutarConsulta(motor, esquemaSql, consulta))
-      })
-      .catch((error: unknown) => {
+    const ejecutar = async () => {
+      try {
+        if (tipoMotor === 'postgres') {
+          const motor = await crearMotorPostgres()
+          if (cancelado) return
+          setResultado(
+            await ejecutarConsultaPostgres(motor, esquemaSql, consulta, { extensiones, identidad }),
+          )
+        } else {
+          const motor = await crearMotorSql()
+          if (cancelado) return
+          setResultado(ejecutarConsulta(motor, esquemaSql, consulta))
+        }
+      } catch (error) {
         if (!cancelado) {
           setResultado({
             ok: false,
             mensaje: error instanceof Error ? error.message : 'No se pudo cargar el motor SQL.',
           })
         }
-      })
+      }
+    }
+    void ejecutar()
     return () => {
       cancelado = true
     }
-  }, [esquemaSql, consulta])
+  }, [esquemaSql, consulta, tipoMotor, extensiones, identidad])
 
   return (
     <section
