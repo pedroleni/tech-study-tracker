@@ -235,6 +235,17 @@ Nada impide tener varios `<header>` y `<footer>` en la misma página — uno glo
 3. Abre una web real con las herramientas de desarrollador y busca cuántos `<main>` tiene. ¿Coincide con lo que has aprendido en esta lección?
 4. Para cada uno de estos tres bloques, decide si usarías `article` o `section` y explica por qué en una frase: (a) un comentario de un usuario en un foro, (b) la sección "Preguntas frecuentes" de una página de producto, (c) una entrada de un diccionario dentro de un glosario.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe el esqueleto del blog del ejercicio 2: header global, nav, main con un article (con su propio header de título y fecha), un aside de posts relacionados, y footer global. El CSS ya puesto solo marca cada región con un borde para que veas la jerarquía — no hace falta tocarlo.",
+  "html": "<!-- Empieza aquí -->",
+  "css": "header, nav, main, article, aside, footer {\n  display: block;\n  border: 1px dashed #999;\n  margin: 8px;\n  padding: 8px;\n}",
+  "pestañaInicial": "html"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

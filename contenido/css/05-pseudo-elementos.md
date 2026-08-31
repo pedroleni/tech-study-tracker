@@ -215,6 +215,17 @@ Un pseudo-elemento actúa como si hubieras insertado un elemento nuevo en el HTM
 3. Cambia el color de fondo con el que se resalta el texto al seleccionarlo en tu página, usando `::selection`.
 4. Explica por qué `li::marker { content: "→ "; text-decoration: underline; }` no llega a subrayar la flecha (pista: revisa qué propiedades acepta `::marker` en esta lección).
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Usa ::first-letter para una letra capital en el primer párrafo, con float: left (ejercicio 1). Añade un ★ antes de cada favorito con ::before (ejercicio 2). Cambia el color de ::selection y selecciona texto en la vista previa para verlo (ejercicio 3).",
+  "html": "<article>\n  <p>El primer párrafo de un artículo cualquiera, con texto suficiente para ver el efecto de la letra capital.</p>\n</article>\n<ul class=\"favoritos\">\n  <li>Elemento uno</li>\n  <li>Elemento dos</li>\n</ul>",
+  "css": "/* Escribe aquí tus pseudo-elementos */",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

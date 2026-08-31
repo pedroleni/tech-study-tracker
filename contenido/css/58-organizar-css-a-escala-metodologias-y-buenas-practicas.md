@@ -174,6 +174,17 @@ Un archivo CSS de 50 líneas no necesita ninguna convención especial. Uno de 50
 3. Escribe un bloque de comentarios de sección para organizar una hoja de estilos en Tipografía, Layout y Componentes.
 4. Explica qué ventaja tienen los custom properties nativos de CSS frente a las variables de un preprocesador como Sass.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe el HTML y el CSS de una tarjeta usando la convención BEM: bloque, elemento y modificador (ejercicio 1).",
+  "html": "<!-- <div class=\"tarjeta\">\n  <h3 class=\"tarjeta__titulo\">...</h3>\n  <p class=\"tarjeta__cuerpo\">...</p>\n</div> -->\n<!-- Añade también una variante tarjeta--destacada -->",
+  "css": "/* Escribe aquí tus reglas BEM: .tarjeta, .tarjeta__titulo, .tarjeta--destacada... */",
+  "pestañaInicial": "html"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

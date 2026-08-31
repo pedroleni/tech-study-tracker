@@ -166,6 +166,17 @@ Una expresión regular describe un patrón de texto — para comprobar si algo c
 3. Usa `match()` con el flag `g` para obtener todas las coincidencias de una cadena de una sola vez.
 4. Compara `replace()` y `replaceAll()` sobre la misma cadena y patrón, explicando la diferencia de resultado.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Crea una expresión regular con el literal /patron/ y otra con new RegExp() (ejercicio 1). Usa match() con el flag g para obtener todas las coincidencias de una vez (ejercicio 3).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nconst literal = /\\d+/;\nconst construida = new RegExp('\\\\d+');\nmostrar(literal.test('Tengo 25 años'));\nmostrar(construida.test('Tengo 25 años'));\n\nconst texto = 'Hay 3 gatos, 5 perros y 12 peces';\nmostrar(texto.match(/\\d+/g));",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

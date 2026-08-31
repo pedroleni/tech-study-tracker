@@ -157,6 +157,17 @@ Cuando una regla CSS "no funciona", casi nunca es magia — es especificidad, so
 3. Explica la diferencia entre el panel Rules y el panel Computed.
 4. Explica qué es un "caso reducido" y por qué ayuda a resolver un problema de CSS.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe dos reglas —una de clase, una de elemento— que compitan por el color de este párrafo, y antes de mirar el resultado, predice cuál gana (ejercicio 1).",
+  "html": "<p class=\"destacado\">¿De qué color se ve este párrafo?</p>",
+  "css": "p { /* una regla */ }\n.destacado { /* otra regla, compitiendo */ }",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

@@ -145,6 +145,17 @@ Cierra el módulo de colecciones. JSON (JavaScript Object Notation) es un format
 3. Añade una propiedad con una función y otra con `undefined` a un objeto, y comprueba qué le pasa a cada una al hacer stringify.
 4. Explica qué le ocurre a `NaN` e `Infinity` al convertir a JSON un objeto que las contiene.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Convierte un objeto a JSON con JSON.stringify() y vuelve a convertirlo con JSON.parse() (ejercicio 1). Usa el tercer argumento de stringify() para una versión indentada (ejercicio 2). Comprueba qué pasa con una función y con undefined al hacer stringify (ejercicio 3).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nconst persona = { nombre: 'Ada', edad: 30, saludar: function () {}, extra: undefined };\nconst texto = JSON.stringify(persona);\nmostrar('Serializado: ' + texto);\nmostrar('Deserializado: ');\nmostrar(JSON.parse(texto));\n\nmostrar('Con indentación:');\nmostrar(JSON.stringify({ a: 1, b: 2 }, null, 2));",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

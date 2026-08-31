@@ -203,6 +203,17 @@ Un selector es la parte de una regla CSS que decide A QUIÉN se le aplica el est
 3. Combina dos clases en un mismo elemento (como .notebox.warning) y escribe una regla que solo se aplique cuando las dos están presentes a la vez.
 4. Encuentra el error en `h1, ..especial { color: red; }` y explica qué pasaría con el h1 si esa línea se quedara así en producción.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe un selector de elemento para los <em> (ejercicio 1). Crea una clase .tarjeta y aplícala al div y al article de abajo (ejercicio 2). Prueba también a combinar dos clases a la vez, como .notebox.warning (ejercicio 3).",
+  "html": "<p>Esto es <em>importante</em>.</p>\n<div class=\"tarjeta\">Tarjeta en un div</div>\n<article class=\"tarjeta\">Tarjeta en un article</article>\n<div class=\"notebox warning\">Aviso combinado</div>",
+  "css": "/* Escribe aquí tus selectores */",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

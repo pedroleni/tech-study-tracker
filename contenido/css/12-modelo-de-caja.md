@@ -169,6 +169,17 @@ Todo lo que CSS pone en pantalla es, por dentro, una caja rectangular con cuatro
 3. Explica por qué darle `padding-top` a un `<span>` sin cambiar su `display` puede hacer que el texto se superponga visualmente con la línea de arriba.
 4. Escribe una regla que haga que un `<a>` tenga una zona de clic más grande que su propio texto, usando lo aprendido sobre elementos inline en esta lección.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Antes de escribir nada, calcula a mano el ancho total de esta caja (width 200px + padding 15px + border 3px, modelo estándar) — luego comprueba tu cálculo inspeccionando el resultado (ejercicio 1). Prueba también el hueco entre los dos párrafos con márgenes distintos (ejercicio 2).",
+  "html": "<div class=\"caja\">Caja de prueba</div>\n<p style=\"margin-bottom: 20px;\">Párrafo A</p>\n<p style=\"margin-top: 35px;\">Párrafo B</p>",
+  "css": ".caja {\n  width: 200px;\n  padding: 15px;\n  border: 3px solid #333;\n}",
+  "pestañaInicial": "html"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

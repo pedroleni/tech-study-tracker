@@ -173,6 +173,17 @@ Antes de escribir una sola línea de JavaScript, HTML ya sabe rechazar un formul
 3. Cambia ese mismo CSS para usar :user-invalid en vez de :invalid, y explica con tus palabras qué cambia en la experiencia.
 4. Escribe un formulario con novalidate y explica qué sigue funcionando (la Constraint Validation API) y qué deja de funcionar (los mensajes automáticos del navegador).
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe el campo de contraseña del ejercicio 1 (required, minlength=\"8\", un pattern con letra y número). Después, en la pestaña CSS, dale estilo con :valid y :invalid — escribe y borra en la vista previa para ver cómo cambia en vivo.",
+  "html": "<!-- Empieza aquí -->",
+  "css": "/* prueba: input:invalid { ... } input:valid { ... } */",
+  "pestañaInicial": "html"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

@@ -179,6 +179,17 @@ Cierra el módulo de APIs del navegador. Los Web Components combinan tres piezas
 3. Adjunta un shadow DOM con `attachShadow({ mode: 'open' })`, y comprueba que sus estilos no afectan al resto de la página.
 4. Usa `<template>` y `<slot>` para definir contenido por defecto que se pueda sustituir al usar el elemento.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Crea una clase que extienda HTMLElement y regístrala con customElements.define() (ejercicio 1). Adjunta un shadow DOM con attachShadow({ mode: 'open' }) y comprueba que sus estilos no afectan al resto de la página (ejercicio 3).",
+  "html": "<mi-tarjeta nombre=\"Ada Lovelace\"></mi-tarjeta>\n<p>Este párrafo NO debería llevar el estilo del shadow DOM.</p>",
+  "js": "class MiTarjeta extends HTMLElement {\n  connectedCallback() {\n    const shadow = this.attachShadow({ mode: 'open' });\n    shadow.innerHTML = `\n      <style>\n        p { color: white; background: #7c3aed; padding: 12px; border-radius: 8px; font-family: system-ui, sans-serif; }\n      </style>\n      <p>Tarjeta de ${this.getAttribute('nombre')}</p>\n    `;\n  }\n}\ncustomElements.define('mi-tarjeta', MiTarjeta);",
+  "pestañaInicial": "html"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

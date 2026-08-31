@@ -26,6 +26,7 @@ export function Navbar() {
 
   const navigationItems = [
     { to: '/#categorias', label: 'Categorías', visible: true },
+    { to: '/proyectos', label: 'Proyectos', visible: true },
     { to: '/favoritos', label: 'Favoritos', visible: Boolean(session) },
     { to: '/admin', label: 'Administración', visible: isAdmin },
   ]

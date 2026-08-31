@@ -159,6 +159,17 @@ El navegador ya valida formularios por su cuenta con atributos como `required` o
 3. Extiende la validación nativa de un campo con una restricción propia (por ejemplo, que termine en un dominio concreto).
 4. Implementa un manejador de `submit` que muestre un mensaje distinto según cuál propiedad de `validity` esté fallando.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Lee valueMissing y typeMismatch de validity sobre este campo (ejercicio 1). Usa setCustomValidity() para un mensaje propio (ejercicio 2).",
+  "html": "<form id=\"form\">\n  <input type=\"email\" id=\"correo\" required>\n  <button type=\"submit\">Enviar</button>\n</form>\n<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nconst correo = document.getElementById('correo');\ndocument.getElementById('form').addEventListener('submit', (evento) => {\n  evento.preventDefault();\n  mostrar('valueMissing: ' + correo.validity.valueMissing);\n  mostrar('typeMismatch: ' + correo.validity.typeMismatch);\n  if (!correo.value.endsWith('@empresa.com')) {\n    correo.setCustomValidity('Usa tu correo de empresa (@empresa.com)');\n  } else {\n    correo.setCustomValidity('');\n  }\n  mostrar('Mensaje de validación: ' + correo.validationMessage);\n});",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

@@ -164,6 +164,17 @@ Cuando el CSS de un proyecto viene de varias fuentes — un reset, un framework,
 3. Explica qué pasa si conviertes las dos reglas del ejercicio anterior en `!important` — ¿cambia el ganador? ¿Por qué?
 4. Explica por qué un estilo `p { color: red !important; }` dentro de la PRIMERA capa declarada le gana a un `p { color: blue !important; }` dentro de la SEGUNDA capa declarada — aunque para reglas normales sería justo al revés.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Declara tres capas — reset, componentes, utilidades — en ese orden (ejercicio 1). Después escribe una regla en cada una de dos capas distintas que compita por el color de este párrafo, y comprueba cuál gana (ejercicio 2).",
+  "html": "<p class=\"texto\">Un párrafo para probar capas de cascada.</p>",
+  "css": "/* @layer reset, componentes, utilidades;\n   Escribe aquí tus reglas dentro de cada @layer */",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

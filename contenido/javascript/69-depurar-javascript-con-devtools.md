@@ -155,6 +155,17 @@ Abre el último módulo. Más allá de `console.log()`, las herramientas de desa
 3. Añade una sentencia `debugger;` a una función, y comprueba que solo pausa la ejecución con las herramientas abiertas.
 4. Pon un breakpoint clicando un número de línea en el panel Sources/Debugger, e inspecciona las variables en el panel Scopes.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Usa console.log() y console.error() sobre el mismo mensaje y compara cómo se muestran (ejercicio 1) — ábrelos en las DevTools reales de tu navegador sobre esta misma vista previa para ver el color y el icono distintos. Provoca un error deliberado y observa su traza (ejercicio 2).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nconsole.log('Esto es un log normal');\nconsole.error('Esto es un error — ábrelo en tus DevTools para ver la diferencia de color e icono');\nmostrar('Revisa la consola de tu navegador (F12) para ver ambos mensajes');\n\nfunction funcionConError() {\n  const objeto = null;\n  return objeto.propiedad; // esto lanza un TypeError real\n}\ntry {\n  funcionConError();\n} catch (error) {\n  mostrar('Error capturado: ' + error.name + ' — ' + error.message);\n  console.error(error);\n}",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

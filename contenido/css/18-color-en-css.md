@@ -171,6 +171,17 @@ Rojo puro se puede escribir como `red`, `#ff0000`, `#f00`, `rgb(255 0 0)` o `hsl
 3. Escribe una regla que haga que el borde de un botón siempre coincida con el color de su propio texto, sin repetir el valor del color dos veces.
 4. Explica por qué `hsl(0 100% 50%)` y `hsl(360 100% 50%)` producen exactamente el mismo color.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Parte de hsl(210 80% 45%) y escribe una versión 20 puntos más clara (ejercicio 1). Escribe también el mismo rojo puro en sus cuatro formas (ejercicio 2). Comprueba que el borde del botón siempre coincide con su propio texto sin repetir el color (ejercicio 3).",
+  "html": "<div class=\"muestra-azul\"></div>\n<div class=\"muestra-azul-claro\"></div>\n<button class=\"boton\">Botón</button>",
+  "css": ".muestra-azul { background: hsl(210 80% 45%); height: 40px; }\n.muestra-azul-claro { height: 40px; /* escribe aquí la versión más clara */ }\n.boton { color: #b45309; border: 2px solid; /* que el borde use el mismo color que el texto */ }",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

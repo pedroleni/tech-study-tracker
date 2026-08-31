@@ -161,6 +161,17 @@ Sumar, restar, multiplicar — lo esperable — pero también el orden en que Ja
 3. Explica qué produce `"74" + 3`, y cómo arreglarlo para que sume numéricamente en vez de concatenar.
 4. Explica la diferencia entre `num++` y `++num` como expresiones, no solo en el valor final de la variable.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Calcula 2 + 3 ** 2 y (2 + 3) ** 2 y compara con tu cálculo mental (ejercicio 1). Usa += y *= sobre la misma variable (ejercicio 2). Comprueba qué produce \"74\" + 3 y cómo arreglarlo (ejercicio 3).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nmostrar(2 + 3 ** 2);\nmostrar((2 + 3) ** 2);\n\nlet x = 10;\nx += 5;\nx *= 2;\nmostrar(x);\n\nmostrar('\"74\" + 3 = ' + (\"74\" + 3));\nmostrar('Number(\"74\") + 3 = ' + (Number(\"74\") + 3));",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

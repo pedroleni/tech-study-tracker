@@ -132,6 +132,17 @@
 3. Dado un padre con `opacity: 0.9; z-index: 1;` y un hijo dentro con `z-index: 500`, explica con qué se compara realmente ese `z-index: 500` frente a un elemento del mismo nivel que el padre.
 4. Explica por qué `position: relative` por sí solo, sin un `z-index` explícito, no crea un nuevo contexto de apilamiento.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Dale a la caja A z-index: 9999 y a la B z-index: 2, pero mete a la A dentro de un contenedor con su propio contexto de apilamiento (opacity < 1) — comprueba que B puede seguir ganando (ejercicio 1 y 3).",
+  "html": "<div class=\"padre-a\">\n  <div class=\"caja-a\">A (z-index: 9999)</div>\n</div>\n<div class=\"caja-b\">B (z-index: 2)</div>",
+  "css": ".padre-a { position: relative; opacity: 0.99; z-index: 1; }\n.caja-a { position: absolute; top: 20px; left: 20px; z-index: 9999; background: crimson; color: white; padding: 12px; }\n.caja-b { position: relative; z-index: 2; background: steelblue; color: white; padding: 12px; margin-top: 10px; width: 160px; }",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

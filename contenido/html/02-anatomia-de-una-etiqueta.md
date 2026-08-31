@@ -188,6 +188,16 @@ Aquí `checked` deja la casilla marcada desde el principio y `disabled` deja el 
 4. Escribe un `<button>` que empiece deshabilitado usando un atributo booleano, y explica con tus palabras por qué `disabled="false"` no serviría para lo contrario.
 5. Escribe en un archivo `<marcador-que-te-inventes>Hola</marcador-que-te-inventes>` y ábrelo en el navegador. ¿Da algún error? ¿Se ve el texto?
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Este HTML está mal anidado a propósito (ejercicio 3) — arréglalo y mira cómo cambia la vista previa. Cuando lo tengas, sigue con el enlace en pestaña nueva del ejercicio 2, el botón deshabilitado del 4 y la etiqueta inventada del 5.",
+  "html": "<p>Texto <strong>importante</p></strong>",
+  "pestañaInicial": "html"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

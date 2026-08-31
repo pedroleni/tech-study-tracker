@@ -175,6 +175,17 @@
 3. Escribe una regla que haga que una imagen llene completamente una caja de 300×200px sin distorsionarse, aceptando que parte de la imagen podría recortarse.
 4. Usando la misma imagen del ejercicio anterior, escribe una variante donde se vea la imagen completa aunque queden franjas vacías a los lados.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe aspect-ratio: 4 / 3 con width: 100% para reservar espacio antes de que la imagen cargue (ejercicio 1). Después prueba object-fit: cover y luego contain sobre la misma caja de 300×200px (ejercicios 3 y 4).",
+  "html": "<div class=\"caja-reservada\"></div>\n<div class=\"marco\">\n  <img class=\"foto\" src=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='500' height='200'%3E%3Crect width='500' height='200' fill='%23bbb'/%3E%3C/svg%3E\" alt=\"\">\n</div>",
+  "css": ".caja-reservada { background: #eee; /* prueba aspect-ratio aquí */ }\n.marco { width: 300px; height: 200px; overflow: hidden; border: 1px solid #999; }\n.foto { width: 100%; height: 100%; /* prueba object-fit aquí */ }",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

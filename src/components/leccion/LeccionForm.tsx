@@ -14,6 +14,7 @@ const leccionSchema = z.object({
   contenido: z.string().max(200_000, 'El contenido no puede superar 200 000 caracteres.'),
   orden: z.number().int('El orden debe ser un número entero.'),
   status: z.enum(['borrador', 'publicado']),
+  esProyecto: z.boolean().default(false),
 })
 
 type LeccionFields = z.infer<typeof leccionSchema>
@@ -26,6 +27,7 @@ export interface LeccionFormValues {
   contenido: string
   orden: number
   status: Leccion['status']
+  esProyecto: boolean
 }
 
 function slugify(value: string) {
@@ -47,6 +49,7 @@ function defaults(leccion?: Leccion): LeccionFields {
         contenido: leccion.contenido,
         orden: leccion.orden,
         status: leccion.status,
+        esProyecto: leccion.esProyecto,
       }
     : {
         modulo: '',
@@ -55,6 +58,7 @@ function defaults(leccion?: Leccion): LeccionFields {
         contenido: '',
         orden: 10,
         status: 'borrador',
+        esProyecto: false,
       }
 }
 
@@ -218,6 +222,27 @@ export function LeccionForm({
               ? 'Publicar hace visible la lección cuando su tecnología también está publicada.'
               : 'Toda lección se crea como borrador. Podrás publicarla desde la edición.'}
           </p>
+        </div>
+
+        <div className="sm:col-span-2">
+          <div className="flex min-h-11 items-start gap-3 rounded-lg border bg-background p-3">
+            <input
+              id="leccion-es-proyecto"
+              type="checkbox"
+              className="mt-0.5 size-4 shrink-0 accent-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+              aria-describedby="leccion-es-proyecto-help"
+              {...register('esProyecto')}
+            />
+            <div className="space-y-1">
+              <Label htmlFor="leccion-es-proyecto" className="cursor-pointer">
+                Es un proyecto
+              </Label>
+              <p id="leccion-es-proyecto-help" className="text-xs text-muted-foreground">
+                Las lecciones publicadas con esta marca aparecen también en la sección
+                Proyectos.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 

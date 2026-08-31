@@ -180,6 +180,73 @@ export const esquemaCapasDeCaja = z.object({
   content: z.string().min(1).max(40),
 })
 
+// Editor en vivo: la lección deja de describir un resultado y deja probarlo
+// de verdad. Al menos uno de html/css/js/ts debe traer contenido — un
+// bloque con los cuatro vacíos no tiene sentido y `refine` lo rechaza en
+// vez de dejarlo caer en un editor completamente en blanco.
+export const esquemaEditorEnVivo = z
+  .object({
+    tipo: z.literal('editor-en-vivo'),
+    titulo: z.string().min(1).max(140).optional(),
+    consigna: z.string().min(1).max(600).optional(),
+    html: z.string().max(4000).default(''),
+    css: z.string().max(4000).default(''),
+    js: z.string().max(4000).default(''),
+    ts: z.string().max(4000).default(''),
+    pestañaInicial: z.enum(['html', 'css', 'js', 'ts']).default('html'),
+  })
+  .refine(
+    (datos) => datos.html.trim() || datos.css.trim() || datos.js.trim() || datos.ts.trim(),
+    { message: 'editor-en-vivo necesita contenido inicial en html, css, js o ts' },
+  )
+
+// Ejecutan de verdad la consulta contra sql.js (motor real, WASM) — nunca
+// muestran un resultado tecleado a mano. Ver specs/features/sql-en-vivo.md.
+const esquemaMotorSql = z.enum(['sqlite', 'postgres']).default('sqlite')
+const esquemaExtensionPostgres = z.array(z.enum(['pgcrypto', 'uuid_ossp'])).optional()
+const esquemaIdentidadSimulada = z
+  .array(
+    z.object({
+      etiqueta: z.string().min(1).max(60),
+      valor: z.string().min(1).max(60),
+    }),
+  )
+  .min(2)
+  .max(4)
+  .optional()
+
+export const esquemaSqlAnotado = z.object({
+  tipo: z.literal('sql-anotado'),
+  titulo: z.string().min(1).max(140).optional(),
+  motor: esquemaMotorSql,
+  extensiones: esquemaExtensionPostgres,
+  identidadSimulada: esquemaIdentidadSimulada,
+  esquemaSql: z.string().min(1).max(3000),
+  consulta: z.string().min(1).max(1500),
+  anotaciones: z
+    .array(
+      z.object({
+        fragmento: z.string().min(1),
+        nota: z.string().min(1).max(500),
+      }),
+    )
+    .min(1)
+    .max(8),
+})
+
+// consultaSolucion es opcional: si falta, el bloque es puramente
+// exploratorio (se ejecuta y se muestra el resultado real, sin ✅/❌).
+export const esquemaSqlEnVivo = z.object({
+  tipo: z.literal('sql-en-vivo'),
+  consigna: z.string().min(1).max(600).optional(),
+  motor: esquemaMotorSql,
+  extensiones: esquemaExtensionPostgres,
+  identidadSimulada: esquemaIdentidadSimulada,
+  esquemaSql: z.string().min(1).max(3000),
+  consultaInicial: z.string().max(1500).default(''),
+  consultaSolucion: z.string().max(1500).optional(),
+})
+
 export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaPrediceElResultado,
   esquemaCodigoAnotado,
@@ -195,6 +262,9 @@ export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaMapaDeRegiones,
   esquemaEsquemaDePagina,
   esquemaCapasDeCaja,
+  esquemaEditorEnVivo,
+  esquemaSqlAnotado,
+  esquemaSqlEnVivo,
 ])
 
 export type DatosPrediceElResultado = z.infer<typeof esquemaPrediceElResultado>
@@ -213,4 +283,7 @@ export type DatosVistaPreviaSocial = z.infer<typeof esquemaVistaPreviaSocial>
 export type DatosMapaDeRegiones = z.infer<typeof esquemaMapaDeRegiones>
 export type DatosEsquemaDePagina = z.infer<typeof esquemaEsquemaDePagina>
 export type DatosCapasDeCaja = z.infer<typeof esquemaCapasDeCaja>
+export type DatosEditorEnVivo = z.infer<typeof esquemaEditorEnVivo>
+export type DatosSqlAnotado = z.infer<typeof esquemaSqlAnotado>
+export type DatosSqlEnVivo = z.infer<typeof esquemaSqlEnVivo>
 export type DatosBloqueLaboratorio = z.infer<typeof esquemaBloqueLaboratorio>

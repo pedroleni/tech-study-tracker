@@ -134,6 +134,17 @@ Cierra el módulo de asincronía. Hasta ahora, `fetch()` y otras APIs nativas ya
 3. Consume tu función implementada tanto con `then()`/`catch()` como con `async`/`await`.
 4. Provoca que el código dentro del ejecutor lance un error con `throw`, y comprueba que la promesa se rechaza igualmente.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Implementa una función que envuelva setTimeout() en una promesa propia con el constructor Promise (ejercicio 1). Añade una validación que llame a reject() antes de empezar (ejercicio 2). Consúmela con then()/catch() y con async/await (ejercicio 3).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nfunction esperar(ms) {\n  return new Promise((resolve, reject) => {\n    if (ms < 0) {\n      reject(new Error('ms no puede ser negativo'));\n      return;\n    }\n    setTimeout(() => resolve('Esperé ' + ms + 'ms'), ms);\n  });\n}\n\nesperar(300).then((mensaje) => mostrar(mensaje));\n\nasync function probar() {\n  const mensaje = await esperar(500);\n  mostrar('Con async/await: ' + mensaje);\n}\nprobar();",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

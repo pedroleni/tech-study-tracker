@@ -249,18 +249,35 @@ corto si solo se copia un artículo.
 
 ---
 
+## Módulo 10 — Proyectos
+
+**Añadido 2026-08-29**, junto al mecanismo `editor-en-vivo`
+(`specs/features/editor-en-vivo.md`): pedido explícito de "hacer más
+prácticas las lecciones... proyectos". Cuatro lecciones-proyecto reales,
+marcadas `es_proyecto` (aparecen también en `/proyectos`), cada una
+guiada paso a paso con varios bloques `editor-en-vivo` que construyen
+hacia un resultado final, en vez del formato ficha habitual — ver la
+plantilla propia al principio de cada archivo `32-35`.
+
+| # | Lección | Requiere |
+|---|---|---|
+| 32 | Proyecto: tarjeta de perfil personal | Módulos 1-2, lección 11 (imágenes) |
+| 33 | Proyecto: página de aterrizaje de un solo scroll, 100% semántica | Módulo 1, lección 5, lección 10 |
+| 34 | Proyecto: formulario de contacto accesible de verdad | Módulo 6, lecciones 19-20 |
+| 35 | Proyecto: ficha de producto con tabla de especificaciones | Lección 11, módulo 5, lección 16 |
+
 ## Notas de alcance
 
-- **31 lecciones, 9 módulos.** Empezó en 22, subió a 26 al ampliar
+- **35 lecciones, 10 módulos.** Empezó en 22, subió a 26 al ampliar
   accesibilidad de verdad, subió a 29 al añadir el módulo de elementos
   interactivos nativos y la lección de foco de teclado, subió a 30 al
   añadir "Anatomía de una etiqueta", subió a 31 al añadir "¿Qué es HTML
-  y para qué sirve?" delante de esa — todo por huecos reales
-  encontrados al cruzar fuentes o al preguntar directamente por lo que
-  faltaba, no por forzar ningún número. Las "~24 fichas" que se
-  mencionaban de pasada en `specs/features/lecciones.md` al planear el
-  modelo de datos nunca fueron un temario real, solo una estimación de
-  orden de magnitud.
+  y para qué sirve?" delante de esa, subió a 35 al añadir el módulo 10
+  de Proyectos (2026-08-29) — todo por huecos reales encontrados al
+  cruzar fuentes o al preguntar directamente por lo que faltaba, no por
+  forzar ningún número. Las "~24 fichas" que se mencionaban de pasada en
+  `specs/features/lecciones.md` al planear el modelo de datos nunca
+  fueron un temario real, solo una estimación de orden de magnitud.
 - **Fuera de este temario, a propósito:** todo lo que en los módulos de
   formularios/HTML de MDN y web.dev es CSS (`Styling web forms`,
   `Advanced form styling`, `Customizable select`, estilos de

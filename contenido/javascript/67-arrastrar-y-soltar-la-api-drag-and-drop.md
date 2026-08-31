@@ -154,6 +154,18 @@ Arrastrar un elemento y soltarlo en otro sitio implica una secuencia de eventos 
 3. Lee los datos arrastrados con `getData()` en el manejador de `drop`, y muéstralos en pantalla.
 4. Explica por qué `preventDefault()` en `dragover` es obligatorio para que `drop` llegue a dispararse.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Haz arrastrable un elemento con draggable=\"true\" y guarda datos con setData() en dragstart (ejercicio 1). Convierte otro en zona de destino cancelando dragover con preventDefault() (ejercicio 2). Lee los datos con getData() en drop (ejercicio 3).",
+  "html": "<div id=\"origen\" draggable=\"true\">Arrástrame</div>\n<div id=\"destino\">Suéltame aquí</div>\n<pre id=\"salida\"></pre>",
+  "css": "#origen { padding: 12px; background: #7c3aed; color: white; width: fit-content; cursor: grab; }\n#destino { margin-top: 12px; padding: 20px; border: 2px dashed #999; }",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\ndocument.getElementById('origen').addEventListener('dragstart', (evento) => {\n  evento.dataTransfer.setData('text/plain', 'Contenido arrastrado');\n});\n\nconst destino = document.getElementById('destino');\ndestino.addEventListener('dragover', (evento) => evento.preventDefault());\ndestino.addEventListener('drop', (evento) => {\n  evento.preventDefault();\n  mostrar('Datos soltados: ' + evento.dataTransfer.getData('text/plain'));\n});",
+  "pestañaInicial": "html"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

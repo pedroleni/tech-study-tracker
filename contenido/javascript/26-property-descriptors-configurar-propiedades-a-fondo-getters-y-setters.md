@@ -186,6 +186,17 @@ Un descriptor es de **datos** (guarda un valor fijo) o de **acceso** (ejecuta fu
 3. Escribe un getter y un setter para una misma propiedad calculada (por ejemplo, un precio con IVA incluido), y demuestra que ambos funcionan.
 4. Crea una propiedad no enumerable y comprueba que `Object.keys()` no la incluye, aunque siga siendo accesible directamente.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Usa Object.defineProperty() para crear una propiedad no escribible, e intenta modificarla (ejercicio 1). Escribe un getter y un setter para un precio con IVA incluido (ejercicio 3).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nconst config = {};\nObject.defineProperty(config, 'version', { value: '1.0', writable: false });\nconfig.version = '2.0';\nmostrar('version sigue siendo: ' + config.version);\n\nconst producto = {\n  precioBase: 100,\n  get precioConIva() {\n    return this.precioBase * 1.21;\n  },\n  set precioConIva(valor) {\n    this.precioBase = valor / 1.21;\n  },\n};\nmostrar(producto.precioConIva);\nproducto.precioConIva = 242;\nmostrar(producto.precioBase);",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

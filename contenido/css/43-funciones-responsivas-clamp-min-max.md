@@ -167,6 +167,17 @@
 3. Explica qué ocurre cuando el valor intermedio de un `clamp()` cae POR ENCIMA del máximo definido.
 4. Reescribe `clamp(1rem, 5vw, 3rem)` usando `max()` y `min()` combinados, sin usar `clamp()`.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe min() para que este ancho nunca supere 400px, pero pueda ser menor (ejercicio 1). Escribe clamp() para un font-size con mínimo 1rem, preferido 4vw, máximo 2.5rem (ejercicio 2).",
+  "html": "<div class=\"caja-min\">Ancho con min()</div>\n<p class=\"texto-clamp\">Texto con font-size en clamp()</p>",
+  "css": ".caja-min { background: #eee; padding: 8px; /* width: min(100%, 400px); */ }\n.texto-clamp { /* font-size: clamp(1rem, 4vw, 2.5rem); */ }",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

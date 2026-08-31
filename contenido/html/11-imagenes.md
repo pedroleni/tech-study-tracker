@@ -241,6 +241,16 @@
 4. Escribe un picture con dos source (avif y webp) y un img de respaldo en jpg, para una imagen de tu elección.
 5. Calcula qué archivo de un srcset con 400w/800w/1200w descargaría un navegador en una pantalla de 1024px de ancho con sizes="50vw".
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Esta imagen es un placeholder (no hace falta una foto real): escríbele un alt malo, luego uno bueno, y compara. Después envuélvela en figure/figcaption con un alt y un figcaption que no se repitan entre sí (ejercicio 3).",
+  "html": "<img src=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='200'%3E%3Crect width='320' height='200' fill='%23ddd'/%3E%3Ctext x='50%25' y='50%25' font-size='16' text-anchor='middle' dy='.3em' fill='%23888'%3Efoto%3C/text%3E%3C/svg%3E\" alt=\"TODO: escribe aquí un alt\">",
+  "pestañaInicial": "html"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

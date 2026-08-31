@@ -145,6 +145,17 @@
 3. Envuelve un `await` en `try/catch`, y provoca un error para comprobar que se captura correctamente.
 4. Demuestra que `await` no bloquea el resto del programa, ejecutando código fuera de la función `async` mientras esta todavía espera.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Reescribe una cadena de then() como una función async con await (ejercicio 1). Envuelve un await en try/catch (ejercicio 3). Demuestra que await no bloquea el resto del programa (ejercicio 4).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nasync function buscarPerro() {\n  try {\n    const respuesta = await fetch('https://dog.ceo/api/breeds/image/random');\n    const datos = await respuesta.json();\n    mostrar('Imagen de perro: ' + datos.message);\n  } catch (error) {\n    mostrar('Error: ' + error.message);\n  }\n}\n\nmostrar('1: antes de llamar a la función async');\nbuscarPerro();\nmostrar('2: esto se ejecuta sin esperar a que termine buscarPerro()');",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

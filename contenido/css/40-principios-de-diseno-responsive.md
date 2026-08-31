@@ -150,6 +150,17 @@ Antes de 2010, un sitio se diseñaba para escritorio, y punto — los móviles r
 3. Explica la diferencia entre progressive enhancement (mobile-first) y graceful degradation (desktop-first).
 4. Explica por qué `font-size: calc(1.5rem + 4vw);` es mejor que `font-size: 4vw;` para la accesibilidad del zoom del navegador.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe la etiqueta meta viewport estándar (ejercicio 1) — pruébala en la pestaña HTML. Escribe después una regla base de una columna y un media query min-width que pase a dos columnas a partir de 700px (ejercicio 2).",
+  "html": "<!-- Escribe aquí tu <meta name=\"viewport\" ...> -->\n<div class=\"columnas\">\n  <div>A</div><div>B</div>\n</div>",
+  "css": ".columnas { display: grid; grid-template-columns: 1fr; gap: 8px; }\n.columnas > div { background: #eee; padding: 12px; }\n/* @media (min-width: 700px) { .columnas { grid-template-columns: 1fr 1fr; } } */",
+  "pestañaInicial": "html"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

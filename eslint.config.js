@@ -6,7 +6,13 @@ import jsxA11y from 'eslint-plugin-jsx-a11y'
 import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
-  { ignores: ['dist'] },
+  {
+    // public/ts-libs: ficheros lib.*.d.ts vendorizados tal cual desde
+    // typescript-en-vivo (ver scripts/dev/generar-ts-libs.mjs) para el
+    // compilador de TypeScript en vivo del navegador — no son código propio,
+    // no tiene sentido aplicarles las reglas de este proyecto.
+    ignores: ['dist', 'public/ts-libs'],
+  },
   {
     extends: [
       js.configs.recommended,

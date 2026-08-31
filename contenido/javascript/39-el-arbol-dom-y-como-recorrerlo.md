@@ -134,6 +134,17 @@ La lección anterior presentó el vocabulario (padre, hijo, hermano). Esta cubre
 3. Usa `nextElementSibling` para recorrer todos los elementos hermanos de una lista, sin toparte con nodos de texto.
 4. Explica por qué se prefieren las propiedades con "Element" en el nombre al trabajar con elementos del DOM.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Compara childNodes.length con children.length en este elemento (ejercicio 1). Usa firstChild y firstElementChild y observa la diferencia (ejercicio 2). Usa nextElementSibling para recorrer los hermanos (ejercicio 3).",
+  "html": "<ul id=\"lista\">\n  <li>Uno</li>\n  <li>Dos</li>\n  <li>Tres</li>\n</ul>\n<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nconst lista = document.getElementById('lista');\nmostrar('childNodes: ' + lista.childNodes.length);\nmostrar('children: ' + lista.children.length);\nmostrar('firstChild: ' + lista.firstChild.nodeName);\nmostrar('firstElementChild: ' + lista.firstElementChild.nodeName);\n\nlet hermano = lista.firstElementChild;\nwhile (hermano) {\n  mostrar(hermano.textContent);\n  hermano = hermano.nextElementSibling;\n}",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

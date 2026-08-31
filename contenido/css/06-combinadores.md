@@ -197,6 +197,17 @@ Un combinador une dos selectores para describir una relación entre elementos en
 3. Usa `+` para poner un borde superior únicamente al primer párrafo que sigue inmediatamente a un `<h2>`.
 4. Explica, con un ejemplo de HTML, por qué `h2 ~ p` puede seleccionar más elementos que `h2 + p` en el mismo documento.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Usa el combinador descendiente para los <em> dentro de blockquote (ejercicio 1). Usa > para los <li> hijos directos del primer ol, sin afectar al anidado (ejercicio 2). Usa + para el primer párrafo justo después del h2 (ejercicio 3).",
+  "html": "<blockquote><p>Una cita con <em>énfasis</em> dentro.</p></blockquote>\n<ol>\n  <li>Uno</li>\n  <li>Dos\n    <ol><li>Anidado</li></ol>\n  </li>\n</ol>\n<h2>Título</h2>\n<p>Primer párrafo tras el título.</p>\n<p>Segundo párrafo.</p>",
+  "css": "/* Escribe aquí tus combinadores */",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

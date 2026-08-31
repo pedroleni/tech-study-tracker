@@ -163,6 +163,17 @@ Mismo CSS, mismo color de partida — la única diferencia es dónde vive el SVG
 3. Investiga qué hace un viewBox="0 0 24 24" en un icono típico de una librería de iconos — ¿por qué casi todos usan esas mismas dimensiones internas?
 4. Busca en una web real un icono SVG y ábrelo con las herramientas de desarrollador — ¿está inline en el HTML o referenciado con img?
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe un SVG inline con un círculo o un rectángulo (ejercicio 1). Después dale color desde la pestaña CSS — funciona precisamente porque el SVG está inline, no lo conseguirías con un <img>.",
+  "html": "<!-- Empieza aquí, por ejemplo: -->\n<svg viewBox=\"0 0 24 24\" width=\"64\">\n  <circle cx=\"12\" cy=\"12\" r=\"10\" />\n</svg>",
+  "css": "/* prueba: svg circle { fill: steelblue; } */",
+  "pestañaInicial": "html"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

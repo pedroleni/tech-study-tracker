@@ -177,6 +177,18 @@ Cuando una SPA reemplaza el DOM al navegar a una vista nueva, el contenido simpl
 3. Explica la regla de "exactamente un elemento" para cada `view-transition-name`.
 4. Escribe una regla `@media (prefers-reduced-motion)` que desactive las animaciones de `::view-transition-group(*)`, `::view-transition-old(*)` y `::view-transition-new(*)`.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe view-transition-name: avatar sobre este elemento para aislar su animación (ejercicio 2). Las View Transitions dentro de un único documento requieren JavaScript (document.startViewTransition()) — la pestaña JS de este editor ya llama a esa API al pulsar el botón.",
+  "html": "<button id=\"cambiar\">Cambiar</button>\n<div class=\"avatar\">😀</div>",
+  "css": ".avatar { font-size: 3rem; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; background: #eee; border-radius: 50%; /* view-transition-name: avatar; */ }",
+  "js": "const boton = document.getElementById('cambiar');\nconst avatar = document.querySelector('.avatar');\nconst emojis = ['😀', '🚀', '🎨', '🌈'];\nboton.addEventListener('click', () => {\n  const cambiarEmoji = () => {\n    avatar.textContent = emojis[Math.floor(Math.random() * emojis.length)];\n  };\n  if (document.startViewTransition) {\n    document.startViewTransition(cambiarEmoji);\n  } else {\n    cambiarEmoji();\n  }\n});",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

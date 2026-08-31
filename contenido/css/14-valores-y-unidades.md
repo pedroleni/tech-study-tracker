@@ -175,6 +175,17 @@
 3. Escribe una regla con `calc()` que haga que un elemento mida el 100% del ancho de su contenedor, menos 40px fijos.
 4. Explica por qué escribir `font-size: 16px` en vez de `font-size: 1rem` hace que una persona que sube el tamaño de fuente por defecto en su navegador no vea ningún cambio en ese texto concreto.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe una regla con calc() que haga que esta caja mida el 100% del ancho de su contenedor menos 40px fijos (ejercicio 3). Prueba también qué pasa si cambias el font-size del párrafo entre rem y em, con distintos niveles de anidamiento (ejercicio 2).",
+  "html": "<div class=\"contenedor\">\n  <div class=\"caja\">Caja con calc()</div>\n</div>\n<ul>\n  <li style=\"font-size: 1.2em;\">Nivel 1<ul>\n    <li style=\"font-size: 1.2em;\">Nivel 2<ul>\n      <li style=\"font-size: 1.2em;\">Nivel 3</li>\n    </ul></li>\n  </ul></li>\n</ul>",
+  "css": ".contenedor { width: 300px; border: 1px dashed #999; }\n.caja { background: #eee; }",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

@@ -211,6 +211,17 @@ Cuando dos reglas de CSS le dicen cosas distintas al mismo elemento, algo tiene 
 3. Reescribe `#header .nav a { color: red !important; }` sin usar `!important`, logrando el mismo resultado solo con especificidad.
 4. Explica por qué `:where(.tarjeta) h2 { }` es más fácil de sobrescribir después que `.tarjeta h2 { }`, aunque ambas parezcan seleccionar lo mismo.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe dos reglas con la misma especificidad exacta que compitan por el color de este enlace, y comprueba en la vista previa cuál gana (ejercicio 2). Después intenta reescribir un !important usando solo especificidad (ejercicio 3).",
+  "html": "<div id=\"header\" class=\"nav\"><a href=\"#\">Enlace de prueba</a></div>",
+  "css": "/* Escribe aquí tus reglas en competencia */",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

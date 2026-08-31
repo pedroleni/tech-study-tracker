@@ -159,6 +159,17 @@ Un clic en un botón no se queda solo en el botón — el evento SUBE por el ár
 3. Usa `stopPropagation()` para evitar que un clic en un elemento interior dispare el manejador de su contenedor.
 4. Implementa delegación de eventos: un único manejador en un contenedor que responda a clics en cualquiera de sus hijos.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Registra manejadores de clic en tres elementos anidados y observa el orden (ejercicio 1). Compara evento.target con evento.currentTarget (ejercicio 2). Implementa delegación de eventos (ejercicio 4).",
+  "html": "<div id=\"exterior\">Exterior\n  <div id=\"medio\">Medio\n    <button id=\"interior\">Interior</button>\n  </div>\n</div>\n<ul id=\"delegado\"><li>Uno</li><li>Dos</li><li>Tres</li></ul>\n<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\n['exterior', 'medio', 'interior'].forEach((id) => {\n  document.getElementById(id).addEventListener('click', (evento) => {\n    mostrar('Clic burbujeó hasta: ' + id + ' (target real: ' + evento.target.id + ')');\n  });\n});\n\ndocument.getElementById('delegado').addEventListener('click', (evento) => {\n  if (evento.target.tagName === 'LI') {\n    mostrar('Delegación: clic en ' + evento.target.textContent);\n  }\n});",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

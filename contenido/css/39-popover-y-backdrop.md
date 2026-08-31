@@ -144,6 +144,17 @@ La lección de HTML sobre `<dialog>` explicó el elemento en sí. Esta se centra
 3. Explica qué propiedad adicional hace falta para que una transición funcione en un elemento que pasa de `display: none` a visible.
 4. Explica la diferencia entre un `<dialog open>` normal y uno abierto con `showModal()`, en cuanto a `::backdrop` y la top layer.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Este popover usa display: grid directamente, lo cual es un error explicado en la lección — corrígelo con @starting-style y las reglas necesarias para animarlo (ejercicio 1 y 2).",
+  "html": "<button popovertarget=\"mi-popover\">Abrir popover</button>\n<div id=\"mi-popover\" popover>Contenido del popover</div>",
+  "css": "[popover] {\n  /* display: grid; -- corrige esto */\n  border-radius: 8px;\n  padding: 16px;\n}",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

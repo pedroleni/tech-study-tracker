@@ -162,6 +162,17 @@ Un carrusel de imágenes que se queda "a medias" al soltar el scroll, cortando u
 3. Escribe una regla `scroll-padding-top` que compense un header fijo de 60px de alto.
 4. Explica para qué sirve `scroll-snap-stop: always` y qué problema resuelve.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe scroll-snap-type: x mandatory en el contenedor y scroll-snap-align: start en cada hijo, y haz scroll horizontal en la vista previa para comprobar el efecto (ejercicio 1).",
+  "html": "<div class=\"galeria\">\n  <div class=\"panel\">1</div>\n  <div class=\"panel\">2</div>\n  <div class=\"panel\">3</div>\n</div>",
+  "css": ".galeria {\n  display: flex;\n  overflow-x: auto;\n  height: 120px;\n  /* scroll-snap-type: x mandatory; */\n}\n.panel {\n  flex: 0 0 100%;\n  display: flex; align-items: center; justify-content: center;\n  background: #7c3aed; color: white; font-size: 2rem;\n  /* scroll-snap-align: start; */\n}",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

@@ -173,6 +173,17 @@ details[open] summary::before {
 3. Escribe el CSS para sustituir el triángulo nativo por un símbolo propio (+ y -, por ejemplo) que cambie según el estado abierto/cerrado.
 4. Busca una web real con un componente de acordeón — ¿está hecho con details o con JavaScript y divs?
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe las 3 preguntas frecuentes con details/summary, con la primera abierta (ejercicio 1). Dales el mismo name para que se comporten como acordeón (ejercicio 2). Si te animas, sustituye el triángulo nativo por + y - en la pestaña CSS (ejercicio 3).",
+  "html": "<!-- Empieza aquí -->",
+  "css": "/* opcional: summary { list-style: none; } summary::before { content: '+ '; } details[open] summary::before { content: '- '; } */",
+  "pestañaInicial": "html"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

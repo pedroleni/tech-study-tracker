@@ -277,6 +277,17 @@ ul.avisos li::marker {
 4. Busca el menú de navegación de una web real (las herramientas de desarrollador te dejan inspeccionar el HTML) — ¿está construido con ul/li? ¿Lleva list-style: none o algo parecido?
 5. Coge la lista de la compra del ejercicio 1 y, solo con CSS, cambia sus marcadores por un emoji o símbolo propio usando list-style-type — sin tocar el HTML.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe tu lista de la compra (ul) y los pasos de una receta (ol) del ejercicio 1. Cuando la tengas, prueba el ejercicio 5 en la pestaña CSS: cambia los marcadores con list-style-type sin tocar el HTML.",
+  "html": "<!-- Empieza aquí -->",
+  "css": "/* prueba aquí, por ejemplo: ul { list-style-type: \"🛒 \"; } */",
+  "pestañaInicial": "html"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

@@ -173,6 +173,17 @@
 3. Escribe una regla que centre elementos flex tanto en el eje principal como en el cruzado, en un contenedor con flex-direction: row.
 4. Explica por qué, con flex-direction: column, align-items pasa a controlar la alineación horizontal en vez de la vertical.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Convierte este contenedor en flex con dirección columna (ejercicio 1). Reparte el espacio sobrante entre los elementos sin dejar hueco en los extremos (ejercicio 2). Céntralos en los dos ejes (ejercicio 3).",
+  "html": "<div class=\"contenedor\">\n  <div class=\"item\">1</div>\n  <div class=\"item\">2</div>\n  <div class=\"item\">3</div>\n</div>",
+  "css": ".contenedor {\n  height: 200px;\n  border: 1px dashed #999;\n  /* display: flex; escribe aquí el resto */\n}\n.item { background: #7c3aed; color: white; padding: 12px; }",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

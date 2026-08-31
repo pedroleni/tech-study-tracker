@@ -155,6 +155,17 @@ Una lista trae, por defecto, viñetas o números, más un padding-left generoso 
 3. Explica por qué `list-style-type: none` por sí solo no basta para eliminar toda la sangría de una lista, y qué propiedad adicional hace falta.
 4. Escribe una lista ordenada que empiece a contar desde el 5 y cuente hacia abajo.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Cambia las viñetas de esta lista a cuadrados (ejercicio 1). Después prueba el patrón list-style-type: none + background-image para un icono personalizado (ejercicio 2). Escribe una ol que empiece en 5 y cuente hacia abajo (ejercicio 4).",
+  "html": "<ul class=\"lista\">\n  <li>Elemento uno</li>\n  <li>Elemento dos</li>\n</ul>\n<ol class=\"ranking\">\n  <li>Elemento</li>\n  <li>Elemento</li>\n</ol>",
+  "css": ".lista { /* cambia list-style-type aquí */ }",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

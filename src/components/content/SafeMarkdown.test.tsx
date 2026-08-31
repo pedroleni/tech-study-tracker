@@ -77,6 +77,48 @@ describe('SafeMarkdown con laboratorios', () => {
     expect(screen.getByTitle('Vista previa de la versión Después')).toHaveAttribute('sandbox', '')
   })
 
+  it('renderiza editor-en-vivo con CodeMirror y un iframe aislado', () => {
+    render(
+      <SafeMarkdown permitirLaboratorios>
+        {bloqueLaboratorio({
+          tipo: 'editor-en-vivo',
+          titulo: 'Prueba el ejercicio',
+          html: '<p>Hola</p>',
+          css: 'p { color: rebeccapurple; }',
+          js: '',
+          pestañaInicial: 'html',
+        })}
+      </SafeMarkdown>,
+    )
+
+    expect(screen.getByRole('region', { name: 'Editor de código en vivo' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'HTML' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('button', { name: 'CSS' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'JavaScript' })).not.toBeInTheDocument()
+    expect(screen.getByTitle('Vista previa del editor en vivo')).toHaveAttribute(
+      'sandbox',
+      'allow-scripts',
+    )
+  })
+
+  it('usa código plano cuando editor-en-vivo no contiene html, css ni js', () => {
+    render(
+      <SafeMarkdown permitirLaboratorios>
+        {bloqueLaboratorio({
+          tipo: 'editor-en-vivo',
+          html: '',
+          css: '   ',
+          js: '',
+        })}
+      </SafeMarkdown>,
+    )
+
+    expect(screen.getByRole('region', { name: 'Bloque de código laboratorio' })).toHaveTextContent(
+      'editor-en-vivo',
+    )
+    expect(screen.queryByRole('region', { name: 'Editor de código en vivo' })).not.toBeInTheDocument()
+  })
+
   it('renderiza notas-clave con todos sus items', () => {
     render(
       <SafeMarkdown permitirLaboratorios>
@@ -609,6 +651,12 @@ describe('SafeMarkdown con laboratorios', () => {
         border: '2px solid',
         padding: '12px',
         content: '320 × 180',
+      }),
+      bloqueLaboratorio({
+        tipo: 'editor-en-vivo',
+        html: '<p>Hola</p>',
+        css: 'p { color: rebeccapurple; }',
+        js: '',
       }),
     ].join('\n\n')
     const { container } = render(

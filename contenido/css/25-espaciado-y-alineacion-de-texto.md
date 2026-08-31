@@ -168,6 +168,17 @@
 3. Escribe una regla que aumente el `letter-spacing` de un titular en mayúsculas, sin afectar al espacio entre palabras.
 4. Escribe una regla con `text-indent` que sangre la primera línea de cada párrafo, como en un libro impreso.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Centra el título y justifica el párrafo largo (ejercicio 1). Aumenta el letter-spacing del titular en mayúsculas sin afectar el espacio entre palabras (ejercicio 3). Prueba text-indent en el párrafo para sangrar su primera línea (ejercicio 4).",
+  "html": "<h2 class=\"titular\">TITULAR EN MAYÚSCULAS</h2>\n<p class=\"parrafo\">Un párrafo lo bastante largo como para notar el efecto de justificar el texto y ver cómo se reparten los espacios entre palabras de forma desigual en distintas líneas.</p>",
+  "css": ".titular { /* centra y añade letter-spacing */ }\n.parrafo { /* justifica y añade text-indent */ }",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

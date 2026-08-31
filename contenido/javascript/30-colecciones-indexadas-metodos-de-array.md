@@ -161,6 +161,17 @@ Abre el módulo de colecciones. Un array es, por dentro, una forma especial de o
 3. Usa `push()`/`pop()` para añadir y quitar al final, y `unshift()`/`shift()` para hacerlo al principio.
 4. Usa `splice()` para eliminar e insertar elementos a la vez en mitad de un array, y examina lo que devuelve frente a lo que queda en el array original.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Crea un array con [] y accede a un índice fuera de rango (ejercicio 1). Asigna a un índice alto y comprueba qué pasa con length (ejercicio 2). Usa push/pop y unshift/shift (ejercicio 3).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nconst vacio = [];\nmostrar(vacio[5]);\n\nconst array = [1, 2, 3];\narray[10] = 'último';\nmostrar('length: ' + array.length);\n\narray.unshift('primero');\nmostrar(array);",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

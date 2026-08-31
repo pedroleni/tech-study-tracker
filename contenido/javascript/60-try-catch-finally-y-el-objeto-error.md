@@ -159,6 +159,17 @@ Abre el módulo de manejo de errores. `try/catch` evita que un error detenga tod
 3. Escribe una función con `return` tanto en `try` como en `finally`, y comprueba cuál de los dos "gana".
 4. Valida un parámetro numérico comprobando tanto `typeof` como `Number.isNaN()`, y lanza un error si no es válido.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe un try/catch que capture un error lanzado con throw new Error() y lee name y message (ejercicio 1). Añade un finally que se ejecute siempre (ejercicio 2). Valida un parámetro con typeof y Number.isNaN() (ejercicio 4).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\ntry {\n  throw new Error('Algo salió mal');\n} catch (error) {\n  mostrar('name: ' + error.name);\n  mostrar('message: ' + error.message);\n} finally {\n  mostrar('finally: esto se ejecuta siempre');\n}\n\nfunction raizCuadrada(numero) {\n  if (typeof numero !== 'number' || Number.isNaN(numero)) {\n    throw new TypeError('Se esperaba un número válido');\n  }\n  return Math.sqrt(numero);\n}\ntry {\n  mostrar(raizCuadrada('no soy un número'));\n} catch (error) {\n  mostrar('Error de validación: ' + error.message);\n}",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

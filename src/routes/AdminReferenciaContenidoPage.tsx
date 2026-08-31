@@ -6,6 +6,7 @@ import { CodigoAnotado } from '@/components/bloques-laboratorio/CodigoAnotado'
 import { ComparadorAntesDespues } from '@/components/bloques-laboratorio/ComparadorAntesDespues'
 import { DiagramaEtiqueta } from '@/components/bloques-laboratorio/DiagramaEtiqueta'
 import { EsquemaDePagina } from '@/components/bloques-laboratorio/EsquemaDePagina'
+import { EditorEnVivo } from '@/components/bloques-laboratorio/EditorEnVivo'
 import { LineaDeTiempo } from '@/components/bloques-laboratorio/LineaDeTiempo'
 import { MapaDeRegiones } from '@/components/bloques-laboratorio/MapaDeRegiones'
 import { Mitos } from '@/components/bloques-laboratorio/Mitos'
@@ -13,6 +14,8 @@ import { NotasClave } from '@/components/bloques-laboratorio/NotasClave'
 import { PrediceElResultado } from '@/components/bloques-laboratorio/PrediceElResultado'
 import { Recursos } from '@/components/bloques-laboratorio/Recursos'
 import { Roles } from '@/components/bloques-laboratorio/Roles'
+import { SqlAnotado } from '@/components/bloques-laboratorio/SqlAnotado'
+import { SqlEnVivo } from '@/components/bloques-laboratorio/SqlEnVivo'
 import { VistaPreviaSocial } from '@/components/bloques-laboratorio/VistaPreviaSocial'
 import { Acordeon } from '@/components/referencia-contenido/Acordeon'
 import { AntesDespuesDeslizante } from '@/components/referencia-contenido/AntesDespuesDeslizante'
@@ -171,7 +174,7 @@ function FiltroCategorias({
 }
 
 function Referencia({ nombre, children }: PropiedadesReferencia) {
-  const tituloId = `referencia-${nombre.toLowerCase()}`
+  const tituloId = `referencia-${nombre.toLowerCase().replace(/\s+/g, '-')}`
 
   return (
     <section aria-labelledby={tituloId} className="scroll-mt-6 space-y-3">
@@ -200,7 +203,7 @@ export function AdminReferenciaContenidoPage() {
         </h1>
         <p className="mt-3 max-w-3xl text-sm text-pretty text-muted-foreground">
           Catálogo visual de componentes React organizado por tipo. El primer grupo, "Bloques de
-          laboratorio", son los 14 componentes reales que ya renderiza cualquier lección a través
+          laboratorio", son los 17 componentes reales que ya renderiza cualquier lección a través
           de un bloque <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">```laboratorio</code>{' '}
           en su Markdown (ver <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">specs/features/laboratorios.md</code>).
           El resto de grupos son prototipos de diseño de <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">referencia-contenido/</code> —
@@ -214,7 +217,7 @@ export function AdminReferenciaContenidoPage() {
       <CategoriaActivaContext.Provider value={categoriaActiva}>
       <GrupoCatalogo
         titulo="Bloques de laboratorio"
-        descripcion="Los 14 tipos reales que un autor puede usar dentro de un bloque ```laboratorio en el Markdown de una lección (src/components/bloques-laboratorio/). Validados por Zod, registrados en un lookup cerrado — no prototipos."
+        descripcion="Los 17 tipos reales que un autor puede usar dentro de un bloque ```laboratorio en el Markdown de una lección (src/components/bloques-laboratorio/). Validados por Zod, registrados en un lookup cerrado — no prototipos."
       >
         <Referencia nombre="PrediceElResultado">
           <PrediceElResultado
@@ -441,6 +444,99 @@ export function AdminReferenciaContenidoPage() {
             border="2px solid"
             padding="12px"
             content="320 × 180"
+          />
+        </Referencia>
+
+        <Referencia nombre="EditorEnVivo">
+          <EditorEnVivo
+            tipo="editor-en-vivo"
+            titulo="Prueba el ejercicio"
+            consigna="Cambia el texto y observa la vista previa."
+            html={'<button id="saludo">Saludar</button>\n<p id="resultado"></p>'}
+            css={'button {\n  padding: 0.75rem 1rem;\n  font: inherit;\n}'}
+            js={
+              "document.querySelector('#saludo').addEventListener('click', () => {\n  document.querySelector('#resultado').textContent = '¡Hola!';\n});"
+            }
+            ts={'const x: number = "hola";'}
+            pestañaInicial="ts"
+          />
+        </Referencia>
+
+        <Referencia nombre="SqlAnotado">
+          <SqlAnotado
+            tipo="sql-anotado"
+            motor="sqlite"
+            esquemaSql={
+              "CREATE TABLE departamentos (id INTEGER PRIMARY KEY, nombre TEXT);\nCREATE TABLE empleados (id INTEGER PRIMARY KEY, nombre TEXT, departamento_id INTEGER, salario REAL);\nINSERT INTO departamentos VALUES (1, 'Ingeniería'), (2, 'Ventas');\nINSERT INTO empleados VALUES (1, 'Ana', 1, 55000), (2, 'Luis', 1, 62000), (3, 'Marta', 2, 48000);"
+            }
+            consulta={
+              'SELECT d.nombre AS departamento, COUNT(*) AS empleados\nFROM empleados e\nJOIN departamentos d ON d.id = e.departamento_id\nGROUP BY d.nombre'
+            }
+            anotaciones={[
+              {
+                fragmento: 'JOIN departamentos d ON d.id = e.departamento_id',
+                nota: 'Une cada empleado con su departamento por id.',
+              },
+              {
+                fragmento: 'GROUP BY d.nombre',
+                nota: 'Agrupa antes de agregar — sin esto, COUNT trataría la tabla entera como un único grupo.',
+              },
+            ]}
+          />
+        </Referencia>
+
+        <Referencia nombre="SqlEnVivo">
+          <SqlEnVivo
+            tipo="sql-en-vivo"
+            motor="sqlite"
+            consigna='Muestra el nombre y el salario de los empleados de "Ingeniería", ordenados de mayor a menor salario.'
+            esquemaSql={
+              "CREATE TABLE departamentos (id INTEGER PRIMARY KEY, nombre TEXT);\nCREATE TABLE empleados (id INTEGER PRIMARY KEY, nombre TEXT, departamento_id INTEGER, salario REAL);\nINSERT INTO departamentos VALUES (1, 'Ingeniería'), (2, 'Ventas');\nINSERT INTO empleados VALUES (1, 'Ana', 1, 55000), (2, 'Luis', 1, 62000), (3, 'Marta', 2, 48000);"
+            }
+            consultaInicial=""
+            consultaSolucion="SELECT nombre, salario FROM empleados WHERE departamento_id = 1 ORDER BY salario DESC"
+          />
+        </Referencia>
+
+        <Referencia nombre="SqlAnotado (motor postgres)">
+          <SqlAnotado
+            tipo="sql-anotado"
+            motor="postgres"
+            etiquetaSeccion="SQL anotado — motor postgres"
+            etiquetaConsulta="Consulta SQL anotada — motor postgres"
+            esquemaSql={
+              "CREATE TABLE eventos (id serial primary key, datos jsonb); INSERT INTO eventos (datos) VALUES ('{\"tipo\": \"click\", \"x\": 10}'), ('{\"tipo\": \"scroll\"}');"
+            }
+            consulta="SELECT datos->>'tipo' AS tipo FROM eventos WHERE datos ? 'x'"
+            anotaciones={[
+              {
+                fragmento: "datos->>'tipo'",
+                nota: 'JSONB, no JSON: Postgres lo guarda en binario, no como texto — por eso admite índices GIN y operadores como ? (¿existe esta clave?).',
+              },
+            ]}
+          />
+        </Referencia>
+
+        <Referencia nombre="SqlEnVivo (motor postgres + RLS con identidad simulada)">
+          <SqlEnVivo
+            tipo="sql-en-vivo"
+            motor="postgres"
+            etiquetaSeccion="SQL en vivo — motor postgres, RLS"
+            consigna='Cambia de identidad arriba y comprueba que cada quien ve solo sus propios posts.'
+            esquemaSql={
+              "CREATE TABLE posts (id serial primary key, autor_id text not null, titulo text not null); " +
+              "INSERT INTO posts (autor_id, titulo) VALUES ('ana', 'Post de Ana 1'), ('ana', 'Post de Ana 2'), ('roberto', 'Post de Roberto'); " +
+              "CREATE OR REPLACE FUNCTION auth_uid() RETURNS text AS $$ SELECT current_setting('myapp.current_user_id', true); $$ LANGUAGE sql STABLE; " +
+              "ALTER TABLE posts ENABLE ROW LEVEL SECURITY; " +
+              "CREATE POLICY \"solo ver los propios posts\" ON posts FOR SELECT USING (autor_id = auth_uid()); " +
+              "CREATE ROLE app_user NOSUPERUSER; GRANT USAGE ON SCHEMA public TO app_user; GRANT SELECT ON posts TO app_user;"
+            }
+            identidadSimulada={[
+              { etiqueta: 'Ana', valor: 'ana' },
+              { etiqueta: 'Roberto', valor: 'roberto' },
+            ]}
+            consultaInicial="SELECT titulo FROM posts ORDER BY titulo"
+            consultaSolucion="SELECT titulo FROM posts ORDER BY titulo"
           />
         </Referencia>
       </GrupoCatalogo>

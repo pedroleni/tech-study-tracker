@@ -174,6 +174,17 @@
 3. Escribe una sombra con `box-shadow` que tenga desplazamiento 0, un blur amplio y un color semitransparente, para simular un resplandor alrededor de un elemento.
 4. Escribe dos sombras apiladas en un mismo `box-shadow`: una exterior sutil y una `inset` más marcada.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe un borde de 3px solo en el lado inferior (ejercicio 1). Convierte la segunda caja en un círculo perfecto con border-radius: 50% (ejercicio 2). Añade a la tercera una sombra amplia y difusa tipo resplandor, y después apila dos sombras (ejercicio 3 y 4).",
+  "html": "<div class=\"caja-borde\">Solo borde inferior</div>\n<div class=\"caja-circulo\"></div>\n<div class=\"caja-sombra\">Resplandor</div>",
+  "css": ".caja-borde { padding: 12px; margin-bottom: 12px; }\n.caja-circulo { width: 100px; height: 100px; background: #999; margin-bottom: 12px; }\n.caja-sombra { width: 120px; height: 60px; background: #333; color: white; display: flex; align-items: center; justify-content: center; }",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

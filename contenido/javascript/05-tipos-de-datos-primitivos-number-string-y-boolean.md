@@ -158,6 +158,17 @@ JavaScript tiene siete tipos primitivos: number, string, boolean, null, undefine
 3. Escribe un template literal que inserte el resultado de una suma dentro de un texto.
 4. Explica por qué `new Boolean(false)` es truthy en un condicional, a diferencia del primitivo `false`.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Comprueba por qué 0.1 + 0.7 no da exactamente 0.8 (ejercicio 1). Escribe la lista de valores falsy (ejercicio 2). Escribe un template literal que inserte el resultado de una suma (ejercicio 3).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nmostrar(0.1 + 0.7);\n\nconst falsy = [false, 0, '', null, undefined, NaN];\nmostrar(falsy);\n\nconst a = 3, b = 4;\nmostrar(`La suma de ${a} y ${b} es ${a + b}`);",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

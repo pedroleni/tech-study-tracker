@@ -157,6 +157,17 @@ La lección anterior configuró el CONTENEDOR flex. Esta se ocupa de sus HIJOS: 
 3. Escribe una regla que haga que el segundo elemento de una fila flex aparezca visualmente primero, sin cambiar el HTML.
 4. Explica por qué cambiar el orden visual de unos botones con `order` puede ser un problema de accesibilidad, aunque se vea bien.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe flex: 1 en los tres hijos para que se repartan el espacio en partes iguales (ejercicio 1). Antes de ejecutarlo, calcula cuánto mediría cada uno en un contenedor de 300px (ejercicio 2). Haz que el segundo aparezca visualmente primero con order (ejercicio 3).",
+  "html": "<div class=\"contenedor\">\n  <div class=\"item\">1</div>\n  <div class=\"item\">2</div>\n  <div class=\"item\">3</div>\n</div>",
+  "css": ".contenedor { display: flex; width: 300px; border: 1px dashed #999; }\n.item { background: #7c3aed; color: white; padding: 12px; text-align: center; /* flex: 1; */ }",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

@@ -41,8 +41,13 @@ export interface Leccion {
   contenido: string
   orden: number
   status: LeccionStatus
+  esProyecto: boolean
   createdAt: string
   updatedAt: string
+}
+
+export interface Proyecto extends Leccion {
+  technology: Pick<Technology, 'id' | 'name' | 'icon' | 'status'>
 }
 
 export interface Profile {

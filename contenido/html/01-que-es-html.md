@@ -146,6 +146,16 @@ Sin etiquetas, el navegador ignora los saltos de línea y lo aplasta todo en una
 2. Escribe, sin usar ninguna etiqueta, el texto de una receta de cocina (un título y una lista de pasos) tal cual lo pegarías en un bloc de notas plano. Después reescríbelo usando las etiquetas de esta lección. Abre las dos versiones en el navegador y compara qué se ve.
 3. Explica en dos frases, con tus propias palabras y sin tecnicismos, la diferencia entre HTML, CSS y JavaScript a alguien que no sabe nada de desarrollo web.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe el ejercicio 2 aquí mismo: primero el texto de la receta sin ninguna etiqueta, tal cual en un bloc de notas. Míralo en la vista previa, bórralo y reescríbelo con las etiquetas de esta lección.",
+  "html": "Receta de tortilla de patatas\n\nIngredientes: patatas, huevos, cebolla, sal\n\nPasos\n1. Pela y corta las patatas\n2. Fríelas a fuego lento\n3. Bate los huevos\n4. Mezcla todo y cuaja la tortilla",
+  "pestañaInicial": "html"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

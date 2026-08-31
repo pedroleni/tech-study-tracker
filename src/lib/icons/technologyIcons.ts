@@ -1,4 +1,4 @@
-import { Terminal } from 'lucide-react'
+import { Database, Terminal } from 'lucide-react'
 import type { ComponentType } from 'react'
 import {
   SiAmazonaws,
@@ -135,6 +135,11 @@ export const technologyIcons: TechnologyIconMap = {
   redis: { label: 'Redis', Icon: SiRedis },
   mysql: { label: 'MySQL', Icon: SiMysql },
   sqlite: { label: 'SQLite', Icon: SiSqlite },
+  // SQL (el lenguaje estándar) no tiene un logo de marca propio — a
+  // diferencia de postgresql/mysql/sqlite arriba, que sí son motores
+  // concretos. Mismo patrón ya usado para "terminal" (lucide genérico,
+  // no un logo de marca).
+  sql: { label: 'SQL', Icon: Database },
   supabase: { label: 'Supabase', Icon: SiSupabase },
   firebase: { label: 'Firebase', Icon: SiFirebase },
   aws: { label: 'AWS', Icon: SiAmazonaws },

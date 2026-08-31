@@ -176,6 +176,16 @@ No son etiquetas "prohibidas" — tienen sus propios casos de uso legítimos, di
 4. Escribe una frase que contenga los tres símbolos &lt;, &gt; y &amp; de forma literal (por ejemplo, explicando la sintaxis de una etiqueta HTML) usando las entidades correctas.
 5. Prueba `<marquee>Texto</marquee>` en las herramientas de desarrollador de tu navegador (Elements/Inspector, no en tu código real: es una etiqueta obsoleta). Verla moverse en pantalla ayuda a entender por qué HTML evolucionó hacia separar contenido y presentación — el mismo argumento de fondo que distingue strong/em de b/i.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe el párrafo de advertencia del ejercicio 2: strong para lo importante, y em anidado donde haga falta énfasis extra dentro de esa importancia.",
+  "html": "<!-- Empieza aquí -->",
+  "pestañaInicial": "html"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

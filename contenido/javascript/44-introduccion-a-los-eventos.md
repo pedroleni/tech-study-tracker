@@ -168,6 +168,17 @@ Abre el módulo de eventos. Un evento es una señal que el navegador emite cuand
 3. Usa `preventDefault()` para detener el envío de un formulario si un campo está vacío.
 4. Registra un manejador con una función NOMBRADA, y quítalo después con `removeEventListener()`.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Registra dos manejadores distintos para el mismo evento y comprueba que ambos se ejecutan (ejercicio 1). Usa evento.target dentro de un manejador (ejercicio 2). Usa preventDefault() para detener el envío de un formulario vacío (ejercicio 3).",
+  "html": "<button id=\"boton\">Púlsame</button>\n<form id=\"form\"><input id=\"campo\" required><button type=\"submit\">Enviar</button></form>\n<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nconst boton = document.getElementById('boton');\nboton.addEventListener('click', () => mostrar('Manejador 1'));\nboton.addEventListener('click', (evento) => mostrar('Manejador 2, target: ' + evento.target.tagName));\n\ndocument.getElementById('form').addEventListener('submit', (evento) => {\n  evento.preventDefault();\n  mostrar('Envío interceptado con preventDefault()');\n});",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

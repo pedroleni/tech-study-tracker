@@ -149,6 +149,18 @@ Saber si un elemento es visible en pantalla solía exigir escuchar `scroll` y re
 3. Implementa carga diferida de una imagen, usando `data-src` y `unobserve()` tras cargarla.
 4. Explica la diferencia entre `unobserve()` y `disconnect()`.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Crea un IntersectionObserver que añada una clase CSS cuando un elemento entra en pantalla (ejercicio 1). Haz scroll dentro del contenedor de la vista previa para verlo en acción.",
+  "html": "<div id=\"scroll\" style=\"height: 150px; overflow-y: auto; border: 1px solid #999;\">\n  <div style=\"height: 300px;\">Sigue bajando...</div>\n  <div id=\"objetivo\" style=\"padding: 20px; background: #eee;\">Obsérvame</div>\n</div>",
+  "css": ".visible { background: lightgreen !important; }",
+  "js": "const observador = new IntersectionObserver((entradas) => {\n  entradas.forEach((entrada) => {\n    entrada.target.classList.toggle('visible', entrada.isIntersecting);\n  });\n}, { root: document.getElementById('scroll') });\n\nobservador.observe(document.getElementById('objetivo'));",
+  "pestañaInicial": "html"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

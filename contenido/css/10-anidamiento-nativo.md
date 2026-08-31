@@ -170,6 +170,17 @@ Durante años, escribir `.tarjeta .titulo { }` y `.tarjeta .cuerpo { }` signific
 3. Con un ejemplo de HTML, explica la diferencia real entre `.lista { &:first-child { } }` y `.lista { & :first-child { } }`.
 4. Explica por qué `.bloque { &__elemento { } }` no crea una clase `.bloque__elemento` en anidamiento nativo, a diferencia de lo que haría Sass con el mismo patrón BEM.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Reescribe .tarjeta .titulo y .tarjeta .cuerpo como un único bloque .tarjeta { } con anidamiento nativo (ejercicio 1). Después, dentro de .boton, escribe un &.deshabilitado que seleccione el propio botón cuando también tenga esa clase (ejercicio 2).",
+  "html": "<div class=\"tarjeta\">\n  <div class=\"titulo\">Título</div>\n  <div class=\"cuerpo\">Cuerpo</div>\n</div>\n<button class=\"boton\">Normal</button>\n<button class=\"boton deshabilitado\">Deshabilitado</button>",
+  "css": "/* Escribe aquí tu anidamiento nativo */",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

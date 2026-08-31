@@ -205,6 +205,17 @@ Una pseudo-clase selecciona un elemento según su ESTADO, no según lo que tiene
 3. Escribe un selector con :not() que ponga un margen inferior a todos los párrafos de un artículo excepto al último.
 4. Explica con un ejemplo concreto la diferencia entre :nth-child(2) y :nth-of-type(2) en una lista con un h3 mezclado entre los párrafos.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe las cuatro pseudo-clases del enlace en orden LVHA (ejercicio 1). Cebra las filas de la tabla con :nth-child (ejercicio 2), y usa :not() para quitar el margen inferior solo al último párrafo (ejercicio 3).",
+  "html": "<a href=\"#\">Un enlace</a>\n<table>\n  <tr><td>Fila 1</td></tr>\n  <tr><td>Fila 2</td></tr>\n  <tr><td>Fila 3</td></tr>\n</table>\n<article>\n  <p>Párrafo 1</p>\n  <p>Párrafo 2</p>\n  <p>Párrafo 3 (último)</p>\n</article>",
+  "css": "/* Escribe aquí tus pseudo-clases */",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

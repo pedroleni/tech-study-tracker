@@ -132,6 +132,17 @@ Ya se vio `fetch()` con JSON en lecciones anteriores. Esta profundiza en algo qu
 3. Usa `fetch()` con `blob()` para obtener una imagen, y muéstrala en la página.
 4. Explica por qué `response.json()` necesita su propio `then()` (o `await`) en vez de devolver los datos directamente.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Usa fetch() con json() para obtener y procesar datos de una API (ejercicio 2). Usa fetch() con blob() para obtener una imagen y muéstrala en la página (ejercicio 3).",
+  "html": "<img id=\"foto\" alt=\"Perro aleatorio\" style=\"max-width: 200px;\">\n<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nfetch('https://pokeapi.co/api/v2/pokemon/ditto')\n  .then((respuesta) => respuesta.json())\n  .then((datos) => mostrar('Peso de ditto: ' + datos.weight));\n\nfetch('https://dog.ceo/api/breeds/image/random')\n  .then((respuesta) => respuesta.json())\n  .then((datos) => fetch(datos.message))\n  .then((respuestaImagen) => respuestaImagen.blob())\n  .then((blob) => {\n    document.getElementById('foto').src = URL.createObjectURL(blob);\n  });",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

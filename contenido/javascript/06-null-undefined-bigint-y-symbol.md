@@ -171,6 +171,17 @@ Cuatro tipos primitivos menos frecuentes en el día a día, pero cada uno resuel
 3. Escribe un `BigInt` usando el sufijo `n`, y súmalo correctamente a otro `BigInt`.
 4. Explica por qué `Symbol('id') === Symbol('id')` da `false`.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe un ejemplo donde undefined aparezca sin que nadie lo haya asignado (ejercicio 1). Compara null == undefined y null === undefined (ejercicio 2). Suma dos BigInt con el sufijo n (ejercicio 3).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nlet variableSinValor;\nmostrar(variableSinValor);\n\nmostrar(null == undefined);\nmostrar(null === undefined);\n\nconst grande = 900719925474099100n;\nmostrar(grande + 1n);",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

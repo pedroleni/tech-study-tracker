@@ -169,6 +169,17 @@ Todas las animaciones de las lecciones anteriores avanzan con el TIEMPO — un s
 3. Escribe una regla `@supports` que muestre un aviso cuando el navegador no soporte `scroll-timeline`.
 4. Explica la diferencia entre `scroll()` y `view()`.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe una barra de progreso de lectura con animation-timeline: scroll(root) y haz scroll en la vista previa para verla avanzar (ejercicio 1). Es una API reciente — si tu navegador no la soporta, no verás movimiento, pero el código es correcto.",
+  "html": "<div class=\"barra-progreso\"></div>\n<div class=\"contenido-largo\">\n  <p>Texto largo para poder hacer scroll y ver la barra de progreso avanzar según bajas por la página, repite este párrafo mentalmente varias veces para tener suficiente altura de scroll.</p>\n</div>",
+  "css": ".barra-progreso {\n  position: sticky; top: 0; height: 6px; background: #7c3aed;\n  transform-origin: left;\n  /* animation: crecer linear;\n  animation-timeline: scroll(root); */\n}\n@keyframes crecer { from { transform: scaleX(0); } to { transform: scaleX(1); } }\n.contenido-largo { height: 800px; }",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

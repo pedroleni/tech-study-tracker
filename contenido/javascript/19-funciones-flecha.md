@@ -158,6 +158,17 @@ Las funciones flecha (`=>`) son más que una sintaxis corta: cambian por complet
 3. Escribe un ejemplo donde una arrow function dentro de otra función herede el `this` de fuera.
 4. Explica por qué una arrow function con llaves `{ }` necesita un `return` explícito, a diferencia de una sin llaves.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Reescribe function(x) { return x * 2; } como arrow function con retorno implícito (ejercicio 1). Escribe una función expresada CON nombre (ejercicio 2). Explica por qué una arrow con llaves necesita return explícito (ejercicio 4).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nconst doble = x => x * 2;\nmostrar(doble(21));\n\nconst nombrada = function factorial(n) {\n  return n <= 1 ? 1 : n * factorial(n - 1);\n};\nmostrar(nombrada(5));",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

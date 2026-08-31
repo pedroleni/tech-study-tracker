@@ -415,3 +415,109 @@ sostenida en las tres pasadas.
   varios módulos a la vez (arrays, funciones, DOM, eventos, JSON) que
   tiene más sentido tratarlos como una lección de síntesis final,
   parecida en espíritu al cierre de organización que tuvo CSS.
+- **Bloques `editor-en-vivo` (2026-08-29)** en 67 de las 71 lecciones.
+  Patrón compartido para las lecciones de fundamentos del lenguaje: un
+  `<pre id="salida">` más un helper `mostrar()` que vuelca el resultado
+  ahí mismo (en vez de pedir que se abra la consola del navegador), con
+  un listener de `error` global que atrapa cualquier excepción no
+  capturada y la muestra igual — así un error de sintaxis o de tipo al
+  experimentar no deja el editor en blanco sin explicación. Las
+  lecciones de DOM/eventos/Canvas/Drag&Drop usan en su lugar elementos
+  reales (botones, listas, un `<canvas>`) porque ahí la propia interfaz
+  es el resultado. Las de fetch/promesas (49, 50, 52, 65) hacen
+  peticiones reales a PokeAPI y dog.ceo — ambas verificadas con `curl`
+  con CORS abierto (`access-control-allow-origin: *`), no simuladas.
+  **Cuatro lecciones se dejaron sin bloque, a propósito:**
+  - `53` (Web Workers) y `54` (módulos ES): un Worker o un `import`
+    necesitan un origen real o varios archivos — el iframe del bloque
+    usa `sandbox="allow-scripts"` sin `allow-same-origin` (origen
+    opaco) precisamente por seguridad, y forzar una excepción a eso
+    para estas dos lecciones habría sido la misma regresión que
+    advierte `specs/features/editor-en-vivo.md`.
+  - `64` (audio/video): sin un archivo de medio real y estable que
+    referenciar, un `<video>`/`<audio>` sin fuente no demuestra nada
+    (`duration` sale `NaN`, no hay reproducción real).
+  - `70` (JSDoc): su beneficio (autocompletado, tooltips de tipo) vive
+    en el editor de código de quien lo escribe, no en el navegador —
+    nada cambia visualmente al "ejecutarlo" en una vista previa.
+  - **`62` (localStorage) sí lleva bloque, pero como excepción
+    deliberada**: el origen opaco del iframe deshabilita
+    `localStorage`/`sessionStorage` de verdad — el bloque envuelve las
+    llamadas en `try/catch` y muestra el error real del navegador como
+    parte de la lección (qué es un origen opaco, no solo teoría), con
+    una nota explícita de que el mismo código sí funciona en un archivo
+    `.html` normal. El proyecto `75` (generador de contraseñas) evita
+    el mismo problema con `navigator.clipboard` quitando el botón de
+    copiar en vez de fingir que funciona.
+- **Módulo de Proyectos (2026-08-29)**: `72` lista de tareas (DOM +
+  delegación de eventos, sin persistencia por la misma razón que `62`),
+  `73` buscador de Pokémon con fetch (el mismo ejemplo validado durante
+  el diseño del mecanismo `editor-en-vivo`), `74` cronómetro
+  (`setInterval`/`clearInterval`, el bug clásico de intervals
+  duplicados), `75` generador de contraseñas (construcción de alfabeto
+  + `Math.random()`, sin botón de copiar por la restricción de
+  `navigator.clipboard` ya explicada).
+- **Proyecto avanzado (`76`, 2026-08-30)**: pedido explícito tras
+  revisar los 4 proyectos de sandbox — "muy sencillos, necesito algo
+  más completo, con arquitectura". Mismo gestor de tareas del proyecto
+  `72`, pero reconstruido con arquitectura real: 4 módulos ES separados
+  por responsabilidad (`estado.js`/`almacenamiento.js`/`vista.js`/
+  `main.js`), patrón estado→render, y persistencia de verdad en
+  localStorage — exactamente las dos cosas que el sandbox de
+  `editor-en-vivo` no puede dar (un origen opaco no puede resolver
+  módulos entre archivos ni usar localStorage). Vive fuera del sandbox,
+  en un repositorio real:
+  [github.com/pedroleni/gestor-de-tareas-js](https://github.com/pedroleni/gestor-de-tareas-js)
+  (rama `main` = punto de partida con TODOs, rama `solucion` =
+  implementación completa) — la solución se verificó de verdad
+  sirviéndola con un servidor HTTP local y probando con Playwright
+  añadir/completar/filtrar/borrar tareas y que sobrevivan a recargar la
+  página. La lección usa `codigo-anotado`/`comparador-antes-despues`
+  para explicar el código en vez de `editor-en-vivo` — no hay nada que
+  ejecutar en vivo aquí.
+- **Proyecto avanzado 2: explorador de personajes con Vite (77,
+  2026-08-30)**: pedido explícito de seguir subiendo el nivel "usando
+  Vite por ejemplo". Mismo patrón de arquitectura que el `76`, escalado
+  a seis capas (`utilidades`/`api`/`estado`/`almacenamiento`/`acciones`/
+  `vista` + `main.js`) contra una API real con paginación y búsqueda
+  (rickandmortyapi.com, sin clave, CORS abierto verificado con `curl`),
+  scaffoldeado con `npm create vite@latest` de verdad — variables de
+  entorno (`import.meta.env`), `npm run dev`/`build`/`preview` los tres
+  verificados con Playwright, y tests con Vitest para la lógica pura
+  (`debounce`, la normalización de la respuesta inconsistente de la
+  API). Repositorio:
+  [github.com/pedroleni/explorador-personajes](https://github.com/pedroleni/explorador-personajes).
+  Durante la construcción de la propia solución apareció un bug real
+  (no fabricado para la lección): `renderizar()` reconstruía la rejilla
+  de tarjetas —y por tanto hasta 20 `<img>`— en cada cambio de estado,
+  incluido "empieza a cargar", disparando el doble de peticiones de
+  imagen de las necesarias por acción; con varias acciones seguidas
+  (buscar, favoritear, paginar) eso saturaba la conexión al mismo host
+  que la API y producía fallos de red intermitentes que el navegador
+  reportaba como CORS sin serlo. El fix (no tocar la rejilla mientras
+  `cargando` sea `true`) y la propia historia de cómo se diagnosticó se
+  convirtieron en la sección más valiosa de la lección — un bug
+  encontrado de verdad vale más que uno inventado para la ocasión.
+- **Proyecto avanzado 3: buscador con TypeScript (78, 2026-08-30)**:
+  tercer escalón de la serie de proyectos avanzados, tras un simple
+  "sigue" del usuario. Deliberadamente el más pequeño en funcionalidad
+  (solo búsqueda, sin pestañas ni paginación) porque la complejidad
+  nueva está en los tipos, no en la interfaz: `EstadoBusqueda` como
+  unión discriminada (estados imposibles de representar, no solo
+  "poco probables"), comprobación de exhaustividad con un helper
+  `casoImposible(valor: never)` — verificada de verdad añadiendo un
+  quinto caso a la unión sin tocar el switch y confirmando que
+  `npm run typecheck` falla en la línea exacta — y un genérico
+  `obtenerJSON<T>()`. Encontró otro gotcha real de tooling durante la
+  construcción: `erasableSyntaxOnly` en `tsconfig.json` (la misma
+  restricción del soporte nativo de TypeScript de Node.js) rechaza los
+  parámetros de constructor (`constructor(public status: number)`)
+  porque esa sintaxis obliga a generar código, no solo borrar tipos.
+  Repositorio:
+  [github.com/pedroleni/buscador-personajes-ts](https://github.com/pedroleni/buscador-personajes-ts).
+  **Trasladada 2026-08-30** a `contenido/typescript/55-proyecto-avanzado-buscador-de-personajes-con-typescript.md`
+  como capstone del Módulo 13 (Proyectos) del temario de TypeScript
+  (`contenido/typescript/TEMARIO.md`) — sigue requiriendo haber hecho los
+  proyectos 76 y 77 de este temario de JavaScript, pero su tema real
+  (TypeScript) pertenece al otro catálogo. El fichero y la lección en
+  producción cambiaron de `technology_id`, no se duplicó contenido.

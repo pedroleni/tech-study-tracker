@@ -140,6 +140,17 @@ Un tooltip que debe aparecer justo debajo de un botón, sin importar dónde est�
 3. Explica por qué `anchor-name` por sí solo, sin nada más, no mueve ningún elemento.
 4. Escribe una regla que use `anchor-size()` para que un elemento anclado tenga el mismo ancho que su elemento ancla.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Ancla el div de abajo al botón, para que aparezca justo debajo (ejercicio 1). Nota: anchor positioning es reciente — si tu navegador no lo soporta todavía, no verás el efecto, pero el código sigue siendo correcto.",
+  "html": "<button class=\"ancla\">Botón ancla</button>\n<div class=\"anclado\">Elemento anclado</div>",
+  "css": ".ancla { anchor-name: --mi-boton; }\n.anclado {\n  position: fixed;\n  /* position-anchor: --mi-boton;\n  top: anchor(--mi-boton bottom);\n  left: anchor(--mi-boton left); */\n  background: #333; color: white; padding: 8px;\n}",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

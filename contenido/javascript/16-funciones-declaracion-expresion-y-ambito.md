@@ -171,6 +171,17 @@ Una función agrupa código para ejecutarlo tantas veces como haga falta, sin re
 3. Explica por qué llamar a una función expresada ANTES de su definición lanza un error, a diferencia de una declaración.
 4. Escribe un ejemplo donde una variable local a una función no sea accesible desde fuera de ella.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Declara una función con function que reciba un parámetro y lo imprima (ejercicio 1). Escríbela también como function expression (ejercicio 2). Demuestra que una variable local no es accesible desde fuera (ejercicio 4).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nfunction saludar(nombre) {\n  mostrar('Hola, ' + nombre);\n}\nsaludar('Ada');\n\nconst saludarExpresion = function (nombre) {\n  mostrar('Hola de nuevo, ' + nombre);\n};\nsaludarExpresion('Grace');",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

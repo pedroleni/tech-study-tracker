@@ -49,6 +49,7 @@ export function AdminLeccionFormPage() {
           contenido: values.contenido,
           orden: values.orden,
           status: values.status,
+          esProyecto: values.esProyecto,
         },
       })
       navigate(`/tecnologias/${id}/${values.slug}`)
@@ -63,6 +64,7 @@ export function AdminLeccionFormPage() {
       resumen: values.resumen,
       contenido: values.contenido,
       orden: values.orden,
+      esProyecto: values.esProyecto,
     })
     navigate(`/admin/tecnologias/${id}/lecciones/${created.id}/editar`)
   }

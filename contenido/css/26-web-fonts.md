@@ -177,6 +177,17 @@ Los "web-safe fonts" de la lección de fundamentos son solo las que casi todos l
 3. Explica la diferencia entre `font-display: swap` y `font-display: block`, y cuál convendría en un sitio de noticias donde la lectura rápida importa más que la apariencia final.
 4. Explica por qué `font-family: "MiFuente", sans-serif;` sigue siendo útil aunque "MiFuente" cargue perfectamente casi siempre.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe un @font-face con woff2 como formato preferido y woff como respaldo (ejercicio 1). Escribe dos @font-face para el mismo nombre de familia, uno normal y otro bold, cada uno con su propio archivo (ejercicio 2).",
+  "html": "<p class=\"texto\">Texto con la fuente declarada por @font-face.</p>\n<p class=\"texto\" style=\"font-weight: bold;\">Texto en negrita con la misma familia.</p>",
+  "css": "/* @font-face {\n  font-family: 'MiFuente';\n  src: url('fuente.woff2') format('woff2'), url('fuente.woff') format('woff');\n} */\n.texto { font-family: 'MiFuente', sans-serif; }",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

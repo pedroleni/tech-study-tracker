@@ -184,6 +184,17 @@ A diferencia de `splice()` y compañía (vistos en la lección anterior), los m�
 3. Encadena `filter()` y `map()` en una sola expresión, sin variables intermedias.
 4. Usa `reduce()` con y sin valor inicial sobre el mismo array, y explica en qué casos el resultado podría diferir.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Usa map() para transformar cada elemento y comprueba que el original no cambió (ejercicio 1). Usa filter() para quedarte con los que cumplan una condición (ejercicio 2). Encadena filter() y map() (ejercicio 3). Usa reduce() (ejercicio 4).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nconst numeros = [1, 2, 3, 4, 5];\nconst dobles = numeros.map(n => n * 2);\nmostrar({ original: numeros, dobles });\n\nconst pares = numeros.filter(n => n % 2 === 0);\nmostrar(pares);\n\nconst resultado = numeros.filter(n => n > 2).map(n => n * 10);\nmostrar(resultado);\n\nconst suma = numeros.reduce((total, n) => total + n, 0);\nmostrar('Suma: ' + suma);",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

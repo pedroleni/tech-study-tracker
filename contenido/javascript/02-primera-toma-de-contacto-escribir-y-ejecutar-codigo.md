@@ -177,6 +177,17 @@ Esta lección no profundiza en nada todavía — cada pieza que aparece aquí (v
 3. Conecta esa función al clic del botón con `addEventListener`, sin ejecutarla por error al escribir la línea.
 4. Añade un condicional dentro de la función que muestre un mensaje distinto según una condición.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Guarda una referencia al botón con querySelector (ejercicio 1), escribe una función que cambie el texto del párrafo (ejercicio 2) y conéctala al clic con addEventListener (ejercicio 3) — sin ejecutarla por error al escribir la línea.",
+  "html": "<button id=\"boton\">Pulsa aquí</button>\n<p id=\"mensaje\">Texto original</p>",
+  "js": "// const boton = document.querySelector('#boton');\n// function cambiarTexto() { ... }\n// boton.addEventListener('click', cambiarTexto); -- sin los () al final",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

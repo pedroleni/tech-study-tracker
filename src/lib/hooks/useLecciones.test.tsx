@@ -40,6 +40,7 @@ const newLeccion: NewLeccionInput = {
   resumen: '',
   contenido: '',
   orden: 10,
+  esProyecto: false,
 }
 
 function createClient() {

@@ -149,6 +149,17 @@ Antes de flexbox, grid o position, cada elemento ya tiene un comportamiento por 
 3. Explica por qué un contenedor con un solo hijo flotado dentro puede colapsar a una altura de casi cero, y cómo evitarlo.
 4. Escribe una regla que convierta un `<a>` normal en un bloque que ocupe toda su línea, útil para un enlace grande y clicable.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Este span tiene width: 200px pero no cambia de tamaño — arréglalo con un cambio de display (ejercicio 1). Haz que la imagen flote a la izquierda con el texto fluyendo alrededor (ejercicio 2). Convierte el enlace en un bloque que ocupe toda su línea (ejercicio 4).",
+  "html": "<span class=\"caja-span\">Span con width fijo</span>\n<div class=\"con-flotante\">\n  <img class=\"foto\" src=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Crect width='80' height='80' fill='%23ccc'/%3E%3C/svg%3E\" alt=\"\">\n  <p>Texto largo que debería fluir alrededor de la imagen flotada, si el float está bien aplicado a la imagen de al lado.</p>\n</div>\n<a href=\"#\" class=\"enlace-bloque\">Enlace grande</a>",
+  "css": ".caja-span { width: 200px; background: #eee; }",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

@@ -157,6 +157,17 @@
 3. Usa `bind()` para fijar `this` de ese método suelto, de forma que vuelva a funcionar correctamente.
 4. Explica la diferencia entre `this` en modo estricto y fuera de él, en una llamada de función suelta.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe un objeto con un método que use this, y llámalo normalmente (ejercicio 1). Extrae ese método a una variable suelta y llámala — observa qué le pasa a this (ejercicio 2). Usa bind() para arreglarlo (ejercicio 3).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nconst persona = {\n  nombre: 'Ada',\n  saludar() {\n    mostrar('Hola, soy ' + this.nombre);\n  },\n};\npersona.saludar();\n\nconst saludarSuelto = persona.saludar;\ntry {\n  saludarSuelto();\n} catch (error) {\n  mostrar('Error al llamarlo suelto: ' + error.message);\n}\n\nconst saludarFijado = persona.saludar.bind(persona);\nsaludarFijado();",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

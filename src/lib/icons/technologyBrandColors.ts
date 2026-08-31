@@ -62,6 +62,11 @@ export const technologyBrandColors: Record<string, TechnologyBrandColor> = {
   redis: { hex: '#FF4438', iconTone: 'light' },
   mysql: { hex: '#4479A1', iconTone: 'light' },
   sqlite: { hex: '#003B57', iconTone: 'light' },
+  // SQL (el lenguaje estándar) no tiene logo de marca propio — usa el
+  // icono genérico de Database (ver technologyIcons.ts), pero sí
+  // necesita su propio color para no caer en el gris "sin marca" que
+  // usan las claves ausentes de este mapa.
+  sql: { hex: '#D97706', iconTone: 'light' },
   supabase: { hex: '#3FCF8E', iconTone: 'light' },
   firebase: { hex: '#DD2C00', iconTone: 'light' },
   aws: { hex: '#FF9900', iconTone: 'light' },

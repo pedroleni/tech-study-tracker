@@ -178,6 +178,16 @@ Un formulario que se ve perfecto puede ser inutilizable con un lector de pantall
 3. Marca un campo obligatorio de forma accesible: con la palabra "obligatorio" en el texto, o un asterisco con aria-hidden más una ayuda conectada con aria-describedby.
 4. Encuentra en una web real un elemento clicable que no sea un button ni un a — ¿tiene tabindex y role? ¿Se puede activar con el teclado?
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe un campo con label explícito (for/id) y otro con label implícito, envolviendo el input (ejercicio 1). Después agrupa 3 checkboxes relacionados dentro de un fieldset con su legend (ejercicio 2).",
+  "html": "<!-- Empieza aquí -->",
+  "pestañaInicial": "html"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

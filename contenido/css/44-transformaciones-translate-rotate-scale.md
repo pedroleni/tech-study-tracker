@@ -216,6 +216,17 @@
 3. Escribe una regla `rotate(60deg)` con `transform-origin: bottom right`, y explica cómo cambia respecto al origen por defecto.
 4. Explica la diferencia entre `transform: translateX(50px);` y la propiedad independiente `translate: 50px;`.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Mueve esta caja 40px a la derecha y 10px hacia arriba con translate() (ejercicio 1). Prueba rotate(60deg) con transform-origin: bottom right en la segunda (ejercicio 3).",
+  "html": "<div class=\"caja-translate\">translate()</div>\n<div class=\"caja-rotate\">rotate()</div>",
+  "css": ".caja-translate, .caja-rotate { width: 100px; height: 60px; background: #7c3aed; color: white; display: flex; align-items: center; justify-content: center; margin-bottom: 40px; }",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

@@ -183,6 +183,17 @@
 3. Escribe una media query que combine dos condiciones con `and`: ancho mínimo de 600px Y orientación landscape.
 4. Explica la diferencia entre `hover: hover` y la pseudo-clase `:hover`.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe una media query en sintaxis moderna para 768px o más (ejercicio 1) y la misma con min-width clásico (ejercicio 2). Combina dos condiciones con and: ancho mínimo 600px Y orientación landscape (ejercicio 3).",
+  "html": "<div class=\"caja\">Cambia de color según el tamaño de la ventana</div>",
+  "css": ".caja { background: #ddd; padding: 16px; }\n/* @media (width >= 768px) { .caja { background: lightgreen; } } */",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

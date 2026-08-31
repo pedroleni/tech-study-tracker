@@ -162,6 +162,17 @@ Durante décadas, CSS solo pudo mirar hacia abajo: un selector podía alcanzar u
 3. Explica la diferencia entre `body:has(video, audio)` y `body:has(video):has(audio)`, con un ejemplo de HTML que coincida con el primero pero no con el segundo.
 4. Explica por qué `.tarjeta:has(> .interior > .imagen)` es mejor para el rendimiento que `.tarjeta:has(.imagen)` en una página con muchos cambios dinámicos en el DOM.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe un selector que ponga borde rojo a cualquier .tarjeta que NO contenga una imagen, combinando :has() con :not() (ejercicio 1). Después aplica un fondo distinto al fieldset que sí contiene un input required (ejercicio 2).",
+  "html": "<div class=\"tarjeta\">Sin imagen</div>\n<div class=\"tarjeta\"><img src=\"foto.jpg\" alt=\"\"> Con imagen</div>\n<fieldset><input required></fieldset>\n<fieldset><input></fieldset>",
+  "css": "/* Escribe aquí tus selectores :has() */",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

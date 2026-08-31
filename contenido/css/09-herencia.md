@@ -174,6 +174,17 @@ Poner `color: blue;` en el `body` tiñe automáticamente cada párrafo, cada enl
 3. Escribe una regla que ponga `color: initial` en un enlace dentro de un contenedor con color heredado, y explica qué color exacto tomará — no el azul del navegador, no el heredado.
 4. Explica la diferencia entre `all: unset` y `all: initial` sobre un mismo elemento, citando al menos una propiedad donde el resultado sería distinto.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe font: inherit; para el button y el input de abajo y observa cómo cambian (ejercicio 2). Después prueba color: initial en el enlace, que vive dentro de un contenedor con color heredado (ejercicio 3).",
+  "html": "<div style=\"color: purple; font-family: Georgia, serif;\">\n  <button>Botón</button>\n  <input value=\"Campo de texto\">\n  <a href=\"#\">Enlace heredado</a>\n</div>",
+  "css": "/* Escribe aquí tus reglas */",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

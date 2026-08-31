@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { act, render, screen } from '@testing-library/react'
 import { axe } from 'vitest-axe'
 import { describe, expect, it, vi } from 'vitest'
 
@@ -19,6 +19,9 @@ const nombresComponentes = [
   'MapaDeRegiones',
   'EsquemaDePagina',
   'CapasDeCaja',
+  'EditorEnVivo',
+  'SqlAnotado',
+  'SqlEnVivo',
   'Acordeon',
   'Pestanas',
   'Pasos',
@@ -73,11 +76,35 @@ describe('AdminReferenciaContenidoPage', () => {
     // Monta 60+ componentes reales más una auditoría axe completa — el
     // timeout por defecto de Vitest (5000ms) se queda corto según crece
     // el catálogo, sin que eso indique un problema real.
-    vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({ matches: true }))
+    // { matches: true } a secas basta para el resto del catálogo, pero
+    // EditorEnVivo monta un EditorView de CodeMirror de verdad, que además
+    // necesita addEventListener/addListener en el objeto devuelto (ver
+    // src/test/setup.ts) — el stub global no aplica aquí porque este test
+    // lo sobrescribe con uno más simple pensado solo para el modo oscuro.
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn().mockReturnValue({
+        matches: true,
+        addListener: () => {},
+        removeListener: () => {},
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        dispatchEvent: () => false,
+      }),
+    )
     vi.spyOn(window, 'setInterval').mockImplementation(
       (() => 0) as unknown as typeof window.setInterval,
     )
+    // SqlAnotado/SqlEnVivo cargan sql.js con fetch('/sql-wasm.wasm') al montar
+    // — no existe servidor en este entorno de test, así que se stubea para
+    // que rechace de inmediato y los dos componentes se asienten en su
+    // estado de error antes de la aserción de accesibilidad, en vez de
+    // dejar una actualización de estado pendiente fuera de act().
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('fetch no disponible en test')))
     const { container } = render(<AdminReferenciaContenidoPage />)
+    await act(async () => {
+      await Promise.resolve()
+    })
 
     expect(screen.getByRole('heading', { name: 'Componentes de contenido' })).toBeInTheDocument()
     for (const nombre of nombresComponentes) {

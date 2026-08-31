@@ -244,3 +244,25 @@ este documento se pueda leer solo:
   39 de aquí profundiza en el atributo `popover` como API CSS-first
   (light-dismiss, `:popover-open`, animarlo con transiciones) que no
   necesita ni `<dialog>` ni JavaScript.
+- **Módulo 9 — Proyectos (2026-08-29)**, mismo criterio que en HTML:
+  cuatro lecciones-proyecto marcadas `es_proyecto`, guiadas paso a paso.
+  `59` panel de precios con Flexbox, `60` galería responsive con Grid
+  (`auto-fit`/`minmax`, sin media queries), `61` modo oscuro con
+  variables CSS redefinidas dentro de una clase (con una pizca de JS
+  solo para alternarla, nunca para calcular colores), `62` tarjeta con
+  micro-interacciones (`transform`/`transition`/`@keyframes`,
+  respetando `prefers-reduced-motion`).
+- **Bloques `editor-en-vivo` (2026-08-29)**, mismo mecanismo que en
+  `contenido/html/TEMARIO.md`: las 58 lecciones ganaron un bloque con
+  un fragmento HTML de partida (a menudo cajas/párrafos de prueba
+  neutros, reutilizados entre lecciones cuando el concepto es el mismo)
+  y la propiedad CSS a escribir comentada como pista, en vez de ejemplo
+  ya resuelto — a diferencia de HTML, donde no todos los ejercicios eran
+  sandboxeables, en CSS prácticamente todos lo son porque "escribe esta
+  regla y observa" es la naturaleza misma de la tecnología. Las
+  lecciones sobre APIs muy recientes (`anchor-positioning` #38, `scroll`
+  dirigido #49, `view-transitions` #54) llevan además una nota de que el
+  efecto puede no verse si el navegador de quien lee no las soporta
+  todavía — el código sigue siendo correcto, es una limitación de
+  soporte, no del bloque. La 54 es la única con pestaña JS, porque
+  `document.startViewTransition()` es una API de JavaScript, no CSS.

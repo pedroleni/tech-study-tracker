@@ -162,6 +162,17 @@ dialog::backdrop {
 3. Escribe un dialog de confirmación con dos botones dentro de un form method="dialog", cada uno con un value distinto, y explica cómo leerías cuál se pulsó a través de returnValue.
 4. Busca en una web real un modal (de confirmación, de cookies, de inicio de sesión) — ¿está hecho con dialog o con un div y JavaScript propio?
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe el dialog del ejercicio 1: un botón que lo abra con command=\"show-modal\" y commandfor, y otro dentro que lo cierre con command=\"close\". Después dale estilo a ::backdrop en la pestaña CSS (ejercicio 2).",
+  "html": "<!-- Empieza aquí -->",
+  "css": "/* prueba: dialog::backdrop { background-color: rgb(0 0 0 / 0.5); } */",
+  "pestañaInicial": "html"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

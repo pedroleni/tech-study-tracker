@@ -178,6 +178,17 @@ Tres operaciones cotidianas con objetos que sorprenden más de lo que deberían:
 3. Congela un objeto con `Object.freeze()` e intenta modificar una propiedad de primer nivel y una anidada — compara los resultados.
 4. Explica en tus propias palabras la diferencia entre `Object.freeze()` y `Object.seal()`.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Crea dos objetos literales idénticos y comprueba con === que no son iguales (ejercicio 1). Copia un objeto con Object.assign() que tenga una propiedad anidada y demuestra la copia superficial (ejercicio 2). Congela uno con Object.freeze() (ejercicio 3).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nconst a = { x: 1 };\nconst b = { x: 1 };\nmostrar('a === b -> ' + (a === b));\n\nconst original = { nombre: 'Ada', direccion: { ciudad: 'Londres' } };\nconst copia = Object.assign({}, original);\ncopia.direccion.ciudad = 'París';\nmostrar('original.direccion.ciudad también cambió: ' + original.direccion.ciudad);\n\nconst congelado = Object.freeze({ valor: 1 });\ncongelado.valor = 2;\nmostrar('sigue siendo: ' + congelado.valor);",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

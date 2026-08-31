@@ -8,6 +8,8 @@ export const queryKeys = {
   lecciones: ['lecciones'] as const,
   leccionesForTechnology: (viewerId: string | null, technologyId: string) =>
     ['lecciones', viewerId ?? 'public', 'technology', technologyId] as const,
+  proyectos: (viewerId: string | null) =>
+    ['lecciones', viewerId ?? 'public', 'proyectos'] as const,
   leccionById: (viewerId: string | null, leccionId: string) =>
     ['lecciones', viewerId ?? 'public', 'id', leccionId] as const,
   leccionBySlug: (viewerId: string | null, technologyId: string, slug: string) =>

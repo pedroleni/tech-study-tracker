@@ -162,6 +162,17 @@ Una variable guarda un valor bajo un nombre, para poder usarlo (y cambiarlo) má
 3. Explica qué es la zona muerta temporal y en qué se diferencia del comportamiento de `var`.
 4. Escribe un objeto con `const` y modifica una de sus propiedades sin reasignar la variable.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Declara con const tu nombre (ejercicio 1). Escribe un ejemplo donde var permita algo que let bloquearía (ejercicio 2, verás el error en la salida si lo escribes con let). Declara un objeto con const y modifica una de sus propiedades sin reasignarlo (ejercicio 4).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nconst nombre = 'Ada';\nmostrar(nombre);\n\n// Ejercicio 2: declara dos veces la misma variable con var, y prueba a hacerlo con let\nvar contador = 1;\nvar contador = 2;\nmostrar('var permitido: ' + contador);\n\n// Ejercicio 4\nconst persona = { nombre: 'Ada' };\npersona.nombre = 'Grace';\nmostrar(persona);",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

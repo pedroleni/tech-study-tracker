@@ -154,6 +154,17 @@ Las lecciones anteriores de este módulo mencionaron `prefers-reduced-motion` va
 3. Explica la excepción que WCAG 2.3.3 hace para animación esencial, con un ejemplo propio.
 4. Escribe una regla que, dentro de `prefers-reduced-motion: reduce`, reduzca `transition-duration` casi a cero sin eliminar la transición entera.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe una regla @media (prefers-reduced-motion: reduce) que ponga animation: none sobre .banner (ejercicio 1). Actívalo en las preferencias de tu sistema para comprobarlo de verdad — en la vista previa siempre verás la animación normal, ya que no siempre es posible simular esa preferencia desde aquí.",
+  "html": "<div class=\"banner\">Banner animado</div>",
+  "css": "@keyframes deslizar { from { transform: translateX(-20px); } to { transform: translateX(0); } }\n.banner { background: #eee; padding: 16px; animation: deslizar 1s infinite alternate; }\n/* @media (prefers-reduced-motion: reduce) { .banner { animation: none; } } */",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

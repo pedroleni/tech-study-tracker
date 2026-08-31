@@ -161,6 +161,18 @@
 3. Dibuja un círculo con `arc()`, convirtiendo grados a radianes para los ángulos.
 4. Escribe texto en el canvas con `fillText()`, y añade un `aria-label` equivalente al elemento.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Obtén el contexto 2D y dibuja un rectángulo relleno con fillRect() (ejercicio 1). Dibuja un rectángulo con solo contorno usando strokeRect() (ejercicio 2). Dibuja un círculo con arc(), convirtiendo grados a radianes (ejercicio 3).",
+  "html": "<canvas id=\"lienzo\" width=\"300\" height=\"200\"></canvas>",
+  "css": "canvas { border: 1px solid #999; }",
+  "js": "const canvas = document.getElementById('lienzo');\nconst ctx = canvas.getContext('2d');\n\nctx.fillStyle = '#7c3aed';\nctx.fillRect(20, 20, 80, 60);\n\nctx.strokeStyle = '#ec4899';\nctx.lineWidth = 3;\nctx.strokeRect(120, 20, 80, 60);\n\nctx.beginPath();\nctx.arc(220, 130, 40, 0, 2 * Math.PI);\nctx.fillStyle = '#10b981';\nctx.fill();",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

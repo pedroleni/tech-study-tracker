@@ -13,6 +13,7 @@ function leccion(datos: Partial<Leccion> & Pick<Leccion, 'id' | 'slug' | 'titulo
     resumen: '',
     contenido: '',
     status: 'publicado',
+    esProyecto: false,
     createdAt: '2026-01-01T00:00:00.000Z',
     updatedAt: '2026-01-01T00:00:00.000Z',
     ...datos,

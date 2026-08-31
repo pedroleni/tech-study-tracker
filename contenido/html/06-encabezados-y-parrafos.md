@@ -180,6 +180,16 @@ Un mismo nivel de encabezado significa algo distinto según en qué región viva
 3. Busca en las herramientas de desarrollador de tu navegador si existe algún panel de "esquema" o "outline" de la página (algunos navegadores y extensiones sí lo ofrecen, aunque no sea nativo del HTML). ¿Coincide con la jerarquía que esperabas al escribir el HTML?
 4. Encuentra un `<span>` o `<div>` con estilos que lo hacen parecer un título en algún proyecto real (tuyo o de código abierto) y explica en una frase qué se pierde exactamente al no ser un encabezado de verdad.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe un h1, dos h2 dentro de él, y un h3 dentro de uno de esos h2 (ejercicio 2). Comprueba en la vista previa que los tamaños decrecen como esperabas.",
+  "html": "<!-- Empieza aquí -->",
+  "pestañaInicial": "html"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

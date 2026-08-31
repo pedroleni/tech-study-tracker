@@ -167,6 +167,17 @@ Repetir la misma acción cien veces sin escribirla cien veces — eso hace un bu
 3. Escribe un bucle que use `break` para detenerse al encontrar el primer número mayor que 50 en un array.
 4. Escribe un bucle que use `continue` para saltarse los números pares al recorrer del 1 al 10.
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Pruébalo tú",
+  "consigna": "Escribe un for que sume del 1 al 10 (ejercicio 1). Escribe un do-while que se ejecute al menos una vez con condición inicial false (ejercicio 2). Usa continue para saltarte los números pares (ejercicio 4).",
+  "html": "<pre id=\"salida\"></pre>",
+  "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) {\n  salida.textContent += (typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2)) + '\\n';\n}\nwindow.addEventListener('error', (evento) => mostrar('Error: ' + evento.message));\n\nlet suma = 0;\nfor (let i = 1; i <= 10; i++) {\n  suma += i;\n}\nmostrar('Suma 1-10: ' + suma);\n\nlet veces = 0;\ndo {\n  veces++;\n} while (false);\nmostrar('Veces ejecutado: ' + veces);",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio
