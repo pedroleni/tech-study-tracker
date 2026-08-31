@@ -54,15 +54,24 @@ describe('GitEnVivo', () => {
           'add a.txt',
           "commit -m 'primer commit'",
         ]}
-        comandoInicial="status"
-        comandoSolucion="log --oneline"
+        comandoInicial=""
+        // status, no log --oneline: la salida de log --oneline incluye el
+        // hash del commit, que depende del segundo real en el que se creó
+        // — esta prueba ejecuta el guion dos veces por separado (una para
+        // el comando escrito, otra para comandoSolucion) y si ambas
+        // ejecuciones caen en segundos distintos, los hashes no coinciden
+        // aunque el comando sea idéntico (confirmado empíricamente: dos
+        // ejecuciones reales separadas por 1.1s producen hashes distintos
+        // para el mismo commit). status no incluye ningún hash aquí, así
+        // que su salida es estable entre ejecuciones.
+        comandoSolucion="status"
         mostrarGrafo={false}
       />,
     )
 
     const campo = await screen.findByRole('textbox')
     userEvent.clear(campo)
-    userEvent.type(campo, 'log --oneline')
+    userEvent.type(campo, 'status')
 
     await waitFor(
       () => {
