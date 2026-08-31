@@ -32,7 +32,7 @@ const estilosTemaAplicacion = {
   '&': {
     color: 'var(--foreground)',
     backgroundColor: 'var(--background)',
-    fontSize: '0.8125rem',
+    fontSize: '0.75rem',
   },
   '&.cm-focused': {
     outline: '2px solid var(--ring)',
