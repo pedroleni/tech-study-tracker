@@ -21,6 +21,15 @@ El mismo gestor de tareas que ya construiste en el proyecto sencillo — pero he
 }
 ```
 
+```laboratorio
+{
+  "tipo": "callout",
+  "variante": "aviso",
+  "titulo": "Antes de nada: los módulos ES necesitan un servidor, no file://",
+  "contenido": "Clona el repositorio y, dentro de la carpeta, ejecuta npx serve . (o python3 -m http.server si no tienes Node) — abrir index.html haciendo doble clic no funciona: los navegadores bloquean import/export cuando la página se carga desde el disco directamente, y la página se queda completamente inerte (ningún botón hace nada) sin ningún error visible salvo en la consola. Si al abrir el proyecto parece \"bloqueado\", es casi siempre esto."
+}
+```
+
 ## Por qué esto no cabe en un editor en vivo
 
 Los bloques `editor-en-vivo` de esta web viven dentro de un `<iframe sandbox="allow-scripts">` — deliberadamente sin `allow-same-origin`, para que el código de la lección nunca tenga acceso a las cookies o la sesión del resto de la página. Ese mismo aislamiento (un origen "opaco", sin dirección real) tiene dos efectos que chocan de frente con este proyecto:
@@ -76,17 +85,6 @@ Cuatro archivos en `src/`, cada uno con una única responsabilidad — el princi
       "descripcion": "Escucha clics y envíos de formulario, y llama a las funciones de estado.js. No pinta nada ni guarda nada directamente."
     }
   ]
-}
-```
-
-## Antes de empezar
-
-```laboratorio
-{
-  "tipo": "callout",
-  "variante": "aviso",
-  "titulo": "Los módulos ES necesitan un servidor, no file://",
-  "contenido": "Clona el repositorio y, dentro de la carpeta, ejecuta npx serve . (o python3 -m http.server si no tienes Node) — abrir index.html haciendo doble clic no funciona: los navegadores bloquean import/export cuando la página se carga desde el disco directamente."
 }
 ```
 
