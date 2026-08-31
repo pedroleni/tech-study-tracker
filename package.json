@@ -12,6 +12,7 @@
     "lint": "eslint .",
     "generar-ts-libs": "node scripts/dev/generar-ts-libs.mjs",
     "generar-sql-wasm": "node scripts/dev/generar-sql-wasm.mjs",
+    "generar-pglite-wasm": "node scripts/dev/generar-pglite-wasm.mjs",
     "codex:task": "bash scripts/dev/codex-task.sh",
     "codex:monitor": "node scripts/dev/codex-monitor.mjs"
   },
@@ -20,6 +21,7 @@
     "@codemirror/lang-html": "6.4.12",
     "@codemirror/lang-javascript": "6.2.5",
     "@codemirror/lang-sql": "6.10.0",
+    "@electric-sql/pglite": "0.5.8",
     "@fontsource-variable/geist": "5.3.0",
     "@supabase/supabase-js": "2.110.9",
     "@tanstack/react-query": "5.101.4",
