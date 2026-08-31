@@ -1,11 +1,13 @@
-import type { SqlValue } from 'sql.js'
-
 export function TablaResultado({
   columns,
   values,
 }: {
   columns: string[]
-  values: SqlValue[][]
+  // unknown, no SqlValue (tipo de sql.js): esta tabla es agnóstica de
+  // motor — también renderiza resultados de PGlite (motor: 'postgres'),
+  // que puede devolver tipos que sql.js no tiene (bigint, objetos JSONB
+  // ya parseados). String(valor) más abajo funciona igual para todos.
+  values: unknown[][]
 }) {
   if (columns.length === 0) {
     return <p className="p-3 text-sm text-muted-foreground">Sin filas</p>

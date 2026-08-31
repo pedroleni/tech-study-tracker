@@ -10,18 +10,10 @@
 // la consulta solución.
 import type { QueryExecResult, SqlJsStatic, SqlValue } from 'sql.js'
 
-export interface ResultadoConsultaOk {
-  ok: true
-  columns: string[]
-  values: SqlValue[][]
-}
+import type { ResultadoConsulta } from './comparar'
 
-export interface ResultadoConsultaError {
-  ok: false
-  mensaje: string
-}
-
-export type ResultadoConsulta = ResultadoConsultaOk | ResultadoConsultaError
+export type { ResultadoConsulta } from './comparar'
+export { compararResultados } from './comparar'
 
 export interface MotorSql {
   DatabaseCtor: SqlJsStatic['Database']
@@ -62,18 +54,4 @@ export function ejecutarConsulta(
   } finally {
     db.close()
   }
-}
-
-export function compararResultados(a: ResultadoConsulta, b: ResultadoConsulta): boolean {
-  if (!a.ok || !b.ok) return false
-  if (a.columns.length !== b.columns.length) return false
-  for (let i = 0; i < a.columns.length; i++) {
-    if (a.columns[i] !== b.columns[i]) return false
-  }
-
-  const normalizar = (filas: SqlValue[][]) => filas.map((fila) => JSON.stringify(fila)).sort()
-  const filasA = normalizar(a.values)
-  const filasB = normalizar(b.values)
-  if (filasA.length !== filasB.length) return false
-  return filasA.every((fila, i) => fila === filasB[i])
 }
