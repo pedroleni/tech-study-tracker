@@ -132,7 +132,12 @@ export function SqlEnVivo({
   esquemaSql,
   consultaInicial,
   consultaSolucion,
-}: DatosSqlEnVivo) {
+  // Prop deliberadamente fuera del esquema Zod de la lección — ver el
+  // mismo comentario en SqlAnotado.tsx: solo la usa la página de
+  // referencia para evitar un landmark aria-label duplicado cuando dos
+  // instancias de este componente conviven en la misma página.
+  etiquetaSeccion = 'SQL en vivo',
+}: DatosSqlEnVivo & { etiquetaSeccion?: string }) {
   const [consulta, setConsulta] = useState(consultaInicial)
   const [identidad, setIdentidad] = useState<IdentidadSimulada | undefined>(identidadSimulada?.[0])
   const [motorSql, setMotorSql] = useState<MotorSql | null>(null)
@@ -226,7 +231,7 @@ export function SqlEnVivo({
 
   return (
     <section
-      aria-label="SQL en vivo"
+      aria-label={etiquetaSeccion}
       className="animate-in fade-in-0 slide-in-from-bottom-2 my-6 min-w-0 space-y-4 rounded-xl border bg-card p-4 shadow-sm duration-500 motion-reduce:animate-none sm:p-5"
     >
       <div className="flex flex-wrap items-start justify-between gap-3">

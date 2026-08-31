@@ -25,7 +25,16 @@ export function SqlAnotado({
   esquemaSql,
   consulta,
   anotaciones,
-}: DatosSqlAnotado) {
+  // Las dos props de abajo están deliberadamente fuera del esquema Zod
+  // de la lección (nunca las rellena contenido real): solo las usa la
+  // página de referencia (AdminReferenciaContenidoPage) para distinguir
+  // dos instancias de este mismo componente en la misma página — dos
+  // landmarks con el mismo aria-label son un landmark duplicado real
+  // (axe: landmark-unique), y una lección real nunca repite este bloque
+  // dos veces en la misma página.
+  etiquetaSeccion = 'SQL anotado',
+  etiquetaConsulta = 'Consulta SQL anotada',
+}: DatosSqlAnotado & { etiquetaSeccion?: string; etiquetaConsulta?: string }) {
   const idNota = useId()
   const anotacionesValidas = useMemo(
     () =>
@@ -80,7 +89,7 @@ export function SqlAnotado({
 
   return (
     <section
-      aria-label="SQL anotado"
+      aria-label={etiquetaSeccion}
       className="animate-in fade-in-0 slide-in-from-bottom-2 my-6 min-w-0 space-y-4 rounded-xl border bg-card p-4 shadow-sm duration-500 motion-reduce:animate-none sm:p-5"
     >
       <div className="flex items-start gap-3">
@@ -102,7 +111,7 @@ export function SqlAnotado({
         lenguaje="sql"
         numerarLineas
         lineasDestacadas={activa ? [activa.linea] : []}
-        etiqueta="Consulta SQL anotada"
+        etiqueta={etiquetaConsulta}
       />
 
       {anotacionesValidas.length > 0 && (

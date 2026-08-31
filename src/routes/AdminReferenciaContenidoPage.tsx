@@ -174,7 +174,7 @@ function FiltroCategorias({
 }
 
 function Referencia({ nombre, children }: PropiedadesReferencia) {
-  const tituloId = `referencia-${nombre.toLowerCase()}`
+  const tituloId = `referencia-${nombre.toLowerCase().replace(/\s+/g, '-')}`
 
   return (
     <section aria-labelledby={tituloId} className="scroll-mt-6 space-y-3">
@@ -495,6 +495,48 @@ export function AdminReferenciaContenidoPage() {
             }
             consultaInicial=""
             consultaSolucion="SELECT nombre, salario FROM empleados WHERE departamento_id = 1 ORDER BY salario DESC"
+          />
+        </Referencia>
+
+        <Referencia nombre="SqlAnotado (motor postgres)">
+          <SqlAnotado
+            tipo="sql-anotado"
+            motor="postgres"
+            etiquetaSeccion="SQL anotado — motor postgres"
+            etiquetaConsulta="Consulta SQL anotada — motor postgres"
+            esquemaSql={
+              "CREATE TABLE eventos (id serial primary key, datos jsonb); INSERT INTO eventos (datos) VALUES ('{\"tipo\": \"click\", \"x\": 10}'), ('{\"tipo\": \"scroll\"}');"
+            }
+            consulta="SELECT datos->>'tipo' AS tipo FROM eventos WHERE datos ? 'x'"
+            anotaciones={[
+              {
+                fragmento: "datos->>'tipo'",
+                nota: 'JSONB, no JSON: Postgres lo guarda en binario, no como texto — por eso admite índices GIN y operadores como ? (¿existe esta clave?).',
+              },
+            ]}
+          />
+        </Referencia>
+
+        <Referencia nombre="SqlEnVivo (motor postgres + RLS con identidad simulada)">
+          <SqlEnVivo
+            tipo="sql-en-vivo"
+            motor="postgres"
+            etiquetaSeccion="SQL en vivo — motor postgres, RLS"
+            consigna='Cambia de identidad arriba y comprueba que cada quien ve solo sus propios posts.'
+            esquemaSql={
+              "CREATE TABLE posts (id serial primary key, autor_id text not null, titulo text not null); " +
+              "INSERT INTO posts (autor_id, titulo) VALUES ('ana', 'Post de Ana 1'), ('ana', 'Post de Ana 2'), ('roberto', 'Post de Roberto'); " +
+              "CREATE OR REPLACE FUNCTION auth_uid() RETURNS text AS $$ SELECT current_setting('myapp.current_user_id', true); $$ LANGUAGE sql STABLE; " +
+              "ALTER TABLE posts ENABLE ROW LEVEL SECURITY; " +
+              "CREATE POLICY \"solo ver los propios posts\" ON posts FOR SELECT USING (autor_id = auth_uid()); " +
+              "CREATE ROLE app_user NOSUPERUSER; GRANT USAGE ON SCHEMA public TO app_user; GRANT SELECT ON posts TO app_user;"
+            }
+            identidadSimulada={[
+              { etiqueta: 'Ana', valor: 'ana' },
+              { etiqueta: 'Roberto', valor: 'roberto' },
+            ]}
+            consultaInicial="SELECT titulo FROM posts ORDER BY titulo"
+            consultaSolucion="SELECT titulo FROM posts ORDER BY titulo"
           />
         </Referencia>
       </GrupoCatalogo>
