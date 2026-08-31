@@ -160,6 +160,26 @@ describe('tokenizar SQL', () => {
     expect(tokens.some((t) => t.tipo === 'palabraClave' && t.texto === 'COUNT')).toBe(true)
     expect(tokens.some((t) => t.tipo === 'funcion' && t.texto === 'mi_funcion')).toBe(true)
   })
+
+  it('reconoce palabras clave de Postgres que no existen en SQLite', () => {
+    const codigo =
+      'ALTER TABLE t ADD COLUMN x JSONB; CREATE POLICY p ON t USING (true); GRANT SELECT ON t TO app_user; CREATE ROLE app_user;'
+    const tokens = tokenizar(codigo, 'sql')
+    const palabrasClave = tokens.filter((t) => t.tipo === 'palabraClave').map((t) => t.texto)
+
+    expect(palabrasClave).toContain('JSONB')
+    expect(palabrasClave).toContain('POLICY')
+    expect(palabrasClave).toContain('GRANT')
+    expect(palabrasClave).toContain('ROLE')
+  })
+
+  it('sigue cumpliendo el invariante de reconstrucción exacta con vocabulario Postgres', () => {
+    const codigo =
+      'CREATE ROLE app_user NOSUPERUSER; CREATE MATERIALIZED VIEW v AS SELECT 1 RETURNING id;'
+    const tokens = tokenizar(codigo, 'sql')
+
+    expect(tokens.map((token) => token.texto).join('')).toBe(codigo)
+  })
 })
 
 describe('resistencia al código roto', () => {

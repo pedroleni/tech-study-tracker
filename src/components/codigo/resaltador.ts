@@ -369,6 +369,11 @@ const PALABRAS_CLAVE_SQL = new Set([
   'SET', 'DELETE', 'CREATE', 'TABLE', 'ALTER', 'DROP', 'PRIMARY', 'KEY', 'FOREIGN',
   'REFERENCES', 'DEFAULT', 'UNIQUE', 'CHECK', 'INDEX', 'VIEW', 'COUNT', 'SUM', 'AVG',
   'MIN', 'MAX',
+  // Vocabulario de PostgreSQL sin equivalente en SQLite (motor: 'postgres')
+  'JSONB', 'RETURNING', 'POLICY', 'ROLE', 'GRANT', 'REVOKE', 'MATERIALIZED',
+  'PARTITION', 'FUNCTION', 'PROCEDURE', 'TRIGGER', 'BEFORE', 'AFTER', 'FOR', 'EACH',
+  'ROW', 'EXTENSION', 'SEQUENCE', 'SUPERUSER', 'NOSUPERUSER', 'LOGIN', 'ENABLE',
+  'USING', 'ARRAY', 'ENUM',
 ])
 
 /**
