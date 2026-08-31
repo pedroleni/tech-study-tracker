@@ -7,6 +7,8 @@ import { ComparadorAntesDespues } from '@/components/bloques-laboratorio/Compara
 import { DiagramaEtiqueta } from '@/components/bloques-laboratorio/DiagramaEtiqueta'
 import { EsquemaDePagina } from '@/components/bloques-laboratorio/EsquemaDePagina'
 import { EditorEnVivo } from '@/components/bloques-laboratorio/EditorEnVivo'
+import { GitAnotado } from '@/components/bloques-laboratorio/GitAnotado'
+import { GitEnVivo } from '@/components/bloques-laboratorio/GitEnVivo'
 import { LineaDeTiempo } from '@/components/bloques-laboratorio/LineaDeTiempo'
 import { MapaDeRegiones } from '@/components/bloques-laboratorio/MapaDeRegiones'
 import { Mitos } from '@/components/bloques-laboratorio/Mitos'
@@ -217,7 +219,7 @@ export function AdminReferenciaContenidoPage() {
       <CategoriaActivaContext.Provider value={categoriaActiva}>
       <GrupoCatalogo
         titulo="Bloques de laboratorio"
-        descripcion="Los 17 tipos reales que un autor puede usar dentro de un bloque ```laboratorio en el Markdown de una lección (src/components/bloques-laboratorio/). Validados por Zod, registrados en un lookup cerrado — no prototipos."
+        descripcion="Los 19 tipos reales que un autor puede usar dentro de un bloque ```laboratorio en el Markdown de una lección (src/components/bloques-laboratorio/). Validados por Zod, registrados en un lookup cerrado — no prototipos."
       >
         <Referencia nombre="PrediceElResultado">
           <PrediceElResultado
@@ -537,6 +539,80 @@ export function AdminReferenciaContenidoPage() {
             ]}
             consultaInicial="SELECT titulo FROM posts ORDER BY titulo"
             consultaSolucion="SELECT titulo FROM posts ORDER BY titulo"
+          />
+        </Referencia>
+
+        <Referencia nombre="GitAnotado">
+          <GitAnotado
+            tipo="git-anotado"
+            esquemaGit={[
+              'init .',
+              { escribir: { ruta: 'a.txt', contenido: 'hola\n' } },
+              'add a.txt',
+              "commit -m 'primer commit'",
+            ]}
+            comando="log --oneline"
+            mostrarGrafo={false}
+            anotaciones={[
+              {
+                fragmento: 'log',
+                nota: 'log --oneline muestra el historial real, hash corto + mensaje por línea.',
+              },
+            ]}
+          />
+        </Referencia>
+
+        <Referencia nombre="GitEnVivo (con conflicto real resuelto)">
+          <GitEnVivo
+            tipo="git-en-vivo"
+            consigna="master y feature cambiaron la misma línea de config.txt desde que se separaron. Ya se intentó fusionar feature en master y hay un conflicto real sin resolver: ¿qué comando te dice qué ficheros están en conflicto?"
+            esquemaGit={[
+              'init .',
+              { escribir: { ruta: 'config.txt', contenido: 'puerto=8080\n' } },
+              'add config.txt',
+              'commit -m base',
+              'checkout -b feature',
+              { escribir: { ruta: 'config.txt', contenido: 'puerto=3000\n' } },
+              'add config.txt',
+              'commit -m feature-cambia-puerto',
+              'checkout master',
+              { escribir: { ruta: 'config.txt', contenido: 'puerto=9090\n' } },
+              'add config.txt',
+              'commit -m master-tambien-cambia-puerto',
+              // wasm-git ("lg2 merge") deja marcadores de conflicto reales en
+              // el fichero y termina con código 0 — no lanza excepción, solo
+              // informa por stderr. Por eso el intento de merge se ejecuta
+              // aquí, en silencio, como paso de guion: lo interactivo es que
+              // el alumno descubra qué comando muestra el conflicto real.
+              'merge feature',
+            ]}
+            comandoInicial=""
+            comandoSolucion="status"
+            mostrarGrafo={false}
+          />
+        </Referencia>
+
+        <Referencia nombre="GitAnotado (con GrafoCommits)">
+          <GitAnotado
+            tipo="git-anotado"
+            esquemaGit={[
+              'init .',
+              { escribir: { ruta: 'a.txt', contenido: 'base\n' } },
+              'add a.txt',
+              'commit -m base',
+              'checkout -b feature',
+              { escribir: { ruta: 'b.txt', contenido: 'x\n' } },
+              'add b.txt',
+              'commit -m feature-commit',
+              'checkout master',
+              { escribir: { ruta: 'c.txt', contenido: 'y\n' } },
+              'add c.txt',
+              'commit -m master-commit',
+            ]}
+            comando="log --oneline"
+            mostrarGrafo={true}
+            anotaciones={[{ fragmento: 'log', nota: 'feature divergió de master en el mismo commit base.' }]}
+            etiquetaSeccion="Git anotado (con grafo)"
           />
         </Referencia>
       </GrupoCatalogo>

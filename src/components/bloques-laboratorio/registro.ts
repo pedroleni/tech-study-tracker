@@ -7,6 +7,8 @@ import { ComparadorAntesDespues } from '@/components/bloques-laboratorio/Compara
 import { DiagramaEtiqueta } from '@/components/bloques-laboratorio/DiagramaEtiqueta'
 import { EsquemaDePagina } from '@/components/bloques-laboratorio/EsquemaDePagina'
 import { EditorEnVivo } from '@/components/bloques-laboratorio/EditorEnVivo'
+import { GitAnotado } from '@/components/bloques-laboratorio/GitAnotado'
+import { GitEnVivo } from '@/components/bloques-laboratorio/GitEnVivo'
 import { LineaDeTiempo } from '@/components/bloques-laboratorio/LineaDeTiempo'
 import { MapaDeRegiones } from '@/components/bloques-laboratorio/MapaDeRegiones'
 import { Mitos } from '@/components/bloques-laboratorio/Mitos'
@@ -39,4 +41,6 @@ export const registroBloquesLaboratorio: Record<string, ComponentType<any>> = {
   'editor-en-vivo': EditorEnVivo,
   'sql-anotado': SqlAnotado,
   'sql-en-vivo': SqlEnVivo,
+  'git-anotado': GitAnotado,
+  'git-en-vivo': GitEnVivo,
 }
