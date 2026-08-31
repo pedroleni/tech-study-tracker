@@ -5,14 +5,16 @@ import { beforeAll, describe, expect, it } from 'vitest'
 import { crearMotorGit } from '@/lib/git-en-vivo/motor'
 import { GitAnotado } from './GitAnotado'
 
-async function cargarWasmDesdeDisco(): Promise<ArrayBuffer> {
+async function cargarWasmDesdeDisco(): Promise<WebAssembly.Module> {
   const buffer = await readFile(
     join(process.cwd(), 'node_modules', 'wasm-git', 'lg2_async.wasm'),
   )
-  return buffer.buffer.slice(
-    buffer.byteOffset,
-    buffer.byteOffset + buffer.byteLength,
-  ) as ArrayBuffer
+  return WebAssembly.compile(
+    buffer.buffer.slice(
+      buffer.byteOffset,
+      buffer.byteOffset + buffer.byteLength,
+    ) as ArrayBuffer,
+  )
 }
 
 describe('GitAnotado', () => {

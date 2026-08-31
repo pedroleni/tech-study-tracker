@@ -5,15 +5,27 @@
 //
 // Cada llamada a ejecutarComandosGit crea una instancia de wasm-git NUEVA
 // (initGit() fresco) — confirmado en el spec que dos instancias nunca
-// comparten sistema de ficheros. El binario WASM ya descargado (motor.wasmBinary)
-// SÍ se reutiliza entre ejecuciones: evita volver a pedirlo por red, aunque
-// cada initGit() lo recompila desde el mismo buffer — coste aceptable dado
-// que el binario pesa 1.6 MB, muy por debajo de los ~10 MB de PGlite.
+// comparten sistema de ficheros. El WebAssembly.Module ya compilado
+// (motor.modulo) SÍ se reutiliza entre ejecuciones: evita tanto volver a
+// pedirlo por red como recompilarlo — WebAssembly.instantiate(modulo, ...)
+// solo crea memoria/tablas nuevas a partir de un módulo ya compilado.
+//
+// NOTA IMPORTANTE: este build de wasm-git (lg2_async 0.0.17) declara la
+// opción `wasmBinary` en su Module de Emscripten pero nunca la lee (el
+// glue trae `var wasmBinary;` sin asignar jamás desde Module["wasmBinary"]
+// — confirmado leyendo node_modules/wasm-git/lg2_async.js). Pasar
+// `{wasmBinary: ...}` a initGit() no tiene ningún efecto: en el navegador,
+// el glue intenta su propio streaming-fetch de una URL adivinada a partir
+// de import.meta.url, que con Vite no coincide con ningún fichero real y
+// cae en el fallback HTML de la SPA (falla con "expected magic word",
+// visto en vivo con Playwright). El punto de extensión real y soportado
+// por Emscripten es `instantiateWasm`, que sustituye la instanciación por
+// completo — es el que se usa aquí.
 
 import type { DatosGitAnotado } from '../laboratorio/schemas'
 
 export interface MotorGit {
-  wasmBinary: ArrayBuffer
+  modulo: WebAssembly.Module
 }
 
 export type ResultadoGit =
@@ -54,21 +66,21 @@ export function dividirComando(comando: string): string[] {
   return tokens
 }
 
-async function cargarWasmPorFetch(): Promise<ArrayBuffer> {
+async function cargarWasmPorFetch(): Promise<WebAssembly.Module> {
   const respuesta = await fetch('/lg2-async.wasm')
   if (!respuesta.ok) {
     throw new Error(`No se pudo cargar lg2-async.wasm (${respuesta.status})`)
   }
-  return respuesta.arrayBuffer()
+  return WebAssembly.compile(await respuesta.arrayBuffer())
 }
 
 let motorCacheado: Promise<MotorGit> | null = null
 
 export function crearMotorGit(
-  cargarWasm: () => Promise<ArrayBuffer> = cargarWasmPorFetch,
+  cargarWasm: () => Promise<WebAssembly.Module> = cargarWasmPorFetch,
 ): Promise<MotorGit> {
   if (!motorCacheado) {
-    motorCacheado = cargarWasm().then((wasmBinary) => ({ wasmBinary }))
+    motorCacheado = cargarWasm().then((modulo) => ({ modulo }))
   }
   return motorCacheado
 }
@@ -88,7 +100,9 @@ interface InstanciaGit {
 async function crearInstancia(motor: MotorGit): Promise<InstanciaGit> {
   const { default: initGit } = await import('wasm-git/lg2_async.js')
   const instancia = (await initGit({
-    wasmBinary: motor.wasmBinary,
+    instantiateWasm: (imports, exito) => {
+      void WebAssembly.instantiate(motor.modulo, imports).then(exito)
+    },
   })) as InstanciaGit
   // En navegador, wasm-git 0.0.17 sustituye callMain por un wrapper async,
   // pero callWithOutput sigue tratándolo como síncrono y confunde el Promise

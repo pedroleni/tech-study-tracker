@@ -7,14 +7,16 @@ import { axe } from 'vitest-axe'
 import { crearMotorGit } from '@/lib/git-en-vivo/motor'
 import { GitEnVivo } from './GitEnVivo'
 
-async function cargarWasmDesdeDisco(): Promise<ArrayBuffer> {
+async function cargarWasmDesdeDisco(): Promise<WebAssembly.Module> {
   const buffer = await readFile(
     join(process.cwd(), 'node_modules', 'wasm-git', 'lg2_async.wasm'),
   )
-  return buffer.buffer.slice(
-    buffer.byteOffset,
-    buffer.byteOffset + buffer.byteLength,
-  ) as ArrayBuffer
+  return WebAssembly.compile(
+    buffer.buffer.slice(
+      buffer.byteOffset,
+      buffer.byteOffset + buffer.byteLength,
+    ) as ArrayBuffer,
+  )
 }
 
 describe('GitEnVivo', () => {
