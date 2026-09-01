@@ -3,7 +3,7 @@
 - **Módulo:** Proyectos
 - **Slug:** `proyecto-avanzado-inventario-transaccional` (autogenerado del título)
 - **Orden:** 460
-- **Repositorio:** [github.com/pedroleni/inventario-transaccional-sqlite](https://github.com/pedroleni/inventario-transaccional-sqlite)
+- **Repositorio:** [github.com/pedroleni/sql-proyectos-avanzados](https://github.com/pedroleni/sql-proyectos-avanzados) (carpeta `inventario-transaccional`)
 - **Requiere:** Módulo 9 (Transacciones) de este mismo temario
 
 ---
@@ -17,7 +17,7 @@ Un sistema de inventario con varios almacenes donde transferir stock de uno a ot
   "tipo": "callout",
   "variante": "info",
   "titulo": "El repositorio",
-  "contenido": "github.com/pedroleni/inventario-transaccional-sqlite — rama main con el esquema (incluido el CHECK cantidad >= 0) y toda la aplicación completos; solo la comprobación de stock suficiente al principio de transferirStock() está recortada. Rama solucion con la comprobación completa."
+  "contenido": "github.com/pedroleni/sql-proyectos-avanzados (carpeta inventario-transaccional) — rama main con el esquema (incluido el CHECK cantidad >= 0) y toda la aplicación completos; solo la comprobación de stock suficiente al principio de transferirStock() está recortada. Rama solucion con la comprobación completa."
 }
 ```
 
@@ -52,7 +52,7 @@ Un sistema de inventario con varios almacenes donde transferir stock de uno a ot
 {
   "tipo": "notas-clave",
   "items": [
-    { "titulo": "Instala y migra — sin Docker, sin servidor.", "texto": "npm install, npm run migrate — crea db.sqlite en la raíz del proyecto con el esquema completo, incluido el CHECK cantidad >= 0." },
+    { "titulo": "Instala y migra — sin Docker, sin servidor.", "texto": "Clona sql-proyectos-avanzados, entra en inventario-transaccional/ y ejecuta npm install, npm run migrate — crea db.sqlite en la raíz del proyecto con el esquema completo, incluido el CHECK cantidad >= 0." },
     { "titulo": "Ejecuta los tests tal cual — 1 de 5 debe fallar.", "texto": "El test de stock insuficiente falla (espera StockInsuficienteError, recibe un error genérico de SQLite); los otros 4 pasan igual, porque no dependen de esa comprobación." },
     { "titulo": "Completa la comprobación y confirma los 5.", "texto": "Usa existenciaDe(db, productoId, almacenOrigenId) (ya existe en el mismo fichero) para comparar contra la cantidad solicitada ANTES de escribir nada, y lanza StockInsuficienteError con los datos reales si no alcanza." }
   ]
@@ -73,15 +73,15 @@ Un sistema de inventario con varios almacenes donde transferir stock de uno a ot
   "titulo": "Repositorio y referencias",
   "recursos": [
     {
-      "titulo": "inventario-transaccional-sqlite (rama main — punto de partida)",
-      "descripcion": "Clona esta rama para hacer el proyecto tú mismo.",
-      "url": "https://github.com/pedroleni/inventario-transaccional-sqlite/tree/main",
+      "titulo": "sql-proyectos-avanzados/inventario-transaccional (rama main — punto de partida)",
+      "descripcion": "Clona el repo entero y entra en inventario-transaccional/ para hacer el proyecto tú mismo.",
+      "url": "https://github.com/pedroleni/sql-proyectos-avanzados/tree/main/inventario-transaccional",
       "etiqueta": "GitHub"
     },
     {
-      "titulo": "inventario-transaccional-sqlite (rama solucion)",
+      "titulo": "sql-proyectos-avanzados/inventario-transaccional (rama solucion)",
       "descripcion": "La implementación completa, para comparar si te atascas.",
-      "url": "https://github.com/pedroleni/inventario-transaccional-sqlite/tree/solucion",
+      "url": "https://github.com/pedroleni/sql-proyectos-avanzados/tree/solucion/inventario-transaccional",
       "etiqueta": "GitHub"
     },
     {

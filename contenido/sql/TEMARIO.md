@@ -194,10 +194,10 @@ Docker ni servidor (a diferencia de los proyectos de PostgreSQL).
 
 | # | Lección | Repositorio |
 |---|---|---|
-| 46 | Proyecto avanzado: inventario transaccional | [inventario-transaccional-sqlite](https://github.com/pedroleni/inventario-transaccional-sqlite) |
-| 47 | Proyecto avanzado: analítica de ventas con funciones de ventana | [analitica-ventas-funciones-ventana](https://github.com/pedroleni/analitica-ventas-funciones-ventana) |
-| 48 | Proyecto avanzado: catálogo jerárquico con CTE recursiva | [catalogo-jerarquico-cte-recursiva](https://github.com/pedroleni/catalogo-jerarquico-cte-recursiva) |
-| 49 | Proyecto avanzado: reportes de ventas con vistas SQL | [reportes-ventas-vistas-sql](https://github.com/pedroleni/reportes-ventas-vistas-sql) |
+| 46 | Proyecto avanzado: inventario transaccional | [sql-proyectos-avanzados/inventario-transaccional](https://github.com/pedroleni/sql-proyectos-avanzados/tree/main/inventario-transaccional) |
+| 47 | Proyecto avanzado: analítica de ventas con funciones de ventana | [sql-proyectos-avanzados/analitica-ventas-ventana](https://github.com/pedroleni/sql-proyectos-avanzados/tree/main/analitica-ventas-ventana) |
+| 48 | Proyecto avanzado: catálogo jerárquico con CTE recursiva | [sql-proyectos-avanzados/catalogo-jerarquico-cte](https://github.com/pedroleni/sql-proyectos-avanzados/tree/main/catalogo-jerarquico-cte) |
+| 49 | Proyecto avanzado: reportes de ventas con vistas SQL | [sql-proyectos-avanzados/reportes-vistas-sql](https://github.com/pedroleni/sql-proyectos-avanzados/tree/main/reportes-vistas-sql) |
 
 ## Nota técnica: claves foráneas no se validan por defecto en SQLite
 

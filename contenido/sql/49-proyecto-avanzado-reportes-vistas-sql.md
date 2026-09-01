@@ -3,7 +3,7 @@
 - **Módulo:** Proyectos
 - **Slug:** `proyecto-avanzado-reportes-de-ventas-con-vistas-sql` (autogenerado del título)
 - **Orden:** 490
-- **Repositorio:** [github.com/pedroleni/reportes-ventas-vistas-sql](https://github.com/pedroleni/reportes-ventas-vistas-sql)
+- **Repositorio:** [github.com/pedroleni/sql-proyectos-avanzados](https://github.com/pedroleni/sql-proyectos-avanzados) (carpeta `reportes-vistas-sql`)
 - **Requiere:** Módulo 10 (Vistas y funciones auxiliares) de este mismo temario
 
 ---
@@ -17,7 +17,7 @@ Un sistema de reportes donde el total de un pedido no vive en una columna que al
   "tipo": "callout",
   "variante": "info",
   "titulo": "El repositorio",
-  "contenido": "github.com/pedroleni/reportes-ventas-vistas-sql — rama main con la vista top_productos, la transacción de crearPedidoConLineas y toda la aplicación completos; solo la columna total de la vista resumen_pedidos está recortada. Rama solucion con el cálculo completo."
+  "contenido": "github.com/pedroleni/sql-proyectos-avanzados (carpeta reportes-vistas-sql) — rama main con la vista top_productos, la transacción de crearPedidoConLineas y toda la aplicación completos; solo la columna total de la vista resumen_pedidos está recortada. Rama solucion con el cálculo completo."
 }
 ```
 
@@ -52,7 +52,7 @@ Un sistema de reportes donde el total de un pedido no vive en una columna que al
 {
   "tipo": "notas-clave",
   "items": [
-    { "titulo": "Instala, migra y siembra — sin Docker.", "texto": "npm install, npm run migrate, npm run seed — 3 clientes, 5 productos, 8 pedidos con líneas reales." },
+    { "titulo": "Instala, migra y siembra — sin Docker.", "texto": "Clona sql-proyectos-avanzados, entra en reportes-vistas-sql/ y ejecuta npm install, npm run migrate, npm run seed — 3 clientes, 5 productos, 8 pedidos con líneas reales." },
     { "titulo": "Ejecuta los tests tal cual — 3 de 5 deben fallar.", "texto": "Los tests que comprueban totales concretos fallan (todos dan 0); el de atomicidad (fallo de clave foránea) y el de top_productos pasan igual, porque no dependen de resumen_pedidos." },
     { "titulo": "Completa el SUM() y confirma los 5.", "texto": "Sustituye 0 AS total por SUM(lp.cantidad * lp.precio_unitario) en migrations/002_vistas.sql, vuelve a migrar sobre una base limpia y corre npm test." }
   ]
@@ -73,15 +73,15 @@ Un sistema de reportes donde el total de un pedido no vive en una columna que al
   "titulo": "Repositorio y referencias",
   "recursos": [
     {
-      "titulo": "reportes-ventas-vistas-sql (rama main — punto de partida)",
-      "descripcion": "Clona esta rama para hacer el proyecto tú mismo.",
-      "url": "https://github.com/pedroleni/reportes-ventas-vistas-sql/tree/main",
+      "titulo": "sql-proyectos-avanzados/reportes-vistas-sql (rama main — punto de partida)",
+      "descripcion": "Clona el repo entero y entra en reportes-vistas-sql/ para hacer el proyecto tú mismo.",
+      "url": "https://github.com/pedroleni/sql-proyectos-avanzados/tree/main/reportes-vistas-sql",
       "etiqueta": "GitHub"
     },
     {
-      "titulo": "reportes-ventas-vistas-sql (rama solucion)",
+      "titulo": "sql-proyectos-avanzados/reportes-vistas-sql (rama solucion)",
       "descripcion": "La implementación completa, para comparar si te atascas.",
-      "url": "https://github.com/pedroleni/reportes-ventas-vistas-sql/tree/solucion",
+      "url": "https://github.com/pedroleni/sql-proyectos-avanzados/tree/solucion/reportes-vistas-sql",
       "etiqueta": "GitHub"
     },
     {
