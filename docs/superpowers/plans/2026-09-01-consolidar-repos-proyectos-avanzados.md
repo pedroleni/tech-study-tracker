@@ -1017,7 +1017,7 @@ git branch -d docs/consolidar-javascript-proyectos-avanzados
 **Interfaces:**
 - Consumes: confirmación explícita de que las Tareas 1-5 están todas verificadas (Step 5 y Step 9 de cada una, reales, no asumidas).
 
-- [ ] **Step 1: Confirmar el estado de las 5 tareas anteriores**
+- [x] **Step 1: Confirmar el estado de las 5 tareas anteriores**
 
 Repasar, para cada una de las 5 tareas: ¿el repo nuevo existe y tiene
 `main`+`solucion` con contenido? ¿Pasó la verificación real (Step 5)?
@@ -1027,7 +1027,7 @@ confirmadas visualmente (Step 9)? Si cualquier respuesta es "no" o
 — este step es la última puerta antes de una acción semi-irreversible
 (ver Global Constraints).
 
-- [ ] **Step 2: Poner los 18 repos viejos en privado**
+- [x] **Step 2: Poner los 18 repos viejos en privado**
 
 ```bash
 for repo in \
@@ -1046,7 +1046,7 @@ Expected: cada uno de los 18 termina sin error. Verificar con
 `gh repo view pedroleni/<repo> --json visibility` sobre 2-3 al azar,
 que devuelvan `{"visibility":"PRIVATE"}`.
 
-- [ ] **Step 3: Merge de la rama de la iniciativa a `main`**
+- [x] **Step 3: Merge de la rama de la iniciativa a `main`**
 
 ```bash
 cd "/Users/pedroleridanieto/Desktop/Proyectos IA/tech-study-tracker"
@@ -1064,7 +1064,7 @@ Expected: fast-forward o merge limpio (nada más ha tocado
 `contenido/sql|postgresql|nodejs|typescript|javascript/` mientras
 tanto), suite en verde, push sin conflictos.
 
-- [ ] **Step 4: Actualizar el estado en la spec**
+- [x] **Step 4: Actualizar el estado en la spec**
 
 Editar `docs/superpowers/specs/2026-09-01-consolidar-repos-proyectos-avanzados-design.md`,
 cambiar `**Estado:**` de "📝 diseño aprobado por el usuario, pendiente
