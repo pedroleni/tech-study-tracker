@@ -467,7 +467,7 @@ sostenida en las tres pasadas.
   `editor-en-vivo` no puede dar (un origen opaco no puede resolver
   módulos entre archivos ni usar localStorage). Vive fuera del sandbox,
   en un repositorio real:
-  [github.com/pedroleni/gestor-de-tareas-js](https://github.com/pedroleni/gestor-de-tareas-js)
+  [github.com/pedroleni/javascript-proyectos-avanzados/gestor-de-tareas](https://github.com/pedroleni/javascript-proyectos-avanzados/tree/main/gestor-de-tareas)
   (rama `main` = punto de partida con TODOs, rama `solucion` =
   implementación completa) — la solución se verificó de verdad
   sirviéndola con un servidor HTTP local y probando con Playwright
@@ -486,7 +486,7 @@ sostenida en las tres pasadas.
   verificados con Playwright, y tests con Vitest para la lógica pura
   (`debounce`, la normalización de la respuesta inconsistente de la
   API). Repositorio:
-  [github.com/pedroleni/explorador-personajes](https://github.com/pedroleni/explorador-personajes).
+  [github.com/pedroleni/javascript-proyectos-avanzados/explorador-personajes](https://github.com/pedroleni/javascript-proyectos-avanzados/tree/main/explorador-personajes).
   Durante la construcción de la propia solución apareció un bug real
   (no fabricado para la lección): `renderizar()` reconstruía la rejilla
   de tarjetas —y por tanto hasta 20 `<img>`— en cada cambio de estado,
@@ -514,7 +514,7 @@ sostenida en las tres pasadas.
   parámetros de constructor (`constructor(public status: number)`)
   porque esa sintaxis obliga a generar código, no solo borrar tipos.
   Repositorio:
-  [github.com/pedroleni/buscador-personajes-ts](https://github.com/pedroleni/buscador-personajes-ts).
+  [github.com/pedroleni/typescript-proyectos-avanzados/buscador-personajes](https://github.com/pedroleni/typescript-proyectos-avanzados/tree/main/buscador-personajes).
   **Trasladada 2026-08-30** a `contenido/typescript/55-proyecto-avanzado-buscador-de-personajes-con-typescript.md`
   como capstone del Módulo 13 (Proyectos) del temario de TypeScript
   (`contenido/typescript/TEMARIO.md`) — sigue requiriendo haber hecho los

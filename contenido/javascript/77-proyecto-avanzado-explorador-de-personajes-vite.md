@@ -3,7 +3,7 @@
 - **Módulo:** Proyectos
 - **Slug:** `proyecto-avanzado-explorador-de-personajes-con-vite` (autogenerado del título)
 - **Orden:** 505
-- **Repositorio:** [github.com/pedroleni/explorador-personajes](https://github.com/pedroleni/explorador-personajes)
+- **Repositorio:** [github.com/pedroleni/javascript-proyectos-avanzados](https://github.com/pedroleni/javascript-proyectos-avanzados) (carpeta `explorador-personajes`)
 - **Requiere:** El proyecto "Gestor de tareas con arquitectura real" (lección 76) y las lecciones de fetch/promesas (49-52)
 
 ---
@@ -17,7 +17,7 @@ Un explorador de personajes de Rick and Morty con búsqueda, paginación y favor
   "tipo": "callout",
   "variante": "info",
   "titulo": "El repositorio",
-  "contenido": "github.com/pedroleni/explorador-personajes — rama main con TODOs para hacerlo tú, rama solucion con la implementación completa. Es una API real y gratuita (rickandmortyapi.com), sin necesitar ninguna clave."
+  "contenido": "github.com/pedroleni/javascript-proyectos-avanzados (carpeta explorador-personajes) — rama main con TODOs para hacerlo tú, rama solucion con la implementación completa. Es una API real y gratuita (rickandmortyapi.com), sin necesitar ninguna clave."
 }
 ```
 
@@ -56,7 +56,7 @@ En el proyecto anterior serviste los archivos con `python3 -m http.server` — s
   "tipo": "callout",
   "variante": "aviso",
   "titulo": "El .env no se sube al repositorio",
-  "contenido": "Clona el proyecto, ejecuta npm install, y copia .env.example a .env (cp .env.example .env) antes de npm run dev. El propio repositorio no lleva un .env real — solo la plantilla — exactamente igual que en tech-study-tracker."
+  "contenido": "Clona javascript-proyectos-avanzados, entra en explorador-personajes/, ejecuta npm install, y copia .env.example a .env (cp .env.example .env) antes de npm run dev. El propio repositorio no lleva un .env real — solo la plantilla — exactamente igual que en tech-study-tracker."
 }
 ```
 
@@ -209,15 +209,15 @@ La causa real estaba en `vista.js`: `renderizar()` reconstruía la rejilla de ta
   "titulo": "Repositorio y referencias",
   "recursos": [
     {
-      "titulo": "explorador-personajes (rama main — punto de partida)",
+      "titulo": "javascript-proyectos-avanzados/explorador-personajes (rama main — punto de partida)",
       "descripcion": "Clona esta rama para hacer el proyecto tú mismo.",
-      "url": "https://github.com/pedroleni/explorador-personajes/tree/main",
+      "url": "https://github.com/pedroleni/javascript-proyectos-avanzados/tree/main/explorador-personajes",
       "etiqueta": "GitHub"
     },
     {
-      "titulo": "explorador-personajes (rama solucion)",
+      "titulo": "javascript-proyectos-avanzados/explorador-personajes (rama solucion)",
       "descripcion": "La implementación completa, para comparar si te atascas.",
-      "url": "https://github.com/pedroleni/explorador-personajes/tree/solucion",
+      "url": "https://github.com/pedroleni/javascript-proyectos-avanzados/tree/solucion/explorador-personajes",
       "etiqueta": "GitHub"
     },
     {
