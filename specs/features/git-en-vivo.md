@@ -315,6 +315,25 @@ inventado, pero no ejecutable en un solo sandbox de un navegador).
 
 **Total: 49 lecciones en 16 módulos, más el módulo de Proyectos.**
 
+**Nota posterior (ampliación del temario, 2026-09-01):** al escribir
+`contenido/git/TEMARIO.md`, una revisión conjunta con el usuario sobre
+si este índice era "suficientemente completo y avanzado" detectó huecos
+reales, verificados contra el motor (no asumidos): `git blame` funciona
+en `wasm-git` y no estaba cubierto; `cherry-pick`/`commit --amend` son
+comandos del día a día ausentes del temario (el primero no soportado
+por este motor, el segundo con un bug real de este build concreto —
+ver la "Nota técnica" de `contenido/git/TEMARIO.md`); y no había ningún
+módulo sobre cómo funciona Git por dentro (objetos/SHA-1/referencias),
+pese a que `GrafoCommits` ya depende de esos mismos comandos de
+plumbing. Resultado aprobado: **55 lecciones en 17 módulos** (más el
+módulo de Proyectos) — un módulo nuevo "Git por dentro: objetos y
+referencias" `[vivo]` insertado tras Merge, `blame` añadido al módulo de
+Commits, y `commit --amend`/`cherry-pick` añadidos como `[anotado]`
+junto a Rebase (módulo renombrado a "Reescribir historia: rebase,
+amend y cherry-pick"). El índice de más abajo queda como registro
+histórico de lo aprobado en el brainstorming original;
+`contenido/git/TEMARIO.md` es la fuente de verdad actual.
+
 ## Checkpoints de seguridad
 
 - **Una dependencia npm nueva** → aplica
@@ -364,13 +383,16 @@ inventado, pero no ejecutable en un solo sandbox de un navegador).
   un bloque `git-anotado` normal, un `git-en-vivo` con conflicto real
   resuelto, y un `GrafoCommits` mostrando una divergencia de ramas real
 - [ ] `npm run build`/`lint`/`test` en verde
-- [ ] Tecnología "Git" creada vía admin, categoría "Herramientas"
-- [ ] `contenido/git/TEMARIO.md` escrito con el índice ya aprobado (ver
-  "Temario aprobado")
-- [ ] Lecciones escritas y publicadas — cada comando ejecutado de
-  verdad contra wasm-git antes de publicarse (no asumido); rebase/
-  GitHub/hooks con salida real capturada fuera del navegador, nunca
-  inventada
+- [x] Tecnología "Git" creada vía admin, categoría "Herramientas"
+- [x] `contenido/git/TEMARIO.md` escrito con el índice ya aprobado (ver
+  "Temario aprobado" — ampliado a 55 lecciones/17 módulos tras la
+  revisión de completitud, ver la nota posterior más arriba)
+- [x] Lecciones escritas e insertadas como borrador — cada comando
+  ejecutado de verdad contra wasm-git antes de escribirse (no
+  asumido); rebase/amend/cherry-pick/reflog/push --force/GitHub/hooks/
+  Git Flow con salida real capturada fuera del navegador (git de línea
+  de comandos, o documentación oficial citada), nunca inventada.
+  Pendiente: publicación (decisión del usuario)
 - [ ] `specs/features/README.md` — fila añadida, estado actualizado
 - [ ] Spot-check de seguridad final: `wasm-git` es el paquete oficial;
   licencia documentada por escrito; sin `dangerouslySetInnerHTML`
