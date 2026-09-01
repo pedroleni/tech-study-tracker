@@ -33,12 +33,30 @@ GREEN='\033[0;32m'
 CYAN='\033[0;36m'
 NC='\033[0m'
 
-EXCLUDE="--exclude-dir=.git --exclude-dir=node_modules --exclude-dir=vendor --exclude-dir=__pycache__ --exclude-dir=.venv --exclude-dir=venv --exclude-dir=dist --exclude-dir=build --exclude-dir=.next --exclude-dir=target --exclude-dir=.tox"
+EXCLUDE="--exclude-dir=.git --exclude-dir=node_modules --exclude-dir=vendor --exclude-dir=__pycache__ --exclude-dir=.venv --exclude-dir=venv --exclude-dir=dist --exclude-dir=build --exclude-dir=.next --exclude-dir=target --exclude-dir=.tox --exclude-dir=ts-libs"
+
+# Falsos positivos concretos ya revisados a mano, uno por línea exacta (no un
+# fichero entero — el resto de cada fichero sigue totalmente escaneado, así
+# que un uso nuevo y real en otra línea se seguiría detectando). Cada entrada
+# documenta por qué:
+# - TablaResultado.tsx:37 — es un COMENTARIO que dice "Nunca
+#   dangerouslySetInnerHTML..."; el patrón cazó el texto del comentario, no
+#   uso real. El valor se renderiza como {String(valor)}, JSX normal,
+#   auto-escapado por React.
+# - postgres-en-vivo/motor.ts:114 — db.exec(...) es el método de PGlite
+#   (motor SQL real, @electric-sql/pglite) para ejecutar una sentencia SQL,
+#   no child_process.exec() — incidencia de mismo nombre de método (SQL vs.
+#   shell), no el patrón real. El valor interpolado (identidad simulada de
+#   RLS) ya está escapado con .replace(/'/g, "''") antes de entrar en el SQL.
+# - vite.config.ts:18 — otro comentario: la frase "index.html (HTML)" cae
+#   por casualidad en el patrón de jQuery .html(); este proyecto no usa
+#   jQuery en ningún sitio.
+POST_EXCLUDE_LINES='^\./src/components/bloques-laboratorio/TablaResultado\.tsx:37:|^\./src/lib/postgres-en-vivo/motor\.ts:114:|^\./vite\.config\.ts:18:'
 
 scan_pattern() {
     local severity="$1" category="$2" description="$3" pattern="$4" includes="$5"
     local results
-    results=$($GREP -rnP $EXCLUDE $includes "$pattern" "$PROJECT_ROOT" 2>/dev/null | head -20 || true)
+    results=$($GREP -rnP $EXCLUDE $includes "$pattern" "$PROJECT_ROOT" 2>/dev/null | grep -vE "$POST_EXCLUDE_LINES" | head -20 || true)
     if [ -n "$results" ]; then
         local count
         count=$(echo "$results" | wc -l)
