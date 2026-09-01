@@ -36,10 +36,10 @@ HTML tiene dos pares de etiquetas que parecen hacer lo mismo pero significan cos
 
 ```laboratorio
 {
-  "tipo": "callout",
-  "variante": "info",
-  "titulo": "Cuando el énfasis cambia lo que quieres decir",
-  "contenido": "\"Sí puedes entrar\" y \"Sí puedes entrar\" (con énfasis en \"puedes\") no dicen lo mismo — em existe para marcar esa diferencia que en texto hablado harías con el tono de voz."
+  "tipo": "comparador-antes-despues",
+  "antes": "<p>Sí puedes entrar.</p>",
+  "despues": "<p>Sí <em>puedes</em> entrar.</p>",
+  "nota": "No dicen lo mismo. \"Antes\" es un permiso neutro. \"Después\", con el énfasis en puedes, suena a respuesta a una duda — \"claro que puedes, ¿por qué no ibas a poder?\". El HTML solo cambia en em; el significado sí — exactamente lo que harías con el tono de voz al decirlo en alto."
 }
 ```
 

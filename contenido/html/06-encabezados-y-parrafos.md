@@ -62,7 +62,7 @@ HTML tiene seis niveles de encabezado, `<h1>` a `<h6>`, y un elemento para todo 
   "anotaciones": [
     { "fragmento": "<h1>Aprende HTML</h1>", "nota": "Uno solo por página, el título de más arriba de todos. Todo lo demás cuelga jerárquicamente de aquí." },
     { "fragmento": "<h2>Fundamentos del documento</h2>", "nota": "Un apartado dentro del h1. Puede haber tantos h2 como apartados reales tenga la página." },
-    { "fragmento": "<h3>El head</h3>", "nota": "Un sub-apartado dentro de ESE h2 concreto — no compite con los demás h2, solo con otros h3 que cuelguen del mismo h2." },
+    { "fragmento": "<h3>El head</h3>", "nota": "Un sub-apartado del h2 anterior (\"Fundamentos del documento\") — no compite con los demás h2, solo con otros h3 que cuelguen de ese mismo h2." },
     { "fragmento": "<h2>Texto y contenido</h2>", "nota": "Otro apartado al mismo nivel que \"Fundamentos del documento\" — el h3 anterior no le afecta, porque no colgaba de él." }
   ]
 }
@@ -125,10 +125,10 @@ Un mismo nivel de encabezado significa algo distinto según en qué región viva
   "lenguaje": "html",
   "codigo": "<header>\n  <h1>Nombre del sitio</h1>\n</header>\n\n<main>\n  <h1>Título de esta página</h1>\n  <article>\n    <h2>Título del post</h2>\n    <section>\n      <h3>Un apartado del post</h3>\n    </section>\n  </article>\n</main>",
   "anotaciones": [
-    { "fragmento": "<header>\n  <h1>Nombre del sitio</h1>\n</header>", "nota": "Este h1 es el nombre del SITIO, no de esta página concreta — vive en el header global." },
-    { "fragmento": "<main>\n  <h1>Título de esta página</h1>", "nota": "¿Otro h1? Sí — dentro de main representa el título de ESTA página, un contexto distinto del header. No es el \"segundo h1 de la jerarquía global\", son dos jerarquías en regiones distintas." },
+    { "fragmento": "<header>\n  <h1>Nombre del sitio</h1>\n</header>", "nota": "Este h1 es el nombre del sitio entero, no de esta página concreta — vive en el header global." },
+    { "fragmento": "<main>\n  <h1>Título de esta página</h1>", "nota": "¿Otro h1? Sí — dentro de main representa el título de esta página concreta, un contexto distinto del header. No es el \"segundo h1 de la jerarquía global\": son dos jerarquías separadas, una por región." },
     { "fragmento": "<h2>Título del post</h2>", "nota": "Dentro del article, cuelga del h1 de main — el título del post concreto." },
-    { "fragmento": "<h3>Un apartado del post</h3>", "nota": "Un sub-apartado dentro de ESE post, anidado un nivel más." }
+    { "fragmento": "<h3>Un apartado del post</h3>", "nota": "Un sub-apartado dentro de este post concreto, anidado un nivel más." }
   ]
 }
 ```

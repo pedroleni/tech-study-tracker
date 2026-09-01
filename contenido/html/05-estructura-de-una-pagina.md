@@ -3,13 +3,27 @@
 - **Módulo:** Fundamentos del documento
 - **Slug:** `la-estructura-de-una-pagina-header-nav-main-y-footer` (autogenerado del título)
 - **Orden:** 20
-- **Fuentes:** [Structuring documents (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Structuring_documents) + [Semantic HTML (web.dev)](https://web.dev/learn/html/semantic-html) — ver `contenido/html/TEMARIO.md` #5
+- **Fuentes:** [Structuring documents (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Structuring_documents) + [Semantic HTML (web.dev)](https://web.dev/learn/html/semantic-html) + [ARIA roles (MDN)](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles) para role y landmark — ver `contenido/html/TEMARIO.md` #5
 
 ---
 
 ## Qué es y para qué sirve
 
 Hasta ahora, todo el contenido de una lección ha vivido dentro de un único `<body>` sin dividir en regiones. Una página real sí tiene regiones — una cabecera, una navegación, un contenido principal, un pie — y HTML tiene etiquetas hechas exactamente para nombrar cada una: `<header>`, `<nav>`, `<main>`, `<footer>`, además de `<article>`, `<section>` y `<aside>` para lo que va dentro. Ninguna de estas etiquetas cambia cómo se ve la página por defecto — un `<div>` y un `<main>` con el mismo contenido se pintan exactamente igual. La diferencia está en quién más, además de un humano mirando la pantalla, puede entender la página.
+
+## Dos palabras que hacen falta antes de seguir: role y landmark
+
+Vas a ver estas dos palabras todo el rato en esta lección, así que van primero, no al final.
+
+```laboratorio
+{
+  "tipo": "notas-clave",
+  "items": [
+    { "titulo": "role: el atributo real que expone cada etiqueta.", "texto": "Cita textual de MDN: \"ARIA roles provide semantic meaning to content, allowing screen readers (...) to present and support interaction with an object in a way that is consistent with user expectations\". Lo importante: <header> ya trae un role implícito (banner) sin que tú escribas nada — \"using the header element will automatically communicate that the element has a role of banner\". La etiqueta \"role: banner\" que vas a ver en cada región, un poco más abajo, es exactamente ese valor real, no una invención de esta lección." },
+    { "titulo": "landmark: el pequeño grupo de roles que un lector de pantalla trata distinto.", "texto": "Cita textual de MDN: \"Landmark roles provide a way to identify the organization and structure of a web page (...) Screen readers use landmark roles to provide keyboard navigation to important sections of a page\". De todos los roles ARIA que existen, solo ocho son landmarks — banner, navigation, main, contentinfo, complementary, region, search, form — y son precisamente los que generan header, nav, main, footer y aside." }
+  ]
+}
+```
 
 Así se distribuyen esas regiones en una página real — no todas ocupan el ancho completo: `main` y `aside` van lado a lado, no una debajo de otra:
 
@@ -91,10 +105,10 @@ El esqueleto mínimo de una página con regiones:
   "lenguaje": "html",
   "codigo": "<body>\n  <header>\n    <h1>Nombre del sitio</h1>\n  </header>\n\n  <nav>\n    <ul>\n      <li><a href=\"/\">Inicio</a></li>\n      <li><a href=\"/blog\">Blog</a></li>\n    </ul>\n  </nav>\n\n  <main>\n    <h2>Título de la página</h2>\n    <p>El contenido único de esta página va aquí.</p>\n  </main>\n\n  <footer>\n    <p>&copy; 2026 — todos los derechos reservados</p>\n  </footer>\n</body>",
   "anotaciones": [
-    { "fragmento": "<header>\n    <h1>Nombre del sitio</h1>\n  </header>", "nota": "El header aquí, hijo directo de body, es la cabecera GLOBAL del sitio — logo, nombre, quizá una imagen de portada. No confundir con un título de sección cualquiera." },
-    { "fragmento": "<nav>\n    <ul>\n      <li><a href=\"/\">Inicio</a></li>\n      <li><a href=\"/blog\">Blog</a></li>\n    </ul>\n  </nav>", "nota": "Reservado para la navegación PRINCIPAL del sitio — no cualquier grupo de enlaces. Un par de enlaces relacionados dentro de un artículo no necesitan su propio nav." },
+    { "fragmento": "<header>\n    <h1>Nombre del sitio</h1>\n  </header>", "nota": "El header aquí, hijo directo de body, es la cabecera global del sitio entero — logo, nombre, quizá una imagen de portada. No confundir con un título de sección cualquiera." },
+    { "fragmento": "<nav>\n    <ul>\n      <li><a href=\"/\">Inicio</a></li>\n      <li><a href=\"/blog\">Blog</a></li>\n    </ul>\n  </nav>", "nota": "Reservado para la navegación principal del sitio — no cualquier grupo de enlaces. Un par de enlaces relacionados dentro de un artículo no necesitan su propio nav." },
     { "fragmento": "<main>\n    <h2>Título de la página</h2>\n    <p>El contenido único de esta página va aquí.</p>\n  </main>", "nota": "Solo puede haber UN main por página, y va directamente dentro de body — nunca anidado dentro de header, nav, article ni ningún otro contenedor." },
-    { "fragmento": "<footer>\n    <p>&copy; 2026 — todos los derechos reservados</p>\n  </footer>", "nota": "El pie global: copyright, enlaces legales, contacto. Igual que header, puede repetirse dentro de un article o section como pie de ESA sección concreta." }
+    { "fragmento": "<footer>\n    <p>&copy; 2026 — todos los derechos reservados</p>\n  </footer>", "nota": "El pie global: copyright, enlaces legales, contacto. Igual que header, puede repetirse dentro de un article o section como pie de esa sección concreta." }
   ]
 }
 ```
@@ -113,9 +127,9 @@ El esqueleto mínimo de una página con regiones:
 }
 ```
 
-## Los landmarks: lo que gana un lector de pantalla
+## Los ocho landmarks, completos: tabla de referencia
 
-Cada etiqueta de esta lección crea, además de estructura visual, un **landmark** — una región con nombre en el árbol de accesibilidad que un lector de pantalla puede listar y saltar directamente, sin tener que escuchar toda la página de arriba a abajo.
+La tabla completa de qué etiqueta genera qué landmark — la misma idea de "role y landmark" del principio de la lección, ahora con las cinco que ya has visto más lo que anuncia un lector de pantalla al llegar a cada una:
 
 | Etiqueta | Landmark ARIA | Lo que anuncia un lector de pantalla |
 |---|---|---|
@@ -130,7 +144,7 @@ Cada etiqueta de esta lección crea, además de estructura visual, un **landmark
   "tipo": "callout",
   "variante": "aviso",
   "titulo": "El landmark no es automático por el nombre de la etiqueta",
-  "contenido": "header y footer solo generan banner/contentinfo cuando son hijos directos de body. Anidados dentro de article o section, dejan de ser landmarks globales y pasan a ser la cabecera o el pie de ESA sección — más sobre esto un poco más abajo."
+  "contenido": "header y footer solo generan banner/contentinfo cuando son hijos directos de body. Anidados dentro de article o section, dejan de ser landmarks globales y pasan a ser la cabecera o el pie de esa sección concreta — más sobre esto un poco más abajo."
 }
 ```
 
@@ -181,7 +195,7 @@ Esta es la distinción que más cuesta la primera vez, porque visualmente no cam
   "codigo": "<main>\n  <article>\n    <header>\n      <h2>Título del post</h2>\n      <p>Publicado el 20 de agosto de 2026</p>\n    </header>\n    <p>Contenido del post...</p>\n    <footer>\n      <p>Escrito por Ada Lovelace</p>\n    </footer>\n  </article>\n</main>",
   "anotaciones": [
     { "fragmento": "<header>\n      <h2>Título del post</h2>\n      <p>Publicado el 20 de agosto de 2026</p>\n    </header>", "nota": "Este header vive dentro de un article, no es hijo directo de body — así que NO crea el landmark banner. Es solo la cabecera de este post: su título y su fecha." },
-    { "fragmento": "<footer>\n      <p>Escrito por Ada Lovelace</p>\n    </footer>", "nota": "Igual que arriba: dentro de article, este footer es el pie de ESTE post (autoría), no el pie global de la página con el copyright del sitio." }
+    { "fragmento": "<footer>\n      <p>Escrito por Ada Lovelace</p>\n    </footer>", "nota": "Igual que arriba: dentro de article, este footer es el pie de este post concreto (autoría), no el pie global de la página con el copyright del sitio." }
   ]
 }
 ```
@@ -204,7 +218,7 @@ Nada impide tener varios `<header>` y `<footer>` en la misma página — uno glo
     },
     {
       "mito": "<nav> hay que ponerlo en cualquier grupo de enlaces",
-      "realidad": "Está pensado para la navegación PRINCIPAL del sitio. Dos o tres enlaces relacionados al pie de un artículo no necesitan su propio nav — eso solo añade ruido al árbol de accesibilidad."
+      "realidad": "Está pensado para la navegación principal del sitio. Dos o tres enlaces relacionados al pie de un artículo no necesitan su propio nav — eso solo añade ruido al árbol de accesibilidad."
     },
     {
       "mito": "Usar header, nav, main y footer ya hace la página accesible",

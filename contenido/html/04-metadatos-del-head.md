@@ -3,7 +3,7 @@
 - **Módulo:** Fundamentos del documento
 - **Slug:** `que-va-en-el-head-metadatos-titulo-favicon-y-css` (autogenerado del título)
 - **Orden:** 15
-- **Fuentes:** [What's in the head? Metadata in HTML (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Webpage_metadata) + [Metadata (web.dev)](https://web.dev/learn/html/metadata) + [Open Graph protocol (ogp.me)](https://ogp.me/) para la parte de redes sociales — ver `contenido/html/TEMARIO.md` #4
+- **Fuentes:** [What's in the head? Metadata in HTML (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Webpage_metadata) + [Metadata (web.dev)](https://web.dev/learn/html/metadata) + [Open Graph protocol (ogp.me)](https://ogp.me/) para la parte de redes sociales + [Introduction to the DOM (MDN)](https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model/Introduction) para el DOM — ver `contenido/html/TEMARIO.md` #4
 
 ---
 
@@ -197,6 +197,17 @@ Con esas cuatro propiedades puestas, así es exactamente lo que aparece cuando a
 
 ## Enlazar CSS y JavaScript desde el head
 
+Antes del ejercicio que viene hace falta una palabra que vas a ver todo el rato a partir de aquí: el **DOM**.
+
+```laboratorio
+{
+  "tipo": "callout",
+  "variante": "info",
+  "titulo": "El DOM no es el HTML que escribiste — es lo que el navegador construye a partir de él",
+  "contenido": "Cita textual de MDN: \"The DOM represents a document with a logical tree (...) DOM methods allow programmatic access to the tree. With them, you can change the document's structure, style, or content.\" El navegador lee tu HTML de arriba a abajo y va construyendo ese árbol en memoria, elemento a elemento, a medida que lo encuentra — no de golpe. document.querySelector('h1') no busca en el texto fuente del HTML: busca en ese árbol. Si el navegador todavía no ha llegado al <h1> al ejecutar esa línea, el árbol todavía no tiene ningún nodo h1 que devolver."
+}
+```
+
 ```laboratorio
 {
   "tipo": "predice-el-resultado",
@@ -207,7 +218,7 @@ Con esas cuatro propiedades puestas, así es exactamente lo que aparece cuando a
     "El navegador espera automáticamente a que cargue el <body> antes de ejecutar el script"
   ],
   "correcta": 1,
-  "explicacion": "Un <script> sin defer se ejecuta en el momento exacto en que el navegador lo encuentra al leer el HTML de arriba a abajo — y si está en head, eso pasa ANTES de que exista el <body>. querySelector('h1') devuelve null y la siguiente línea revienta. Por eso los scripts que tocan el DOM van con el atributo defer (o al final del body, antes de cerrar </html>)."
+  "explicacion": "Un <script> sin defer se ejecuta en el momento exacto en que el navegador lo encuentra al leer el HTML de arriba a abajo — y si está en head, eso pasa antes de que el navegador haya construido el <body> en el DOM. querySelector('h1') devuelve null (ese nodo todavía no existe en el árbol) y la siguiente línea revienta. Por eso los scripts que tocan el DOM van con el atributo defer (o al final del body, antes de cerrar </html>)."
 }
 ```
 
