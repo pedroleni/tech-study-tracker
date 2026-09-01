@@ -2,8 +2,8 @@
 
 - **Módulo:** Accesibilidad
 - **Slug:** `foco-de-teclado-tabindex-orden-de-tabulacion-y-por-que-no-quitarlo` (autogenerado del título)
-- **Orden:** 120
-- **Fuentes:** [Focus (web.dev)](https://web.dev/learn/html/focus) + [WCAG 2.2 Quick Reference (W3C/WAI)](https://www.w3.org/WAI/WCAG22/quickref/) — ver `contenido/html/TEMARIO.md` #25
+- **Orden:** 140
+- **Fuentes:** [Focus (web.dev)](https://web.dev/learn/html/focus) + [WCAG 2.2 Quick Reference (W3C/WAI)](https://www.w3.org/WAI/WCAG22/quickref/) — ver `contenido/html/TEMARIO.md` #29
 
 ---
 

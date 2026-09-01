@@ -2,8 +2,8 @@
 
 - **Módulo:** Accesibilidad
 - **Slug:** `que-es-la-accesibilidad-y-por-que-te-importa` (autogenerado del título)
-- **Orden:** 110
-- **Fuentes:** [What is accessibility? (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Accessibility/What_is_accessibility) — ver `contenido/html/TEMARIO.md` #23
+- **Orden:** 130
+- **Fuentes:** [What is accessibility? (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Accessibility/What_is_accessibility) — ver `contenido/html/TEMARIO.md` #27
 
 ---
 

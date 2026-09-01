@@ -2,8 +2,8 @@
 
 - **Módulo:** Tablas
 - **Slug:** `tablas-filas-celdas-cabeceras-y-como-no-romperlas` (autogenerado del título)
-- **Orden:** 70
-- **Fuentes:** [HTML table basics (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/HTML_table_basics) + [Tables (web.dev)](https://web.dev/learn/html/tables) — ver `contenido/html/TEMARIO.md` #15
+- **Orden:** 80
+- **Fuentes:** [HTML table basics (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/HTML_table_basics) + [Tables (web.dev)](https://web.dev/learn/html/tables) — ver `contenido/html/TEMARIO.md` #17
 
 ---
 

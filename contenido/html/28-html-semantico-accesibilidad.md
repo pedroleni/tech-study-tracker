@@ -2,8 +2,8 @@
 
 - **Módulo:** Accesibilidad
 - **Slug:** `html-semantico-la-base-de-la-accesibilidad` (autogenerado del título)
-- **Orden:** 115
-- **Fuentes:** [HTML: A good basis for accessibility (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Accessibility/HTML) — ver `contenido/html/TEMARIO.md` #24
+- **Orden:** 135
+- **Fuentes:** [HTML: A good basis for accessibility (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Accessibility/HTML) — ver `contenido/html/TEMARIO.md` #28
 
 ---
 

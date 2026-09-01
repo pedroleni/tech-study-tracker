@@ -180,31 +180,35 @@ entrar en el documento mínimo.
 | # | Lección | Fuentes |
 |---|---|---|
 | 10 | Crear enlaces: rutas relativas/absolutas, `target`, `rel`, buenas prácticas | [Creating links (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Creating_links) + [Links (web.dev)](https://web.dev/learn/html/links) |
+| 11 | 🧪 Proyecto: página de aterrizaje de un solo scroll, 100% semántica | Requiere módulos 1-2 y esta misma lección — ver "Proyectos" más abajo |
 
 ## Módulo 4 — Multimedia
 
 | # | Lección | Fuentes |
 |---|---|---|
-| 11 | Imágenes: `<img>`, `alt`, `<figure>`/`<figcaption>`, formatos e imágenes responsive | [HTML images (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/HTML_images) + [Images (web.dev)](https://web.dev/learn/html/images) — web.dev entra en formatos/rendimiento, MDN en la sintaxis base |
-| 12 | Vídeo y audio: `<video>`, `<audio>`, subtítulos | [HTML video and audio (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/HTML_video_and_audio) + [Audio and Video (web.dev)](https://web.dev/learn/html/audio-video) |
-| 13 | Gráficos vectoriales: SVG inline vs `<img src="*.svg">` | [Including vector graphics in HTML (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Including_vector_graphics_in_HTML) + [especificación SVG 2 (W3C)](https://www.w3.org/TR/SVG2/) para lo normativo |
-| 14 | Embeber contenido externo: `<iframe>`, `<embed>`, `<object>` | [From object to iframe (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/General_embedding_technologies) + [iframe, embed, object (WHATWG spec)](https://html.spec.whatwg.org/multipage/iframe-embed-object.html) |
+| 12 | Imágenes: `<img>`, `alt`, `<figure>`/`<figcaption>`, formatos e imágenes responsive | [HTML images (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/HTML_images) + [Images (web.dev)](https://web.dev/learn/html/images) — web.dev entra en formatos/rendimiento, MDN en la sintaxis base |
+| 13 | 🧪 Proyecto: tarjeta de perfil personal | Requiere módulos 1-2, lección 10 y esta misma lección — ver "Proyectos" más abajo |
+| 14 | Vídeo y audio: `<video>`, `<audio>`, subtítulos | [HTML video and audio (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/HTML_video_and_audio) + [Audio and Video (web.dev)](https://web.dev/learn/html/audio-video) |
+| 15 | Gráficos vectoriales: SVG inline vs `<img src="*.svg">` | [Including vector graphics in HTML (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Including_vector_graphics_in_HTML) + [especificación SVG 2 (W3C)](https://www.w3.org/TR/SVG2/) para lo normativo |
+| 16 | Embeber contenido externo: `<iframe>`, `<embed>`, `<object>` | [From object to iframe (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/General_embedding_technologies) + [iframe, embed, object (WHATWG spec)](https://html.spec.whatwg.org/multipage/iframe-embed-object.html) |
 
 ## Módulo 5 — Tablas
 
 | # | Lección | Fuentes |
 |---|---|---|
-| 15 | Tablas: filas, celdas, cabeceras, cómo no romperlas | [HTML table basics (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/HTML_table_basics) + [Tables (web.dev)](https://web.dev/learn/html/tables) |
-| 16 | Accesibilidad en tablas: `caption`, `scope`, `thead`/`tbody`/`tfoot` | [HTML table accessibility (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Table_accessibility) + [Creating Accessible Tables — Data Tables (WebAIM)](https://webaim.org/techniques/tables/data) |
+| 17 | Tablas: filas, celdas, cabeceras, cómo no romperlas | [HTML table basics (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/HTML_table_basics) + [Tables (web.dev)](https://web.dev/learn/html/tables) |
+| 18 | Accesibilidad en tablas: `caption`, `scope`, `thead`/`tbody`/`tfoot` | [HTML table accessibility (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Table_accessibility) + [Creating Accessible Tables — Data Tables (WebAIM)](https://webaim.org/techniques/tables/data) |
+| 19 | 🧪 Proyecto: ficha de producto con tabla de especificaciones | Requiere lección 8, lección 12 y este módulo — ver "Proyectos" más abajo |
 
 ## Módulo 6 — Formularios
 
 | # | Lección | Fuentes |
 |---|---|---|
-| 17 | Formularios: anatomía completa (`<form>`, `method`, `action`) | [Your first form (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Forms/Your_first_form) + [Use forms to get data from users (web.dev Learn Forms)](https://web.dev/learn/forms/form-element) |
-| 18 | Campos de formulario: tipos de `<input>` y cuándo usar cada uno | [The HTML5 input types (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Forms/HTML5_input_types) + [Help users enter data in forms (web.dev Learn Forms)](https://web.dev/learn/forms/form-fields) |
-| 19 | Validación nativa: `required`, `pattern`, mensajes del navegador | [Client-side form validation (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Forms/Form_validation) + [Help users enter the right data in forms (web.dev Learn Forms)](https://web.dev/learn/forms/validation) |
-| 20 | Formularios accesibles de verdad: `label`, `fieldset`/`legend` | [HTML: A good basis for accessibility (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Accessibility/HTML) + [Accessibility (web.dev Learn Forms)](https://web.dev/learn/forms/accessibility) + [Creating Accessible Forms (WebAIM)](https://webaim.org/techniques/forms/) |
+| 20 | Formularios: anatomía completa (`<form>`, `method`, `action`) | [Your first form (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Forms/Your_first_form) + [Use forms to get data from users (web.dev Learn Forms)](https://web.dev/learn/forms/form-element) |
+| 21 | Campos de formulario: tipos de `<input>` y cuándo usar cada uno | [The HTML5 input types (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Forms/HTML5_input_types) + [Help users enter data in forms (web.dev Learn Forms)](https://web.dev/learn/forms/form-fields) |
+| 22 | Validación nativa: `required`, `pattern`, mensajes del navegador | [Client-side form validation (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Forms/Form_validation) + [Help users enter the right data in forms (web.dev Learn Forms)](https://web.dev/learn/forms/validation) |
+| 23 | Formularios accesibles de verdad: `label`, `fieldset`/`legend` | [HTML: A good basis for accessibility (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Accessibility/HTML) + [Accessibility (web.dev Learn Forms)](https://web.dev/learn/forms/accessibility) + [Creating Accessible Forms (WebAIM)](https://webaim.org/techniques/forms/) |
+| 24 | 🧪 Proyecto: formulario de contacto accesible de verdad | Requiere este módulo completo — ver "Proyectos" más abajo |
 
 ## Módulo 7 — Elementos interactivos nativos
 
@@ -216,8 +220,8 @@ fuentes.
 
 | # | Lección | Fuentes |
 |---|---|---|
-| 21 | `<details>` y `<summary>`: desplegables nativos sin JavaScript | [Details and summary (web.dev)](https://web.dev/learn/html/details) + [referencia `<details>` (MDN)](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/details) |
-| 22 | `<dialog>`: modales nativos, `showModal()` y el backdrop gratis | [Dialog (web.dev)](https://web.dev/learn/html/dialog) + [referencia `<dialog>` (MDN)](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/dialog) |
+| 25 | `<details>` y `<summary>`: desplegables nativos sin JavaScript | [Details and summary (web.dev)](https://web.dev/learn/html/details) + [referencia `<details>` (MDN)](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/details) |
+| 26 | `<dialog>`: modales nativos, `showModal()` y el backdrop gratis | [Dialog (web.dev)](https://web.dev/learn/html/dialog) + [referencia `<dialog>` (MDN)](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/dialog) |
 
 ## Módulo 8 — Accesibilidad
 
@@ -232,52 +236,66 @@ corto si solo se copia un artículo.
 
 | # | Lección | Fuentes |
 |---|---|---|
-| 23 | Qué es la accesibilidad y por qué te importa | [What is accessibility? (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Accessibility/What_is_accessibility) |
-| 24 | HTML semántico: la base de la accesibilidad | [HTML: A good basis for accessibility (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Accessibility/HTML) |
-| 25 | Foco de teclado: `tabindex`, orden de tabulación, y por qué no quitarlo | [Focus (web.dev)](https://web.dev/learn/html/focus) + [WCAG 2.2 Quick Reference (W3C/WAI)](https://www.w3.org/WAI/WCAG22/quickref/), filtrado por los criterios de foco visible y orden de foco |
-| 26 | WAI-ARIA: cuándo hace falta y cuándo es un parche mal puesto | [WAI-ARIA basics (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Accessibility/WAI-ARIA_basics) + [ARIA Authoring Practices Guide (W3C/WAI)](https://www.w3.org/WAI/ARIA/apg/) para patrones concretos (diálogos, tabs, menús) con ejemplos funcionales |
-| 27 | Multimedia accesible: subtítulos, transcripciones, audiodescripción | [Accessible multimedia (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Accessibility/Multimedia) |
-| 28 | Accesibilidad móvil y táctil: tamaño de objetivos, zoom, viewport | [Mobile accessibility (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Accessibility/Mobile) |
-| 29 | Herramientas para probar accesibilidad de verdad: lector de pantalla, axe, Lighthouse | [Accessibility tooling and assistive technology (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Accessibility/Tooling) + [Web Accessibility Evaluation Guide (WebAIM)](https://webaim.org/articles/evaluationguide/) |
+| 27 | Qué es la accesibilidad y por qué te importa | [What is accessibility? (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Accessibility/What_is_accessibility) |
+| 28 | HTML semántico: la base de la accesibilidad | [HTML: A good basis for accessibility (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Accessibility/HTML) |
+| 29 | Foco de teclado: `tabindex`, orden de tabulación, y por qué no quitarlo | [Focus (web.dev)](https://web.dev/learn/html/focus) + [WCAG 2.2 Quick Reference (W3C/WAI)](https://www.w3.org/WAI/WCAG22/quickref/), filtrado por los criterios de foco visible y orden de foco |
+| 30 | WAI-ARIA: cuándo hace falta y cuándo es un parche mal puesto | [WAI-ARIA basics (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Accessibility/WAI-ARIA_basics) + [ARIA Authoring Practices Guide (W3C/WAI)](https://www.w3.org/WAI/ARIA/apg/) para patrones concretos (diálogos, tabs, menús) con ejemplos funcionales |
+| 31 | Multimedia accesible: subtítulos, transcripciones, audiodescripción | [Accessible multimedia (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Accessibility/Multimedia) |
+| 32 | Accesibilidad móvil y táctil: tamaño de objetivos, zoom, viewport | [Mobile accessibility (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Accessibility/Mobile) |
+| 33 | Herramientas para probar accesibilidad de verdad: lector de pantalla, axe, Lighthouse | [Accessibility tooling and assistive technology (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Accessibility/Tooling) + [Web Accessibility Evaluation Guide (WebAIM)](https://webaim.org/articles/evaluationguide/) |
 
 ## Módulo 9 — Calidad
 
 | # | Lección | Fuentes |
 |---|---|---|
-| 30 | Depurar HTML: DevTools, validador W3C, errores de anidamiento | [Debugging HTML (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Debugging_HTML) |
-| 31 | HTML y SEO: qué lee de verdad un buscador | [SEO Starter Guide (Google Search Central)](https://developers.google.com/search/docs/fundamentals/seo-starter-guide) + [Meta tags Google soporta (Google Search Central)](https://developers.google.com/search/docs/crawling-indexing/special-tags) — fuente principal ahora es Google, no MDN: para "qué lee un buscador" la autoridad es el propio buscador |
+| 34 | Depurar HTML: DevTools, validador W3C, errores de anidamiento | [Debugging HTML (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Debugging_HTML) |
+| 35 | HTML y SEO: qué lee de verdad un buscador | [SEO Starter Guide (Google Search Central)](https://developers.google.com/search/docs/fundamentals/seo-starter-guide) + [Meta tags Google soporta (Google Search Central)](https://developers.google.com/search/docs/crawling-indexing/special-tags) — fuente principal ahora es Google, no MDN: para "qué lee un buscador" la autoridad es el propio buscador |
 
 ---
 
-## Módulo 10 — Proyectos
+## Proyectos
 
-**Añadido 2026-08-29**, junto al mecanismo `editor-en-vivo`
+**Añadidos 2026-08-29**, junto al mecanismo `editor-en-vivo`
 (`specs/features/editor-en-vivo.md`): pedido explícito de "hacer más
 prácticas las lecciones... proyectos". Cuatro lecciones-proyecto reales,
 marcadas `es_proyecto` (aparecen también en `/proyectos`), cada una
 guiada paso a paso con varios bloques `editor-en-vivo` que construyen
 hacia un resultado final, en vez del formato ficha habitual — ver la
-plantilla propia al principio de cada archivo `32-35`.
+plantilla propia al principio de cada archivo.
 
-| # | Lección | Requiere |
+**Reordenados 2026-09-02** — nacieron todos amontonados al final
+(como antiguo "Módulo 10", detrás incluso de accesibilidad y SEO), sin
+que ninguno de los 4 necesitara ese contenido para hacerse. Se
+verificó contra el contenido REAL de cada lección (no solo el título)
+qué usa cada proyecto de verdad, y se intercalaron cada uno justo
+después de la última lección de la que depende — así el alumno lo
+hace nada más tener lo necesario, no al final de todo el temario. De
+paso salieron dos huecos reales en el "Requiere" de la versión
+anterior, ya corregidos en el propio fichero de cada proyecto:
+
+| Proyecto | Usa de verdad | Suelo real |
 |---|---|---|
-| 32 | Proyecto: tarjeta de perfil personal | Módulos 1-2, lección 11 (imágenes) |
-| 33 | Proyecto: página de aterrizaje de un solo scroll, 100% semántica | Módulo 1, lección 5, lección 10 |
-| 34 | Proyecto: formulario de contacto accesible de verdad | Módulo 6, lecciones 19-20 |
-| 35 | Proyecto: ficha de producto con tabla de especificaciones | Lección 11, módulo 5, lección 16 |
+| Página de aterrizaje (lección 11) | header/nav/main/footer/article/section (5), encabezados (6), listas (8), **blockquote (9 — no estaba listado)**, enlaces de ancla (10) | Lección 10 |
+| Tarjeta de perfil (lección 13) | imágenes (12), encabezados (6), listas (8), **enlace mailto: (10 — no estaba listado)** | Lección 12 |
+| Ficha de producto (lección 19) | figure/figcaption (12), **dl/dt/dd (8 — no estaba listado)**, tablas accesibles (17-18) | Lección 18 |
+| Formulario de contacto (lección 24) | form/label/input/fieldset/legend/textarea (20-23) | Lección 23 (ya estaba correcto) |
 
 ## Notas de alcance
 
-- **35 lecciones, 10 módulos.** Empezó en 22, subió a 26 al ampliar
-  accesibilidad de verdad, subió a 29 al añadir el módulo de elementos
-  interactivos nativos y la lección de foco de teclado, subió a 30 al
-  añadir "Anatomía de una etiqueta", subió a 31 al añadir "¿Qué es HTML
-  y para qué sirve?" delante de esa, subió a 35 al añadir el módulo 10
-  de Proyectos (2026-08-29) — todo por huecos reales encontrados al
-  cruzar fuentes o al preguntar directamente por lo que faltaba, no por
-  forzar ningún número. Las "~24 fichas" que se mencionaban de pasada en
-  `specs/features/lecciones.md` al planear el modelo de datos nunca
-  fueron un temario real, solo una estimación de orden de magnitud.
+- **35 lecciones, 9 módulos + 4 proyectos intercalados.** Empezó en 22,
+  subió a 26 al ampliar accesibilidad de verdad, subió a 29 al añadir
+  el módulo de elementos interactivos nativos y la lección de foco de
+  teclado, subió a 30 al añadir "Anatomía de una etiqueta", subió a 31
+  al añadir "¿Qué es HTML y para qué sirve?" delante de esa, subió a 35
+  al añadir los 4 proyectos (2026-08-29, al principio como "Módulo 10"
+  aparte) — todo por huecos reales encontrados al cruzar fuentes o al
+  preguntar directamente por lo que faltaba, no por forzar ningún
+  número. Los proyectos se intercalaron dentro de sus módulos el
+  2026-09-02 (ver sección "Proyectos" arriba) — el total sigue siendo
+  35, solo cambió dónde vive cada uno. Las "~24 fichas" que se
+  mencionaban de pasada en `specs/features/lecciones.md` al planear el
+  modelo de datos nunca fueron un temario real, solo una estimación de
+  orden de magnitud.
 - **Fuera de este temario, a propósito:** todo lo que en los módulos de
   formularios/HTML de MDN y web.dev es CSS (`Styling web forms`,
   `Advanced form styling`, `Customizable select`, estilos de

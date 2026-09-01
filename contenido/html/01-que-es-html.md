@@ -2,7 +2,7 @@
 
 - **Módulo:** Fundamentos del documento
 - **Slug:** `que-es-html-y-para-que-sirve` (autogenerado del título)
-- **Orden:** 2
+- **Orden:** 0
 - **Fuentes:** [Creating the content (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Getting_started/Your_first_website/Creating_the_content) + [Overview of HTML (web.dev)](https://web.dev/learn/html/overview) — ver `contenido/html/TEMARIO.md` #1
 
 ---

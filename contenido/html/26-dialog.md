@@ -2,8 +2,8 @@
 
 - **Módulo:** Elementos interactivos nativos
 - **Slug:** `dialog-modales-nativos-con-backdrop-y-sin-javascript` (autogenerado del título)
-- **Orden:** 105
-- **Fuentes:** [Dialog (web.dev)](https://web.dev/learn/html/dialog) + [referencia dialog (MDN)](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/dialog) — ver `contenido/html/TEMARIO.md` #22
+- **Orden:** 125
+- **Fuentes:** [Dialog (web.dev)](https://web.dev/learn/html/dialog) + [referencia dialog (MDN)](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/dialog) — ver `contenido/html/TEMARIO.md` #26
 
 ---
 

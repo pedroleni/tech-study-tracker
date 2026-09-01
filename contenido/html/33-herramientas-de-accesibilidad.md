@@ -2,8 +2,8 @@
 
 - **Módulo:** Accesibilidad
 - **Slug:** `herramientas-para-probar-accesibilidad-de-verdad-lector-de-pantalla-axe-y-lighthouse` (autogenerado del título)
-- **Orden:** 140
-- **Fuentes:** [Accessibility tooling and assistive technology (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Accessibility/Tooling) + [Web Accessibility Evaluation Guide (WebAIM)](https://webaim.org/articles/evaluationguide/) — ver `contenido/html/TEMARIO.md` #29
+- **Orden:** 160
+- **Fuentes:** [Accessibility tooling and assistive technology (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Accessibility/Tooling) + [Web Accessibility Evaluation Guide (WebAIM)](https://webaim.org/articles/evaluationguide/) — ver `contenido/html/TEMARIO.md` #33
 
 ---
 

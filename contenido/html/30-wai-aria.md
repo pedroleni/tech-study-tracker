@@ -2,8 +2,8 @@
 
 - **Módulo:** Accesibilidad
 - **Slug:** `wai-aria-cuando-hace-falta-y-cuando-es-un-parche-mal-puesto` (autogenerado del título)
-- **Orden:** 125
-- **Fuentes:** [WAI-ARIA basics (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Accessibility/WAI-ARIA_basics) + [ARIA Authoring Practices Guide (W3C/WAI)](https://www.w3.org/WAI/ARIA/apg/) — ver `contenido/html/TEMARIO.md` #26
+- **Orden:** 145
+- **Fuentes:** [WAI-ARIA basics (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Accessibility/WAI-ARIA_basics) + [ARIA Authoring Practices Guide (W3C/WAI)](https://www.w3.org/WAI/ARIA/apg/) — ver `contenido/html/TEMARIO.md` #30
 
 ---
 

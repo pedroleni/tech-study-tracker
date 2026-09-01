@@ -2,8 +2,8 @@
 
 - **Módulo:** Calidad
 - **Slug:** `html-y-seo-que-lee-de-verdad-un-buscador` (autogenerado del título)
-- **Orden:** 150
-- **Fuentes:** [SEO Starter Guide (Google Search Central)](https://developers.google.com/search/docs/fundamentals/seo-starter-guide) + [Meta tags que Google soporta (Google Search Central)](https://developers.google.com/search/docs/crawling-indexing/special-tags) — ver `contenido/html/TEMARIO.md` #31
+- **Orden:** 170
+- **Fuentes:** [SEO Starter Guide (Google Search Central)](https://developers.google.com/search/docs/fundamentals/seo-starter-guide) + [Meta tags que Google soporta (Google Search Central)](https://developers.google.com/search/docs/crawling-indexing/special-tags) — ver `contenido/html/TEMARIO.md` #35
 
 ---
 

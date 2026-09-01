@@ -2,8 +2,8 @@
 
 - **Módulo:** Calidad
 - **Slug:** `depurar-html-devtools-el-validador-w3c-y-errores-de-anidamiento` (autogenerado del título)
-- **Orden:** 145
-- **Fuentes:** [Debugging HTML (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Debugging_HTML) — ver `contenido/html/TEMARIO.md` #30
+- **Orden:** 165
+- **Fuentes:** [Debugging HTML (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Debugging_HTML) — ver `contenido/html/TEMARIO.md` #34
 
 ---
 

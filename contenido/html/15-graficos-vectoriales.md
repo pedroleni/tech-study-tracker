@@ -2,8 +2,8 @@
 
 - **Módulo:** Multimedia
 - **Slug:** `graficos-vectoriales-svg-inline-frente-a-img` (autogenerado del título)
-- **Orden:** 60
-- **Fuentes:** [Including vector graphics in HTML (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Including_vector_graphics_in_HTML) + [especificación SVG 2 (W3C)](https://www.w3.org/TR/SVG2/) — ver `contenido/html/TEMARIO.md` #13
+- **Orden:** 70
+- **Fuentes:** [Including vector graphics in HTML (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Including_vector_graphics_in_HTML) + [especificación SVG 2 (W3C)](https://www.w3.org/TR/SVG2/) — ver `contenido/html/TEMARIO.md` #15
 
 ---
 

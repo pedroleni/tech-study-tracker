@@ -2,8 +2,8 @@
 
 - **Módulo:** Elementos interactivos nativos
 - **Slug:** `details-y-summary-desplegables-nativos-sin-javascript` (autogenerado del título)
-- **Orden:** 100
-- **Fuentes:** [Details and summary (web.dev)](https://web.dev/learn/html/details) + [referencia details (MDN)](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/details) — ver `contenido/html/TEMARIO.md` #21
+- **Orden:** 120
+- **Fuentes:** [Details and summary (web.dev)](https://web.dev/learn/html/details) + [referencia details (MDN)](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/details) — ver `contenido/html/TEMARIO.md` #25
 
 ---
 

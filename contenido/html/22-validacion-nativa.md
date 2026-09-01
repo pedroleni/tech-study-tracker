@@ -2,8 +2,8 @@
 
 - **Módulo:** Formularios
 - **Slug:** `validacion-nativa-required-pattern-y-mensajes-del-navegador` (autogenerado del título)
-- **Orden:** 90
-- **Fuentes:** [Client-side form validation (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Forms/Form_validation) + [Help users enter the right data in forms (web.dev Learn Forms)](https://web.dev/learn/forms/validation) — ver `contenido/html/TEMARIO.md` #19
+- **Orden:** 105
+- **Fuentes:** [Client-side form validation (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Forms/Form_validation) + [Help users enter the right data in forms (web.dev Learn Forms)](https://web.dev/learn/forms/validation) — ver `contenido/html/TEMARIO.md` #22
 
 ---
 

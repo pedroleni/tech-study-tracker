@@ -2,8 +2,8 @@
 
 - **Módulo:** Accesibilidad
 - **Slug:** `accesibilidad-movil-y-tactil-tamano-de-objetivos-zoom-y-viewport` (autogenerado del título)
-- **Orden:** 135
-- **Fuentes:** [Mobile accessibility (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Accessibility/Mobile) + [WCAG 2.2 — Target Size Minimum (W3C/WAI)](https://www.w3.org/WAI/WCAG22/quickref/?showtechniques=258#target-size-minimum) para el número normativo exacto de tamaño de objetivo — ver `contenido/html/TEMARIO.md` #28
+- **Orden:** 155
+- **Fuentes:** [Mobile accessibility (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Accessibility/Mobile) + [WCAG 2.2 — Target Size Minimum (W3C/WAI)](https://www.w3.org/WAI/WCAG22/quickref/?showtechniques=258#target-size-minimum) para el número normativo exacto de tamaño de objetivo — ver `contenido/html/TEMARIO.md` #32
 
 ---
 

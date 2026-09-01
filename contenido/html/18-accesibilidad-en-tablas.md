@@ -2,8 +2,8 @@
 
 - **Módulo:** Tablas
 - **Slug:** `accesibilidad-en-tablas-caption-scope-y-thead-tbody-tfoot` (autogenerado del título)
-- **Orden:** 75
-- **Fuentes:** [HTML table accessibility (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Table_accessibility) + [Creating Accessible Tables — Data Tables (WebAIM)](https://webaim.org/techniques/tables/data) — ver `contenido/html/TEMARIO.md` #16
+- **Orden:** 85
+- **Fuentes:** [HTML table accessibility (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Table_accessibility) + [Creating Accessible Tables — Data Tables (WebAIM)](https://webaim.org/techniques/tables/data) — ver `contenido/html/TEMARIO.md` #18
 
 ---
 

@@ -2,8 +2,8 @@
 
 - **Módulo:** Formularios
 - **Slug:** `campos-de-formulario-tipos-de-input-y-cuando-usar-cada-uno` (autogenerado del título)
-- **Orden:** 85
-- **Fuentes:** [The HTML5 input types (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Forms/HTML5_input_types) + [Help users enter data in forms (web.dev Learn Forms)](https://web.dev/learn/forms/form-fields) — ver `contenido/html/TEMARIO.md` #18
+- **Orden:** 100
+- **Fuentes:** [The HTML5 input types (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Forms/HTML5_input_types) + [Help users enter data in forms (web.dev Learn Forms)](https://web.dev/learn/forms/form-fields) — ver `contenido/html/TEMARIO.md` #21
 
 ---
 

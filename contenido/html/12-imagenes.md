@@ -2,8 +2,8 @@
 
 - **Módulo:** Multimedia
 - **Slug:** `imagenes-img-alt-figure-figcaption-y-formatos-responsive` (autogenerado del título)
-- **Orden:** 50
-- **Fuentes:** [HTML images (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/HTML_images) + [Images (web.dev)](https://web.dev/learn/html/images) — ver `contenido/html/TEMARIO.md` #11
+- **Orden:** 55
+- **Fuentes:** [HTML images (MDN)](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/HTML_images) + [Images (web.dev)](https://web.dev/learn/html/images) — ver `contenido/html/TEMARIO.md` #12
 
 ---
 
