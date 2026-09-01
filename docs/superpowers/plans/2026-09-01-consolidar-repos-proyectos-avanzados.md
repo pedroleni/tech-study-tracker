@@ -544,7 +544,7 @@ git branch -d docs/consolidar-postgresql-proyectos-avanzados
 (Ninguno de los 4 lleva sufijo de tecnología en su nombre de repo —
 carpeta y repo viejo coinciden.)
 
-- [ ] **Step 1: Crear el config de Node.js**
+- [x] **Step 1: Crear el config de Node.js**
 
 ```json
 {
@@ -559,14 +559,14 @@ carpeta y repo viejo coinciden.)
 }
 ```
 
-- [ ] **Step 2: Ejecutar la migración local**
+- [x] **Step 2: Ejecutar la migración local**
 
 ```bash
 cd <directorio-scratchpad>
 node migrar-repo-tecnologia.mjs config-nodejs.json
 ```
 
-- [ ] **Step 3: Escanear secretos**
+- [x] **Step 3: Escanear secretos**
 
 ```bash
 bash "/Users/pedroleridanieto/Desktop/Proyectos IA/tech-study-tracker/scripts/security/scan_secrets.sh" nodejs-proyectos-avanzados
@@ -576,7 +576,7 @@ Prestar atención especial: `api-auth-jwt` construye JWT a mano —
 revisar que no quede ningún secreto de firma real hardcodeado más allá
 de un valor de ejemplo evidente (`"secreto-de-desarrollo"` o similar).
 
-- [ ] **Step 4: Crear el repo remoto y hacer push**
+- [x] **Step 4: Crear el repo remoto y hacer push**
 
 ```bash
 cd nodejs-proyectos-avanzados
@@ -586,7 +586,7 @@ git push -u origin main
 git push -u origin solucion
 ```
 
-- [ ] **Step 5: Verificación real**
+- [x] **Step 5: Verificación real**
 
 ```bash
 git clone --branch solucion https://github.com/pedroleni/nodejs-proyectos-avanzados.git /tmp/verificar-nodejs
@@ -601,14 +601,14 @@ con `ls` tras el clon — si no hay `tests/` ni script `test` en
 `package.json`, probar con `acortador-rate-limit` en su lugar antes de
 continuar).
 
-- [ ] **Step 6: Actualizar las 4 lecciones**
+- [x] **Step 6: Actualizar las 4 lecciones**
 
 Mismo patrón (URL base `github.com/pedroleni/nodejs-proyectos-avanzados`,
 `/tree/main/<carpeta>`, `/tree/solucion/<carpeta>`, `cd <carpeta> &&`).
 Node.js no tiene `TEMARIO.md` con enlaces a repos (confirmado al
 escribir el spec).
 
-- [ ] **Step 7: Validar los bloques `laboratorio` contra el esquema Zod**
+- [x] **Step 7: Validar los bloques `laboratorio` contra el esquema Zod**
 
 ```bash
 cd "/Users/pedroleridanieto/Desktop/Proyectos IA/tech-study-tracker"
@@ -643,7 +643,7 @@ rm src/lib/laboratorio/_debug-validar-nodejs-migrado.test.ts
 
 Expected: `1 passed (1)`.
 
-- [ ] **Step 8: Sincronizar las 4 lecciones con la base de datos real**
+- [x] **Step 8: Sincronizar las 4 lecciones con la base de datos real**
 
 Igual que en la migración de SQL: arrancar el servidor de dev, para
 cada una de las 4 lecciones de la tabla de mapeo de esta tarea,
@@ -653,7 +653,7 @@ leer el `value` actual de `textarea#leccion-contenido`, aplicar la
 sustitución del Step 6 (debe encontrarse literalmente — si no, parar y
 revisar antes de continuar), rellenar el campo, pulsar "Guardar".
 
-- [ ] **Step 9: Verificación visual**
+- [x] **Step 9: Verificación visual**
 
 Con Playwright: navegar a la lección pública ya actualizada de uno de
 los 4 proyectos de Node.js (por ejemplo `procesador-webhooks`),
@@ -663,7 +663,7 @@ confirmar que el callout del repositorio muestra
 `https://github.com/pedroleni/nodejs-proyectos-avanzados/tree/main/procesador-webhooks`.
 Capturar pantalla para verificación humana.
 
-- [ ] **Step 10: Suite completa + commit**
+- [x] **Step 10: Suite completa + commit**
 
 ```bash
 cd "/Users/pedroleridanieto/Desktop/Proyectos IA/tech-study-tracker"
