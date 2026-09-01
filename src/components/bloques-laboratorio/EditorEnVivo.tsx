@@ -40,6 +40,7 @@ const estilosTemaAplicacion = {
   },
   '.cm-scroller': {
     overflow: 'auto',
+    maxHeight: '24rem',
     fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
   },
   '.cm-content': {
@@ -83,6 +84,19 @@ function construirDocumento(html: string, css: string, js: string) {
   <body>
 ${html}
     <script>${javascriptSeguro}</script>
+    <script>
+      (() => {
+        const comunicarAltura = () => {
+          window.parent.postMessage(
+            { tipo: 'editor-en-vivo:alto', alto: document.documentElement.scrollHeight },
+            '*',
+          )
+        }
+        new ResizeObserver(comunicarAltura).observe(document.documentElement)
+        window.addEventListener('load', comunicarAltura)
+        comunicarAltura()
+      })()
+    </script>
   </body>
 </html>`
 }
@@ -243,6 +257,26 @@ export function EditorEnVivo({
   )
   const [diagnosticosTs, setDiagnosticosTs] = useState<DiagnosticoTs[]>([])
   const entornoTsRef = useRef<EntornoTypeScript | null>(null)
+  const iframeRef = useRef<HTMLIFrameElement>(null)
+  const [altoIframe, setAltoIframe] = useState<number | null>(null)
+
+  useEffect(() => {
+    const recibirAltura = (evento: MessageEvent) => {
+      if (evento.source !== iframeRef.current?.contentWindow) return
+      if (
+        typeof evento.data !== 'object' ||
+        evento.data === null ||
+        evento.data.tipo !== 'editor-en-vivo:alto' ||
+        typeof evento.data.alto !== 'number'
+      ) {
+        return
+      }
+      setAltoIframe(evento.data.alto)
+    }
+
+    window.addEventListener('message', recibirAltura)
+    return () => window.removeEventListener('message', recibirAltura)
+  }, [])
 
   useEffect(() => {
     if (!usaTypeScript) return
@@ -368,9 +402,18 @@ export function EditorEnVivo({
         <div className="min-w-0 space-y-2">
           <h4 className="text-sm font-semibold">Vista previa</h4>
           <iframe
-            className="block h-40 w-full max-w-full rounded-lg border bg-white sm:h-56"
+            ref={iframeRef}
+            className={cn(
+              'block w-full max-w-full rounded-lg border bg-white',
+              altoIframe === null && 'h-40 sm:h-56',
+            )}
             sandbox="allow-scripts allow-forms"
             srcDoc={srcDoc}
+            style={
+              altoIframe === null
+                ? undefined
+                : { height: `${Math.min(Math.max(altoIframe + 2, 160), 2400)}px` }
+            }
             title="Vista previa del editor en vivo"
           />
         </div>
