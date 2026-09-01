@@ -3,7 +3,7 @@
 - **Módulo:** Proyectos
 - **Slug:** `proyecto-avanzado-analitica-de-eventos-con-jsonb` (autogenerado del título)
 - **Orden:** 650
-- **Repositorio:** [github.com/pedroleni/analitica-eventos-jsonb](https://github.com/pedroleni/analitica-eventos-jsonb)
+- **Repositorio:** [github.com/pedroleni/postgresql-proyectos-avanzados](https://github.com/pedroleni/postgresql-proyectos-avanzados) (carpeta `analitica-eventos-jsonb`)
 - **Requiere:** Módulo 3 (JSON frente a JSONB) y la lección 40-41 (Vistas materializadas) de este mismo temario
 
 ---
@@ -17,7 +17,7 @@ Un sistema de tracking de eventos de producto (piensa en analítica tipo Mixpane
   "tipo": "callout",
   "variante": "info",
   "titulo": "El repositorio",
-  "contenido": "github.com/pedroleni/analitica-eventos-jsonb — rama main con el esquema (JSONB + GIN, vista materializada de resumen diario) y toda la aplicación completos; solo las dos consultas de búsqueda por payload en src/eventos.ts están recortadas. Rama solucion con las consultas completas."
+  "contenido": "github.com/pedroleni/postgresql-proyectos-avanzados (carpeta analitica-eventos-jsonb) — rama main con el esquema (JSONB + GIN, vista materializada de resumen diario) y toda la aplicación completos; solo las dos consultas de búsqueda por payload en src/eventos.ts están recortadas. Rama solucion con las consultas completas."
 }
 ```
 
@@ -54,7 +54,7 @@ Un sistema de tracking de eventos de producto (piensa en analítica tipo Mixpane
 {
   "tipo": "notas-clave",
   "items": [
-    { "titulo": "Levanta Postgres, migra y siembra eventos reales.", "texto": "docker compose up -d, npm install, npm run migrate, npm run seed — 45 eventos de 3 tipos distintos, con payloads variados y repartidos en varios días." },
+    { "titulo": "Levanta Postgres, migra y siembra eventos reales.", "texto": "Clona postgresql-proyectos-avanzados, entra en analitica-eventos-jsonb/ y ejecuta docker compose up -d, npm install, npm run migrate, npm run seed — 45 eventos de 3 tipos distintos, con payloads variados y repartidos en varios días." },
     { "titulo": "Ejecuta los tests tal cual — 2 de 4 deben fallar.", "texto": "Los tests de buscarPorCampoPayload y contarPorClaveExistente fallan; los del resumen diario pasan igual, porque no dependen de estas dos consultas." },
     { "titulo": "Completa los dos WHERE y confirma los 4.", "texto": "Sustituye los placeholders por payload ->> $1 = $2 y payload ? $1 respectivamente, y vuelve a correr npm test." }
   ]
@@ -86,15 +86,15 @@ Un sistema de tracking de eventos de producto (piensa en analítica tipo Mixpane
   "titulo": "Repositorio y referencias",
   "recursos": [
     {
-      "titulo": "analitica-eventos-jsonb (rama main — punto de partida)",
-      "descripcion": "Clona esta rama para hacer el proyecto tú mismo.",
-      "url": "https://github.com/pedroleni/analitica-eventos-jsonb/tree/main",
+      "titulo": "postgresql-proyectos-avanzados/analitica-eventos-jsonb (rama main — punto de partida)",
+      "descripcion": "Clona el repo entero y entra en analitica-eventos-jsonb/ para hacer el proyecto tú mismo.",
+      "url": "https://github.com/pedroleni/postgresql-proyectos-avanzados/tree/main/analitica-eventos-jsonb",
       "etiqueta": "GitHub"
     },
     {
-      "titulo": "analitica-eventos-jsonb (rama solucion)",
+      "titulo": "postgresql-proyectos-avanzados/analitica-eventos-jsonb (rama solucion)",
       "descripcion": "La implementación completa, para comparar si te atascas.",
-      "url": "https://github.com/pedroleni/analitica-eventos-jsonb/tree/solucion",
+      "url": "https://github.com/pedroleni/postgresql-proyectos-avanzados/tree/solucion/analitica-eventos-jsonb",
       "etiqueta": "GitHub"
     },
     {

@@ -3,7 +3,7 @@
 - **Módulo:** Proyectos
 - **Slug:** `proyecto-avanzado-reservas-multi-tenant-con-row-level-security` (autogenerado del título)
 - **Orden:** 620
-- **Repositorio:** [github.com/pedroleni/reservas-multi-tenant-rls](https://github.com/pedroleni/reservas-multi-tenant-rls)
+- **Repositorio:** [github.com/pedroleni/postgresql-proyectos-avanzados](https://github.com/pedroleni/postgresql-proyectos-avanzados) (carpeta `reservas-multi-tenant-rls`)
 - **Requiere:** Módulo 13 (Roles, privilegios y control de acceso real) y Módulo 14 (Row Level Security) de este mismo temario
 
 ---
@@ -17,7 +17,7 @@ Un sistema de reservas de salas de reuniones donde varias organizaciones compart
   "tipo": "callout",
   "variante": "info",
   "titulo": "El repositorio",
-  "contenido": "github.com/pedroleni/reservas-multi-tenant-rls — rama main con el esquema, los roles y toda la aplicación completos; solo las políticas RLS de migrations/003_rls.sql están recortadas a using(false)/with check(false). Rama solucion con las políticas completas."
+  "contenido": "github.com/pedroleni/postgresql-proyectos-avanzados (carpeta reservas-multi-tenant-rls) — rama main con el esquema, los roles y toda la aplicación completos; solo las políticas RLS de migrations/003_rls.sql están recortadas a using(false)/with check(false). Rama solucion con las políticas completas."
 }
 ```
 
@@ -55,7 +55,7 @@ Un sistema de reservas de salas de reuniones donde varias organizaciones compart
 {
   "tipo": "notas-clave",
   "items": [
-    { "titulo": "Levanta Postgres y aplica las migraciones.", "texto": "docker compose up -d, npm install, npm run migrate — el esquema, los roles y la función current_org_id() quedan listos." },
+    { "titulo": "Levanta Postgres y aplica las migraciones.", "texto": "Clona postgresql-proyectos-avanzados, entra en reservas-multi-tenant-rls/ y ejecuta docker compose up -d, npm install, npm run migrate — el esquema, los roles y la función current_org_id() quedan listos." },
     { "titulo": "Ejecuta los tests tal cual — deben fallar.", "texto": "npm test falla ya al crear la primera sala (WITH CHECK rechaza todo). Es el punto de partida correcto, no un error tuyo." },
     { "titulo": "Completa las dos políticas y vuelve a correr los tests.", "texto": "Sustituye using(false)/with check(false) por organizacion_id = current_org_id() en ambas políticas de migrations/003_rls.sql, aplica las migraciones sobre una base limpia y confirma que los 5 tests pasan." }
   ]
@@ -87,15 +87,15 @@ Un sistema de reservas de salas de reuniones donde varias organizaciones compart
   "titulo": "Repositorio y referencias",
   "recursos": [
     {
-      "titulo": "reservas-multi-tenant-rls (rama main — punto de partida)",
-      "descripcion": "Clona esta rama para hacer el proyecto tú mismo.",
-      "url": "https://github.com/pedroleni/reservas-multi-tenant-rls/tree/main",
+      "titulo": "postgresql-proyectos-avanzados/reservas-multi-tenant-rls (rama main — punto de partida)",
+      "descripcion": "Clona el repo entero y entra en reservas-multi-tenant-rls/ para hacer el proyecto tú mismo.",
+      "url": "https://github.com/pedroleni/postgresql-proyectos-avanzados/tree/main/reservas-multi-tenant-rls",
       "etiqueta": "GitHub"
     },
     {
-      "titulo": "reservas-multi-tenant-rls (rama solucion)",
+      "titulo": "postgresql-proyectos-avanzados/reservas-multi-tenant-rls (rama solucion)",
       "descripcion": "La implementación completa, para comparar si te atascas.",
-      "url": "https://github.com/pedroleni/reservas-multi-tenant-rls/tree/solucion",
+      "url": "https://github.com/pedroleni/postgresql-proyectos-avanzados/tree/solucion/reservas-multi-tenant-rls",
       "etiqueta": "GitHub"
     },
     {

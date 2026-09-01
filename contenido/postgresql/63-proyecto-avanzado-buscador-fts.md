@@ -3,7 +3,7 @@
 - **Módulo:** Proyectos
 - **Slug:** `proyecto-avanzado-buscador-de-articulos-con-busqueda-de-texto-completo` (autogenerado del título)
 - **Orden:** 630
-- **Repositorio:** [github.com/pedroleni/buscador-fts-postgres](https://github.com/pedroleni/buscador-fts-postgres)
+- **Repositorio:** [github.com/pedroleni/postgresql-proyectos-avanzados](https://github.com/pedroleni/postgresql-proyectos-avanzados) (carpeta `buscador-fts`)
 - **Requiere:** Módulo 6 (Búsqueda de texto completo) y la lección 40-41 (Vistas materializadas) de este mismo temario
 
 ---
@@ -17,7 +17,7 @@ Un buscador de artículos que ordena los resultados por relevancia REAL — no p
   "tipo": "callout",
   "variante": "info",
   "titulo": "El repositorio",
-  "contenido": "github.com/pedroleni/buscador-fts-postgres — rama main con el esquema (tsvector con pesos, índice GIN, vista materializada) y toda la aplicación completos; solo el filtro y el ranking de buscarArticulos() en src/articulos.ts están recortados. Rama solucion con la consulta completa."
+  "contenido": "github.com/pedroleni/postgresql-proyectos-avanzados (carpeta buscador-fts) — rama main con el esquema (tsvector con pesos, índice GIN, vista materializada) y toda la aplicación completos; solo el filtro y el ranking de buscarArticulos() en src/articulos.ts están recortados. Rama solucion con la consulta completa."
 }
 ```
 
@@ -54,7 +54,7 @@ Un buscador de artículos que ordena los resultados por relevancia REAL — no p
 {
   "tipo": "notas-clave",
   "items": [
-    { "titulo": "Levanta Postgres, migra y siembra artículos reales.", "texto": "docker compose up -d, npm install, npm run migrate, npm run seed — 10 artículos con contenido real y solapado a propósito, para que el ranking sea observable." },
+    { "titulo": "Levanta Postgres, migra y siembra artículos reales.", "texto": "Clona postgresql-proyectos-avanzados, entra en buscador-fts/ y ejecuta docker compose up -d, npm install, npm run migrate, npm run seed — 10 artículos con contenido real y solapado a propósito, para que el ranking sea observable." },
     { "titulo": "Ejecuta los tests tal cual — 2 de 5 deben fallar.", "texto": "Los tests que comprueban ranking y fragmento resaltado fallan; los que comprueban 'sin resultados' o el registro de búsquedas pasan igual, porque no dependen del filtro real." },
     { "titulo": "Completa la consulta y confirma los 5.", "texto": "Sustituye el WHERE y las dos columnas por websearch_to_tsquery + @@ + ts_rank + ts_headline (tal como viste en el módulo 6) y vuelve a correr npm test." }
   ]
@@ -86,15 +86,15 @@ Un buscador de artículos que ordena los resultados por relevancia REAL — no p
   "titulo": "Repositorio y referencias",
   "recursos": [
     {
-      "titulo": "buscador-fts-postgres (rama main — punto de partida)",
-      "descripcion": "Clona esta rama para hacer el proyecto tú mismo.",
-      "url": "https://github.com/pedroleni/buscador-fts-postgres/tree/main",
+      "titulo": "postgresql-proyectos-avanzados/buscador-fts (rama main — punto de partida)",
+      "descripcion": "Clona el repo entero y entra en buscador-fts/ para hacer el proyecto tú mismo.",
+      "url": "https://github.com/pedroleni/postgresql-proyectos-avanzados/tree/main/buscador-fts",
       "etiqueta": "GitHub"
     },
     {
-      "titulo": "buscador-fts-postgres (rama solucion)",
+      "titulo": "postgresql-proyectos-avanzados/buscador-fts (rama solucion)",
       "descripcion": "La implementación completa, para comparar si te atascas.",
-      "url": "https://github.com/pedroleni/buscador-fts-postgres/tree/solucion",
+      "url": "https://github.com/pedroleni/postgresql-proyectos-avanzados/tree/solucion/buscador-fts",
       "etiqueta": "GitHub"
     },
     {
