@@ -476,42 +476,44 @@ export function TechnologyPage() {
                                     : undefined
                                 }
                               >
-                                <div className="flex min-w-0 items-start gap-3">
-                                  <span
-                                    aria-hidden="true"
-                                    className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-bold tabular-nums text-muted-foreground"
-                                  >
-                                    {String(indice + 1).padStart(2, '0')}
-                                  </span>
-                                  <div className="min-w-0 flex-1 space-y-2">
-                                    <div className="flex flex-wrap items-center gap-2">
-                                      <h4 className="min-w-0 break-words text-base font-semibold text-balance">
-                                        <Link
-                                          to={`/tecnologias/${technology.id}/${leccion.slug}`}
-                                          className="rounded-sm decoration-foreground/30 underline-offset-4 group-hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                                        >
-                                          {leccion.titulo}
-                                        </Link>
-                                      </h4>
-                                      {esActual && (
-                                        <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
-                                          <PlayCircle
-                                            aria-hidden="true"
-                                            className="size-3.5"
-                                          />
-                                          Continuando aquí
-                                        </span>
-                                      )}
-                                      {leccion.status === 'borrador' && (
-                                        <span className="shrink-0 rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-                                          Borrador
-                                        </span>
-                                      )}
+                                <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                  <div className="flex min-w-0 flex-1 items-start gap-3">
+                                    <span
+                                      aria-hidden="true"
+                                      className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-bold tabular-nums text-muted-foreground"
+                                    >
+                                      {String(indice + 1).padStart(2, '0')}
+                                    </span>
+                                    <div className="min-w-0 flex-1 space-y-2">
+                                      <div className="flex flex-wrap items-center gap-2">
+                                        <h4 className="min-w-0 break-words text-base font-semibold text-balance">
+                                          <Link
+                                            to={`/tecnologias/${technology.id}/${leccion.slug}`}
+                                            className="rounded-sm decoration-foreground/30 underline-offset-4 group-hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                          >
+                                            {leccion.titulo}
+                                          </Link>
+                                        </h4>
+                                        {esActual && (
+                                          <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+                                            <PlayCircle
+                                              aria-hidden="true"
+                                              className="size-3.5"
+                                            />
+                                            Continuando aquí
+                                          </span>
+                                        )}
+                                        {leccion.status === 'borrador' && (
+                                          <span className="shrink-0 rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                                            Borrador
+                                          </span>
+                                        )}
+                                      </div>
+                                      <p className="break-words text-sm text-muted-foreground">
+                                        {leccion.resumen ||
+                                          'Esta lección todavía no tiene resumen.'}
+                                      </p>
                                     </div>
-                                    <p className="break-words text-sm text-muted-foreground">
-                                      {leccion.resumen ||
-                                        'Esta lección todavía no tiene resumen.'}
-                                    </p>
                                   </div>
                                   <div className="flex shrink-0 items-center gap-3">
                                     {user && leccion.status === 'publicado' && (
