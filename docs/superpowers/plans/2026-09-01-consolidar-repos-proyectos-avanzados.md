@@ -379,7 +379,7 @@ spec — no se fusiona a `main` hasta el final de la Tarea 6).
 mismo nombre de carpeta que de repo — no llevaban sufijo de tecnología
 que quitar.)
 
-- [ ] **Step 1: Crear el config de PostgreSQL**
+- [x] **Step 1: Crear el config de PostgreSQL**
 
 ```json
 {
@@ -394,7 +394,7 @@ que quitar.)
 }
 ```
 
-- [ ] **Step 2: Ejecutar la migración local**
+- [x] **Step 2: Ejecutar la migración local**
 
 ```bash
 cd <directorio-scratchpad>
@@ -404,7 +404,7 @@ node migrar-repo-tecnologia.mjs config-postgresql.json
 Expected: igual que Task 1 Step 2, adaptado a `postgresql-proyectos-avanzados`
 y sus 4 carpetas.
 
-- [ ] **Step 3: Escanear secretos**
+- [x] **Step 3: Escanear secretos**
 
 ```bash
 bash "/Users/pedroleridanieto/Desktop/Proyectos IA/tech-study-tracker/scripts/security/scan_secrets.sh" postgresql-proyectos-avanzados
@@ -417,7 +417,7 @@ contraseñas reales de una instancia de desarrollo personal, solo
 valores de ejemplo (`postgres`/`postgres` o similar, típico de
 `docker-compose` de desarrollo).
 
-- [ ] **Step 4: Crear el repo remoto y hacer push**
+- [x] **Step 4: Crear el repo remoto y hacer push**
 
 ```bash
 cd postgresql-proyectos-avanzados
@@ -427,7 +427,7 @@ git push -u origin main
 git push -u origin solucion
 ```
 
-- [ ] **Step 5: Verificación real**
+- [x] **Step 5: Verificación real**
 
 Todos los proyectos de PostgreSQL necesitan una instancia real de
 Postgres (vía `docker-compose.yml`, confirmado en la validación del
@@ -450,7 +450,7 @@ como hecho sin haberlo comprobado) y verificar en su lugar que
 dejando constancia de que la verificación de integración con Postgres
 real queda pendiente para cuando haya `docker` disponible.
 
-- [ ] **Step 6: Actualizar las 4 lecciones (mismo procedimiento que Task 1 Step 6)**
+- [x] **Step 6: Actualizar las 4 lecciones (mismo procedimiento que Task 1 Step 6)**
 
 Mismas sustituciones (URL base `github.com/pedroleni/postgresql-proyectos-avanzados`,
 `/tree/main/<carpeta>` y `/tree/solucion/<carpeta>`, `cd <carpeta> &&`
@@ -459,7 +459,7 @@ de mapeo de esta tarea. PostgreSQL no tiene `TEMARIO.md` con enlaces a
 repos (confirmado al escribir el spec) — no hay fichero de índice que
 tocar aquí.
 
-- [ ] **Step 7: Validar los bloques `laboratorio` contra el esquema Zod**
+- [x] **Step 7: Validar los bloques `laboratorio` contra el esquema Zod**
 
 ```bash
 cd "/Users/pedroleridanieto/Desktop/Proyectos IA/tech-study-tracker"
@@ -494,17 +494,17 @@ rm src/lib/laboratorio/_debug-validar-postgresql-migrado.test.ts
 
 Expected: `1 passed (1)`.
 
-- [ ] **Step 8: Sincronizar las 4 lecciones con la base de datos real**
+- [x] **Step 8: Sincronizar las 4 lecciones con la base de datos real**
 
 Mismo procedimiento que Task 1 Step 8, con el id de la tecnología
 PostgreSQL y las 4 lecciones de esta tarea.
 
-- [ ] **Step 9: Verificación visual**
+- [x] **Step 9: Verificación visual**
 
 Mismo procedimiento que Task 1 Step 9, sobre una de las 4 lecciones de
 PostgreSQL (por ejemplo `analitica-eventos-jsonb`).
 
-- [ ] **Step 10: Suite completa + commit**
+- [x] **Step 10: Suite completa + commit**
 
 ```bash
 cd "/Users/pedroleridanieto/Desktop/Proyectos IA/tech-study-tracker"
