@@ -180,7 +180,7 @@ console.log('Siguiente paso: scan_secrets.sh, gh repo create, git remote add, gi
 | `catalogo-jerarquico-cte-recursiva` | `catalogo-jerarquico-cte` | `contenido/sql/48-proyecto-avanzado-catalogo-jerarquico-cte.md` |
 | `reportes-ventas-vistas-sql` | `reportes-vistas-sql` | `contenido/sql/49-proyecto-avanzado-reportes-vistas-sql.md` |
 
-- [ ] **Step 1: Crear el script de migración y el config de SQL**
+- [x] **Step 1: Crear el script de migración y el config de SQL**
 
 Crear `migrar-repo-tecnologia.mjs` con el código completo dado en la
 sección "Herramienta compartida" de arriba, en el directorio de
@@ -201,7 +201,7 @@ Crear `config-sql.json`, en el mismo directorio:
 }
 ```
 
-- [ ] **Step 2: Ejecutar la migración local**
+- [x] **Step 2: Ejecutar la migración local**
 
 ```bash
 cd <directorio-scratchpad>
@@ -214,7 +214,7 @@ pobladas localmente." Verificar a mano: `ls sql-proyectos-avanzados/`
 sql-proyectos-avanzados && git log --oneline --all` debe mostrar 2
 commits (uno en `main`, uno en `solucion`).
 
-- [ ] **Step 3: Escanear secretos antes de crear nada remoto**
+- [x] **Step 3: Escanear secretos antes de crear nada remoto**
 
 ```bash
 bash "/Users/pedroleridanieto/Desktop/Proyectos IA/tech-study-tracker/scripts/security/scan_secrets.sh" sql-proyectos-avanzados
@@ -224,7 +224,7 @@ Expected: sin hallazgos `[HIGH]`/`[CRITICAL]` reales (a diferencia del
 repo de la app, aquí no hay ningún `.env` — cualquier hallazgo real
 debe investigarse antes de continuar, no descartarse por rutina).
 
-- [ ] **Step 4: Crear el repo remoto y hacer push**
+- [x] **Step 4: Crear el repo remoto y hacer push**
 
 ```bash
 cd sql-proyectos-avanzados
@@ -237,7 +237,7 @@ git push -u origin solucion
 Expected: ambas ramas visibles en
 `https://github.com/pedroleni/sql-proyectos-avanzados`.
 
-- [ ] **Step 5: Verificación real — al menos un proyecto funciona igual que antes**
+- [x] **Step 5: Verificación real — al menos un proyecto funciona igual que antes**
 
 `inventario-transaccional-sqlite` es un proyecto Node con test suite
 propia (confirmado con `gh api repos/pedroleni/inventario-transaccional-sqlite/contents`
@@ -256,7 +256,7 @@ el repo viejo `inventario-transaccional-sqlite`, rama `solucion` —
 si hay dudas, ejecutarlos también contra el repo viejo para comparar
 antes de seguir).
 
-- [ ] **Step 6: Actualizar las 4 lecciones + TEMARIO.md (ficheros locales)**
+- [x] **Step 6: Actualizar las 4 lecciones + TEMARIO.md (ficheros locales)**
 
 Para cada una de las 4 lecciones de la tabla de arriba: leer el
 fichero completo, localizar toda mención a
@@ -275,7 +275,7 @@ cualquier instrucción de "clona y ejecuta"), y sustituir por:
 Aplicar el mismo tipo de sustitución a `contenido/sql/TEMARIO.md` (solo
 referencia de autoría, no se sincroniza a ninguna lección publicada).
 
-- [ ] **Step 7: Validar los bloques `laboratorio` de las 4 lecciones contra el esquema Zod**
+- [x] **Step 7: Validar los bloques `laboratorio` de las 4 lecciones contra el esquema Zod**
 
 ```bash
 cd "/Users/pedroleridanieto/Desktop/Proyectos IA/tech-study-tracker"
@@ -310,7 +310,7 @@ rm src/lib/laboratorio/_debug-validar-sql-migrado.test.ts
 
 Expected: `1 passed (1)`.
 
-- [ ] **Step 8: Sincronizar las 4 lecciones con la base de datos real**
+- [x] **Step 8: Sincronizar las 4 lecciones con la base de datos real**
 
 Arrancar el servidor de dev (`npm run dev`), y para cada una de las 4
 lecciones: iniciar sesión de administrador con Playwright, ir a
@@ -323,7 +323,7 @@ sustitución del Step 6 sobre ese texto (debe encontrarse literalmente
 — si no, parar y revisar por qué diverge del fichero local antes de
 continuar), rellenar el campo con el resultado, y pulsar "Guardar".
 
-- [ ] **Step 9: Verificación visual de una lección actualizada**
+- [x] **Step 9: Verificación visual de una lección actualizada**
 
 Con Playwright: navegar a la lección pública de
 `inventario-transaccional` ya actualizada, confirmar que el callout
@@ -333,7 +333,7 @@ del repositorio muestra la URL nueva
 `https://github.com/pedroleni/sql-proyectos-avanzados/tree/main/inventario-transaccional`.
 Capturar pantalla para verificación humana.
 
-- [ ] **Step 10: Suite completa + commit**
+- [x] **Step 10: Suite completa + commit**
 
 ```bash
 cd "/Users/pedroleridanieto/Desktop/Proyectos IA/tech-study-tracker"
