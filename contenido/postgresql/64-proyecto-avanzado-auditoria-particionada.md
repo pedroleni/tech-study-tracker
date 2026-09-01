@@ -3,7 +3,7 @@
 - **Módulo:** Proyectos
 - **Slug:** `proyecto-avanzado-auditoria-automatica-con-triggers-y-particionado` (autogenerado del título)
 - **Orden:** 640
-- **Repositorio:** [github.com/pedroleni/postgresql-proyectos-avanzados](https://github.com/pedroleni/postgresql-proyectos-avanzados) (carpeta `auditoria-particionada`)
+- **Repositorio:** [github.com/pedroleni/postgresql-proyectos](https://github.com/pedroleni/postgresql-proyectos) (carpeta `auditoria-particionada`)
 - **Requiere:** Módulo 11 (Triggers) y Módulo 15 (Particionado de tablas) de este mismo temario
 
 ---
@@ -17,7 +17,7 @@ Un sistema de auditoría que registra automáticamente cada `INSERT`/`UPDATE`/`D
   "tipo": "callout",
   "variante": "info",
   "titulo": "El repositorio",
-  "contenido": "github.com/pedroleni/postgresql-proyectos-avanzados (carpeta auditoria-particionada) — rama main con el esquema particionado, los índices y toda la aplicación completos; solo fn_auditar_cambio() en migrations/003_trigger_auditoria.sql está recortada. Rama solucion con el trigger completo."
+  "contenido": "github.com/pedroleni/postgresql-proyectos (carpeta auditoria-particionada) — rama main con el esquema particionado, los índices y toda la aplicación completos; solo fn_auditar_cambio() en migrations/003_trigger_auditoria.sql está recortada. Rama solucion con el trigger completo."
 }
 ```
 
@@ -54,7 +54,7 @@ Un sistema de auditoría que registra automáticamente cada `INSERT`/`UPDATE`/`D
 {
   "tipo": "notas-clave",
   "items": [
-    { "titulo": "Levanta Postgres y aplica las migraciones.", "texto": "Clona postgresql-proyectos-avanzados, entra en auditoria-particionada/ y ejecuta docker compose up -d, npm install, npm run migrate — crea productos, auditoria particionada (mes anterior/actual/siguiente ya creados) y el trigger." },
+    { "titulo": "Levanta Postgres y aplica las migraciones.", "texto": "Clona postgresql-proyectos, entra en auditoria-particionada/ y ejecuta docker compose up -d, npm install, npm run migrate — crea productos, auditoria particionada (mes anterior/actual/siguiente ya creados) y el trigger." },
     { "titulo": "Ejecuta los tests tal cual — 4 de 5 deben fallar.", "texto": "Los tests que esperan filas de auditoría fallan (array vacío); el test de crearParticionParaMes para un mes futuro pasa igual, porque no depende del trigger." },
     { "titulo": "Completa el INSERT en las tres ramas y confirma los 5.", "texto": "Usa TG_TABLE_NAME, TG_OP, to_jsonb(NEW)/to_jsonb(OLD) tal como viste en el módulo 11, aplica sobre una base limpia y vuelve a correr npm test." }
   ]
@@ -86,15 +86,15 @@ Un sistema de auditoría que registra automáticamente cada `INSERT`/`UPDATE`/`D
   "titulo": "Repositorio y referencias",
   "recursos": [
     {
-      "titulo": "postgresql-proyectos-avanzados/auditoria-particionada (rama main — punto de partida)",
+      "titulo": "postgresql-proyectos/auditoria-particionada (rama main — punto de partida)",
       "descripcion": "Clona el repo entero y entra en auditoria-particionada/ para hacer el proyecto tú mismo.",
-      "url": "https://github.com/pedroleni/postgresql-proyectos-avanzados/tree/main/auditoria-particionada",
+      "url": "https://github.com/pedroleni/postgresql-proyectos/tree/main/auditoria-particionada",
       "etiqueta": "GitHub"
     },
     {
-      "titulo": "postgresql-proyectos-avanzados/auditoria-particionada (rama solucion)",
+      "titulo": "postgresql-proyectos/auditoria-particionada (rama solucion)",
       "descripcion": "La implementación completa, para comparar si te atascas.",
-      "url": "https://github.com/pedroleni/postgresql-proyectos-avanzados/tree/solucion/auditoria-particionada",
+      "url": "https://github.com/pedroleni/postgresql-proyectos/tree/solucion/auditoria-particionada",
       "etiqueta": "GitHub"
     },
     {

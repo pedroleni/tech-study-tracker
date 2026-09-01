@@ -3,7 +3,7 @@
 - **Módulo:** Proyectos
 - **Slug:** `proyecto-avanzado-procesador-de-ventas-por-lotes` (autogenerado del título)
 - **Orden:** 550
-- **Repositorio:** [github.com/pedroleni/nodejs-proyectos-avanzados](https://github.com/pedroleni/nodejs-proyectos-avanzados) (carpeta `procesador-ventas-streams`)
+- **Repositorio:** [github.com/pedroleni/nodejs-proyectos](https://github.com/pedroleni/nodejs-proyectos) (carpeta `procesador-ventas-streams`)
 - **Requiere:** Módulo 9 (Streams, especialmente las lecciones 33 —
   `pipe()`/`pipeline()` — y 34 — Backpressure) y Módulo 12 (TypeScript en
   Node) de este mismo temario
@@ -24,7 +24,7 @@ streams" y "Backpressuring in Streams".
   "tipo": "callout",
   "variante": "info",
   "titulo": "El repositorio",
-  "contenido": "github.com/pedroleni/nodejs-proyectos-avanzados (carpeta procesador-ventas-streams) — rama main con tipos.ts, parseo-csv.ts, informe-csv.ts, procesar.ts y cli.ts completos (la infraestructura y el diseño) y divisor-lineas.ts + agregador.ts con TODO; rama solucion con la implementación completa."
+  "contenido": "github.com/pedroleni/nodejs-proyectos (carpeta procesador-ventas-streams) — rama main con tipos.ts, parseo-csv.ts, informe-csv.ts, procesar.ts y cli.ts completos (la infraestructura y el diseño) y divisor-lineas.ts + agregador.ts con TODO; rama solucion con la implementación completa."
 }
 ```
 
@@ -88,7 +88,7 @@ justo por la mitad, en cualquier punto.
 {
   "tipo": "notas-clave",
   "items": [
-    { "titulo": "Genera un fichero real de cientos de miles de filas.", "texto": "Clona nodejs-proyectos-avanzados, entra en procesador-ventas-streams/ y ejecuta npm run generar-datos -- ventas.csv 300000 — el propio generador escribe por streaming, así que ni siquiera él construye el CSV entero en memoria." },
+    { "titulo": "Genera un fichero real de cientos de miles de filas.", "texto": "Clona nodejs-proyectos, entra en procesador-ventas-streams/ y ejecuta npm run generar-datos -- ventas.csv 300000 — el propio generador escribe por streaming, así que ni siquiera él construye el CSV entero en memoria." },
     { "titulo": "Procésalo y mira el informe real.", "texto": "npm start -- ventas.csv — verás el total de ventas, el ingreso total, y un desglose por categoría ordenado de mayor a menor ingreso, calculado sobre un fichero de varios megabytes en un puñado de milisegundos." },
     { "titulo": "Comprueba el caso límite a propósito.", "texto": "Los tests de divisor-lineas.test.ts cubren el caso exacto de una línea partida entre dos chunks distintos — el bug más fácil de introducir sin darte cuenta al escribir un parser de streams a mano." }
   ]
@@ -109,15 +109,15 @@ justo por la mitad, en cualquier punto.
   "titulo": "Repositorio y referencias",
   "recursos": [
     {
-      "titulo": "nodejs-proyectos-avanzados/procesador-ventas-streams (rama main — punto de partida)",
+      "titulo": "nodejs-proyectos/procesador-ventas-streams (rama main — punto de partida)",
       "descripcion": "Clona el repo entero y entra en procesador-ventas-streams/ para hacer el proyecto tú mismo.",
-      "url": "https://github.com/pedroleni/nodejs-proyectos-avanzados/tree/main/procesador-ventas-streams",
+      "url": "https://github.com/pedroleni/nodejs-proyectos/tree/main/procesador-ventas-streams",
       "etiqueta": "GitHub"
     },
     {
-      "titulo": "nodejs-proyectos-avanzados/procesador-ventas-streams (rama solucion)",
+      "titulo": "nodejs-proyectos/procesador-ventas-streams (rama solucion)",
       "descripcion": "La implementación completa, para comparar si te atascas.",
-      "url": "https://github.com/pedroleni/nodejs-proyectos-avanzados/tree/solucion/procesador-ventas-streams",
+      "url": "https://github.com/pedroleni/nodejs-proyectos/tree/solucion/procesador-ventas-streams",
       "etiqueta": "GitHub"
     },
     {

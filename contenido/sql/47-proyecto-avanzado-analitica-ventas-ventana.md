@@ -3,7 +3,7 @@
 - **Módulo:** Proyectos
 - **Slug:** `proyecto-avanzado-analitica-de-ventas-con-funciones-de-ventana` (autogenerado del título)
 - **Orden:** 470
-- **Repositorio:** [github.com/pedroleni/sql-proyectos-avanzados](https://github.com/pedroleni/sql-proyectos-avanzados) (carpeta `analitica-ventas-ventana`)
+- **Repositorio:** [github.com/pedroleni/sql-proyectos](https://github.com/pedroleni/sql-proyectos) (carpeta `analitica-ventas-ventana`)
 - **Requiere:** Módulo 11 (Funciones de ventana) de este mismo temario
 
 ---
@@ -17,7 +17,7 @@ Un panel de analítica que responde a tres preguntas que un `GROUP BY` normal no
   "tipo": "callout",
   "variante": "info",
   "titulo": "El repositorio",
-  "contenido": "github.com/pedroleni/sql-proyectos-avanzados (carpeta analitica-ventas-ventana) — rama main con totalAcumuladoPorCliente, variacionMensual y toda la aplicación completos; solo el ranking de topClientesPorCategoria() está recortado. Rama solucion con el ranking completo."
+  "contenido": "github.com/pedroleni/sql-proyectos (carpeta analitica-ventas-ventana) — rama main con totalAcumuladoPorCliente, variacionMensual y toda la aplicación completos; solo el ranking de topClientesPorCategoria() está recortado. Rama solucion con el ranking completo."
 }
 ```
 
@@ -54,7 +54,7 @@ Un panel de analítica que responde a tres preguntas que un `GROUP BY` normal no
 {
   "tipo": "notas-clave",
   "items": [
-    { "titulo": "Instala, migra y siembra — sin Docker.", "texto": "Clona sql-proyectos-avanzados, entra en analitica-ventas-ventana/ y ejecuta npm install, npm run migrate, npm run seed — 4 clientes, 28 pedidos en 3 categorías y varios meses." },
+    { "titulo": "Instala, migra y siembra — sin Docker.", "texto": "Clona sql-proyectos, entra en analitica-ventas-ventana/ y ejecuta npm install, npm run migrate, npm run seed — 4 clientes, 28 pedidos en 3 categorías y varios meses." },
     { "titulo": "Ejecuta los tests tal cual — 2 de 4 deben fallar.", "texto": "Los dos tests de topClientesPorCategoria fallan; los de totalAcumuladoPorCliente y variacionMensual pasan igual, porque no dependen del ranking." },
     { "titulo": "Completa el ROW_NUMBER() y confirma los 4.", "texto": "Sustituye 1 AS puesto por ROW_NUMBER() OVER (PARTITION BY categoria ORDER BY total DESC, cliente_id ASC) y vuelve a correr npm test." }
   ]
@@ -86,15 +86,15 @@ Un panel de analítica que responde a tres preguntas que un `GROUP BY` normal no
   "titulo": "Repositorio y referencias",
   "recursos": [
     {
-      "titulo": "sql-proyectos-avanzados/analitica-ventas-ventana (rama main — punto de partida)",
+      "titulo": "sql-proyectos/analitica-ventas-ventana (rama main — punto de partida)",
       "descripcion": "Clona el repo entero y entra en analitica-ventas-ventana/ para hacer el proyecto tú mismo.",
-      "url": "https://github.com/pedroleni/sql-proyectos-avanzados/tree/main/analitica-ventas-ventana",
+      "url": "https://github.com/pedroleni/sql-proyectos/tree/main/analitica-ventas-ventana",
       "etiqueta": "GitHub"
     },
     {
-      "titulo": "sql-proyectos-avanzados/analitica-ventas-ventana (rama solucion)",
+      "titulo": "sql-proyectos/analitica-ventas-ventana (rama solucion)",
       "descripcion": "La implementación completa, para comparar si te atascas.",
-      "url": "https://github.com/pedroleni/sql-proyectos-avanzados/tree/solucion/analitica-ventas-ventana",
+      "url": "https://github.com/pedroleni/sql-proyectos/tree/solucion/analitica-ventas-ventana",
       "etiqueta": "GitHub"
     },
     {

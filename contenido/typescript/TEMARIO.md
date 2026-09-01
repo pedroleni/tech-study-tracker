@@ -219,9 +219,9 @@ pueda leer solo:
 | 53 | Proyecto: lista de tareas tipada, de cero (editor en vivo) | Aplicación directa de Módulos 2-5 (tipos, narrowing, uniones discriminadas) en un ejercicio sandbox nuevo |
 | 54 | Proyecto: validar datos de una API con Zod — cuando un tipo no basta | Continúa el reto #3 de la lección 78 (ya lo planteaba sin resolverlo); fuente técnica: [Utility Types](https://www.typescriptlang.org/docs/handbook/utility-types.html) (para tipar la salida de Zod con `z.infer`) |
 | 55 | Proyecto avanzado: Buscador de personajes con TypeScript | **Trasladada** desde `contenido/javascript/78-proyecto-avanzado-buscador-typescript.md` (cambio de `technology_id`, no reescritura) — capstone heredado de este temario |
-| 56 | Proyecto avanzado: Bus de eventos tipado | Aplicación real de Módulo 5 (narrowing) + Módulo 7 (genéricos) + Módulo 11 (mapped types) — [github.com/pedroleni/typescript-proyectos-avanzados](https://github.com/pedroleni/typescript-proyectos-avanzados) (carpeta `bus-eventos`) |
-| 57 | Proyecto avanzado: Cliente tipado con Zod | Cierra el reto de la lección 54 contra una API real (PokeAPI) — [github.com/pedroleni/typescript-proyectos-avanzados](https://github.com/pedroleni/typescript-proyectos-avanzados) (carpeta `cliente-zod`) |
-| 58 | Proyecto avanzado: Máquina de estados tipada | Aplicación real de Módulo 5 (uniones discriminadas) + Módulo 7 (genéricos) + Módulo 9 (indexed access types) — [github.com/pedroleni/typescript-proyectos-avanzados](https://github.com/pedroleni/typescript-proyectos-avanzados) (carpeta `maquina-estados`) |
+| 56 | Proyecto avanzado: Bus de eventos tipado | Aplicación real de Módulo 5 (narrowing) + Módulo 7 (genéricos) + Módulo 11 (mapped types) — [github.com/pedroleni/typescript-proyectos](https://github.com/pedroleni/typescript-proyectos) (carpeta `bus-eventos`) |
+| 57 | Proyecto avanzado: Cliente tipado con Zod | Cierra el reto de la lección 54 contra una API real (PokeAPI) — [github.com/pedroleni/typescript-proyectos](https://github.com/pedroleni/typescript-proyectos) (carpeta `cliente-zod`) |
+| 58 | Proyecto avanzado: Máquina de estados tipada | Aplicación real de Módulo 5 (uniones discriminadas) + Módulo 7 (genéricos) + Módulo 9 (indexed access types) — [github.com/pedroleni/typescript-proyectos](https://github.com/pedroleni/typescript-proyectos) (carpeta `maquina-estados`) |
 
 **Total: 58 lecciones en 13 módulos** — por encima de la horquilla
 orientativa de la spec (~12 módulos / 40-48 lecciones), mismo patrón que

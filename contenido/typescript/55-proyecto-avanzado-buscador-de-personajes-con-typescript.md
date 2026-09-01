@@ -3,7 +3,7 @@
 - **Módulo:** Proyectos
 - **Slug:** `proyecto-avanzado-buscador-de-personajes-con-typescript` (autogenerado del título)
 - **Orden:** 550
-- **Repositorio:** [github.com/pedroleni/typescript-proyectos-avanzados](https://github.com/pedroleni/typescript-proyectos-avanzados) (carpeta `buscador-personajes`)
+- **Repositorio:** [github.com/pedroleni/typescript-proyectos](https://github.com/pedroleni/typescript-proyectos) (carpeta `buscador-personajes`)
 - **Requiere:** Los proyectos "Gestor de tareas" (76) y "Explorador de personajes con Vite" (77) del temario de JavaScript
 - **Nota:** Trasladada desde `contenido/javascript/78-proyecto-avanzado-buscador-typescript.md` — es el capstone de este temario de TypeScript, no de JavaScript. Contenido idéntico al original, solo cambia dónde vive.
 
@@ -18,7 +18,7 @@ La versión más pequeña de esta serie de proyectos — a propósito. Aquí no 
   "tipo": "callout",
   "variante": "info",
   "titulo": "El repositorio",
-  "contenido": "github.com/pedroleni/typescript-proyectos-avanzados (carpeta buscador-personajes) — rama main con tipos.ts completo (es el diseño del proyecto) y el resto con TODOs; rama solucion con la implementación completa."
+  "contenido": "github.com/pedroleni/typescript-proyectos (carpeta buscador-personajes) — rama main con tipos.ts completo (es el diseño del proyecto) y el resto con TODOs; rama solucion con la implementación completa."
 }
 ```
 
@@ -61,7 +61,7 @@ En los dos proyectos anteriores, el estado tenía `cargando`, `error` y `persona
   "items": [
     {
       "titulo": "Pruébalo tú, de verdad.",
-      "texto": "Clona typescript-proyectos-avanzados, entra en buscador-personajes/, añade { tipo: 'prueba' } a la unión EstadoBusqueda en tipos.ts, y ejecuta npm run typecheck sin tocar vista.ts — verás el error exacto, en la línea exacta, antes de ejecutar ni una línea de código."
+      "texto": "Clona typescript-proyectos, entra en buscador-personajes/, añade { tipo: 'prueba' } a la unión EstadoBusqueda en tipos.ts, y ejecuta npm run typecheck sin tocar vista.ts — verás el error exacto, en la línea exacta, antes de ejecutar ni una línea de código."
     },
     {
       "titulo": "Esto no es teoría abstracta.",
@@ -138,15 +138,15 @@ En los dos proyectos anteriores, el estado tenía `cargando`, `error` y `persona
   "titulo": "Repositorio y referencias",
   "recursos": [
     {
-      "titulo": "typescript-proyectos-avanzados/buscador-personajes (rama main — punto de partida)",
+      "titulo": "typescript-proyectos/buscador-personajes (rama main — punto de partida)",
       "descripcion": "Clona el repo entero y entra en buscador-personajes/ para hacer el proyecto tú mismo.",
-      "url": "https://github.com/pedroleni/typescript-proyectos-avanzados/tree/main/buscador-personajes",
+      "url": "https://github.com/pedroleni/typescript-proyectos/tree/main/buscador-personajes",
       "etiqueta": "GitHub"
     },
     {
-      "titulo": "typescript-proyectos-avanzados/buscador-personajes (rama solucion)",
+      "titulo": "typescript-proyectos/buscador-personajes (rama solucion)",
       "descripcion": "La implementación completa, para comparar si te atascas.",
-      "url": "https://github.com/pedroleni/typescript-proyectos-avanzados/tree/solucion/buscador-personajes",
+      "url": "https://github.com/pedroleni/typescript-proyectos/tree/solucion/buscador-personajes",
       "etiqueta": "GitHub"
     },
     {

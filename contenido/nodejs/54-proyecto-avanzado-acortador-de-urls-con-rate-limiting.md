@@ -3,7 +3,7 @@
 - **Módulo:** Proyectos
 - **Slug:** `proyecto-avanzado-acortador-de-urls-con-rate-limiting` (autogenerado del título)
 - **Orden:** 540
-- **Repositorio:** [github.com/pedroleni/nodejs-proyectos-avanzados](https://github.com/pedroleni/nodejs-proyectos-avanzados) (carpeta `acortador-rate-limit`)
+- **Repositorio:** [github.com/pedroleni/nodejs-proyectos](https://github.com/pedroleni/nodejs-proyectos) (carpeta `acortador-rate-limit`)
 - **Requiere:** Módulo 10 (Construir un servidor HTTP desde cero) y la
   lección 34 (Backpressure) de este mismo temario
 
@@ -23,7 +23,7 @@ en memoria.
   "tipo": "callout",
   "variante": "info",
   "titulo": "El repositorio",
-  "contenido": "github.com/pedroleni/nodejs-proyectos-avanzados (carpeta acortador-rate-limit) — rama main con db.js, codigo.js y servidor.js completos (la infraestructura y el diseño) y limitador.js + csv.js con TODO; rama solucion con la implementación completa."
+  "contenido": "github.com/pedroleni/nodejs-proyectos (carpeta acortador-rate-limit) — rama main con db.js, codigo.js y servidor.js completos (la infraestructura y el diseño) y limitador.js + csv.js con TODO; rama solucion con la implementación completa."
 }
 ```
 
@@ -84,7 +84,7 @@ en memoria.
 {
   "tipo": "notas-clave",
   "items": [
-    { "titulo": "Agota el cubo con curl.", "texto": "Clona nodejs-proyectos-avanzados, entra en acortador-rate-limit/ y ejecuta npm start, acorta una URL con POST /acortar, y visita el enlace corto varias veces seguidas con GET — verás 302 hasta agotar la capacidad, y luego un 429 real." },
+    { "titulo": "Agota el cubo con curl.", "texto": "Clona nodejs-proyectos, entra en acortador-rate-limit/ y ejecuta npm start, acorta una URL con POST /acortar, y visita el enlace corto varias veces seguidas con GET — verás 302 hasta agotar la capacidad, y luego un 429 real." },
     { "titulo": "Exporta la analítica real.", "texto": "curl http://localhost:3000/analitica/<codigo>/exportar — debe listar, como CSV, cada visita registrada, con su fecha exacta." },
     { "titulo": "Espera y repite.", "texto": "Tras el 429, espera 1 segundo (la tasa de relleno por defecto) y vuelve a visitar el enlace — debería volver a dar 302, con exactamente 1 ficha nueva disponible." }
   ]
@@ -105,15 +105,15 @@ en memoria.
   "titulo": "Repositorio y referencias",
   "recursos": [
     {
-      "titulo": "nodejs-proyectos-avanzados/acortador-rate-limit (rama main — punto de partida)",
+      "titulo": "nodejs-proyectos/acortador-rate-limit (rama main — punto de partida)",
       "descripcion": "Clona el repo entero y entra en acortador-rate-limit/ para hacer el proyecto tú mismo.",
-      "url": "https://github.com/pedroleni/nodejs-proyectos-avanzados/tree/main/acortador-rate-limit",
+      "url": "https://github.com/pedroleni/nodejs-proyectos/tree/main/acortador-rate-limit",
       "etiqueta": "GitHub"
     },
     {
-      "titulo": "nodejs-proyectos-avanzados/acortador-rate-limit (rama solucion)",
+      "titulo": "nodejs-proyectos/acortador-rate-limit (rama solucion)",
       "descripcion": "La implementación completa, para comparar si te atascas.",
-      "url": "https://github.com/pedroleni/nodejs-proyectos-avanzados/tree/solucion/acortador-rate-limit",
+      "url": "https://github.com/pedroleni/nodejs-proyectos/tree/solucion/acortador-rate-limit",
       "etiqueta": "GitHub"
     },
     {

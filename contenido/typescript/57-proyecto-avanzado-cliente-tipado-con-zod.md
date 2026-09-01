@@ -3,7 +3,7 @@
 - **Módulo:** Proyectos
 - **Slug:** `proyecto-avanzado-cliente-tipado-con-zod` (autogenerado del título)
 - **Orden:** 570
-- **Repositorio:** [github.com/pedroleni/typescript-proyectos-avanzados](https://github.com/pedroleni/typescript-proyectos-avanzados) (carpeta `cliente-zod`)
+- **Repositorio:** [github.com/pedroleni/typescript-proyectos](https://github.com/pedroleni/typescript-proyectos) (carpeta `cliente-zod`)
 - **Requiere:** La lección "Proyecto: validar datos de una API con Zod" (Módulo 13) y el Módulo 10 (Utility types) de este mismo temario
 
 ---
@@ -21,7 +21,7 @@ de verdad, dato a dato, en tiempo de ejecución.
   "tipo": "callout",
   "variante": "info",
   "titulo": "El repositorio",
-  "contenido": "github.com/pedroleni/typescript-proyectos-avanzados (carpeta cliente-zod) — rama main con esquemas.ts completo (el diseño del proyecto) y cliente.ts con TODO; rama solucion con la implementación completa."
+  "contenido": "github.com/pedroleni/typescript-proyectos (carpeta cliente-zod) — rama main con esquemas.ts completo (el diseño del proyecto) y cliente.ts con TODO; rama solucion con la implementación completa."
 }
 ```
 
@@ -69,7 +69,7 @@ de verdad, dato a dato, en tiempo de ejecución.
 {
   "tipo": "notas-clave",
   "items": [
-    { "titulo": "Busca un Pokémon que no existe.", "texto": "Clona typescript-proyectos-avanzados, entra en cliente-zod/, ejecuta npm run dev, y busca algo como \"no-existe-123\" — verás el ErrorHttp real (404) manejado con un mensaje legible, no un error sin capturar en la consola." },
+    { "titulo": "Busca un Pokémon que no existe.", "texto": "Clona typescript-proyectos, entra en cliente-zod/, ejecuta npm run dev, y busca algo como \"no-existe-123\" — verás el ErrorHttp real (404) manejado con un mensaje legible, no un error sin capturar en la consola." },
     { "titulo": "Rompe el esquema a propósito.", "texto": "Cambia height: z.number() por height: z.string() en esquemaPokemon y vuelve a buscar cualquier Pokémon real — verás ErrorValidacion con el mensaje exacto de z.prettifyError, mostrando qué campo no encajó y por qué." }
   ]
 }
@@ -101,15 +101,15 @@ de verdad, dato a dato, en tiempo de ejecución.
   "titulo": "Repositorio y referencias",
   "recursos": [
     {
-      "titulo": "typescript-proyectos-avanzados/cliente-zod (rama main — punto de partida)",
+      "titulo": "typescript-proyectos/cliente-zod (rama main — punto de partida)",
       "descripcion": "Clona el repo entero y entra en cliente-zod/ para hacer el proyecto tú mismo.",
-      "url": "https://github.com/pedroleni/typescript-proyectos-avanzados/tree/main/cliente-zod",
+      "url": "https://github.com/pedroleni/typescript-proyectos/tree/main/cliente-zod",
       "etiqueta": "GitHub"
     },
     {
-      "titulo": "typescript-proyectos-avanzados/cliente-zod (rama solucion)",
+      "titulo": "typescript-proyectos/cliente-zod (rama solucion)",
       "descripcion": "La implementación completa, para comparar si te atascas.",
-      "url": "https://github.com/pedroleni/typescript-proyectos-avanzados/tree/solucion/cliente-zod",
+      "url": "https://github.com/pedroleni/typescript-proyectos/tree/solucion/cliente-zod",
       "etiqueta": "GitHub"
     },
     {

@@ -3,7 +3,7 @@
 - **Módulo:** Proyectos
 - **Slug:** `proyecto-avanzado-api-rest-con-autenticacion-jwt` (autogenerado del título)
 - **Orden:** 520
-- **Repositorio:** [github.com/pedroleni/nodejs-proyectos-avanzados](https://github.com/pedroleni/nodejs-proyectos-avanzados) (carpeta `api-auth-jwt`)
+- **Repositorio:** [github.com/pedroleni/nodejs-proyectos](https://github.com/pedroleni/nodejs-proyectos) (carpeta `api-auth-jwt`)
 - **Requiere:** Módulos 10 (Construir un servidor HTTP desde cero) y 12
   (TypeScript en Node), y las lecciones 50 (Hashing de contraseñas) y 51
   (Firmar y verificar datos con HMAC) de este mismo temario
@@ -25,7 +25,7 @@ array en memoria.
   "tipo": "callout",
   "variante": "info",
   "titulo": "El repositorio",
-  "contenido": "github.com/pedroleni/nodejs-proyectos-avanzados (carpeta api-auth-jwt) — rama main con tipos.ts, db.ts y servidor.ts completos (el diseño del proyecto) y contrasenas.ts + jwt.ts con TODO; rama solucion con la implementación completa."
+  "contenido": "github.com/pedroleni/nodejs-proyectos (carpeta api-auth-jwt) — rama main con tipos.ts, db.ts y servidor.ts completos (el diseño del proyecto) y contrasenas.ts + jwt.ts con TODO; rama solucion con la implementación completa."
 }
 ```
 
@@ -91,7 +91,7 @@ comprobación que un HMAC normal no tiene: la caducidad.
 {
   "tipo": "notas-clave",
   "items": [
-    { "titulo": "Sigue el flujo completo con curl.", "texto": "Clona nodejs-proyectos-avanzados, entra en api-auth-jwt/ y ejecuta npm install, npm start. Registra un usuario, haz login y copia el token que devuelve, y pásalo como 'Authorization: Bearer <token>' a GET /perfil." },
+    { "titulo": "Sigue el flujo completo con curl.", "texto": "Clona nodejs-proyectos, entra en api-auth-jwt/ y ejecuta npm install, npm start. Registra un usuario, haz login y copia el token que devuelve, y pásalo como 'Authorization: Bearer <token>' a GET /perfil." },
     { "titulo": "Rompe la firma a propósito.", "texto": "Copia un token válido y cambia un solo carácter en medio (en la parte del payload). GET /perfil debe devolver 401 — la firma ya no coincide con ese payload modificado." },
     { "titulo": "Fuerza la caducidad.", "texto": "En jwt.ts, cambia temporalmente la expiración a unos segundos, arranca el servidor y espera antes de llamar a /perfil — verás el mismo 401, ahora por exp en el pasado, no por firma inválida." }
   ]
@@ -112,15 +112,15 @@ comprobación que un HMAC normal no tiene: la caducidad.
   "titulo": "Repositorio y referencias",
   "recursos": [
     {
-      "titulo": "nodejs-proyectos-avanzados/api-auth-jwt (rama main — punto de partida)",
+      "titulo": "nodejs-proyectos/api-auth-jwt (rama main — punto de partida)",
       "descripcion": "Clona el repo entero y entra en api-auth-jwt/ para hacer el proyecto tú mismo.",
-      "url": "https://github.com/pedroleni/nodejs-proyectos-avanzados/tree/main/api-auth-jwt",
+      "url": "https://github.com/pedroleni/nodejs-proyectos/tree/main/api-auth-jwt",
       "etiqueta": "GitHub"
     },
     {
-      "titulo": "nodejs-proyectos-avanzados/api-auth-jwt (rama solucion)",
+      "titulo": "nodejs-proyectos/api-auth-jwt (rama solucion)",
       "descripcion": "La implementación completa, para comparar si te atascas.",
-      "url": "https://github.com/pedroleni/nodejs-proyectos-avanzados/tree/solucion/api-auth-jwt",
+      "url": "https://github.com/pedroleni/nodejs-proyectos/tree/solucion/api-auth-jwt",
       "etiqueta": "GitHub"
     },
     {

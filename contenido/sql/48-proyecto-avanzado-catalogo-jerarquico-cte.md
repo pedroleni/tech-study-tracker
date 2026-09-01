@@ -3,7 +3,7 @@
 - **Módulo:** Proyectos
 - **Slug:** `proyecto-avanzado-catalogo-jerarquico-con-cte-recursiva` (autogenerado del título)
 - **Orden:** 480
-- **Repositorio:** [github.com/pedroleni/sql-proyectos-avanzados](https://github.com/pedroleni/sql-proyectos-avanzados) (carpeta `catalogo-jerarquico-cte`)
+- **Repositorio:** [github.com/pedroleni/sql-proyectos](https://github.com/pedroleni/sql-proyectos) (carpeta `catalogo-jerarquico-cte`)
 - **Requiere:** la lección 23 (CTEs recursivas) y el Módulo 8 (Índices y rendimiento) de este mismo temario
 
 ---
@@ -17,7 +17,7 @@ Un catálogo de productos organizado en un árbol de categorías sin límite de 
   "tipo": "callout",
   "variante": "info",
   "titulo": "El repositorio",
-  "contenido": "github.com/pedroleni/sql-proyectos-avanzados (carpeta catalogo-jerarquico-cte) — rama main con productosDeCategoriaYSubcategorias, la búsqueda y toda la aplicación completos; solo el término recursivo de descendientesDeCategoria() falta. Rama solucion con la CTE completa."
+  "contenido": "github.com/pedroleni/sql-proyectos (carpeta catalogo-jerarquico-cte) — rama main con productosDeCategoriaYSubcategorias, la búsqueda y toda la aplicación completos; solo el término recursivo de descendientesDeCategoria() falta. Rama solucion con la CTE completa."
 }
 ```
 
@@ -52,7 +52,7 @@ Un catálogo de productos organizado en un árbol de categorías sin límite de 
 {
   "tipo": "notas-clave",
   "items": [
-    { "titulo": "Instala, migra y siembra — sin Docker.", "texto": "Clona sql-proyectos-avanzados, entra en catalogo-jerarquico-cte/ y ejecuta npm install, npm run migrate, npm run seed — un árbol de 3 niveles con productos repartidos en varias hojas." },
+    { "titulo": "Instala, migra y siembra — sin Docker.", "texto": "Clona sql-proyectos, entra en catalogo-jerarquico-cte/ y ejecuta npm install, npm run migrate, npm run seed — un árbol de 3 niveles con productos repartidos en varias hojas." },
     { "titulo": "Ejecuta los tests tal cual — 2 de 7 deben fallar.", "texto": "Los dos tests que recorren el árbol desde la raíz o desde un nodo intermedio fallan (no llegan a los nietos); los de productos y búsqueda pasan igual." },
     { "titulo": "Completa el término recursivo y confirma los 7.", "texto": "Añade el UNION ALL con el JOIN a la propia CTE, tal como se indica en el comentario TODO del código, y vuelve a correr npm test." }
   ]
@@ -73,15 +73,15 @@ Un catálogo de productos organizado en un árbol de categorías sin límite de 
   "titulo": "Repositorio y referencias",
   "recursos": [
     {
-      "titulo": "sql-proyectos-avanzados/catalogo-jerarquico-cte (rama main — punto de partida)",
+      "titulo": "sql-proyectos/catalogo-jerarquico-cte (rama main — punto de partida)",
       "descripcion": "Clona el repo entero y entra en catalogo-jerarquico-cte/ para hacer el proyecto tú mismo.",
-      "url": "https://github.com/pedroleni/sql-proyectos-avanzados/tree/main/catalogo-jerarquico-cte",
+      "url": "https://github.com/pedroleni/sql-proyectos/tree/main/catalogo-jerarquico-cte",
       "etiqueta": "GitHub"
     },
     {
-      "titulo": "sql-proyectos-avanzados/catalogo-jerarquico-cte (rama solucion)",
+      "titulo": "sql-proyectos/catalogo-jerarquico-cte (rama solucion)",
       "descripcion": "La implementación completa, para comparar si te atascas.",
-      "url": "https://github.com/pedroleni/sql-proyectos-avanzados/tree/solucion/catalogo-jerarquico-cte",
+      "url": "https://github.com/pedroleni/sql-proyectos/tree/solucion/catalogo-jerarquico-cte",
       "etiqueta": "GitHub"
     },
     {

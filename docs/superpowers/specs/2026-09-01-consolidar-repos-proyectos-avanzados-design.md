@@ -1,6 +1,8 @@
 # Consolidar los repos de "proyecto avanzado" por tecnología
 
-**Estado:** ✅ implementada — 5 repos consolidados (`sql-`, `postgresql-`, `nodejs-`, `typescript-`, `javascript-proyectos-avanzados`), 18 lecciones + 3 TEMARIO.md + 1 mención incidental actualizados y verificados en la base de datos real, 18 repos viejos en privado (sin borrar). Ver `docs/superpowers/plans/2026-09-01-consolidar-repos-proyectos-avanzados.md` para el detalle de verificación de cada tarea.
+**Estado:** ✅ implementada — 5 repos consolidados, 18 lecciones + 3 TEMARIO.md + 1 mención incidental actualizados y verificados en la base de datos real, 18 repos viejos en privado (sin borrar). Ver `docs/superpowers/plans/2026-09-01-consolidar-repos-proyectos-avanzados.md` para el detalle de verificación de cada tarea.
+
+**Nota posterior (renombrado):** los 5 repos se renombraron después, quitando "avanzados" del nombre (`gh repo rename`, GitHub redirige la URL vieja automáticamente): `sql-proyectos`, `postgresql-proyectos`, `nodejs-proyectos`, `typescript-proyectos`, `javascript-proyectos`. El resto del documento conserva el nombre original (`<tecnologia>-proyectos-avanzados`) como registro de lo decidido en su momento — el nombre real y vigente es el de esta nota.
 
 ## Por qué existe
 

@@ -3,7 +3,7 @@
 - **Módulo:** Proyectos
 - **Slug:** `proyecto-avanzado-maquina-de-estados-tipada` (autogenerado del título)
 - **Orden:** 580
-- **Repositorio:** [github.com/pedroleni/typescript-proyectos-avanzados](https://github.com/pedroleni/typescript-proyectos-avanzados) (carpeta `maquina-estados`)
+- **Repositorio:** [github.com/pedroleni/typescript-proyectos](https://github.com/pedroleni/typescript-proyectos) (carpeta `maquina-estados`)
 - **Requiere:** Módulo 5 (Narrowing y uniones discriminadas) y Módulo 7 (Genéricos) de este mismo temario
 
 ---
@@ -23,7 +23,7 @@ ni expresar si te falta un caso.
   "tipo": "callout",
   "variante": "info",
   "titulo": "El repositorio",
-  "contenido": "github.com/pedroleni/typescript-proyectos-avanzados (carpeta maquina-estados) — rama main con tipos.ts completo (el diseño del proyecto) y MaquinaEstados.ts con TODO; rama solucion con la implementación completa."
+  "contenido": "github.com/pedroleni/typescript-proyectos (carpeta maquina-estados) — rama main con tipos.ts completo (el diseño del proyecto) y MaquinaEstados.ts con TODO; rama solucion con la implementación completa."
 }
 ```
 
@@ -105,15 +105,15 @@ ni expresar si te falta un caso.
   "titulo": "Repositorio y referencias",
   "recursos": [
     {
-      "titulo": "typescript-proyectos-avanzados/maquina-estados (rama main — punto de partida)",
+      "titulo": "typescript-proyectos/maquina-estados (rama main — punto de partida)",
       "descripcion": "Clona el repo entero y entra en maquina-estados/ para hacer el proyecto tú mismo.",
-      "url": "https://github.com/pedroleni/typescript-proyectos-avanzados/tree/main/maquina-estados",
+      "url": "https://github.com/pedroleni/typescript-proyectos/tree/main/maquina-estados",
       "etiqueta": "GitHub"
     },
     {
-      "titulo": "typescript-proyectos-avanzados/maquina-estados (rama solucion)",
+      "titulo": "typescript-proyectos/maquina-estados (rama solucion)",
       "descripcion": "La implementación completa, para comparar si te atascas.",
-      "url": "https://github.com/pedroleni/typescript-proyectos-avanzados/tree/solucion/maquina-estados",
+      "url": "https://github.com/pedroleni/typescript-proyectos/tree/solucion/maquina-estados",
       "etiqueta": "GitHub"
     },
     {

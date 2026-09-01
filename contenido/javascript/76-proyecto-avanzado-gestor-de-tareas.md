@@ -3,7 +3,7 @@
 - **Módulo:** Proyectos
 - **Slug:** `proyecto-avanzado-gestor-de-tareas-con-arquitectura-real` (autogenerado del título)
 - **Orden:** 500
-- **Repositorio:** [github.com/pedroleni/javascript-proyectos-avanzados](https://github.com/pedroleni/javascript-proyectos-avanzados) (carpeta `gestor-de-tareas`)
+- **Repositorio:** [github.com/pedroleni/javascript-proyectos](https://github.com/pedroleni/javascript-proyectos) (carpeta `gestor-de-tareas`)
 - **Requiere:** El proyecto "Lista de tareas interactiva", módulos ES (lección 54, aunque no tuviera bloque en vivo) y closures/estado (lección 23)
 
 ---
@@ -17,7 +17,7 @@ El mismo gestor de tareas que ya construiste en el proyecto sencillo — pero he
   "tipo": "callout",
   "variante": "info",
   "titulo": "El repositorio",
-  "contenido": "github.com/pedroleni/javascript-proyectos-avanzados (carpeta gestor-de-tareas) — la rama main tiene el HTML y el CSS ya terminados, y los cuatro archivos de src/ con la firma de cada función y un TODO explicando qué hacer. La rama solucion tiene la implementación completa, por si te atascas."
+  "contenido": "github.com/pedroleni/javascript-proyectos (carpeta gestor-de-tareas) — la rama main tiene el HTML y el CSS ya terminados, y los cuatro archivos de src/ con la firma de cada función y un TODO explicando qué hacer. La rama solucion tiene la implementación completa, por si te atascas."
 }
 ```
 
@@ -26,7 +26,7 @@ El mismo gestor de tareas que ya construiste en el proyecto sencillo — pero he
   "tipo": "callout",
   "variante": "aviso",
   "titulo": "Antes de nada: los módulos ES necesitan un servidor, no file://",
-  "contenido": "Clona javascript-proyectos-avanzados y ejecuta cd gestor-de-tareas && npx serve . (o python3 -m http.server si no tienes Node) — abrir index.html haciendo doble clic no funciona: los navegadores bloquean import/export cuando la página se carga desde el disco directamente, y la página se queda completamente inerte (ningún botón hace nada) sin ningún error visible salvo en la consola. Si al abrir el proyecto parece \"bloqueado\", es casi siempre esto."
+  "contenido": "Clona javascript-proyectos y ejecuta cd gestor-de-tareas && npx serve . (o python3 -m http.server si no tienes Node) — abrir index.html haciendo doble clic no funciona: los navegadores bloquean import/export cuando la página se carga desde el disco directamente, y la página se queda completamente inerte (ningún botón hace nada) sin ningún error visible salvo en la consola. Si al abrir el proyecto parece \"bloqueado\", es casi siempre esto."
 }
 ```
 
@@ -227,15 +227,15 @@ El único archivo que sabe que existen tanto `estado.js` como `vista.js` como `a
   "titulo": "Repositorio y referencias",
   "recursos": [
     {
-      "titulo": "javascript-proyectos-avanzados/gestor-de-tareas (rama main — punto de partida)",
+      "titulo": "javascript-proyectos/gestor-de-tareas (rama main — punto de partida)",
       "descripcion": "Clona esta rama para hacer el proyecto tú mismo, con los TODO ya puestos.",
-      "url": "https://github.com/pedroleni/javascript-proyectos-avanzados/tree/main/gestor-de-tareas",
+      "url": "https://github.com/pedroleni/javascript-proyectos/tree/main/gestor-de-tareas",
       "etiqueta": "GitHub"
     },
     {
-      "titulo": "javascript-proyectos-avanzados/gestor-de-tareas (rama solucion)",
+      "titulo": "javascript-proyectos/gestor-de-tareas (rama solucion)",
       "descripcion": "La implementación completa, para comparar si te atascas.",
-      "url": "https://github.com/pedroleni/javascript-proyectos-avanzados/tree/solucion/gestor-de-tareas",
+      "url": "https://github.com/pedroleni/javascript-proyectos/tree/solucion/gestor-de-tareas",
       "etiqueta": "GitHub"
     },
     {
