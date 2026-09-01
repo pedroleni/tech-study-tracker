@@ -75,8 +75,8 @@ La otra cara de este mismo tema — por qué `const enum` sí es compatible con 
   "recursos": [
     {
       "titulo": "Proyecto avanzado: Buscador de personajes con TypeScript",
-      "descripcion": "El proyecto real donde se encontró este comportamiento por primera vez, construyendo con esta misma opción activada.",
-      "url": "https://github.com/pedroleni/buscador-personajes-ts",
+      "descripcion": "El proyecto real donde se encontró este comportamiento por primera vez — la rama solucion tiene la clase ErrorHttp con la propiedad declarada y asignada a mano, tal cual el bloque \"después\" de esta lección.",
+      "url": "https://github.com/pedroleni/typescript-proyectos-avanzados/tree/solucion/buscador-personajes",
       "etiqueta": "GitHub"
     }
   ]

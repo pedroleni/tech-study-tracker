@@ -3,7 +3,7 @@
 - **Módulo:** Proyectos
 - **Slug:** `proyecto-avanzado-bus-de-eventos-tipado` (autogenerado del título)
 - **Orden:** 560
-- **Repositorio:** [github.com/pedroleni/bus-eventos-ts](https://github.com/pedroleni/bus-eventos-ts)
+- **Repositorio:** [github.com/pedroleni/typescript-proyectos-avanzados](https://github.com/pedroleni/typescript-proyectos-avanzados) (carpeta `bus-eventos`)
 - **Requiere:** Módulos 5 (Narrowing), 7 (Genéricos) y 9 (Operadores de manipulación de tipos) de este mismo temario
 
 ---
@@ -22,7 +22,7 @@ sin casts, con autocompletado real.
   "tipo": "callout",
   "variante": "info",
   "titulo": "El repositorio",
-  "contenido": "github.com/pedroleni/bus-eventos-ts — rama main con tipos.ts completo (el diseño del proyecto) y EventBus.ts con TODO; rama solucion con la implementación completa."
+  "contenido": "github.com/pedroleni/typescript-proyectos-avanzados (carpeta bus-eventos) — rama main con tipos.ts completo (el diseño del proyecto) y EventBus.ts con TODO; rama solucion con la implementación completa."
 }
 ```
 
@@ -71,7 +71,7 @@ sin casts, con autocompletado real.
 {
   "tipo": "notas-clave",
   "items": [
-    { "titulo": "El registro de eventos de la demo prueba la inferencia en vivo.", "texto": "Clona el repo, abre src/main.ts, y comprueba que el payload de cada 'on' tiene el tipo correcto sin ninguna anotación explícita — el editor te lo muestra al pasar el ratón por encima." },
+    { "titulo": "El registro de eventos de la demo prueba la inferencia en vivo.", "texto": "Clona typescript-proyectos-avanzados, entra en bus-eventos/, abre src/main.ts, y comprueba que el payload de cada 'on' tiene el tipo correcto sin ninguna anotación explícita — el editor te lo muestra al pasar el ratón por encima." },
     { "titulo": "Rompe algo a propósito.", "texto": "Cambia bus.emit('contador:incrementado', { valor: 5 }) por { valor: '5' } y ejecuta npm run typecheck — verás el error exacto, antes de ejecutar nada." }
   ]
 }
@@ -113,15 +113,15 @@ sin casts, con autocompletado real.
   "titulo": "Repositorio y referencias",
   "recursos": [
     {
-      "titulo": "bus-eventos-ts (rama main — punto de partida)",
-      "descripcion": "Clona esta rama para hacer el proyecto tú mismo.",
-      "url": "https://github.com/pedroleni/bus-eventos-ts/tree/main",
+      "titulo": "typescript-proyectos-avanzados/bus-eventos (rama main — punto de partida)",
+      "descripcion": "Clona el repo entero y entra en bus-eventos/ para hacer el proyecto tú mismo.",
+      "url": "https://github.com/pedroleni/typescript-proyectos-avanzados/tree/main/bus-eventos",
       "etiqueta": "GitHub"
     },
     {
-      "titulo": "bus-eventos-ts (rama solucion)",
+      "titulo": "typescript-proyectos-avanzados/bus-eventos (rama solucion)",
       "descripcion": "La implementación completa, para comparar si te atascas.",
-      "url": "https://github.com/pedroleni/bus-eventos-ts/tree/solucion",
+      "url": "https://github.com/pedroleni/typescript-proyectos-avanzados/tree/solucion/bus-eventos",
       "etiqueta": "GitHub"
     },
     {
