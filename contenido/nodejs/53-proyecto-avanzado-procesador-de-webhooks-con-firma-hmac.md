@@ -3,7 +3,7 @@
 - **Módulo:** Proyectos
 - **Slug:** `proyecto-avanzado-procesador-de-webhooks-con-firma-hmac` (autogenerado del título)
 - **Orden:** 530
-- **Repositorio:** [github.com/pedroleni/procesador-webhooks](https://github.com/pedroleni/procesador-webhooks)
+- **Repositorio:** [github.com/pedroleni/nodejs-proyectos-avanzados](https://github.com/pedroleni/nodejs-proyectos-avanzados) (carpeta `procesador-webhooks`)
 - **Requiere:** Módulo 10 (Construir un servidor HTTP desde cero) y la
   lección 51 (Firmar y verificar datos con HMAC) de este mismo temario
 
@@ -23,7 +23,7 @@ verdad transitorio.
   "tipo": "callout",
   "variante": "info",
   "titulo": "El repositorio",
-  "contenido": "github.com/pedroleni/procesador-webhooks — rama main con servidor.js completo (el receptor real) y firma.js + cliente-reintentos.js con TODO; rama solucion con la implementación completa."
+  "contenido": "github.com/pedroleni/nodejs-proyectos-avanzados (carpeta procesador-webhooks) — rama main con servidor.js completo (el receptor real) y firma.js + cliente-reintentos.js con TODO; rama solucion con la implementación completa."
 }
 ```
 
@@ -72,7 +72,7 @@ verdad transitorio.
 {
   "tipo": "notas-clave",
   "items": [
-    { "titulo": "Levanta el servidor y envía un webhook real.", "texto": "npm start en una terminal, npm run enviar en otra — comprueba que el evento aparece en eventos.jsonl con la hora real de recepción." },
+    { "titulo": "Levanta el servidor y envía un webhook real.", "texto": "Clona nodejs-proyectos-avanzados, entra en procesador-webhooks/ y ejecuta npm start en una terminal, npm run enviar en otra — comprueba que el evento aparece en eventos.jsonl con la hora real de recepción." },
     { "titulo": "Manda una firma incorrecta a propósito.", "texto": "Con curl, envía un POST a /webhooks/pagos con una cabecera X-Signature inventada — debe rechazarlo con 401, y NO debe aparecer nada nuevo en eventos.jsonl." },
     { "titulo": "Observa el backoff en los tests.", "texto": "Los tests de cliente-reintentos.test.js sustituyen 'esperar' por una función que no espera de verdad — así 6 tests con reintentos corren en milisegundos, no en varios segundos reales." }
   ]
@@ -104,15 +104,15 @@ verdad transitorio.
   "titulo": "Repositorio y referencias",
   "recursos": [
     {
-      "titulo": "procesador-webhooks (rama main — punto de partida)",
-      "descripcion": "Clona esta rama para hacer el proyecto tú mismo.",
-      "url": "https://github.com/pedroleni/procesador-webhooks/tree/main",
+      "titulo": "nodejs-proyectos-avanzados/procesador-webhooks (rama main — punto de partida)",
+      "descripcion": "Clona el repo entero y entra en procesador-webhooks/ para hacer el proyecto tú mismo.",
+      "url": "https://github.com/pedroleni/nodejs-proyectos-avanzados/tree/main/procesador-webhooks",
       "etiqueta": "GitHub"
     },
     {
-      "titulo": "procesador-webhooks (rama solucion)",
+      "titulo": "nodejs-proyectos-avanzados/procesador-webhooks (rama solucion)",
       "descripcion": "La implementación completa, para comparar si te atascas.",
-      "url": "https://github.com/pedroleni/procesador-webhooks/tree/solucion",
+      "url": "https://github.com/pedroleni/nodejs-proyectos-avanzados/tree/solucion/procesador-webhooks",
       "etiqueta": "GitHub"
     },
     {
