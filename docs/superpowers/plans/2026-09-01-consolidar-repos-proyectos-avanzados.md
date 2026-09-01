@@ -700,7 +700,7 @@ git branch -d docs/consolidar-nodejs-proyectos-avanzados
 | `cliente-tipado-zod` | `cliente-zod` | `contenido/typescript/57-proyecto-avanzado-cliente-tipado-con-zod.md` |
 | `maquina-estados-ts` | `maquina-estados` | `contenido/typescript/58-proyecto-avanzado-maquina-de-estados-tipada.md` |
 
-- [ ] **Step 1: Crear el config de TypeScript**
+- [x] **Step 1: Crear el config de TypeScript**
 
 ```json
 {
@@ -715,20 +715,20 @@ git branch -d docs/consolidar-nodejs-proyectos-avanzados
 }
 ```
 
-- [ ] **Step 2: Ejecutar la migración local**
+- [x] **Step 2: Ejecutar la migración local**
 
 ```bash
 cd <directorio-scratchpad>
 node migrar-repo-tecnologia.mjs config-typescript.json
 ```
 
-- [ ] **Step 3: Escanear secretos**
+- [x] **Step 3: Escanear secretos**
 
 ```bash
 bash "/Users/pedroleridanieto/Desktop/Proyectos IA/tech-study-tracker/scripts/security/scan_secrets.sh" typescript-proyectos-avanzados
 ```
 
-- [ ] **Step 4: Crear el repo remoto y hacer push**
+- [x] **Step 4: Crear el repo remoto y hacer push**
 
 ```bash
 cd typescript-proyectos-avanzados
@@ -738,7 +738,7 @@ git push -u origin main
 git push -u origin solucion
 ```
 
-- [ ] **Step 5: Verificación real**
+- [x] **Step 5: Verificación real**
 
 `buscador-personajes` y `explorador-personajes` (Task 5) son frontend
 puro (confirmado en la validación del spec: `index.html` + `src/`, sin
@@ -761,7 +761,7 @@ dominio real leyendo el `README.md` migrado antes de elegir el caso de
 prueba, no asumirlo) y confirmar que el resultado aparece de verdad.
 Cerrar el servidor de preview al terminar.
 
-- [ ] **Step 6: Actualizar las 4 lecciones + la mención incidental + TEMARIO.md**
+- [x] **Step 6: Actualizar las 4 lecciones + la mención incidental + TEMARIO.md**
 
 Mismo patrón de sustitución de URL/`cd` sobre las 4 lecciones de la
 tabla de mapeo. Además:
@@ -777,7 +777,7 @@ tabla de mapeo. Además:
   `buscador-personajes-ts` si también aparece — confirmar al leer el
   fichero).
 
-- [ ] **Step 7: Validar los bloques `laboratorio` contra el esquema Zod**
+- [x] **Step 7: Validar los bloques `laboratorio` contra el esquema Zod**
 
 ```bash
 cd "/Users/pedroleridanieto/Desktop/Proyectos IA/tech-study-tracker"
@@ -813,7 +813,7 @@ rm src/lib/laboratorio/_debug-validar-typescript-migrado.test.ts
 
 Expected: `1 passed (1)`.
 
-- [ ] **Step 8: Sincronizar las 5 lecciones con la base de datos real**
+- [x] **Step 8: Sincronizar las 5 lecciones con la base de datos real**
 
 Igual que en la migración de SQL: arrancar el servidor de dev, para
 cada una de las 4 lecciones de proyecto **más**
@@ -824,7 +824,7 @@ leer el `value` actual de `textarea#leccion-contenido`, aplicar la
 sustitución del Step 6 (debe encontrarse literalmente — si no, parar y
 revisar antes de continuar), rellenar el campo, pulsar "Guardar".
 
-- [ ] **Step 9: Verificación visual**
+- [x] **Step 9: Verificación visual**
 
 Mismo procedimiento que Task 1 Step 9, sobre `maquina-estados` (ya
 tiene, desde antes de este plan, el bloque `editor-en-vivo` con vista
