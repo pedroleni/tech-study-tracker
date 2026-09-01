@@ -867,7 +867,7 @@ git branch -d docs/consolidar-typescript-proyectos-avanzados
 | `gestor-de-tareas-js` | `gestor-de-tareas` | `contenido/javascript/76-proyecto-avanzado-gestor-de-tareas.md` |
 | `explorador-personajes` | `explorador-personajes` | `contenido/javascript/77-proyecto-avanzado-explorador-de-personajes-vite.md` |
 
-- [ ] **Step 1: Crear el config de JavaScript**
+- [x] **Step 1: Crear el config de JavaScript**
 
 ```json
 {
@@ -880,14 +880,14 @@ git branch -d docs/consolidar-typescript-proyectos-avanzados
 }
 ```
 
-- [ ] **Step 2: Ejecutar la migración local**
+- [x] **Step 2: Ejecutar la migración local**
 
 ```bash
 cd <directorio-scratchpad>
 node migrar-repo-tecnologia.mjs config-javascript.json
 ```
 
-- [ ] **Step 3: Escanear secretos**
+- [x] **Step 3: Escanear secretos**
 
 ```bash
 bash "/Users/pedroleridanieto/Desktop/Proyectos IA/tech-study-tracker/scripts/security/scan_secrets.sh" javascript-proyectos-avanzados
@@ -898,7 +898,7 @@ contenido (confirmado al escribir el spec) — confirmar que es
 literalmente un ejemplo (claves vacías o de mentira) y no un `.env`
 real copiado por error.
 
-- [ ] **Step 4: Crear el repo remoto y hacer push**
+- [x] **Step 4: Crear el repo remoto y hacer push**
 
 ```bash
 cd javascript-proyectos-avanzados
@@ -908,7 +908,7 @@ git push -u origin main
 git push -u origin solucion
 ```
 
-- [ ] **Step 5: Verificación real**
+- [x] **Step 5: Verificación real**
 
 Ya se verificó `gestor-de-tareas` funcionalmente en esta misma sesión
 (root-cause del aviso de `file://`, ver historial) — repetir esa
@@ -929,7 +929,7 @@ que persiste en `localStorage` — mismos tres pasos ya verificados
 antes en esta sesión para el repo viejo. Parar el servidor al
 terminar.
 
-- [ ] **Step 6: Actualizar las 2 lecciones + TEMARIO.md**
+- [x] **Step 6: Actualizar las 2 lecciones + TEMARIO.md**
 
 Mismo patrón de sustitución sobre las 2 lecciones de la tabla de
 mapeo, y sobre `contenido/javascript/TEMARIO.md` (que además menciona
@@ -937,7 +937,7 @@ mapeo, y sobre `contenido/javascript/TEMARIO.md` (que además menciona
 actualizarse a la URL de `typescript-proyectos-avanzados/buscador-personajes`,
 ya migrado en la Tarea 4).
 
-- [ ] **Step 7: Validar los bloques `laboratorio` contra el esquema Zod**
+- [x] **Step 7: Validar los bloques `laboratorio` contra el esquema Zod**
 
 ```bash
 cd "/Users/pedroleridanieto/Desktop/Proyectos IA/tech-study-tracker"
@@ -970,7 +970,7 @@ rm src/lib/laboratorio/_debug-validar-javascript-migrado.test.ts
 
 Expected: `1 passed (1)`.
 
-- [ ] **Step 8: Sincronizar las 2 lecciones con la base de datos real**
+- [x] **Step 8: Sincronizar las 2 lecciones con la base de datos real**
 
 Igual que en la migración de SQL: arrancar el servidor de dev, para
 cada una de las 2 lecciones de la tabla de mapeo de esta tarea,
@@ -980,7 +980,7 @@ leer el `value` actual de `textarea#leccion-contenido`, aplicar la
 sustitución del Step 6 (debe encontrarse literalmente — si no, parar y
 revisar antes de continuar), rellenar el campo, pulsar "Guardar".
 
-- [ ] **Step 9: Verificación visual**
+- [x] **Step 9: Verificación visual**
 
 Con Playwright: navegar a la lección pública ya actualizada de
 `gestor-de-tareas`, confirmar que el callout del repositorio muestra
@@ -992,7 +992,7 @@ para este mismo proyecto) sigue siendo correcto con la nueva ruta
 (`cd gestor-de-tareas && npx serve .` en vez de solo `npx serve .`).
 Capturar pantalla para verificación humana.
 
-- [ ] **Step 10: Suite completa + commit**
+- [x] **Step 10: Suite completa + commit**
 
 ```bash
 cd "/Users/pedroleridanieto/Desktop/Proyectos IA/tech-study-tracker"
