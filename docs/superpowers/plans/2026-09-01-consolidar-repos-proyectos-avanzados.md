@@ -832,7 +832,7 @@ previa real — confirmar que sigue mostrando "Sin errores de tipos." y
 el resultado en la vista previa tras el cambio de contenido, no solo
 el enlace del repositorio).
 
-- [ ] **Step 10: Suite completa + commit**
+- [x] **Step 10: Suite completa + commit**
 
 ```bash
 cd "/Users/pedroleridanieto/Desktop/Proyectos IA/tech-study-tracker"
