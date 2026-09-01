@@ -1,6 +1,6 @@
 # Consolidar los repos de "proyecto avanzado" por tecnología
 
-**Estado:** 📝 diseño aprobado por el usuario, pendiente de implementar.
+**Estado:** ✅ implementada — 5 repos consolidados (`sql-`, `postgresql-`, `nodejs-`, `typescript-`, `javascript-proyectos-avanzados`), 18 lecciones + 3 TEMARIO.md + 1 mención incidental actualizados y verificados en la base de datos real, 18 repos viejos en privado (sin borrar). Ver `docs/superpowers/plans/2026-09-01-consolidar-repos-proyectos-avanzados.md` para el detalle de verificación de cada tarea.
 
 ## Por qué existe
 
