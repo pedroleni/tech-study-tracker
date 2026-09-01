@@ -34,17 +34,17 @@ export function ComparadorAntesDespues({
             className="size-4.75 text-violet-600 dark:text-violet-400"
           />
         </div>
-        <div className="min-w-0 space-y-0.5">
+        <div className="min-w-0 space-y-0.5 pr-12">
           <p className="text-[11px] font-bold tracking-wider text-violet-600 uppercase dark:text-violet-400">
             Antes y después
           </p>
-          <h3 className="text-lg font-bold tracking-tight text-balance">
+          <h3 className="text-lg font-bold tracking-tight text-justify">
             {nota ?? 'Compara las dos versiones y su resultado en vivo.'}
           </h3>
         </div>
       </div>
 
-      <fieldset className="w-full max-w-sm">
+      <fieldset className="w-full">
         <legend className="sr-only">Versión que quieres comparar</legend>
         <div className="relative grid grid-cols-2 rounded-xl border bg-muted p-1">
           <div
@@ -79,7 +79,7 @@ export function ComparadorAntesDespues({
         </div>
       </fieldset>
 
-      <div className="grid min-w-0 gap-4 lg:grid-cols-2">
+      <div className="grid min-w-0 gap-4">
         <div
           key={`codigo-${version}`}
           className="animate-in fade-in-0 min-w-0 space-y-2 duration-300 motion-reduce:animate-none"
@@ -90,7 +90,7 @@ export function ComparadorAntesDespues({
             lenguaje="html"
             numerarLineas
             etiqueta={`Código HTML de la versión ${etiquetaVersion}`}
-            className="h-64"
+            className="min-h-32"
           />
         </div>
         <div
@@ -99,7 +99,7 @@ export function ComparadorAntesDespues({
         >
           <h4 className="text-sm font-semibold">Resultado · {etiquetaVersion}</h4>
           <iframe
-            className="block h-64 w-full max-w-full rounded-lg border bg-white"
+            className="block h-32 w-full max-w-full rounded-lg border bg-white"
             sandbox=""
             srcDoc={codigo}
             title={`Vista previa de la versión ${etiquetaVersion}`}
