@@ -58,7 +58,7 @@ Si te atascas, aquí tienes este paso ya resuelto:
   "titulo": "Paso 2: la tarjeta destacada",
   "consigna": "Dale a .plan un flex: 1 (para que las tres compartan el espacio disponible) y a .plan--destacado un flex-grow ligeramente mayor, además de un borde de color y una sombra propia.",
   "html": "<div class=\"planes\">\n  <div class=\"plan\">\n    <h3>Básico</h3>\n    <p class=\"precio\">9€/mes</p>\n    <ul><li>1 proyecto</li><li>Soporte por email</li></ul>\n  </div>\n  <div class=\"plan plan--destacado\">\n    <h3>Pro</h3>\n    <p class=\"precio\">29€/mes</p>\n    <ul><li>Proyectos ilimitados</li><li>Soporte prioritario</li><li>Estadísticas avanzadas</li></ul>\n  </div>\n  <div class=\"plan\">\n    <h3>Equipo</h3>\n    <p class=\"precio\">79€/mes</p>\n    <ul><li>Todo lo de Pro</li><li>5 miembros de equipo</li></ul>\n  </div>\n</div>",
-  "css": "body {\n  font-family: system-ui, sans-serif;\n}\n.planes {\n  display: flex;\n  gap: 1.5rem;\n  align-items: flex-start;\n  justify-content: center;\n}\n.plan {\n  border: 1px solid #d8d3c8;\n  border-radius: 12px;\n  padding: 1.5rem;\n  flex: 1;\n}\n.plan--destacado {\n  /* flex-grow mayor, borde de color, box-shadow */\n}",
+  "css": "body {\n  font-family: system-ui, sans-serif;\n}\n.planes {\n  display: flex;\n  gap: 1.5rem;\n  justify-content: center;\n}\n.plan {\n  border: 1px solid #d8d3c8;\n  border-radius: 12px;\n  padding: 1.5rem;\n  flex: 1;\n}\n.plan--destacado {\n  /* flex-grow mayor, borde de color, box-shadow */\n}",
   "pestañaInicial": "css"
 }
 ```
@@ -71,7 +71,7 @@ Si te atascas, aquí tienes este paso ya resuelto:
   "titulo": "Solución del paso 2",
   "consigna": "Así queda este paso resuelto, para comparar con el tuyo.",
   "html": "<div class=\"planes\">\n  <div class=\"plan\">\n    <h3>Básico</h3>\n    <p class=\"precio\">9€/mes</p>\n    <ul><li>1 proyecto</li><li>Soporte por email</li></ul>\n  </div>\n  <div class=\"plan plan--destacado\">\n    <h3>Pro</h3>\n    <p class=\"precio\">29€/mes</p>\n    <ul><li>Proyectos ilimitados</li><li>Soporte prioritario</li><li>Estadísticas avanzadas</li></ul>\n  </div>\n  <div class=\"plan\">\n    <h3>Equipo</h3>\n    <p class=\"precio\">79€/mes</p>\n    <ul><li>Todo lo de Pro</li><li>5 miembros de equipo</li></ul>\n  </div>\n</div>",
-  "css": "body {\n  font-family: system-ui, sans-serif;\n}\n.planes {\n  display: flex;\n  gap: 1.5rem;\n  align-items: flex-start;\n  justify-content: center;\n}\n.plan {\n  border: 1px solid #d8d3c8;\n  border-radius: 12px;\n  padding: 1.5rem;\n  flex: 1;\n}\n.plan--destacado {\n  flex-grow: 1.15;\n  border-color: #7c3aed;\n  box-shadow: 0 8px 24px rgb(124 58 237 / 0.15);\n}",
+  "css": "body {\n  font-family: system-ui, sans-serif;\n}\n.planes {\n  display: flex;\n  gap: 1.5rem;\n  justify-content: center;\n}\n.plan {\n  border: 1px solid #d8d3c8;\n  border-radius: 12px;\n  padding: 1.5rem;\n  flex: 1;\n}\n.plan--destacado {\n  flex-grow: 1.15;\n  border-color: #7c3aed;\n  box-shadow: 0 8px 24px rgb(124 58 237 / 0.15);\n}",
   "pestañaInicial": "css"
 }
 ```
