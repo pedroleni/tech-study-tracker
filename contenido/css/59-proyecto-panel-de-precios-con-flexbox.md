@@ -157,6 +157,41 @@ Si te has atascado, o quieres comparar tu resultado con uno completo y en marcha
 2. Añade una transición suave al `flex-grow` de la tarjeta destacada al pasar el ratón por encima.
 3. Cambia el criterio de "destacada" a la tarjeta del medio usando `:nth-child(2)` en vez de una clase, y compara ventajas/inconvenientes.
 
+Si quieres comparar con una solución real de cada reto:
+
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Reto 1: insignia \"Más popular\"",
+  "consigna": "La tarjeta destacada necesita position: relative para que la insignia se posicione respecto a ELLA, no respecto a toda la página.",
+  "html": "<div class=\"planes\">\n  <div class=\"plan\">\n    <h3>Básico</h3>\n    <p class=\"precio\">9€/mes</p>\n  </div>\n  <div class=\"plan plan--destacado\">\n    <span class=\"insignia\">Más popular</span>\n    <h3>Pro</h3>\n    <p class=\"precio\">29€/mes</p>\n  </div>\n  <div class=\"plan\">\n    <h3>Equipo</h3>\n    <p class=\"precio\">79€/mes</p>\n  </div>\n</div>",
+  "css": "body {\n  font-family: system-ui, sans-serif;\n}\n.planes {\n  display: flex;\n  gap: 1.5rem;\n  justify-content: center;\n}\n.plan {\n  border: 1px solid #d8d3c8;\n  border-radius: 12px;\n  padding: 1.5rem;\n  flex: 1;\n}\n.plan--destacado {\n  position: relative;\n  flex-grow: 1.15;\n  border-color: #7c3aed;\n  box-shadow: 0 8px 24px rgb(124 58 237 / 0.15);\n}\n.insignia {\n  position: absolute;\n  top: -0.75rem;\n  left: 50%;\n  transform: translateX(-50%);\n  background: #7c3aed;\n  color: white;\n  font-size: 0.7rem;\n  font-weight: 600;\n  padding: 0.25rem 0.75rem;\n  border-radius: 999px;\n}",
+  "pestañaInicial": "css"
+}
+```
+
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Reto 2: transición en el flex-grow",
+  "consigna": "flex-grow es un número, así que es animable como cualquier otro — transition funciona igual que con cualquier propiedad numérica. Pasa el ratón por encima de la tarjeta Pro en la vista previa.",
+  "html": "<div class=\"planes\">\n  <div class=\"plan\">\n    <h3>Básico</h3>\n    <p class=\"precio\">9€/mes</p>\n  </div>\n  <div class=\"plan plan--destacado\">\n    <h3>Pro</h3>\n    <p class=\"precio\">29€/mes</p>\n  </div>\n  <div class=\"plan\">\n    <h3>Equipo</h3>\n    <p class=\"precio\">79€/mes</p>\n  </div>\n</div>",
+  "css": "body {\n  font-family: system-ui, sans-serif;\n}\n.planes {\n  display: flex;\n  gap: 1.5rem;\n  justify-content: center;\n}\n.plan {\n  border: 1px solid #d8d3c8;\n  border-radius: 12px;\n  padding: 1.5rem;\n  flex: 1;\n}\n.plan--destacado {\n  flex-grow: 1.15;\n  border-color: #7c3aed;\n  box-shadow: 0 8px 24px rgb(124 58 237 / 0.15);\n  transition: flex-grow 200ms;\n}\n.plan--destacado:hover {\n  flex-grow: 1.35;\n}",
+  "pestañaInicial": "css"
+}
+```
+
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Reto 3: :nth-child(2) en vez de una clase",
+  "consigna": "Mismo resultado visual, pero fíjate en el HTML: ya no hay ninguna clase plan--destacado. El inconveniente real: si mañana reordenas las tarjetas o añades una cuarta antes de \"Pro\", deja de ser la del medio y el estilo se aplica a la tarjeta equivocada — con una clase explícita eso nunca pasa, da igual el orden.",
+  "html": "<div class=\"planes\">\n  <div class=\"plan\">\n    <h3>Básico</h3>\n    <p class=\"precio\">9€/mes</p>\n  </div>\n  <div class=\"plan\">\n    <h3>Pro</h3>\n    <p class=\"precio\">29€/mes</p>\n  </div>\n  <div class=\"plan\">\n    <h3>Equipo</h3>\n    <p class=\"precio\">79€/mes</p>\n  </div>\n</div>",
+  "css": "body {\n  font-family: system-ui, sans-serif;\n}\n.planes {\n  display: flex;\n  gap: 1.5rem;\n  justify-content: center;\n}\n.plan {\n  border: 1px solid #d8d3c8;\n  border-radius: 12px;\n  padding: 1.5rem;\n  flex: 1;\n}\n.plan:nth-child(2) {\n  flex-grow: 1.15;\n  border-color: #7c3aed;\n  box-shadow: 0 8px 24px rgb(124 58 237 / 0.15);\n}",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

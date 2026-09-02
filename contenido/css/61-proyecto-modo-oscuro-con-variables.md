@@ -135,6 +135,53 @@ Si te atascas, o quieres comparar tu resultado con uno completo y en marcha, aqu
 2. Añade un tercer tema ("alto contraste") como una segunda clase alternativa.
 3. Sustituye el toggle manual por `prefers-color-scheme` como valor inicial, y deja el botón solo para forzar lo contrario.
 
+Si quieres comparar con una solución real de cada reto:
+
+```laboratorio
+{
+  "tipo": "callout",
+  "variante": "aviso",
+  "titulo": "El reto 1 no puede demostrar la persistencia aquí",
+  "contenido": "El editor en vivo de esta página vive dentro de un iframe con sandbox por seguridad, y ese sandbox bloquea localStorage con un SecurityError real. El código de abajo es el correcto y funcionaría tal cual en tu propia web — con try/catch para que, si el almacenamiento no está disponible (como aquí, o en modo privado), el interruptor siga funcionando en vez de romperse."
+}
+```
+
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Reto 1: recordar el tema con localStorage",
+  "consigna": "El try/catch es la parte importante: si localStorage falla (como en este sandbox), el interruptor sigue cambiando el tema con normalidad, solo que no lo recuerda.",
+  "html": "<body>\n  <div class=\"tarjeta\">\n    <h2>Tarjeta de ejemplo</h2>\n    <p>Pulsa el botón para alternar el tema.</p>\n    <button class=\"boton\" id=\"interruptor\">Cambiar tema</button>\n  </div>\n</body>",
+  "css": ":root {\n  --fondo: #ffffff;\n  --texto: #1a1a1a;\n  --acento: #7c3aed;\n}\nbody {\n  font-family: system-ui, sans-serif;\n  background: var(--fondo);\n  color: var(--texto);\n  margin: 0;\n  padding: 1.5rem;\n  transition: background 200ms, color 200ms;\n}\nbody.oscuro {\n  --fondo: #18181b;\n  --texto: #f4f4f5;\n  --acento: #a78bfa;\n}\n.tarjeta {\n  border: 1px solid color-mix(in srgb, var(--texto) 20%, transparent);\n  border-radius: 12px;\n  padding: 1.5rem;\n  max-width: 320px;\n}\n.boton {\n  background: var(--acento);\n  color: white;\n  border: none;\n  padding: 0.5rem 1rem;\n  border-radius: 8px;\n  cursor: pointer;\n}",
+  "js": "const CLAVE = 'tema-preferido';\n\nfunction leerTemaGuardado() {\n  try {\n    return localStorage.getItem(CLAVE);\n  } catch {\n    return null; // almacenamiento no disponible (sandbox, modo privado...)\n  }\n}\n\nfunction guardarTema(valor) {\n  try {\n    localStorage.setItem(CLAVE, valor);\n  } catch {\n    // el interruptor sigue funcionando, solo que no recuerda la próxima vez\n  }\n}\n\nif (leerTemaGuardado() === 'oscuro') {\n  document.body.classList.add('oscuro');\n}\n\ndocument.getElementById('interruptor').addEventListener('click', () => {\n  document.body.classList.toggle('oscuro');\n  guardarTema(document.body.classList.contains('oscuro') ? 'oscuro' : 'claro');\n});",
+  "pestañaInicial": "css"
+}
+```
+
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Reto 2: un tercer tema, alto contraste",
+  "consigna": "El botón ya no alterna una sola clase, sino que recorre un array de 3 temas en orden. El color del texto del botón usa var(--fondo) a propósito — así siempre contrasta con var(--acento), sea cual sea el tema activo.",
+  "html": "<body>\n  <div class=\"tarjeta\">\n    <h2>Tarjeta de ejemplo</h2>\n    <p>Cada clic pasa al siguiente tema: claro, oscuro, alto contraste.</p>\n    <button class=\"boton\" id=\"interruptor\">Cambiar tema</button>\n  </div>\n</body>",
+  "css": ":root {\n  --fondo: #ffffff;\n  --texto: #1a1a1a;\n  --acento: #7c3aed;\n}\nbody {\n  font-family: system-ui, sans-serif;\n  background: var(--fondo);\n  color: var(--texto);\n  margin: 0;\n  padding: 1.5rem;\n  transition: background 200ms, color 200ms;\n}\nbody.oscuro {\n  --fondo: #18181b;\n  --texto: #f4f4f5;\n  --acento: #a78bfa;\n}\nbody.alto-contraste {\n  --fondo: #000000;\n  --texto: #ffffff;\n  --acento: #ffff00;\n}\n.tarjeta {\n  border: 1px solid color-mix(in srgb, var(--texto) 20%, transparent);\n  border-radius: 12px;\n  padding: 1.5rem;\n  max-width: 320px;\n}\n.boton {\n  background: var(--acento);\n  color: var(--fondo);\n  border: none;\n  padding: 0.5rem 1rem;\n  border-radius: 8px;\n  cursor: pointer;\n}",
+  "js": "const TEMAS = ['claro', 'oscuro', 'alto-contraste'];\nlet indice = 0;\n\ndocument.getElementById('interruptor').addEventListener('click', () => {\n  document.body.classList.remove(TEMAS[indice]);\n  indice = (indice + 1) % TEMAS.length;\n  if (TEMAS[indice] !== 'claro') {\n    document.body.classList.add(TEMAS[indice]);\n  }\n});",
+  "pestañaInicial": "css"
+}
+```
+
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Reto 3: prefers-color-scheme como punto de partida",
+  "consigna": "matchMedia lee la preferencia del sistema UNA vez, al cargar — el botón solo añade una clase que fuerza el tema contrario a esa preferencia inicial.",
+  "html": "<body>\n  <div class=\"tarjeta\">\n    <h2>Tarjeta de ejemplo</h2>\n    <p>El tema inicial depende de la preferencia de tu sistema operativo.</p>\n    <button class=\"boton\" id=\"interruptor\">Forzar el tema contrario</button>\n  </div>\n</body>",
+  "css": ":root {\n  --fondo: #ffffff;\n  --texto: #1a1a1a;\n  --acento: #7c3aed;\n}\n@media (prefers-color-scheme: dark) {\n  :root {\n    --fondo: #18181b;\n    --texto: #f4f4f5;\n    --acento: #a78bfa;\n  }\n}\nbody {\n  font-family: system-ui, sans-serif;\n  background: var(--fondo);\n  color: var(--texto);\n  margin: 0;\n  padding: 1.5rem;\n  transition: background 200ms, color 200ms;\n}\nbody.forzar-oscuro {\n  --fondo: #18181b;\n  --texto: #f4f4f5;\n  --acento: #a78bfa;\n}\nbody.forzar-claro {\n  --fondo: #ffffff;\n  --texto: #1a1a1a;\n  --acento: #7c3aed;\n}\n.tarjeta {\n  border: 1px solid color-mix(in srgb, var(--texto) 20%, transparent);\n  border-radius: 12px;\n  padding: 1.5rem;\n  max-width: 320px;\n}\n.boton {\n  background: var(--acento);\n  color: var(--fondo);\n  border: none;\n  padding: 0.5rem 1rem;\n  border-radius: 8px;\n  cursor: pointer;\n}",
+  "js": "const prefiereOscuro = window.matchMedia('(prefers-color-scheme: dark)').matches;\n\ndocument.getElementById('interruptor').addEventListener('click', () => {\n  document.body.classList.toggle(prefiereOscuro ? 'forzar-claro' : 'forzar-oscuro');\n});",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

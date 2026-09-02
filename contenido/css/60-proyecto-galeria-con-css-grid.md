@@ -146,6 +146,41 @@ Si te has atascado, o quieres comparar tu resultado con uno completo y en marcha
 2. Convierte la galería en un `container` de consultas y cambia el `gap` cuando el contenedor sea muy estrecho.
 3. Añade `prefers-reduced-motion` para desactivar la transición del overlay en quien lo prefiera.
 
+Si quieres comparar con una solución real de cada reto:
+
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Reto 1: grid-auto-flow: dense",
+  "consigna": "Dos galerías idénticas, una sin dense y otra con — la foto 3 ocupa 2 columnas y no cabe al final de la primera fila, así que sin dense deja un hueco vacío (fila 1, columna 3) que el resto de fotos ya no rellena. Con dense, la foto 4 salta hacia atrás para tapar ese hueco.",
+  "html": "<p class=\"etiqueta\">Sin dense (deja un hueco)</p>\n<div class=\"galeria\">\n  <div class=\"foto\">1</div>\n  <div class=\"foto\">2</div>\n  <div class=\"foto foto--ancha\">3</div>\n  <div class=\"foto\">4</div>\n  <div class=\"foto\">5</div>\n  <div class=\"foto\">6</div>\n</div>\n<p class=\"etiqueta\">Con dense (rellena el hueco)</p>\n<div class=\"galeria galeria--dense\">\n  <div class=\"foto\">1</div>\n  <div class=\"foto\">2</div>\n  <div class=\"foto foto--ancha\">3</div>\n  <div class=\"foto\">4</div>\n  <div class=\"foto\">5</div>\n  <div class=\"foto\">6</div>\n</div>",
+  "css": "body {\n  font-family: system-ui, sans-serif;\n}\n.etiqueta {\n  font-weight: 600;\n  margin: 1rem 0 0.5rem;\n}\n.etiqueta:first-child {\n  margin-top: 0;\n}\n.galeria {\n  display: grid;\n  grid-template-columns: repeat(3, 1fr);\n  gap: 8px;\n}\n.galeria--dense {\n  grid-auto-flow: dense;\n}\n.foto {\n  aspect-ratio: 1;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  color: white;\n  font-size: 1.1rem;\n  background: linear-gradient(135deg, #7c3aed, #ec4899);\n  border-radius: 8px;\n}\n.foto--ancha {\n  grid-column: span 2;\n}",
+  "pestañaInicial": "css"
+}
+```
+
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Reto 2: container queries",
+  "consigna": "container-type: inline-size convierte el contenedor en una unidad de medida propia — @container reacciona a SU ancho, no al de la ventana. Arrastra la esquina inferior derecha de la caja punteada en la vista previa para encogerla y ver cómo cambia el gap.",
+  "html": "<div class=\"galeria-envoltorio\">\n  <div class=\"galeria\">\n    <div class=\"foto\"></div>\n    <div class=\"foto\"></div>\n    <div class=\"foto\"></div>\n    <div class=\"foto\"></div>\n  </div>\n</div>",
+  "css": "body {\n  font-family: system-ui, sans-serif;\n}\n.galeria-envoltorio {\n  container-type: inline-size;\n  container-name: galeria-caja;\n  resize: horizontal;\n  overflow: auto;\n  max-width: 100%;\n  border: 1px dashed #d8d3c8;\n  padding: 8px;\n}\n.galeria {\n  display: grid;\n  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));\n  gap: 16px;\n}\n.foto {\n  aspect-ratio: 1;\n  background: linear-gradient(135deg, #7c3aed, #ec4899);\n  border-radius: 8px;\n}\n@container galeria-caja (max-width: 280px) {\n  .galeria {\n    gap: 4px;\n  }\n}",
+  "pestañaInicial": "css"
+}
+```
+
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Reto 3: prefers-reduced-motion en el overlay",
+  "consigna": "Igual que en el proyecto de micro-interacciones: el fundido del overlay es exactamente el tipo de movimiento que puede molestar a quien activó esta preferencia — se apaga la transición, no el propio overlay.",
+  "html": "<div class=\"galeria\">\n  <div class=\"foto\"><span class=\"overlay\">1</span></div>\n  <div class=\"foto\"><span class=\"overlay\">2</span></div>\n  <div class=\"foto\"><span class=\"overlay\">3</span></div>\n</div>",
+  "css": "body {\n  font-family: system-ui, sans-serif;\n}\n.galeria {\n  display: grid;\n  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));\n  gap: 8px;\n}\n.foto {\n  position: relative;\n  aspect-ratio: 1;\n  background: linear-gradient(135deg, #7c3aed, #ec4899);\n  border-radius: 8px;\n  overflow: hidden;\n}\n.overlay {\n  position: absolute;\n  inset: 0;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  background: rgb(0 0 0 / 0.5);\n  color: white;\n  font-size: 1.5rem;\n  opacity: 0;\n  transition: opacity 200ms;\n}\n.foto:hover .overlay {\n  opacity: 1;\n}\n@media (prefers-reduced-motion: reduce) {\n  .overlay {\n    transition: none;\n  }\n}",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

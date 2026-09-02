@@ -157,6 +157,41 @@ Si te has atascado, o quieres comparar tu resultado con uno completo y en marcha
 2. Haz que la elevación de la tarjeta (paso 1) también gire ligeramente con `rotate()`, un grado o dos, para un efecto más orgánico.
 3. Sustituye el pulso de `box-shadow` por uno de `scale` en un pseudo-elemento `::after` detrás de la insignia.
 
+Si quieres comparar con una solución real de cada reto:
+
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Reto 1: color de fondo en hover + rebote en active",
+  "consigna": "Dos transiciones en la misma propiedad transition, separadas por comas — cada una con su propia duración. Pasa el ratón y luego haz clic y mantenlo pulsado en la vista previa.",
+  "html": "<button class=\"boton\">Añadir al carrito</button>",
+  "css": "body {\n  font-family: system-ui, sans-serif;\n  padding: 2rem;\n}\n.boton {\n  background: #7c3aed;\n  color: white;\n  border: none;\n  padding: 0.6rem 1.2rem;\n  border-radius: 8px;\n  font-size: 1rem;\n  cursor: pointer;\n  transition: background-color 200ms, transform 100ms;\n}\n.boton:hover {\n  background-color: #6d28d9;\n}\n.boton:active {\n  transform: scale(0.95);\n}",
+  "pestañaInicial": "css"
+}
+```
+
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Reto 2: elevación con un giro sutil",
+  "consigna": "Dos funciones dentro del mismo transform, separadas por un espacio — se aplican juntas, no una sustituye a la otra. Pasa el ratón por encima de la tarjeta en la vista previa.",
+  "html": "<div class=\"tarjeta\">\n  <h3>Auriculares inalámbricos</h3>\n  <p>49,99€</p>\n  <button class=\"boton\">Añadir al carrito</button>\n</div>",
+  "css": "body {\n  font-family: system-ui, sans-serif;\n  padding: 2rem;\n}\n.tarjeta {\n  border: 1px solid #e2ded6;\n  border-radius: 12px;\n  padding: 1.5rem;\n  max-width: 260px;\n  box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);\n  transition: transform 200ms, box-shadow 200ms;\n}\n.tarjeta:hover {\n  transform: translateY(-4px) rotate(-1deg);\n  box-shadow: 0 12px 24px rgb(0 0 0 / 0.15);\n}\n.boton {\n  background: #7c3aed;\n  color: white;\n  border: none;\n  padding: 0.5rem 1rem;\n  border-radius: 8px;\n}",
+  "pestañaInicial": "css"
+}
+```
+
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Reto 3: pulso con scale en un ::after",
+  "consigna": "La insignia sigue con position: absolute respecto a la tarjeta, igual que en el paso 3 — lo nuevo es su ::after, que se coloca respecto a LA INSIGNIA (inset: 0 la hace empezar exactamente del mismo tamaño) y crece hacia fuera con scale mientras se desvanece. z-index: -1 lo manda detrás del texto \"Nuevo\" para que siga siendo legible.",
+  "html": "<div class=\"tarjeta\">\n  <span class=\"insignia\">Nuevo</span>\n  <h3>Auriculares inalámbricos</h3>\n</div>",
+  "css": "body {\n  font-family: system-ui, sans-serif;\n  padding: 2rem;\n}\n.tarjeta {\n  position: relative;\n  border: 1px solid #e2ded6;\n  border-radius: 12px;\n  padding: 1.5rem 1.5rem 1.5rem 2.5rem;\n  max-width: 260px;\n}\n.insignia {\n  position: absolute;\n  top: -6px;\n  left: -6px;\n  background: #ef4444;\n  color: white;\n  font-size: 0.7rem;\n  padding: 2px 8px;\n  border-radius: 999px;\n}\n.insignia::after {\n  content: '';\n  position: absolute;\n  inset: 0;\n  border-radius: inherit;\n  background: #ef4444;\n  z-index: -1;\n  animation: pulso-scale 2s infinite;\n}\n@keyframes pulso-scale {\n  0% {\n    transform: scale(1);\n    opacity: 0.6;\n  }\n  100% {\n    transform: scale(1.8);\n    opacity: 0;\n  }\n}\n@media (prefers-reduced-motion: reduce) {\n  .insignia::after {\n    animation: none;\n  }\n}",
+  "pestañaInicial": "css"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio
