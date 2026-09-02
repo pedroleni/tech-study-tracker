@@ -26,6 +26,19 @@ Declara las variables de un tema claro: fondo, texto y un color de acento.
 }
 ```
 
+Si te atascas, aquí tienes este paso ya resuelto:
+
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Solución del paso 1",
+  "consigna": "Así queda este paso resuelto, para comparar con el tuyo.",
+  "html": "<body>\n  <div class=\"tarjeta\">\n    <h2>Tarjeta de ejemplo</h2>\n    <p>Este texto debería cambiar de color con el tema.</p>\n    <button class=\"boton\">Acción</button>\n  </div>\n</body>",
+  "css": ":root {\n  --fondo: #ffffff;\n  --texto: #1a1a1a;\n  --acento: #7c3aed;\n}\nbody {\n  font-family: system-ui, sans-serif;\n  background: var(--fondo);\n  color: var(--texto);\n  margin: 0;\n  padding: 1.5rem;\n}\n.tarjeta {\n  border: 1px solid #d8d3c8;\n  border-radius: 12px;\n  padding: 1.5rem;\n  max-width: 320px;\n}\n.boton {\n  background: var(--acento);\n  color: white;\n  border: none;\n  padding: 0.5rem 1rem;\n  border-radius: 8px;\n}",
+  "pestañaInicial": "css"
+}
+```
+
 ## Paso 2: el tema oscuro
 
 Redefine las mismas variables dentro de una clase `.oscuro` en `body` — no crees variables nuevas con otro nombre, redefine las mismas.
@@ -37,6 +50,19 @@ Redefine las mismas variables dentro de una clase `.oscuro` en `body` — no cre
   "consigna": "Escribe body.oscuro { } redefiniendo --fondo, --texto y --acento con valores oscuros. Añade manualmente class=\"oscuro\" al body en la pestaña HTML para comprobarlo (lo quitaremos en el paso 3, cuando lo haga un botón).",
   "html": "<body class=\"oscuro\">\n  <div class=\"tarjeta\">\n    <h2>Tarjeta de ejemplo</h2>\n    <p>Prueba a quitar la clase \"oscuro\" del body para volver al tema claro.</p>\n    <button class=\"boton\">Acción</button>\n  </div>\n</body>",
   "css": ":root {\n  --fondo: #ffffff;\n  --texto: #1a1a1a;\n  --acento: #7c3aed;\n}\nbody {\n  font-family: system-ui, sans-serif;\n  background: var(--fondo);\n  color: var(--texto);\n  margin: 0;\n  padding: 1.5rem;\n  transition: background 200ms, color 200ms;\n}\n/* body.oscuro { --fondo: ...; --texto: ...; --acento: ...; } */\n.tarjeta {\n  border: 1px solid color-mix(in srgb, var(--texto) 20%, transparent);\n  border-radius: 12px;\n  padding: 1.5rem;\n  max-width: 320px;\n}\n.boton {\n  background: var(--acento);\n  color: white;\n  border: none;\n  padding: 0.5rem 1rem;\n  border-radius: 8px;\n}",
+  "pestañaInicial": "css"
+}
+```
+
+Si te atascas, aquí tienes este paso ya resuelto:
+
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Solución del paso 2",
+  "consigna": "Así queda este paso resuelto, para comparar con el tuyo.",
+  "html": "<body class=\"oscuro\">\n  <div class=\"tarjeta\">\n    <h2>Tarjeta de ejemplo</h2>\n    <p>Prueba a quitar la clase \"oscuro\" del body para volver al tema claro.</p>\n    <button class=\"boton\">Acción</button>\n  </div>\n</body>",
+  "css": ":root {\n  --fondo: #ffffff;\n  --texto: #1a1a1a;\n  --acento: #7c3aed;\n}\nbody {\n  font-family: system-ui, sans-serif;\n  background: var(--fondo);\n  color: var(--texto);\n  margin: 0;\n  padding: 1.5rem;\n  transition: background 200ms, color 200ms;\n}\nbody.oscuro {\n  --fondo: #18181b;\n  --texto: #f4f4f5;\n  --acento: #a78bfa;\n}\n.tarjeta {\n  border: 1px solid color-mix(in srgb, var(--texto) 20%, transparent);\n  border-radius: 12px;\n  padding: 1.5rem;\n  max-width: 320px;\n}\n.boton {\n  background: var(--acento);\n  color: white;\n  border: none;\n  padding: 0.5rem 1rem;\n  border-radius: 8px;\n}",
   "pestañaInicial": "css"
 }
 ```
@@ -54,6 +80,30 @@ Con las variables ya resueltas en CSS, JavaScript solo necesita alternar una cla
   "css": ":root {\n  /* --fondo: #ffffff; --texto: #1a1a1a; --acento: #7c3aed; */\n}\nbody {\n  font-family: system-ui, sans-serif;\n  background: var(--fondo);\n  color: var(--texto);\n  margin: 0;\n  padding: 1.5rem;\n  transition: background 200ms, color 200ms;\n}\n/* body.oscuro { --fondo: #18181b; --texto: #f4f4f5; --acento: #a78bfa; } */\n.tarjeta {\n  border: 1px solid color-mix(in srgb, var(--texto) 20%, transparent);\n  border-radius: 12px;\n  padding: 1.5rem;\n  max-width: 320px;\n}\n.boton {\n  background: var(--acento);\n  color: white;\n  border: none;\n  padding: 0.5rem 1rem;\n  border-radius: 8px;\n  cursor: pointer;\n}",
   "js": "document.getElementById('interruptor').addEventListener('click', () => {\n  document.body.classList.toggle('oscuro');\n});",
   "pestañaInicial": "css"
+}
+```
+
+Si te atascas, o quieres comparar tu resultado con uno completo y en marcha, aquí tienes el interruptor entero, ya resuelto — este paso ya era el proyecto completo, así que esta es también la solución final:
+
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Solución completa",
+  "consigna": "El interruptor terminado: variables en :root, redefinidas en body.oscuro, y un botón que alterna la clase. Pulsa \"Cambiar tema\" en la vista previa para comprobarlo.",
+  "html": "<body>\n  <div class=\"tarjeta\">\n    <h2>Tarjeta de ejemplo</h2>\n    <p>Pulsa el botón para alternar el tema.</p>\n    <button class=\"boton\" id=\"interruptor\">Cambiar tema</button>\n  </div>\n</body>",
+  "css": ":root {\n  --fondo: #ffffff;\n  --texto: #1a1a1a;\n  --acento: #7c3aed;\n}\nbody {\n  font-family: system-ui, sans-serif;\n  background: var(--fondo);\n  color: var(--texto);\n  margin: 0;\n  padding: 1.5rem;\n  transition: background 200ms, color 200ms;\n}\nbody.oscuro {\n  --fondo: #18181b;\n  --texto: #f4f4f5;\n  --acento: #a78bfa;\n}\n.tarjeta {\n  border: 1px solid color-mix(in srgb, var(--texto) 20%, transparent);\n  border-radius: 12px;\n  padding: 1.5rem;\n  max-width: 320px;\n}\n.boton {\n  background: var(--acento);\n  color: white;\n  border: none;\n  padding: 0.5rem 1rem;\n  border-radius: 8px;\n  cursor: pointer;\n}",
+  "js": "document.getElementById('interruptor').addEventListener('click', () => {\n  document.body.classList.toggle('oscuro');\n});",
+  "pestañaInicial": "css"
+}
+```
+
+```laboratorio
+{
+  "tipo": "notas-clave",
+  "items": [
+    { "titulo": "Mismo nombre de variable, valor distinto.", "texto": "body.oscuro redeclara --fondo/--texto/--acento con el MISMO nombre que :root — eso es lo que hace que todo lo que ya usa var(--fondo) cambie solo, sin tocar el resto del CSS." },
+    { "titulo": "JavaScript no calcula ningún color.", "texto": "El único trabajo del JS es alternar una clase — el cambio de color en sí vive entero en las variables CSS." }
+  ]
 }
 ```
 

@@ -35,6 +35,19 @@ Combina `transform: translateY()` con una sombra más pronunciada, y una `transi
 }
 ```
 
+Si te atascas, aquí tienes este paso ya resuelto:
+
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Solución del paso 1",
+  "consigna": "Así queda este paso resuelto, para comparar con el tuyo. Pasa el ratón por encima de la tarjeta en la vista previa para verlo.",
+  "html": "<div class=\"tarjeta\">\n  <h3>Auriculares inalámbricos</h3>\n  <p>49,99€</p>\n  <button class=\"boton\">Añadir al carrito</button>\n</div>",
+  "css": "body {\n  font-family: system-ui, sans-serif;\n  padding: 2rem;\n}\n.tarjeta {\n  border: 1px solid #e2ded6;\n  border-radius: 12px;\n  padding: 1.5rem;\n  max-width: 260px;\n  box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);\n  transition: transform 200ms, box-shadow 200ms;\n}\n.tarjeta:hover {\n  transform: translateY(-4px);\n  box-shadow: 0 12px 24px rgb(0 0 0 / 0.15);\n}\n.boton {\n  background: #7c3aed;\n  color: white;\n  border: none;\n  padding: 0.5rem 1rem;\n  border-radius: 8px;\n}",
+  "pestañaInicial": "css"
+}
+```
+
 ## Paso 2: el botón con rebote al pulsarlo
 
 Un `scale` breve en `:active` — el botón se encoge un instante al pulsarlo, dando la sensación física de haber sido presionado.
@@ -46,6 +59,19 @@ Un `scale` breve en `:active` — el botón se encoge un instante al pulsarlo, d
   "consigna": "Añade transition: transform 100ms al botón, y en .boton:active escala a 0.95. Haz clic y mantenlo pulsado en la vista previa para verlo.",
   "html": "<button class=\"boton\">Añadir al carrito</button>",
   "css": "body {\n  font-family: system-ui, sans-serif;\n  padding: 2rem;\n}\n.boton {\n  background: #7c3aed;\n  color: white;\n  border: none;\n  padding: 0.6rem 1.2rem;\n  border-radius: 8px;\n  font-size: 1rem;\n  cursor: pointer;\n  /* transition: transform 100ms; */\n}\n/* .boton:active { transform: scale(0.95); } */",
+  "pestañaInicial": "css"
+}
+```
+
+Si te atascas, aquí tienes este paso ya resuelto:
+
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Solución del paso 2",
+  "consigna": "Así queda este paso resuelto, para comparar con el tuyo. Haz clic y mantenlo pulsado en la vista previa para verlo.",
+  "html": "<button class=\"boton\">Añadir al carrito</button>",
+  "css": "body {\n  font-family: system-ui, sans-serif;\n  padding: 2rem;\n}\n.boton {\n  background: #7c3aed;\n  color: white;\n  border: none;\n  padding: 0.6rem 1.2rem;\n  border-radius: 8px;\n  font-size: 1rem;\n  cursor: pointer;\n  transition: transform 100ms;\n}\n.boton:active {\n  transform: scale(0.95);\n}",
   "pestañaInicial": "css"
 }
 ```
@@ -62,6 +88,44 @@ Un `@keyframes` que anime `box-shadow` (o `transform: scale`) en bucle, sutil, y
   "html": "<div class=\"tarjeta\">\n  <span class=\"insignia\">Nuevo</span>\n  <h3>Auriculares inalámbricos</h3>\n</div>",
   "css": "body {\n  font-family: system-ui, sans-serif;\n  padding: 2rem;\n}\n.tarjeta {\n  position: relative;\n  border: 1px solid #e2ded6;\n  border-radius: 12px;\n  padding: 1.5rem 1.5rem 1.5rem 2.5rem;\n  max-width: 260px;\n}\n.insignia {\n  position: absolute;\n  top: -6px;\n  left: -6px;\n  background: #ef4444;\n  color: white;\n  font-size: 0.7rem;\n  padding: 2px 8px;\n  border-radius: 999px;\n  /* animation: pulso 2s infinite; */\n}\n/* @keyframes pulso {\n  0% { box-shadow: 0 0 0 0 rgb(239 68 68 / 0.5); }\n  100% { box-shadow: 0 0 0 8px rgb(239 68 68 / 0); }\n} */\n/* @media (prefers-reduced-motion: reduce) { .insignia { animation: none; } } */",
   "pestañaInicial": "css"
+}
+```
+
+Si te atascas, aquí tienes este paso ya resuelto:
+
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Solución del paso 3",
+  "consigna": "Así queda este paso resuelto, para comparar con el tuyo. La insignia \"Nuevo\" pulsa sola en la vista previa.",
+  "html": "<div class=\"tarjeta\">\n  <span class=\"insignia\">Nuevo</span>\n  <h3>Auriculares inalámbricos</h3>\n</div>",
+  "css": "body {\n  font-family: system-ui, sans-serif;\n  padding: 2rem;\n}\n.tarjeta {\n  position: relative;\n  border: 1px solid #e2ded6;\n  border-radius: 12px;\n  padding: 1.5rem 1.5rem 1.5rem 2.5rem;\n  max-width: 260px;\n}\n.insignia {\n  position: absolute;\n  top: -6px;\n  left: -6px;\n  background: #ef4444;\n  color: white;\n  font-size: 0.7rem;\n  padding: 2px 8px;\n  border-radius: 999px;\n  animation: pulso 2s infinite;\n}\n@keyframes pulso {\n  0% {\n    box-shadow: 0 0 0 0 rgb(239 68 68 / 0.5);\n  }\n  100% {\n    box-shadow: 0 0 0 8px rgb(239 68 68 / 0);\n  }\n}\n@media (prefers-reduced-motion: reduce) {\n  .insignia {\n    animation: none;\n  }\n}",
+  "pestañaInicial": "css"
+}
+```
+
+## Solución
+
+Si te has atascado, o quieres comparar tu resultado con uno completo y en marcha, aquí tienes la tarjeta entera, ya resuelta — con los tres detalles de pulido juntos en un mismo sitio: elevación al pasar el ratón, rebote del botón al pulsarlo, e insignia con pulso continuo:
+
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Solución completa",
+  "consigna": "La tarjeta terminada con las tres micro-interacciones a la vez. Pasa el ratón por encima, pulsa el botón, y observa la insignia \"Nuevo\".",
+  "html": "<div class=\"tarjeta\">\n  <span class=\"insignia\">Nuevo</span>\n  <h3>Auriculares inalámbricos</h3>\n  <p>49,99€</p>\n  <button class=\"boton\">Añadir al carrito</button>\n</div>",
+  "css": "body {\n  font-family: system-ui, sans-serif;\n  padding: 2rem;\n}\n.tarjeta {\n  position: relative;\n  border: 1px solid #e2ded6;\n  border-radius: 12px;\n  padding: 1.5rem 1.5rem 1.5rem 2.5rem;\n  max-width: 260px;\n  box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);\n  transition: transform 200ms, box-shadow 200ms;\n}\n.tarjeta:hover {\n  transform: translateY(-4px);\n  box-shadow: 0 12px 24px rgb(0 0 0 / 0.15);\n}\n.insignia {\n  position: absolute;\n  top: -6px;\n  left: -6px;\n  background: #ef4444;\n  color: white;\n  font-size: 0.7rem;\n  padding: 2px 8px;\n  border-radius: 999px;\n  animation: pulso 2s infinite;\n}\n@keyframes pulso {\n  0% {\n    box-shadow: 0 0 0 0 rgb(239 68 68 / 0.5);\n  }\n  100% {\n    box-shadow: 0 0 0 8px rgb(239 68 68 / 0);\n  }\n}\n@media (prefers-reduced-motion: reduce) {\n  .insignia {\n    animation: none;\n  }\n}\n.boton {\n  background: #7c3aed;\n  color: white;\n  border: none;\n  padding: 0.6rem 1.2rem;\n  border-radius: 8px;\n  font-size: 1rem;\n  cursor: pointer;\n  transition: transform 100ms;\n}\n.boton:active {\n  transform: scale(0.95);\n}",
+  "pestañaInicial": "css"
+}
+```
+
+```laboratorio
+{
+  "tipo": "notas-clave",
+  "items": [
+    { "titulo": "Solo transform y box-shadow se animan.", "texto": "Ninguna de las tres micro-interacciones toca top, left ni width — eso evita que el navegador recalcule el layout en cada fotograma." },
+    { "titulo": "El pulso respeta prefers-reduced-motion.", "texto": "Quien activó esa preferencia del sistema ve la insignia quieta, sin el bucle infinito." }
+  ]
 }
 ```
 
