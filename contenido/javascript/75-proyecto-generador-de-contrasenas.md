@@ -45,7 +45,7 @@ Junta minúsculas siempre, y añade mayúsculas/números/símbolos solo si su ch
   "titulo": "Paso 2: construir el alfabeto",
   "consigna": "Completa construirAlfabeto(): empieza con minúsculas, y ve concatenando MAYUSCULAS/NUMEROS/SIMBOLOS según el estado .checked de cada checkbox.",
   "html": "<label><input type=\"checkbox\" id=\"mayusculas\" checked> Mayúsculas</label>\n<label><input type=\"checkbox\" id=\"numeros\" checked> Números</label>\n<label><input type=\"checkbox\" id=\"simbolos\"> Símbolos</label>\n<button id=\"probar\">Ver alfabeto</button>\n<pre id=\"salida\"></pre>",
-  "css": "body { font-family: system-ui, sans-serif; padding: 1rem; }\nlabel { display: block; margin-bottom: 4px; }",
+  "css": "body {\n  font-family: system-ui, sans-serif;\n  padding: 1rem;\n}\nlabel {\n  display: block;\n  margin-bottom: 4px;\n}",
   "js": "const salida = document.getElementById('salida');\nfunction mostrar(valor) { salida.textContent += valor + '\\n'; }\n\nconst MINUSCULAS = 'abcdefghijklmnopqrstuvwxyz';\nconst MAYUSCULAS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';\nconst NUMEROS = '0123456789';\nconst SIMBOLOS = '!@#$%^&*()_+-=';\n\nfunction construirAlfabeto() {\n  let alfabeto = MINUSCULAS;\n  // añade MAYUSCULAS si #mayusculas.checked, NUMEROS si #numeros.checked, SIMBOLOS si #simbolos.checked\n  return alfabeto;\n}\n\ndocument.getElementById('probar').addEventListener('click', () => {\n  salida.textContent = '';\n  mostrar(construirAlfabeto());\n});",
   "pestañaInicial": "js"
 }
@@ -61,7 +61,7 @@ Añade un input de longitud y genera la contraseña completa combinando los dos 
   "titulo": "Proyecto completo",
   "consigna": "Completa generarContrasena(): construye el alfabeto según las opciones marcadas, y repite caracterAlAzar() tantas veces como indique #longitud, uniendo el resultado en un string.",
   "html": "<div class=\"opciones\">\n  <label>Longitud: <input type=\"number\" id=\"longitud\" value=\"12\" min=\"4\" max=\"32\"></label>\n  <label><input type=\"checkbox\" id=\"mayusculas\" checked> Mayúsculas</label>\n  <label><input type=\"checkbox\" id=\"numeros\" checked> Números</label>\n  <label><input type=\"checkbox\" id=\"simbolos\"> Símbolos</label>\n</div>\n<button id=\"generar\">Generar</button>\n<input id=\"resultado\" readonly>",
-  "css": "body { font-family: system-ui, sans-serif; padding: 1rem; max-width: 320px; }\n.opciones label { display: block; margin-bottom: 6px; }\n#resultado { width: 100%; box-sizing: border-box; padding: 8px; margin-top: 12px; font-family: monospace; font-size: 1rem; }\nbutton { padding: 6px 14px; cursor: pointer; }",
+  "css": "body {\n  font-family: system-ui, sans-serif;\n  padding: 1rem;\n  max-width: 320px;\n}\n.opciones label {\n  display: block;\n  margin-bottom: 6px;\n}\n#resultado {\n  width: 100%;\n  box-sizing: border-box;\n  padding: 8px;\n  margin-top: 12px;\n  font-family: monospace;\n  font-size: 1rem;\n}\nbutton {\n  padding: 6px 14px;\n  cursor: pointer;\n}",
   "js": "const MINUSCULAS = 'abcdefghijklmnopqrstuvwxyz';\nconst MAYUSCULAS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';\nconst NUMEROS = '0123456789';\nconst SIMBOLOS = '!@#$%^&*()_+-=';\n\nfunction caracterAlAzar(caracteres) {\n  const indice = Math.floor(Math.random() * caracteres.length);\n  return caracteres[indice];\n}\n\nfunction construirAlfabeto() {\n  let alfabeto = MINUSCULAS;\n  if (document.getElementById('mayusculas').checked) alfabeto += MAYUSCULAS;\n  if (document.getElementById('numeros').checked) alfabeto += NUMEROS;\n  if (document.getElementById('simbolos').checked) alfabeto += SIMBOLOS;\n  return alfabeto;\n}\n\nfunction generarContrasena() {\n  const longitud = Number(document.getElementById('longitud').value);\n  const alfabeto = construirAlfabeto();\n  let contrasena = '';\n  for (let i = 0; i < longitud; i++) {\n    contrasena += caracterAlAzar(alfabeto);\n  }\n  return contrasena;\n}\n\ndocument.getElementById('generar').addEventListener('click', () => {\n  document.getElementById('resultado').value = generarContrasena();\n});",
   "pestañaInicial": "js"
 }
@@ -73,9 +73,18 @@ Añade un input de longitud y genera la contraseña completa combinando los dos 
 {
   "tipo": "notas-clave",
   "items": [
-    { "titulo": "¿Desmarcar todas las opciones extra sigue generando algo?", "texto": "El alfabeto siempre debería tener al menos las minúsculas — nunca un string vacío que rompería Math.floor(Math.random() * 0)." },
-    { "titulo": "¿La longitud se lee como número, no como texto?", "texto": "Number(input.value) es necesario — sin él, el bucle for compara un string contra un número y puede comportarse de forma inesperada." },
-    { "titulo": "¿Cada generación es realmente distinta?", "texto": "Pulsa Generar varias veces seguidas y comprueba que el resultado cambia cada vez." }
+    {
+      "titulo": "¿Desmarcar todas las opciones extra sigue generando algo?",
+      "texto": "El alfabeto siempre debería tener al menos las minúsculas — nunca un string vacío que rompería Math.floor(Math.random() * 0)."
+    },
+    {
+      "titulo": "¿La longitud se lee como número, no como texto?",
+      "texto": "Number(input.value) es necesario — sin él, el bucle for compara un string contra un número y puede comportarse de forma inesperada."
+    },
+    {
+      "titulo": "¿Cada generación es realmente distinta?",
+      "texto": "Pulsa Generar varias veces seguidas y comprueba que el resultado cambia cada vez."
+    }
   ]
 }
 ```

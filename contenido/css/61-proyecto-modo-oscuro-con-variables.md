@@ -21,7 +21,7 @@ Declara las variables de un tema claro: fondo, texto y un color de acento.
   "titulo": "Paso 1: variables del tema claro",
   "consigna": "Declara --fondo, --texto y --acento en :root, y úsalas en body y en .tarjeta en vez de colores sueltos.",
   "html": "<body>\n  <div class=\"tarjeta\">\n    <h2>Tarjeta de ejemplo</h2>\n    <p>Este texto debería cambiar de color con el tema.</p>\n    <button class=\"boton\">Acción</button>\n  </div>\n</body>",
-  "css": ":root {\n  /* --fondo: #ffffff; --texto: #1a1a1a; --acento: #7c3aed; */\n}\nbody { font-family: system-ui, sans-serif; /* background: var(--fondo); color: var(--texto); */ margin: 0; padding: 1.5rem; }\n.tarjeta { border: 1px solid #d8d3c8; border-radius: 12px; padding: 1.5rem; max-width: 320px; }\n.boton { /* background: var(--acento); */ color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; }",
+  "css": ":root {\n  /* --fondo: #ffffff; --texto: #1a1a1a; --acento: #7c3aed; */\n}\nbody {\n  font-family: system-ui, sans-serif;\n  /* background: var(--fondo); color: var(--texto); */\n  margin: 0;\n  padding: 1.5rem;\n}\n.tarjeta {\n  border: 1px solid #d8d3c8;\n  border-radius: 12px;\n  padding: 1.5rem;\n  max-width: 320px;\n}\n.boton {\n  /* background: var(--acento); */\n  color: white;\n  border: none;\n  padding: 0.5rem 1rem;\n  border-radius: 8px;\n}",
   "pestañaInicial": "css"
 }
 ```
@@ -36,7 +36,7 @@ Redefine las mismas variables dentro de una clase `.oscuro` en `body` — no cre
   "titulo": "Paso 2: redefinir en .oscuro",
   "consigna": "Escribe body.oscuro { } redefiniendo --fondo, --texto y --acento con valores oscuros. Añade manualmente class=\"oscuro\" al body en la pestaña HTML para comprobarlo (lo quitaremos en el paso 3, cuando lo haga un botón).",
   "html": "<body class=\"oscuro\">\n  <div class=\"tarjeta\">\n    <h2>Tarjeta de ejemplo</h2>\n    <p>Prueba a quitar la clase \"oscuro\" del body para volver al tema claro.</p>\n    <button class=\"boton\">Acción</button>\n  </div>\n</body>",
-  "css": ":root {\n  --fondo: #ffffff;\n  --texto: #1a1a1a;\n  --acento: #7c3aed;\n}\nbody {\n  font-family: system-ui, sans-serif;\n  background: var(--fondo);\n  color: var(--texto);\n  margin: 0; padding: 1.5rem;\n  transition: background 200ms, color 200ms;\n}\n/* body.oscuro { --fondo: ...; --texto: ...; --acento: ...; } */\n.tarjeta { border: 1px solid color-mix(in srgb, var(--texto) 20%, transparent); border-radius: 12px; padding: 1.5rem; max-width: 320px; }\n.boton { background: var(--acento); color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; }",
+  "css": ":root {\n  --fondo: #ffffff;\n  --texto: #1a1a1a;\n  --acento: #7c3aed;\n}\nbody {\n  font-family: system-ui, sans-serif;\n  background: var(--fondo);\n  color: var(--texto);\n  margin: 0;\n  padding: 1.5rem;\n  transition: background 200ms, color 200ms;\n}\n/* body.oscuro { --fondo: ...; --texto: ...; --acento: ...; } */\n.tarjeta {\n  border: 1px solid color-mix(in srgb, var(--texto) 20%, transparent);\n  border-radius: 12px;\n  padding: 1.5rem;\n  max-width: 320px;\n}\n.boton {\n  background: var(--acento);\n  color: white;\n  border: none;\n  padding: 0.5rem 1rem;\n  border-radius: 8px;\n}",
   "pestañaInicial": "css"
 }
 ```
@@ -51,7 +51,7 @@ Con las variables ya resueltas en CSS, JavaScript solo necesita alternar una cla
   "titulo": "Proyecto completo: botón + variables",
   "consigna": "El JS ya alterna la clase \"oscuro\" en el body al pulsar el botón. Completa tú las variables de :root y de body.oscuro en la pestaña CSS para que el cambio se vea de verdad.",
   "html": "<body>\n  <div class=\"tarjeta\">\n    <h2>Tarjeta de ejemplo</h2>\n    <p>Pulsa el botón para alternar el tema.</p>\n    <button class=\"boton\" id=\"interruptor\">Cambiar tema</button>\n  </div>\n</body>",
-  "css": ":root {\n  /* --fondo: #ffffff; --texto: #1a1a1a; --acento: #7c3aed; */\n}\nbody {\n  font-family: system-ui, sans-serif;\n  background: var(--fondo);\n  color: var(--texto);\n  margin: 0; padding: 1.5rem;\n  transition: background 200ms, color 200ms;\n}\n/* body.oscuro { --fondo: #18181b; --texto: #f4f4f5; --acento: #a78bfa; } */\n.tarjeta { border: 1px solid color-mix(in srgb, var(--texto) 20%, transparent); border-radius: 12px; padding: 1.5rem; max-width: 320px; }\n.boton { background: var(--acento); color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; }",
+  "css": ":root {\n  /* --fondo: #ffffff; --texto: #1a1a1a; --acento: #7c3aed; */\n}\nbody {\n  font-family: system-ui, sans-serif;\n  background: var(--fondo);\n  color: var(--texto);\n  margin: 0;\n  padding: 1.5rem;\n  transition: background 200ms, color 200ms;\n}\n/* body.oscuro { --fondo: #18181b; --texto: #f4f4f5; --acento: #a78bfa; } */\n.tarjeta {\n  border: 1px solid color-mix(in srgb, var(--texto) 20%, transparent);\n  border-radius: 12px;\n  padding: 1.5rem;\n  max-width: 320px;\n}\n.boton {\n  background: var(--acento);\n  color: white;\n  border: none;\n  padding: 0.5rem 1rem;\n  border-radius: 8px;\n  cursor: pointer;\n}",
   "js": "document.getElementById('interruptor').addEventListener('click', () => {\n  document.body.classList.toggle('oscuro');\n});",
   "pestañaInicial": "css"
 }
@@ -63,9 +63,18 @@ Con las variables ya resueltas en CSS, JavaScript solo necesita alternar una cla
 {
   "tipo": "notas-clave",
   "items": [
-    { "titulo": "¿Redefiniste las mismas variables, no creaste otras?", "texto": "body.oscuro tiene que redeclarar --fondo/--texto/--acento con el MISMO nombre — es eso lo que hace que todo lo que ya usa var(--fondo) cambie solo, sin tocar el resto del CSS." },
-    { "titulo": "¿El cambio tiene una transición suave?", "texto": "Sin transition en background/color, el cambio de tema se ve como un salto brusco en vez de un fundido." },
-    { "titulo": "¿JavaScript solo alterna una clase?", "texto": "Todo el cálculo de color vive en CSS — JS no debería tener ningún color escrito dentro." }
+    {
+      "titulo": "¿Redefiniste las mismas variables, no creaste otras?",
+      "texto": "body.oscuro tiene que redeclarar --fondo/--texto/--acento con el MISMO nombre — es eso lo que hace que todo lo que ya usa var(--fondo) cambie solo, sin tocar el resto del CSS."
+    },
+    {
+      "titulo": "¿El cambio tiene una transición suave?",
+      "texto": "Sin transition en background/color, el cambio de tema se ve como un salto brusco en vez de un fundido."
+    },
+    {
+      "titulo": "¿JavaScript solo alterna una clase?",
+      "texto": "Todo el cálculo de color vive en CSS — JS no debería tener ningún color escrito dentro."
+    }
   ]
 }
 ```

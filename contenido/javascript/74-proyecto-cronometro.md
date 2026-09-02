@@ -36,7 +36,7 @@ Guarda el id que devuelve `setInterval` en una variable — es lo único que te 
   "titulo": "Paso 2: iniciar y pausar",
   "consigna": "Escribe iniciar(): si ya hay un intervalId activo, no crees otro. Si no, guarda el id de setInterval (incrementa segundos y actualiza la pantalla cada 1000ms). Escribe pausar(): clearInterval(intervalId) y ponlo a null.",
   "html": "<div id=\"pantalla\">00:00</div>\n<button id=\"iniciar\">Iniciar</button>\n<button id=\"pausar\">Pausar</button>",
-  "css": "body { font-family: system-ui, sans-serif; padding: 1rem; text-align: center; }\n#pantalla { font-size: 2.5rem; font-variant-numeric: tabular-nums; margin-bottom: 1rem; }",
+  "css": "body {\n  font-family: system-ui, sans-serif;\n  padding: 1rem;\n  text-align: center;\n}\n#pantalla {\n  font-size: 2.5rem;\n  font-variant-numeric: tabular-nums;\n  margin-bottom: 1rem;\n}",
   "js": "let segundos = 0;\nlet intervalId = null;\nconst pantalla = document.getElementById('pantalla');\n\nfunction formatearTiempo(s) {\n  const minutos = Math.floor(s / 60);\n  const segs = s % 60;\n  return String(minutos).padStart(2, '0') + ':' + String(segs).padStart(2, '0');\n}\n\nfunction iniciar() {\n  // si intervalId ya existe, no hagas nada\n  // si no, intervalId = setInterval(() => { segundos++; pantalla.textContent = formatearTiempo(segundos); }, 1000);\n}\n\nfunction pausar() {\n  // clearInterval(intervalId); intervalId = null;\n}\n\ndocument.getElementById('iniciar').addEventListener('click', iniciar);\ndocument.getElementById('pausar').addEventListener('click', pausar);",
   "pestañaInicial": "js"
 }
@@ -52,7 +52,7 @@ Añade el botón Reiniciar (pausa y pone segundos a 0) al cronómetro del paso 2
   "titulo": "Proyecto completo",
   "consigna": "Completa reiniciar(): debe pausar el intervalo si está corriendo, poner segundos a 0, y actualizar la pantalla.",
   "html": "<div id=\"pantalla\">00:00</div>\n<button id=\"iniciar\">Iniciar</button>\n<button id=\"pausar\">Pausar</button>\n<button id=\"reiniciar\">Reiniciar</button>",
-  "css": "body { font-family: system-ui, sans-serif; padding: 1rem; text-align: center; }\n#pantalla { font-size: 2.5rem; font-variant-numeric: tabular-nums; margin-bottom: 1rem; }\nbutton { padding: 6px 14px; margin: 0 4px; cursor: pointer; }",
+  "css": "body {\n  font-family: system-ui, sans-serif;\n  padding: 1rem;\n  text-align: center;\n}\n#pantalla {\n  font-size: 2.5rem;\n  font-variant-numeric: tabular-nums;\n  margin-bottom: 1rem;\n}\nbutton {\n  padding: 6px 14px;\n  margin: 0 4px;\n  cursor: pointer;\n}",
   "js": "let segundos = 0;\nlet intervalId = null;\nconst pantalla = document.getElementById('pantalla');\n\nfunction formatearTiempo(s) {\n  const minutos = Math.floor(s / 60);\n  const segs = s % 60;\n  return String(minutos).padStart(2, '0') + ':' + String(segs).padStart(2, '0');\n}\n\nfunction actualizarPantalla() {\n  pantalla.textContent = formatearTiempo(segundos);\n}\n\nfunction iniciar() {\n  if (intervalId) return;\n  intervalId = setInterval(() => {\n    segundos++;\n    actualizarPantalla();\n  }, 1000);\n}\n\nfunction pausar() {\n  clearInterval(intervalId);\n  intervalId = null;\n}\n\nfunction reiniciar() {\n  pausar();\n  segundos = 0;\n  actualizarPantalla();\n}\n\ndocument.getElementById('iniciar').addEventListener('click', iniciar);\ndocument.getElementById('pausar').addEventListener('click', pausar);\ndocument.getElementById('reiniciar').addEventListener('click', reiniciar);",
   "pestañaInicial": "js"
 }
@@ -64,9 +64,18 @@ Añade el botón Reiniciar (pausa y pone segundos a 0) al cronómetro del paso 2
 {
   "tipo": "notas-clave",
   "items": [
-    { "titulo": "¿Pulsar Iniciar dos veces seguidas acelera el conteo?", "texto": "Si iniciar() no comprueba intervalId antes de crear uno nuevo, tendrás dos (o más) intervals corriendo a la vez, sumando segundos más rápido de lo esperado — un bug muy común y difícil de notar a simple vista." },
-    { "titulo": "¿Pausar detiene de verdad?", "texto": "clearInterval necesita el id exacto que devolvió setInterval — guardarlo en una variable no es opcional." },
-    { "titulo": "¿El formato siempre tiene dos dígitos?", "texto": "5 segundos debe verse \"00:05\", no \"0:5\" — comprueba especialmente los primeros 10 segundos." }
+    {
+      "titulo": "¿Pulsar Iniciar dos veces seguidas acelera el conteo?",
+      "texto": "Si iniciar() no comprueba intervalId antes de crear uno nuevo, tendrás dos (o más) intervals corriendo a la vez, sumando segundos más rápido de lo esperado — un bug muy común y difícil de notar a simple vista."
+    },
+    {
+      "titulo": "¿Pausar detiene de verdad?",
+      "texto": "clearInterval necesita el id exacto que devolvió setInterval — guardarlo en una variable no es opcional."
+    },
+    {
+      "titulo": "¿El formato siempre tiene dos dígitos?",
+      "texto": "5 segundos debe verse \"00:05\", no \"0:5\" — comprueba especialmente los primeros 10 segundos."
+    }
   ]
 }
 ```

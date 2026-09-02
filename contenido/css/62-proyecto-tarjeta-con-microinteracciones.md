@@ -30,7 +30,7 @@ Combina `transform: translateY()` con una sombra más pronunciada, y una `transi
   "titulo": "Paso 1: elevación en hover",
   "consigna": "Añade a .tarjeta una transition de transform y box-shadow. En .tarjeta:hover, sube el elemento unos px con translateY negativo y aumenta el box-shadow.",
   "html": "<div class=\"tarjeta\">\n  <h3>Auriculares inalámbricos</h3>\n  <p>49,99€</p>\n  <button class=\"boton\">Añadir al carrito</button>\n</div>",
-  "css": "body { font-family: system-ui, sans-serif; padding: 2rem; }\n.tarjeta {\n  border: 1px solid #e2ded6;\n  border-radius: 12px;\n  padding: 1.5rem;\n  max-width: 260px;\n  box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);\n  /* transition: transform 200ms, box-shadow 200ms; */\n}\n/* .tarjeta:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgb(0 0 0 / 0.15); } */\n.boton { background: #7c3aed; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; }",
+  "css": "body {\n  font-family: system-ui, sans-serif;\n  padding: 2rem;\n}\n.tarjeta {\n  border: 1px solid #e2ded6;\n  border-radius: 12px;\n  padding: 1.5rem;\n  max-width: 260px;\n  box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);\n  /* transition: transform 200ms, box-shadow 200ms; */\n}\n/* .tarjeta:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgb(0 0 0 / 0.15); } */\n.boton {\n  background: #7c3aed;\n  color: white;\n  border: none;\n  padding: 0.5rem 1rem;\n  border-radius: 8px;\n}",
   "pestañaInicial": "css"
 }
 ```
@@ -45,7 +45,7 @@ Un `scale` breve en `:active` — el botón se encoge un instante al pulsarlo, d
   "titulo": "Paso 2: rebote del botón",
   "consigna": "Añade transition: transform 100ms al botón, y en .boton:active escala a 0.95. Haz clic y mantenlo pulsado en la vista previa para verlo.",
   "html": "<button class=\"boton\">Añadir al carrito</button>",
-  "css": "body { font-family: system-ui, sans-serif; padding: 2rem; }\n.boton {\n  background: #7c3aed; color: white; border: none;\n  padding: 0.6rem 1.2rem; border-radius: 8px; font-size: 1rem;\n  cursor: pointer;\n  /* transition: transform 100ms; */\n}\n/* .boton:active { transform: scale(0.95); } */",
+  "css": "body {\n  font-family: system-ui, sans-serif;\n  padding: 2rem;\n}\n.boton {\n  background: #7c3aed;\n  color: white;\n  border: none;\n  padding: 0.6rem 1.2rem;\n  border-radius: 8px;\n  font-size: 1rem;\n  cursor: pointer;\n  /* transition: transform 100ms; */\n}\n/* .boton:active { transform: scale(0.95); } */",
   "pestañaInicial": "css"
 }
 ```
@@ -60,7 +60,7 @@ Un `@keyframes` que anime `box-shadow` (o `transform: scale`) en bucle, sutil, y
   "titulo": "Paso 3: insignia con pulso",
   "consigna": "Escribe un @keyframes pulso que anime box-shadow de un anillo pequeño a uno más grande y transparente. Aplícalo a .insignia en bucle infinito, y añade @media (prefers-reduced-motion: reduce) que lo desactive.",
   "html": "<div class=\"tarjeta\">\n  <span class=\"insignia\">Nuevo</span>\n  <h3>Auriculares inalámbricos</h3>\n</div>",
-  "css": "body { font-family: system-ui, sans-serif; padding: 2rem; }\n.tarjeta { position: relative; border: 1px solid #e2ded6; border-radius: 12px; padding: 1.5rem 1.5rem 1.5rem 2.5rem; max-width: 260px; }\n.insignia {\n  position: absolute; top: -6px; left: -6px;\n  background: #ef4444; color: white; font-size: 0.7rem;\n  padding: 2px 8px; border-radius: 999px;\n  /* animation: pulso 2s infinite; */\n}\n/* @keyframes pulso {\n  0% { box-shadow: 0 0 0 0 rgb(239 68 68 / 0.5); }\n  100% { box-shadow: 0 0 0 8px rgb(239 68 68 / 0); }\n} */\n/* @media (prefers-reduced-motion: reduce) { .insignia { animation: none; } } */",
+  "css": "body {\n  font-family: system-ui, sans-serif;\n  padding: 2rem;\n}\n.tarjeta {\n  position: relative;\n  border: 1px solid #e2ded6;\n  border-radius: 12px;\n  padding: 1.5rem 1.5rem 1.5rem 2.5rem;\n  max-width: 260px;\n}\n.insignia {\n  position: absolute;\n  top: -6px;\n  left: -6px;\n  background: #ef4444;\n  color: white;\n  font-size: 0.7rem;\n  padding: 2px 8px;\n  border-radius: 999px;\n  /* animation: pulso 2s infinite; */\n}\n/* @keyframes pulso {\n  0% { box-shadow: 0 0 0 0 rgb(239 68 68 / 0.5); }\n  100% { box-shadow: 0 0 0 8px rgb(239 68 68 / 0); }\n} */\n/* @media (prefers-reduced-motion: reduce) { .insignia { animation: none; } } */",
   "pestañaInicial": "css"
 }
 ```
@@ -71,9 +71,18 @@ Un `@keyframes` que anime `box-shadow` (o `transform: scale`) en bucle, sutil, y
 {
   "tipo": "notas-clave",
   "items": [
-    { "titulo": "¿Animas transform/box-shadow, no propiedades pesadas?", "texto": "top/left/width fuerzan al navegador a recalcular el layout en cada fotograma — transform y opacity no." },
-    { "titulo": "¿Cada animación tiene su transition o duration razonable?", "texto": "Sin ella, los cambios saltan de golpe en vez de sentirse suaves." },
-    { "titulo": "¿El pulso respeta prefers-reduced-motion?", "texto": "Una animación en bucle infinito es exactamente el tipo de movimiento que puede resultar molesto o mareante para quien activó esa preferencia." }
+    {
+      "titulo": "¿Animas transform/box-shadow, no propiedades pesadas?",
+      "texto": "top/left/width fuerzan al navegador a recalcular el layout en cada fotograma — transform y opacity no."
+    },
+    {
+      "titulo": "¿Cada animación tiene su transition o duration razonable?",
+      "texto": "Sin ella, los cambios saltan de golpe en vez de sentirse suaves."
+    },
+    {
+      "titulo": "¿El pulso respeta prefers-reduced-motion?",
+      "texto": "Una animación en bucle infinito es exactamente el tipo de movimiento que puede resultar molesto o mareante para quien activó esa preferencia."
+    }
   ]
 }
 ```
