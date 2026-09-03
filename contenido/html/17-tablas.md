@@ -121,6 +121,41 @@ Una tabla HTML es para datos que se leen de verdad en dos direcciones a la vez �
 }
 ```
 
+## Bordes de tabla: border-collapse y los tipos de borde
+
+Sin ningún CSS, una tabla no tiene ningún borde visible — hace falta añadirlo tú mismo. Y en cuanto le pones `border` tanto a `table` como a cada `th`/`td`, aparece un problema clásico: cada celda dibuja su propio borde por separado, así que entre dos celdas contiguas ves DOS líneas juntas en vez de una.
+
+```laboratorio
+{
+  "tipo": "comparador-antes-despues",
+  "antes": "<style>\n  table {\n    border: 2px solid #333;\n  }\n  th, td {\n    border: 2px solid #333;\n    padding: 8px 12px;\n  }\n</style>\n<table>\n  <tr><th>Perro</th><th>Edad</th></tr>\n  <tr><td>Rex</td><td>4</td></tr>\n  <tr><td>Luna</td><td>9</td></tr>\n</table>",
+  "despues": "<style>\n  table {\n    border: 2px solid #333;\n    border-collapse: collapse;\n  }\n  th, td {\n    border: 2px solid #333;\n    padding: 8px 12px;\n  }\n</style>\n<table>\n  <tr><th>Perro</th><th>Edad</th></tr>\n  <tr><td>Rex</td><td>4</td></tr>\n  <tr><td>Luna</td><td>9</td></tr>\n</table>",
+  "nota": "En \"antes\" (el valor por defecto, border-collapse: separate) cada celda dibuja su propio borde independiente — el borde entre dos celdas contiguas se ve el doble de grueso de lo que cabría esperar. border-collapse: collapse fusiona los bordes adyacentes en una única línea compartida: el comportamiento que casi siempre quieres en una tabla de datos."
+}
+```
+
+```laboratorio
+{
+  "tipo": "callout",
+  "variante": "info",
+  "titulo": "border-spacing: el hueco entre celdas separadas",
+  "contenido": "Solo tiene efecto con border-collapse: separate (el valor por defecto) — controla el espacio entre los bordes de celdas contiguas, como un gap. Con border-collapse: collapse no hace nada: los bordes ya están fusionados, no queda ningún hueco que espaciar."
+}
+```
+
+`border-style` no es exclusivo de las tablas — funciona en el borde de cualquier elemento — pero una tabla, con sus celdas ya alineadas en filas, es un sitio perfecto para comparar sus valores unos junto a otros:
+
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Los ocho tipos de border-style, uno junto a otro",
+  "consigna": "Cambia el color, el grosor (border-width) o añade tus propias filas. Fíjate en double (necesita al menos 3px de grosor para verse como dos líneas separadas) y en groove/ridge/inset/outset: con un único border-color, el navegador calcula solo un tono más claro y otro más oscuro para simular relieve — con un borde fino apenas se nota, por eso aquí se usa uno bastante grueso a propósito.",
+  "html": "<table>\n  <tr><th>Estilo</th><th>Ejemplo</th></tr>\n  <tr><td>solid</td><td class=\"solid\"></td></tr>\n  <tr><td>dashed</td><td class=\"dashed\"></td></tr>\n  <tr><td>dotted</td><td class=\"dotted\"></td></tr>\n  <tr><td>double</td><td class=\"double\"></td></tr>\n  <tr><td>groove</td><td class=\"groove\"></td></tr>\n  <tr><td>ridge</td><td class=\"ridge\"></td></tr>\n  <tr><td>inset</td><td class=\"inset\"></td></tr>\n  <tr><td>outset</td><td class=\"outset\"></td></tr>\n</table>",
+  "css": "table {\n  border-collapse: separate;\n  border-spacing: 0 10px;\n}\nth, td {\n  padding: 10px 16px;\n  text-align: left;\n}\ntd[class] {\n  width: 120px;\n  height: 24px;\n  border-width: 10px;\n  border-color: #7c3aed;\n}\n.solid { border-style: solid; }\n.dashed { border-style: dashed; }\n.dotted { border-style: dotted; }\n.double { border-style: double; }\n.groove { border-style: groove; }\n.ridge { border-style: ridge; }\n.inset { border-style: inset; }\n.outset { border-style: outset; }",
+  "pestañaInicial": "css"
+}
+```
+
 ## Lo que una tabla NO es
 
 ```laboratorio
