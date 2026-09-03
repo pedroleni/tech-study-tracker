@@ -77,6 +77,7 @@ function construirDocumento(html: string, css: string, js: string) {
   return `<!doctype html>
 <html lang="es">
   <head>
+    <base href="about:srcdoc" />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>${css}</style>
