@@ -69,7 +69,7 @@ Un PNG o un JPEG guardan un color exacto para cada píxel — por eso pixelan al
 ```laboratorio
 {
   "tipo": "predice-el-resultado",
-  "codigo": "<img src=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E %3Ccircle cx='12' cy='12' r='11' fill='%232563eb'/%3E %3Cpath d='M7 12.5l3 3 7-7' stroke='%23ffffff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E %3C/svg%3E\" width=\"800\" alt=\"Logotipo\">\n<!-- El SVG original mide 24x24 unidades -->",
+  "codigo": "<img src=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E %3Ccircle cx='12' cy='12' r='11' fill='%232563eb'/%3E %3Cpath d='M7 12.5l3 3 7-7' stroke='%23ffffff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E %3C/svg%3E\" width=\"80\" alt=\"Logotipo\">\n<!-- El SVG original mide 24x24 unidades: aquí se muestra a más de 3 veces ese tamaño -->",
   "opciones": [
     "Se ve borroso o pixelado al ampliarlo tanto",
     "Se ve nítido, sin importar cuánto se agrande",
