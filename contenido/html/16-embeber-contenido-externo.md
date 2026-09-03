@@ -114,15 +114,23 @@ Sin ningún valor, `sandbox` ya es la opción más restrictiva posible: sin scri
 
 ```laboratorio
 {
-  "tipo": "predice-el-resultado",
+  "tipo": "codigo-anotado",
+  "lenguaje": "html",
   "codigo": "<iframe\n  src=\"https://sitio-no-confiable.com\"\n  sandbox=\"allow-scripts allow-same-origin\">\n</iframe>",
-  "opciones": [
-    "Es más seguro que sandbox solo, porque combina dos permisos concretos",
-    "Es prácticamente equivalente a no tener sandbox en absoluto",
-    "El navegador rechaza la combinación y no carga el iframe"
-  ],
-  "correcta": 1,
-  "explicacion": "Esta combinación concreta es la excepción documentada del sandbox: con scripts activos y el origen real disponible a la vez, el contenido embebido puede modificar sus propios atributos y librarse de las restricciones — en la práctica, deja al iframe casi tan expuesto como si no llevara sandbox."
+  "anotaciones": [
+    { "fragmento": "src=\"https://sitio-no-confiable.com\"", "nota": "Un origen que no controlas ni conoces — exactamente el escenario para el que existe sandbox." },
+    { "fragmento": "allow-scripts", "nota": "Por sí solo, con el origen tratado como opaco, un script de ahí dentro podría ejecutarse pero sin acceso a cookies, almacenamiento ni el resto de recursos de su propio origen real." },
+    { "fragmento": "allow-same-origin", "nota": "Combinado con allow-scripts, el contenido recupera su origen real — el script ya no está aislado: puede acceder a todo lo que ese origen tendría normalmente, incluida la capacidad de modificar sus propios atributos. Es prácticamente equivalente a no tener sandbox." }
+  ]
+}
+```
+
+```laboratorio
+{
+  "tipo": "callout",
+  "variante": "info",
+  "titulo": "¿Por qué no hay una vista previa en vivo aquí?",
+  "contenido": "El editor de esta plataforma ya vive dentro de su propio iframe con sandbox=\"\" (todo bloqueado) por seguridad. Un iframe anidado con allow-scripts allow-same-origin dentro de ese contenedor sigue bloqueado igualmente — un hijo nunca puede tener más permisos que su padre, sea cual sea la URL. Por eso este ejemplo se explica con anotaciones en vez de una demo en vivo que nunca podría funcionar aquí (aunque sí lo haría en una página normal, fuera de este editor)."
 }
 ```
 
