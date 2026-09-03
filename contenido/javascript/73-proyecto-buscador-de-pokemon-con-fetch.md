@@ -95,6 +95,44 @@ Si el Pokémon no existe, muestra un mensaje de error en vez de romper la págin
 2. Busca por Enter en el input, no solo con el botón.
 3. Muestra también las estadísticas base (`datos.stats`) en una lista.
 
+Si quieres comparar con una solución real:
+
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Reto 1: estado \"cargando\" visual",
+  "consigna": "Deshabilita el botón y cambia su texto mientras esperas la respuesta, y vuelve a dejarlo como estaba tanto si la búsqueda tiene éxito como si falla — por eso el finally.",
+  "html": "<div class=\"buscador\">\n  <input id=\"nombre\" value=\"pikachu\">\n  <button id=\"buscar\">Buscar</button>\n</div>\n<div id=\"resultado\"></div>",
+  "css": "body {\n  font-family: system-ui, sans-serif;\n  padding: 1rem;\n}\n.buscador {\n  display: flex;\n  gap: 8px;\n  margin-bottom: 12px;\n}\ninput {\n  padding: 6px 10px;\n}\nbutton {\n  padding: 6px 14px;\n  cursor: pointer;\n}\nbutton:disabled {\n  opacity: 0.6;\n  cursor: default;\n}\n#resultado {\n  text-align: center;\n}\n#resultado img {\n  width: 96px;\n  height: 96px;\n}",
+  "js": "const boton = document.getElementById('buscar');\nconst input = document.getElementById('nombre');\nconst resultado = document.getElementById('resultado');\n\nasync function buscarPokemon() {\n  boton.disabled = true;\n  boton.textContent = 'Buscando...';\n  resultado.textContent = '';\n  try {\n    const respuesta = await fetch('https://pokeapi.co/api/v2/pokemon/' + input.value.toLowerCase().trim());\n    if (!respuesta.ok) throw new Error('No se encontró ese Pokémon');\n    const datos = await respuesta.json();\n\n    const img = document.createElement('img');\n    img.src = datos.sprites.front_default;\n    img.alt = datos.name;\n\n    const titulo = document.createElement('h3');\n    titulo.textContent = datos.name;\n\n    resultado.appendChild(img);\n    resultado.appendChild(titulo);\n  } catch (error) {\n    resultado.textContent = error.message;\n  } finally {\n    boton.disabled = false;\n    boton.textContent = 'Buscar';\n  }\n}\n\nboton.addEventListener('click', buscarPokemon);\nbuscarPokemon();",
+  "pestañaInicial": "js"
+}
+```
+
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Reto 2: buscar también con Enter",
+  "consigna": "Escucha keydown en el input y, si evento.key es 'Enter', llama a la misma función que usa el botón — nada de duplicar la lógica de búsqueda.",
+  "html": "<div class=\"buscador\">\n  <input id=\"nombre\" value=\"charizard\">\n  <button id=\"buscar\">Buscar</button>\n</div>\n<div id=\"resultado\"></div>",
+  "css": "body {\n  font-family: system-ui, sans-serif;\n  padding: 1rem;\n}\n.buscador {\n  display: flex;\n  gap: 8px;\n  margin-bottom: 12px;\n}\ninput {\n  padding: 6px 10px;\n}\nbutton {\n  padding: 6px 14px;\n  cursor: pointer;\n}\n#resultado {\n  text-align: center;\n}\n#resultado img {\n  width: 96px;\n  height: 96px;\n}",
+  "js": "const boton = document.getElementById('buscar');\nconst input = document.getElementById('nombre');\nconst resultado = document.getElementById('resultado');\n\nasync function buscarPokemon() {\n  resultado.textContent = 'Buscando...';\n  try {\n    const respuesta = await fetch('https://pokeapi.co/api/v2/pokemon/' + input.value.toLowerCase().trim());\n    if (!respuesta.ok) throw new Error('No se encontró ese Pokémon');\n    const datos = await respuesta.json();\n\n    resultado.textContent = '';\n    const img = document.createElement('img');\n    img.src = datos.sprites.front_default;\n    img.alt = datos.name;\n    const titulo = document.createElement('h3');\n    titulo.textContent = datos.name;\n    resultado.appendChild(img);\n    resultado.appendChild(titulo);\n  } catch (error) {\n    resultado.textContent = error.message;\n  }\n}\n\nboton.addEventListener('click', buscarPokemon);\ninput.addEventListener('keydown', (evento) => {\n  if (evento.key === 'Enter') buscarPokemon();\n});\nbuscarPokemon();",
+  "pestañaInicial": "js"
+}
+```
+
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Reto 3: mostrar las estadísticas base",
+  "consigna": "datos.stats es un array de { base_stat, stat: { name } } — construye un li por cada una con createElement(), igual que ya haces con los tipos.",
+  "html": "<div class=\"buscador\">\n  <input id=\"nombre\" value=\"pikachu\">\n  <button id=\"buscar\">Buscar</button>\n</div>\n<div id=\"resultado\"></div>\n<ul id=\"stats\"></ul>",
+  "css": "body {\n  font-family: system-ui, sans-serif;\n  padding: 1rem;\n}\n.buscador {\n  display: flex;\n  gap: 8px;\n  margin-bottom: 12px;\n}\ninput {\n  padding: 6px 10px;\n}\nbutton {\n  padding: 6px 14px;\n  cursor: pointer;\n}\n#resultado {\n  text-align: center;\n}\n#resultado img {\n  width: 96px;\n  height: 96px;\n}\n#stats {\n  list-style: none;\n  padding: 0;\n  max-width: 220px;\n  margin: 0 auto;\n  font-size: 0.9rem;\n  text-transform: capitalize;\n}\n#stats li {\n  display: flex;\n  justify-content: space-between;\n  padding: 4px 0;\n  border-bottom: 1px solid #e2ded6;\n}",
+  "js": "const boton = document.getElementById('buscar');\nconst input = document.getElementById('nombre');\nconst resultado = document.getElementById('resultado');\nconst stats = document.getElementById('stats');\n\nasync function buscarPokemon() {\n  resultado.textContent = 'Buscando...';\n  stats.textContent = '';\n  try {\n    const respuesta = await fetch('https://pokeapi.co/api/v2/pokemon/' + input.value.toLowerCase().trim());\n    if (!respuesta.ok) throw new Error('No se encontró ese Pokémon');\n    const datos = await respuesta.json();\n\n    resultado.textContent = '';\n    const img = document.createElement('img');\n    img.src = datos.sprites.front_default;\n    img.alt = datos.name;\n    const titulo = document.createElement('h3');\n    titulo.textContent = datos.name;\n    resultado.appendChild(img);\n    resultado.appendChild(titulo);\n\n    datos.stats.forEach((s) => {\n      const li = document.createElement('li');\n      const nombreStat = document.createElement('span');\n      nombreStat.textContent = s.stat.name;\n      const valorStat = document.createElement('span');\n      valorStat.textContent = s.base_stat;\n      li.appendChild(nombreStat);\n      li.appendChild(valorStat);\n      stats.appendChild(li);\n    });\n  } catch (error) {\n    resultado.textContent = error.message;\n  }\n}\n\nboton.addEventListener('click', buscarPokemon);\nbuscarPokemon();",
+  "pestañaInicial": "js"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

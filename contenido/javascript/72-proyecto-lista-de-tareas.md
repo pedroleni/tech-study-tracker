@@ -112,6 +112,41 @@ Une los tres pasos: añadir con el formulario, marcar completada y borrar, todo 
 2. Añade un botón "Borrar completadas" que elimine de golpe todas las marcadas.
 3. Cuando llegues a la lección de localStorage, guarda y recupera la lista completa en tu propio archivo .html (no en este editor).
 
+Si quieres comparar con una solución real de los dos primeros retos:
+
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Reto 1: contador de pendientes en tiempo real",
+  "consigna": "Cuenta cuántos li NO tienen la clase completada y actualiza un párrafo cada vez que añades, completas o borras una tarea — no solo al cargar la página.",
+  "html": "<form id=\"formulario\">\n  <input id=\"entrada\" placeholder=\"Nueva tarea\" autocomplete=\"off\">\n  <button type=\"submit\">Añadir</button>\n</form>\n<p id=\"contador\"></p>\n<ul id=\"lista\">\n  <li>Comprar leche <button class=\"borrar\">×</button></li>\n  <li class=\"completada\">Repasar closures <button class=\"borrar\">×</button></li>\n</ul>",
+  "css": "body {\n  font-family: system-ui, sans-serif;\n  padding: 1rem;\n}\n#formulario {\n  display: flex;\n  gap: 0.5rem;\n  margin-bottom: 0.75rem;\n}\n#contador {\n  color: #6f6a61;\n  font-size: 0.9rem;\n  margin: 0 0 0.5rem;\n}\n#lista {\n  list-style: none;\n  padding: 0;\n  max-width: 320px;\n}\n#lista li {\n  display: flex;\n  justify-content: space-between;\n  padding: 0.5rem;\n  border-bottom: 1px solid #e2ded6;\n  cursor: pointer;\n}\n#lista li.completada {\n  text-decoration: line-through;\n  color: #999;\n}\n.borrar {\n  border: none;\n  background: none;\n  cursor: pointer;\n  font-size: 1rem;\n}",
+  "js": "const formulario = document.getElementById('formulario');\nconst entrada = document.getElementById('entrada');\nconst lista = document.getElementById('lista');\nconst contador = document.getElementById('contador');\n\nfunction actualizarContador() {\n  const pendientes = lista.querySelectorAll('li:not(.completada)').length;\n  contador.textContent = pendientes === 1 ? '1 tarea pendiente' : `${pendientes} tareas pendientes`;\n}\n\nformulario.addEventListener('submit', (evento) => {\n  evento.preventDefault();\n  const texto = entrada.value.trim();\n  if (!texto) return;\n\n  const li = document.createElement('li');\n  li.textContent = texto;\n\n  const boton = document.createElement('button');\n  boton.className = 'borrar';\n  boton.textContent = '×';\n  li.appendChild(boton);\n\n  lista.appendChild(li);\n  entrada.value = '';\n  actualizarContador();\n});\n\nlista.addEventListener('click', (evento) => {\n  if (evento.target.classList.contains('borrar')) {\n    evento.target.closest('li').remove();\n    actualizarContador();\n    return;\n  }\n  if (evento.target.tagName === 'LI') {\n    evento.target.classList.toggle('completada');\n    actualizarContador();\n  }\n});\n\nactualizarContador();",
+  "pestañaInicial": "js"
+}
+```
+
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Reto 2: borrar todas las completadas de golpe",
+  "consigna": "Un botón que recorra #lista y elimine de una vez todos los li.completada, sin tocar los pendientes.",
+  "html": "<form id=\"formulario\">\n  <input id=\"entrada\" placeholder=\"Nueva tarea\" autocomplete=\"off\">\n  <button type=\"submit\">Añadir</button>\n</form>\n<ul id=\"lista\">\n  <li class=\"completada\">Comprar leche <button class=\"borrar\">×</button></li>\n  <li>Repasar closures <button class=\"borrar\">×</button></li>\n  <li class=\"completada\">Sacar al perro <button class=\"borrar\">×</button></li>\n</ul>\n<button id=\"borrar-completadas\">Borrar completadas</button>",
+  "css": "body {\n  font-family: system-ui, sans-serif;\n  padding: 1rem;\n}\n#formulario {\n  display: flex;\n  gap: 0.5rem;\n  margin-bottom: 0.75rem;\n}\n#lista {\n  list-style: none;\n  padding: 0;\n  max-width: 320px;\n}\n#lista li {\n  display: flex;\n  justify-content: space-between;\n  padding: 0.5rem;\n  border-bottom: 1px solid #e2ded6;\n  cursor: pointer;\n}\n#lista li.completada {\n  text-decoration: line-through;\n  color: #999;\n}\n.borrar {\n  border: none;\n  background: none;\n  cursor: pointer;\n  font-size: 1rem;\n}\n#borrar-completadas {\n  margin-top: 0.75rem;\n  padding: 6px 14px;\n  cursor: pointer;\n}",
+  "js": "const formulario = document.getElementById('formulario');\nconst entrada = document.getElementById('entrada');\nconst lista = document.getElementById('lista');\n\nformulario.addEventListener('submit', (evento) => {\n  evento.preventDefault();\n  const texto = entrada.value.trim();\n  if (!texto) return;\n\n  const li = document.createElement('li');\n  li.textContent = texto;\n\n  const boton = document.createElement('button');\n  boton.className = 'borrar';\n  boton.textContent = '×';\n  li.appendChild(boton);\n\n  lista.appendChild(li);\n  entrada.value = '';\n});\n\nlista.addEventListener('click', (evento) => {\n  if (evento.target.classList.contains('borrar')) {\n    evento.target.closest('li').remove();\n    return;\n  }\n  if (evento.target.tagName === 'LI') {\n    evento.target.classList.toggle('completada');\n  }\n});\n\ndocument.getElementById('borrar-completadas').addEventListener('click', () => {\n  lista.querySelectorAll('li.completada').forEach((li) => li.remove());\n});",
+  "pestañaInicial": "js"
+}
+```
+
+```laboratorio
+{
+  "tipo": "callout",
+  "variante": "info",
+  "titulo": "Reto 3: guardar la lista con localStorage (respuesta escrita)",
+  "contenido": "En tu archivo .html normal (fuera de este editor, donde localStorage sí funciona) guarda datos, no HTML: cada tarea como { texto, completada }. Tras cada cambio, localStorage.setItem('tareas', JSON.stringify(tareas)). Al cargar la página, JSON.parse(localStorage.getItem('tareas') || '[]') y reconstruye cada li con createElement() a partir de ese array antes de añadir los listeners. Reconstruir desde datos guardados es más fiable que serializar el innerHTML entero."
+}
+```
+
 ## Para profundizar
 
 ```laboratorio
