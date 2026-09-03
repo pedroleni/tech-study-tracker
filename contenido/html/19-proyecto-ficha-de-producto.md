@@ -212,6 +212,41 @@ Si te has atascado, o quieres comparar tu resultado con uno completo y en marcha
 2. Añade un segundo `dl` para "Disponibilidad" con varios pares término/valor (talla, color, stock).
 3. Envuelve toda la ficha en un `article` — justifica en una frase por qué tendría sentido (o no) fuera de esta página.
 
+Si quieres comparar con una solución real de cada reto:
+
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Reto 1: cabecera agrupada con colspan y rowspan",
+  "consigna": "\"Característica\" usa rowspan=\"2\" para ocupar las dos filas de cabecera (no se repite), y \"Dimensiones\" usa colspan=\"2\" para agrupar Ancho y Alto debajo — scope=\"colgroup\" en vez de \"col\" porque esa cabecera abarca un grupo de columnas, no solo una.",
+  "html": "<table>\n  <caption>Especificaciones técnicas</caption>\n  <tr>\n    <th rowspan=\"2\" scope=\"col\">Característica</th>\n    <th colspan=\"2\" scope=\"colgroup\">Dimensiones</th>\n  </tr>\n  <tr>\n    <th scope=\"col\">Ancho</th>\n    <th scope=\"col\">Alto</th>\n  </tr>\n  <tr>\n    <td>Auriculares</td>\n    <td>18 cm</td>\n    <td>20 cm</td>\n  </tr>\n  <tr>\n    <td>Estuche de carga</td>\n    <td>6 cm</td>\n    <td>3 cm</td>\n  </tr>\n</table>",
+  "css": "table {\n  border-collapse: collapse;\n  margin: 1rem 0;\n  width: 100%;\n  max-width: 480px;\n}\ncaption {\n  text-align: left;\n  font-weight: 600;\n  margin-bottom: 0.5rem;\n}\nth, td {\n  border: 1px solid #d8d3c8;\n  padding: 0.5rem 0.75rem;\n  text-align: left;\n  font-size: 0.9rem;\n}\nth {\n  background: #f4f1ea;\n}",
+  "pestañaInicial": "html"
+}
+```
+
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Reto 2: un segundo dl para disponibilidad",
+  "consigna": "Tres pares término/valor seguidos, dentro del mismo dl — no hace falta un dl por cada par, uno solo puede llevar varios dt/dd.",
+  "html": "<h1>Auriculares inalámbricos AeroSound</h1>\n<dl class=\"disponibilidad\">\n  <dt>Talla</dt>\n  <dd>Única</dd>\n  <dt>Color</dt>\n  <dd>Gris grafito</dd>\n  <dt>Stock</dt>\n  <dd>Disponible</dd>\n</dl>",
+  "css": "body {\n  font-family: system-ui, sans-serif;\n  color: #2c2a26;\n  max-width: 480px;\n  margin: 0 auto;\n  padding: 0 1rem;\n}\nh1 {\n  font-size: 1.4rem;\n  margin-bottom: 0.25rem;\n}\n.disponibilidad {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 0.4rem 1rem;\n  margin: 0.5rem 0;\n}\n.disponibilidad dt {\n  font-weight: 600;\n}\n.disponibilidad dt::after {\n  content: ':';\n}\n.disponibilidad dd {\n  margin: 0;\n}",
+  "pestañaInicial": "html"
+}
+```
+
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Reto 3: la ficha como article",
+  "consigna": "Sí tendría sentido: la ficha de un producto se sostiene sola fuera de esta página — podría aparecer igual en un catálogo, un feed de \"novedades\" o citada en una comparativa de otra web.",
+  "html": "<article>\n  <h1>Auriculares inalámbricos AeroSound</h1>\n  <p>Cancelación de ruido activa y hasta 30 horas de batería con el estuche de carga.</p>\n</article>",
+  "css": "body {\n  font-family: system-ui, sans-serif;\n  color: #2c2a26;\n  max-width: 480px;\n  margin: 0 auto;\n  padding: 0 1rem;\n}\nh1 {\n  font-size: 1.4rem;\n  margin-bottom: 0.25rem;\n}",
+  "pestañaInicial": "html"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

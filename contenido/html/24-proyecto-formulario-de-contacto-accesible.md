@@ -212,6 +212,41 @@ Si te has atascado, o quieres comparar tu resultado con uno completo y en marcha
 2. Cambia el asunto de radio buttons a un `select` con las mismas tres opciones — ¿qué label necesitaría y cómo cambiaría la experiencia de elegir una opción?
 3. Añade un `pattern` al campo de nombre que rechace números, y escribe la explicación de por qué ese pattern es el correcto.
 
+Si quieres comparar con una solución real de cada reto:
+
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Reto 1: teléfono opcional",
+  "consigna": "Sin required — type=\"tel\" por sí solo ya hace que los móviles muestren un teclado numérico, aunque el campo sea opcional.",
+  "html": "<form action=\"#\" method=\"post\">\n  <div>\n    <label for=\"telefono\">Teléfono (opcional)</label>\n    <input type=\"tel\" id=\"telefono\" name=\"telefono\">\n  </div>\n</form>",
+  "css": "body {\n  font-family: system-ui, sans-serif;\n  color: #2c2a26;\n}\nform {\n  max-width: 420px;\n  margin: 1rem auto;\n  display: flex;\n  flex-direction: column;\n  gap: 1rem;\n}\nlabel {\n  display: block;\n  font-size: 0.85rem;\n  font-weight: 600;\n  margin-bottom: 0.25rem;\n}\ninput {\n  width: 100%;\n  box-sizing: border-box;\n  padding: 0.5rem 0.65rem;\n  border: 1px solid #d8d3c8;\n  border-radius: 8px;\n  font: inherit;\n}",
+  "pestañaInicial": "html"
+}
+```
+
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Reto 2: select en vez de radio",
+  "consigna": "Un select necesita UN solo label (no un legend de grupo, porque ya no hay varias opciones marcables por separado) — y cambia la experiencia: con radio se ven las 3 opciones de un vistazo, con select hace falta abrir el desplegable para verlas, aunque ocupa menos espacio en pantalla.",
+  "html": "<form action=\"#\" method=\"post\">\n  <div>\n    <label for=\"asunto\">¿Sobre qué nos escribes?</label>\n    <select id=\"asunto\" name=\"asunto\">\n      <option value=\"soporte\">Soporte</option>\n      <option value=\"ventas\">Ventas</option>\n      <option value=\"otro\">Otro</option>\n    </select>\n  </div>\n</form>",
+  "css": "body {\n  font-family: system-ui, sans-serif;\n  color: #2c2a26;\n}\nform {\n  max-width: 420px;\n  margin: 1rem auto;\n  display: flex;\n  flex-direction: column;\n  gap: 1rem;\n}\nlabel {\n  display: block;\n  font-size: 0.85rem;\n  font-weight: 600;\n  margin-bottom: 0.25rem;\n}\nselect {\n  width: 100%;\n  box-sizing: border-box;\n  padding: 0.5rem 0.65rem;\n  border: 1px solid #d8d3c8;\n  border-radius: 8px;\n  font: inherit;\n}",
+  "pestañaInicial": "html"
+}
+```
+
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Reto 3: pattern que rechaza números",
+  "consigna": "[^0-9]* significa \"cualquier cosa que NO sea un dígito, cero o más veces\" — el ^ dentro de los corchetes niega la clase de caracteres, así que basta un solo número en cualquier posición para que el navegador lo rechace. title es el texto que el navegador muestra en su mensaje de error nativo.",
+  "html": "<form action=\"#\" method=\"post\">\n  <div>\n    <label for=\"nombre\">Nombre</label>\n    <input type=\"text\" id=\"nombre\" name=\"nombre\" required pattern=\"[^0-9]*\" title=\"El nombre no debe contener números\">\n  </div>\n</form>",
+  "css": "body {\n  font-family: system-ui, sans-serif;\n  color: #2c2a26;\n}\nform {\n  max-width: 420px;\n  margin: 1rem auto;\n  display: flex;\n  flex-direction: column;\n  gap: 1rem;\n}\nlabel {\n  display: block;\n  font-size: 0.85rem;\n  font-weight: 600;\n  margin-bottom: 0.25rem;\n}\ninput {\n  width: 100%;\n  box-sizing: border-box;\n  padding: 0.5rem 0.65rem;\n  border: 1px solid #d8d3c8;\n  border-radius: 8px;\n  font: inherit;\n}",
+  "pestañaInicial": "html"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

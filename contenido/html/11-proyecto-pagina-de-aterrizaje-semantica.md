@@ -249,6 +249,39 @@ Si te has atascado, o quieres comparar tu resultado con uno completo y en marcha
 2. Añade un enlace "Volver arriba" al final del footer que salte de vuelta al inicio de la página.
 3. Marca visualmente en el menú qué sección estás mirando ahora mismo (pista: no hace falta JavaScript para plantear la pregunta de diseño, aunque resolverla con precisión sí lo necesite — de momento, describe con tus palabras qué información necesitarías).
 
+Si quieres comparar con una solución real de los dos primeros retos:
+
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Reto 1: preguntas frecuentes con details/summary",
+  "consigna": "Cada pregunta es su propio details independiente — no hace falta ningún JavaScript para que se abran y cierren, es comportamiento nativo del navegador.",
+  "html": "<section id=\"preguntas\">\n  <h2>Preguntas frecuentes</h2>\n  <details>\n    <summary>¿Cuánto tarda la puesta en marcha?</summary>\n    <p>La mayoría de negocios están facturando su primera factura en menos de 10 minutos.</p>\n  </details>\n  <details>\n    <summary>¿Necesito tarjeta de crédito para probarlo?</summary>\n    <p>No. La prueba gratuita de 14 días no pide ningún método de pago.</p>\n  </details>\n  <details>\n    <summary>¿Puedo cambiar de plan más adelante?</summary>\n    <p>Sí, en cualquier momento desde el panel de tu cuenta, sin coste adicional.</p>\n  </details>\n</section>",
+  "css": "body {\n  font-family: system-ui, sans-serif;\n  margin: 0;\n  color: #2c2a26;\n}\nsection {\n  padding: 3rem 1.5rem;\n  max-width: 720px;\n  margin: 0 auto;\n}\nh2 {\n  text-align: center;\n}\ndetails {\n  border: 1px solid #e2ded6;\n  border-radius: 8px;\n  padding: 0.75rem 1rem;\n  margin-bottom: 0.75rem;\n}\nsummary {\n  font-weight: 600;\n  cursor: pointer;\n}\ndetails p {\n  margin: 0.75rem 0 0;\n  color: #6f6a61;\n}",
+  "pestañaInicial": "html"
+}
+```
+
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Reto 2: enlace \"Volver arriba\"",
+  "consigna": "El hero necesita un id (aquí, \"inicio\") para ser el destino del enlace — funciona exactamente igual que los enlaces del menú a #servicios o #opiniones, solo que hacia arriba en vez de hacia abajo.",
+  "html": "<section class=\"hero\" id=\"inicio\">\n  <h1>Software de gestión para pequeños negocios</h1>\n</section>\n<footer>\n  <p>&copy; 2026 Acme. Todos los derechos reservados.</p>\n  <a href=\"#inicio\" class=\"volver-arriba\">Volver arriba ↑</a>\n</footer>",
+  "css": "body {\n  font-family: system-ui, sans-serif;\n  margin: 0;\n  color: #2c2a26;\n  scroll-behavior: smooth;\n}\n.hero {\n  padding: 4rem 1.5rem;\n  text-align: center;\n  background: #f4f1ea;\n}\nfooter {\n  text-align: center;\n  padding: 1.5rem;\n  color: #6f6a61;\n  font-size: 0.85rem;\n}\n.volver-arriba {\n  display: inline-block;\n  margin-top: 0.5rem;\n  color: #2f5fd6;\n  text-decoration: none;\n}",
+  "pestañaInicial": "html"
+}
+```
+
+```laboratorio
+{
+  "tipo": "callout",
+  "variante": "info",
+  "titulo": "Reto 3: qué información necesitarías (respuesta escrita, no código)",
+  "contenido": "Para marcar cuál sección estás mirando necesitarías saber, en cada instante, qué sección ocupa la mayor parte del viewport mientras el usuario hace scroll — eso es exactamente lo que resuelve la Intersection Observer API, que verás en el temario de JavaScript. Con esa información, el trabajo del CSS es sencillo: añadir una clase (por ejemplo, \"activo\") al enlace del menú correspondiente, con su propio estilo. El HTML y el CSS ya están listos para recibir esa clase — lo único que falta es el JavaScript que decida cuándo ponerla, y eso no es un reto de HTML."
+}
+```
+
 ## Para profundizar
 
 ```laboratorio

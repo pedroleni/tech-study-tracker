@@ -214,6 +214,41 @@ Si te has atascado, o quieres comparar tu resultado con uno completo y en marcha
 2. Envuelve la foto en `figure`/`figcaption` con una cita breve de la persona como pie de foto.
 3. Convierte la tarjeta entera en un `article` — piensa si tendría sentido fuera de esta página, como un post en un feed de "conoce al equipo".
 
+Si quieres comparar con una solución real de cada reto:
+
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Reto 1: un segundo enlace",
+  "consigna": "target=\"_blank\" abre el enlace en pestaña nueva — y siempre que lo uses, rel=\"noopener\" evita que esa pestaña nueva pueda manipular la página original desde JavaScript.",
+  "html": "<div class=\"tarjeta\">\n  <img class=\"foto\" src=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Crect width='96' height='96' fill='%23ddd'/%3E%3C/svg%3E\" alt=\"Retrato de Marta Ibáñez, sonriendo\">\n  <h2>Marta Ibáñez</h2>\n  <p class=\"cargo\">Desarrolladora frontend</p>\n  <div class=\"enlaces\">\n    <a href=\"mailto:marta@ejemplo.com\">Escríbeme</a>\n    <a href=\"https://github.com/martaibanez\" target=\"_blank\" rel=\"noopener\">GitHub</a>\n  </div>\n</div>",
+  "css": ".tarjeta {\n  font-family: system-ui, sans-serif;\n  max-width: 320px;\n  margin: 1rem auto;\n  padding: 1.5rem;\n  border: 1px solid #e2ded6;\n  border-radius: 16px;\n  text-align: center;\n  background: #fff;\n}\n.foto {\n  width: 96px;\n  height: 96px;\n  border-radius: 999px;\n  object-fit: cover;\n}\n.tarjeta h2 {\n  margin: 0.75rem 0 0.15rem;\n  font-size: 1.15rem;\n}\n.cargo {\n  margin: 0;\n  color: #6f6a61;\n  font-size: 0.9rem;\n}\n.enlaces {\n  display: flex;\n  gap: 1rem;\n  justify-content: center;\n  margin-top: 0.75rem;\n}\n.enlaces a {\n  color: #2f5fd6;\n  font-size: 0.9rem;\n}",
+  "pestañaInicial": "html"
+}
+```
+
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Reto 2: figure/figcaption con una cita",
+  "consigna": "Misma relación que ya viste en la lección de imágenes: alt describe la foto para quien no puede verla, figcaption es un pie de foto visible para todo el mundo — aquí, una cita breve, no una repetición del alt.",
+  "html": "<div class=\"tarjeta\">\n  <figure class=\"foto-envoltorio\">\n    <img class=\"foto\" src=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Crect width='96' height='96' fill='%23ddd'/%3E%3C/svg%3E\" alt=\"Retrato de Marta Ibáñez, sonriendo\">\n    <figcaption>«El buen HTML no se nota — hasta que falta.»</figcaption>\n  </figure>\n  <h2>Marta Ibáñez</h2>\n  <p class=\"cargo\">Desarrolladora frontend</p>\n</div>",
+  "css": ".tarjeta {\n  font-family: system-ui, sans-serif;\n  max-width: 320px;\n  margin: 1rem auto;\n  padding: 1.5rem;\n  border: 1px solid #e2ded6;\n  border-radius: 16px;\n  text-align: center;\n  background: #fff;\n}\n.foto-envoltorio {\n  margin: 0;\n}\n.foto {\n  width: 96px;\n  height: 96px;\n  border-radius: 999px;\n  object-fit: cover;\n}\nfigcaption {\n  margin-top: 0.4rem;\n  font-size: 0.8rem;\n  font-style: italic;\n  color: #6f6a61;\n}\n.tarjeta h2 {\n  margin: 0.75rem 0 0.15rem;\n  font-size: 1.15rem;\n}\n.cargo {\n  margin: 0;\n  color: #6f6a61;\n  font-size: 0.9rem;\n}",
+  "pestañaInicial": "html"
+}
+```
+
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Reto 3: la tarjeta como article",
+  "consigna": "Sí tendría sentido: esta tarjeta se sostiene sola fuera de esta página — podría aparecer igual en un feed de \"conoce al equipo\" o citada en otra web, que es justo el criterio de article que ya viste en el proyecto de la landing page.",
+  "html": "<article class=\"tarjeta\">\n  <img class=\"foto\" src=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Crect width='96' height='96' fill='%23ddd'/%3E%3C/svg%3E\" alt=\"Retrato de Marta Ibáñez, sonriendo\">\n  <h2>Marta Ibáñez</h2>\n  <p class=\"cargo\">Desarrolladora frontend</p>\n</article>",
+  "css": ".tarjeta {\n  font-family: system-ui, sans-serif;\n  max-width: 320px;\n  margin: 1rem auto;\n  padding: 1.5rem;\n  border: 1px solid #e2ded6;\n  border-radius: 16px;\n  text-align: center;\n  background: #fff;\n}\n.foto {\n  width: 96px;\n  height: 96px;\n  border-radius: 999px;\n  object-fit: cover;\n}\n.tarjeta h2 {\n  margin: 0.75rem 0 0.15rem;\n  font-size: 1.15rem;\n}\n.cargo {\n  margin: 0;\n  color: #6f6a61;\n  font-size: 0.9rem;\n}",
+  "pestañaInicial": "html"
+}
+```
+
 ## Para profundizar
 
 ```laboratorio
