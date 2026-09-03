@@ -23,6 +23,29 @@ Una página de "un solo scroll" — el formato que usan casi todas las landing p
 
 ## Antes de empezar
 
+CSS es el lenguaje que decide el aspecto de una página: colores, tamaños, bordes, espacios entre las cosas. Aquí no vas a escribir CSS — eso tiene su propio temario — pero para entender por qué la página cambia de aspecto en cuanto añades una clase, mira cómo se conectan las dos partes:
+
+```html
+<div class="logo">Acme</div>
+```
+
+```css
+.logo {
+  font-weight: 700;
+}
+```
+
+El punto delante del nombre en CSS (`.logo`) significa "busca en el HTML cualquier elemento con `class="logo"`" y aplícale lo que hay entre las llaves. Por eso basta con que pongas la clase correcta en el sitio correcto del HTML — en cuanto el nombre coincide, el estilo se aplica solo.
+
+```laboratorio
+{
+  "tipo": "callout",
+  "variante": "info",
+  "titulo": "El CSS de esta página ya está escrito",
+  "contenido": "En la pestaña CSS del editor de abajo tienes ya todo el estilo, siguiendo exactamente esa idea: una regla por cada clase (logo, hero, servicios...). No hace falta que sepas escribir CSS todavía — solo que pongas en el HTML la clase correcta en el sitio correcto, y el diseño aparece solo."
+}
+```
+
 ```laboratorio
 {
   "tipo": "callout",

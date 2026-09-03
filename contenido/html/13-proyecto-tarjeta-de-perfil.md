@@ -37,27 +37,12 @@ Una tarjeta de perfil como la que verías en la página "Sobre el equipo" de cua
 
 ## Antes de empezar
 
-CSS es el lenguaje que decide el aspecto de una página: colores, tamaños, bordes, espacios entre las cosas. Aquí no vas a escribir CSS — eso tiene su propio temario — pero para entender por qué la tarjeta cambia de aspecto en cuanto añades una clase, mira cómo se conectan las dos partes:
-
-```html
-<div class="tarjeta">...</div>
-```
-
-```css
-.tarjeta {
-  border-radius: 16px;
-  padding: 1.5rem;
-}
-```
-
-El punto delante del nombre en CSS (`.tarjeta`) significa "busca en el HTML cualquier elemento con `class="tarjeta"`" y aplícale lo que hay entre las llaves. Por eso basta con que pongas la clase correcta en el sitio correcto del HTML — en cuanto el nombre coincide, el estilo se aplica solo.
-
 ```laboratorio
 {
   "tipo": "callout",
   "variante": "info",
   "titulo": "El CSS de esta tarjeta ya está escrito",
-  "contenido": "En la pestaña CSS del editor de abajo tienes ya todo el estilo, siguiendo exactamente esa idea: una regla por cada clase (tarjeta, foto, cargo, bio, habilidades...). No hace falta que sepas escribir CSS todavía — solo que pongas en el HTML la clase correcta en el sitio correcto, y el diseño aparece solo."
+  "contenido": "Ya viste en el proyecto anterior cómo una clase del HTML (class=\"tarjeta\") conecta con su regla en CSS (.tarjeta { ... }). Aquí pasa exactamente lo mismo: en la pestaña CSS del editor de abajo tienes ya todo el estilo, una regla por cada clase (tarjeta, foto, cargo, bio, habilidades...). No hace falta que sepas escribir CSS todavía — solo que pongas en el HTML la clase correcta en el sitio correcto, y el diseño aparece solo."
 }
 ```
 
