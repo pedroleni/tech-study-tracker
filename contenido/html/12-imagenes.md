@@ -109,8 +109,8 @@
 ```laboratorio
 {
   "tipo": "comparador-antes-despues",
-  "antes": "<img src=\"dino.jpg\" alt=\"imagen\">",
-  "despues": "<img src=\"dino.jpg\" alt=\"Cráneo y torso de un esqueleto de dinosaurio, con una cabeza grande y dientes afilados\">",
+  "antes": "<img src=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 260'%3E %3Crect width='400' height='260' fill='%23f4f1ea'/%3E %3Cg fill='none' stroke='%236f6a61' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E %3Cpath d='M70 165 Q40 190 15 215'/%3E %3Cpath d='M70 165 Q150 90 230 95 Q280 90 300 75'/%3E %3Cpath d='M300 75 L365 65 L345 100 L300 100 Z'/%3E %3Cpath d='M320 95 L324 104 M330 93 L334 102 M340 91 L344 100'/%3E %3Ccircle cx='316' cy='82' r='4'/%3E %3Cpath d='M160 105 Q150 140 155 175'/%3E %3Cpath d='M180 102 Q172 142 178 178'/%3E %3Cpath d='M200 100 Q194 142 200 180'/%3E %3Cpath d='M220 98 Q216 138 222 176'/%3E %3Cpath d='M260 140 L276 160'/%3E %3Cpath d='M170 150 L155 195 L150 235'/%3E %3Cpath d='M150 235 L135 235 M150 235 L165 235'/%3E %3Cpath d='M130 155 L110 200 L100 235'/%3E %3Cpath d='M100 235 L85 235 M100 235 L115 235'/%3E %3C/g%3E %3C/svg%3E\" width=\"200\" alt=\"imagen\">",
+  "despues": "<img src=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 260'%3E %3Crect width='400' height='260' fill='%23f4f1ea'/%3E %3Cg fill='none' stroke='%236f6a61' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E %3Cpath d='M70 165 Q40 190 15 215'/%3E %3Cpath d='M70 165 Q150 90 230 95 Q280 90 300 75'/%3E %3Cpath d='M300 75 L365 65 L345 100 L300 100 Z'/%3E %3Cpath d='M320 95 L324 104 M330 93 L334 102 M340 91 L344 100'/%3E %3Ccircle cx='316' cy='82' r='4'/%3E %3Cpath d='M160 105 Q150 140 155 175'/%3E %3Cpath d='M180 102 Q172 142 178 178'/%3E %3Cpath d='M200 100 Q194 142 200 180'/%3E %3Cpath d='M220 98 Q216 138 222 176'/%3E %3Cpath d='M260 140 L276 160'/%3E %3Cpath d='M170 150 L155 195 L150 235'/%3E %3Cpath d='M150 235 L135 235 M150 235 L165 235'/%3E %3Cpath d='M130 155 L110 200 L100 235'/%3E %3Cpath d='M100 235 L85 235 M100 235 L115 235'/%3E %3C/g%3E %3C/svg%3E\" width=\"200\" alt=\"Cráneo y torso de un esqueleto de dinosaurio, con una cabeza grande y dientes afilados\">",
   "nota": "La imagen que se ve es idéntica en los dos casos — la diferencia solo existe para quien no puede verla: un lector de pantalla, o cualquiera si la imagen no llega a cargar."
 }
 ```
@@ -118,7 +118,7 @@
 ```laboratorio
 {
   "tipo": "predice-el-resultado",
-  "codigo": "<img src=\"separador-decorativo.png\" alt=\"\">",
+  "codigo": "<img src=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 20'%3E %3Cline x1='0' y1='10' x2='85' y2='10' stroke='%23c9c2b4' stroke-width='2'/%3E %3Ccircle cx='100' cy='10' r='4' fill='%23c9c2b4'/%3E %3Cline x1='115' y1='10' x2='200' y2='10' stroke='%23c9c2b4' stroke-width='2'/%3E %3C/svg%3E\" alt=\"\">",
   "opciones": [
     "El lector de pantalla se salta la imagen, como si no estuviera",
     "El lector de pantalla se detiene y dice \"imagen sin descripción\"",
@@ -134,8 +134,8 @@
 ```laboratorio
 {
   "tipo": "comparador-antes-despues",
-  "antes": "<div class=\"figura\">\n  <img src=\"trex.jpg\" alt=\"Esqueleto completo de T-Rex\">\n  <p>Un T-Rex expuesto en el Museo de la Universidad de Manchester.</p>\n</div>",
-  "despues": "<figure>\n  <img src=\"trex.jpg\" alt=\"Esqueleto completo de T-Rex\">\n  <figcaption>Un T-Rex expuesto en el Museo de la Universidad de Manchester.</figcaption>\n</figure>",
+  "antes": "<div class=\"figura\">\n  <img src=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 260'%3E %3Crect width='400' height='260' fill='%23f4f1ea'/%3E %3Cg fill='none' stroke='%236f6a61' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E %3Cpath d='M70 165 Q40 190 15 215'/%3E %3Cpath d='M70 165 Q150 90 230 95 Q280 90 300 75'/%3E %3Cpath d='M300 75 L365 65 L345 100 L300 100 Z'/%3E %3Cpath d='M320 95 L324 104 M330 93 L334 102 M340 91 L344 100'/%3E %3Ccircle cx='316' cy='82' r='4'/%3E %3Cpath d='M160 105 Q150 140 155 175'/%3E %3Cpath d='M180 102 Q172 142 178 178'/%3E %3Cpath d='M200 100 Q194 142 200 180'/%3E %3Cpath d='M220 98 Q216 138 222 176'/%3E %3Cpath d='M260 140 L276 160'/%3E %3Cpath d='M170 150 L155 195 L150 235'/%3E %3Cpath d='M150 235 L135 235 M150 235 L165 235'/%3E %3Cpath d='M130 155 L110 200 L100 235'/%3E %3Cpath d='M100 235 L85 235 M100 235 L115 235'/%3E %3C/g%3E %3C/svg%3E\" width=\"200\" alt=\"Esqueleto completo de T-Rex\">\n  <p>Un T-Rex expuesto en el Museo de la Universidad de Manchester.</p>\n</div>",
+  "despues": "<figure>\n  <img src=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 260'%3E %3Crect width='400' height='260' fill='%23f4f1ea'/%3E %3Cg fill='none' stroke='%236f6a61' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E %3Cpath d='M70 165 Q40 190 15 215'/%3E %3Cpath d='M70 165 Q150 90 230 95 Q280 90 300 75'/%3E %3Cpath d='M300 75 L365 65 L345 100 L300 100 Z'/%3E %3Cpath d='M320 95 L324 104 M330 93 L334 102 M340 91 L344 100'/%3E %3Ccircle cx='316' cy='82' r='4'/%3E %3Cpath d='M160 105 Q150 140 155 175'/%3E %3Cpath d='M180 102 Q172 142 178 178'/%3E %3Cpath d='M200 100 Q194 142 200 180'/%3E %3Cpath d='M220 98 Q216 138 222 176'/%3E %3Cpath d='M260 140 L276 160'/%3E %3Cpath d='M170 150 L155 195 L150 235'/%3E %3Cpath d='M150 235 L135 235 M150 235 L165 235'/%3E %3Cpath d='M130 155 L110 200 L100 235'/%3E %3Cpath d='M100 235 L85 235 M100 235 L115 235'/%3E %3C/g%3E %3C/svg%3E\" width=\"200\" alt=\"Esqueleto completo de T-Rex\">\n  <figcaption>Un T-Rex expuesto en el Museo de la Universidad de Manchester.</figcaption>\n</figure>",
   "nota": "Visualmente pueden verse iguales. La diferencia es semántica: figure y figcaption asocian explícitamente el pie de foto con SU imagen — imprescindible en una página con varias imágenes, donde un div y un p sueltos no dejan claro cuál va con cuál."
 }
 ```

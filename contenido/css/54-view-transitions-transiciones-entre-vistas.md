@@ -84,7 +84,7 @@ Cuando una SPA reemplaza el DOM al navegar a una vista nueva, el contenido simpl
 ```laboratorio
 {
   "tipo": "predice-el-resultado",
-  "codigo": "<style>\n  .avatar-1, .avatar-2 {\n    view-transition-name: avatar;\n  }\n</style>\n<img class=\"avatar-1\" src=\"a.jpg\">\n<img class=\"avatar-2\" src=\"b.jpg\">",
+  "codigo": "<style>\n  .avatar-1, .avatar-2 {\n    view-transition-name: avatar;\n  }\n</style>\n<img class=\"avatar-1\" width=\"64\" src=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E %3Ccircle cx='32' cy='32' r='32' fill='%232563eb'/%3E %3Ccircle cx='32' cy='24' r='12' fill='%23ffffff'/%3E %3Cpath d='M12 58c0-15 9-24 20-24s20 9 20 24' fill='%23ffffff'/%3E %3C/svg%3E\">\n<img class=\"avatar-2\" width=\"64\" src=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E %3Ccircle cx='32' cy='32' r='32' fill='%23ea580c'/%3E %3Ccircle cx='32' cy='24' r='12' fill='%23ffffff'/%3E %3Cpath d='M12 58c0-15 9-24 20-24s20 9 20 24' fill='%23ffffff'/%3E %3C/svg%3E\">",
   "opciones": [
     "Ambos elementos se animan correctamente, uno detrás del otro",
     "Es un error: para cada view-transition-name debe existir exactamente UN elemento con ese nombre en cada estado del DOM",
