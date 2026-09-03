@@ -91,6 +91,18 @@
 }
 ```
 
+El ejemplo de arriba usa una URL inventada para que se lea bien — pero un iframe real incrusta una página real. Esta vez no es una simulación:
+
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Un iframe real: Google Maps de verdad, cargando aquí mismo",
+  "consigna": "Esto es exactamente lo que vería un visitante: un mapa real de Google Maps, servido por google.com, embebido en esta página con sandbox=\"allow-scripts allow-forms\". Prueba a arrastrar el mapa o hacer zoom — funciona porque el sitio que lo sirve así lo permite. Después, cambia \"Madrid\" por el nombre de otra ciudad en el src y mira cómo cambia el resultado.",
+  "html": "<iframe\n  width=\"100%\"\n  height=\"300\"\n  src=\"https://www.google.com/maps?q=Madrid&output=embed\"\n  title=\"Mapa de Madrid\"\n  sandbox=\"allow-scripts allow-forms\"\n  loading=\"lazy\">\n</iframe>",
+  "pestañaInicial": "html"
+}
+```
+
 ## sandbox: la postura segura por defecto
 
 Sin ningún valor, `sandbox` ya es la opción más restrictiva posible: sin scripts, sin formularios, sin popups, con el contenido tratado como si viniera de un origen distinto al real. Cada permiso se reactiva explícitamente, token a token:
@@ -142,14 +154,24 @@ Clickjacking es superponer un iframe invisible (o casi) sobre una página, de fo
 X-Frame-Options: DENY
 ```
 
-MDN, por ejemplo, la usa — si intentas meter una página de MDN dentro de un iframe, el navegador se niega a mostrarla y lo dice explícitamente en la consola.
+MDN, por ejemplo, la usa — si intentas meter una página de MDN dentro de un iframe, el navegador se niega a mostrarla y lo dice explícitamente en la consola. Compruébalo tú mismo, en vivo, sin tener que confiar en mi palabra:
+
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "Compruébalo tú mismo: MDN rechaza ser embebida",
+  "consigna": "Este iframe intenta cargar developer.mozilla.org de verdad — no es un error de esta lección. Abre las herramientas de desarrollador de tu navegador (pestaña Consola) y busca el mensaje: dirá algo como \"Refused to display '...' in a frame because it set 'X-Frame-Options' to 'deny'\".",
+  "html": "<iframe\n  width=\"100%\"\n  height=\"200\"\n  src=\"https://developer.mozilla.org/es/docs/Web/HTML/Element/iframe\"\n  title=\"Intento de embeber una página de MDN\">\n</iframe>",
+  "pestañaInicial": "html"
+}
+```
 
 ```laboratorio
 {
   "tipo": "callout",
   "variante": "info",
   "titulo": "Si un iframe se ve en blanco, puede que sea intencionado",
-  "contenido": "No siempre es un error de tu código — muchos sitios bloquean activamente ser embebidos con X-Frame-Options o una Content-Security-Policy con frame-ancestors. Es su forma de protegerse del clickjacking, no un fallo tuyo."
+  "contenido": "No siempre es un error de tu código — muchos sitios bloquean activamente ser embebidos con X-Frame-Options o una Content-Security-Policy con frame-ancestors. Es su forma de protegerse del clickjacking, no un fallo tuyo. El icono de \"página rota\" que acabas de ver arriba es justo ese caso: MDN protegiéndose, no un error tuyo."
 }
 ```
 
