@@ -9,6 +9,7 @@ import { EsquemaDePagina } from '@/components/bloques-laboratorio/EsquemaDePagin
 import { EditorEnVivo } from '@/components/bloques-laboratorio/EditorEnVivo'
 import { GitAnotado } from '@/components/bloques-laboratorio/GitAnotado'
 import { GitEnVivo } from '@/components/bloques-laboratorio/GitEnVivo'
+import { Imagen } from '@/components/bloques-laboratorio/Imagen'
 import { LineaDeTiempo } from '@/components/bloques-laboratorio/LineaDeTiempo'
 import { MapaDeRegiones } from '@/components/bloques-laboratorio/MapaDeRegiones'
 import { Mitos } from '@/components/bloques-laboratorio/Mitos'
@@ -43,4 +44,5 @@ export const registroBloquesLaboratorio: Record<string, ComponentType<any>> = {
   'sql-en-vivo': SqlEnVivo,
   'git-anotado': GitAnotado,
   'git-en-vivo': GitEnVivo,
+  imagen: Imagen,
 }
