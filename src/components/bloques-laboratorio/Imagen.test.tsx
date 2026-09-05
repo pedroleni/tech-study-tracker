@@ -8,7 +8,7 @@ describe('Imagen', () => {
     render(
       <Imagen
         tipo="imagen"
-        src="https://img.techstudytracker.com/abc123.png"
+        src="https://techstudytracker.com/img/abc123.png"
         alt="Captura de la pestaña Network de DevTools"
       />,
     )
@@ -16,7 +16,7 @@ describe('Imagen', () => {
     const img = screen.getByRole('img', {
       name: 'Captura de la pestaña Network de DevTools',
     })
-    expect(img).toHaveAttribute('src', 'https://img.techstudytracker.com/abc123.png')
+    expect(img).toHaveAttribute('src', 'https://techstudytracker.com/img/abc123.png')
     expect(img).toHaveAttribute('loading', 'lazy')
   })
 
@@ -24,7 +24,7 @@ describe('Imagen', () => {
     render(
       <Imagen
         tipo="imagen"
-        src="https://img.techstudytracker.com/abc123.png"
+        src="https://techstudytracker.com/img/abc123.png"
         alt="Captura"
         titulo="Figura 1: la pestaña Network"
       />,
@@ -37,7 +37,7 @@ describe('Imagen', () => {
     const { container } = render(
       <Imagen
         tipo="imagen"
-        src="https://img.techstudytracker.com/abc123.png"
+        src="https://techstudytracker.com/img/abc123.png"
         alt="Captura"
       />,
     )

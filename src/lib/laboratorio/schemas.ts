@@ -294,7 +294,7 @@ export const esquemaGitEnVivo = z.object({
 
 export const esquemaImagen = z.object({
   tipo: z.literal('imagen'),
-  src: z.string().url().startsWith('https://img.techstudytracker.com/'),
+  src: z.string().url().startsWith('https://techstudytracker.com/img/'),
   alt: z.string().min(1).max(200),
   titulo: z.string().min(1).max(160).optional(),
 })
