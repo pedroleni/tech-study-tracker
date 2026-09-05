@@ -129,7 +129,7 @@ describe('POST /api/imagenes', () => {
 
     expect(respuesta.status).toBe(200)
     expect(cuerpo.publicUrl).toMatch(
-      /^https:\/\/techstudytracker\.com\/img\/[0-9a-f]{64}\.png$/,
+      /^https:\/\/www.techstudytracker\.com\/img\/[0-9a-f]{64}\.png$/,
     )
     expect(mockSend).toHaveBeenCalledTimes(1)
   })

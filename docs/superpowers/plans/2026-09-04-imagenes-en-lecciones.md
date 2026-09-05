@@ -58,7 +58,7 @@ Testing Library.
   variables de entorno de Vercel (server-side) y en un `.env` local
   gitignored. R2 no tiene ningún dominio público conectado — solo se accede
   vía su API S3, autenticada, desde las funciones de Vercel.
-- El bloque `imagen` restringe `src` a `https://techstudytracker.com/img/`
+- El bloque `imagen` restringe `src` a `https://www.techstudytracker.com/img/`
   — nunca una URL externa arbitraria, y nunca un dominio de R2/Cloudflare
   directamente.
 - `alt` es obligatorio en el esquema del bloque `imagen`; `titulo` es
@@ -204,14 +204,14 @@ src: z.string().url().startsWith('https://img.techstudytracker.com/'),
 por:
 
 ```typescript
-src: z.string().url().startsWith('https://techstudytracker.com/img/'),
+src: z.string().url().startsWith('https://www.techstudytracker.com/img/'),
 ```
 
 En `src/lib/laboratorio/schemas.test.ts`, sustituye las tres apariciones de
 `https://img.techstudytracker.com/abc123.png` (en los tests
 `esquemaImagen` que usan ese dominio, incluido el que espera rechazo por
 dominio ajeno — ESE no lo toques, sigue usando `https://otro-sitio.com/...`
-como ya estaba) por `https://techstudytracker.com/img/abc123.png`.
+como ya estaba) por `https://www.techstudytracker.com/img/abc123.png`.
 
 - [ ] **Paso 2: Confirmar que los tests siguen en verde**
 
@@ -249,7 +249,7 @@ re-ejecute en verde antes de mergear.
   `image/jpeg` o `image/webp` — SVG queda fuera a propósito, ver la nota
   de seguridad más abajo) y
   `Authorization: Bearer <access_token>`. Respuesta 200:
-  `{ publicUrl: "https://techstudytracker.com/img/<hash>.<ext>" }`. Usado
+  `{ publicUrl: "https://www.techstudytracker.com/img/<hash>.<ext>" }`. Usado
   por la Task 4 (script) y la Task 5 (drag&drop en el editor).
 - Produces: `GET /img/<clave>` (público, sin autenticación — cualquiera
   puede VER una imagen ya subida, igual que cualquier imagen normal de una
@@ -426,7 +426,7 @@ describe('POST /api/imagenes', () => {
 
     expect(respuesta.status).toBe(200)
     expect(cuerpo.publicUrl).toMatch(
-      /^https:\/\/techstudytracker\.com\/img\/[0-9a-f]{64}\.png$/,
+      /^https:\/\/www\.techstudytracker\.com\/img\/[0-9a-f]{64}\.png$/,
     )
     expect(mockSend).toHaveBeenCalledTimes(1)
   })
@@ -551,7 +551,7 @@ export default {
     )
 
     return new Response(
-      JSON.stringify({ publicUrl: `https://techstudytracker.com/img/${clave}` }),
+      JSON.stringify({ publicUrl: `https://www.techstudytracker.com/img/${clave}` }),
       { status: 200, headers: { 'Content-Type': 'application/json' } },
     )
   },
@@ -738,13 +738,16 @@ Tras el deploy de `main` (confirma con
 `gh run list --branch main --limit 1` como en el resto de la sesión):
 
 ```bash
+# El dominio raíz redirige (308) a www, que es el canónico real — usa
+# siempre www aquí para no confundir un 308 esperado con un fallo real.
+
 # Sin token: debe dar 401, no un 200 de index.html (si diera 200, revisa
 # el Paso 3 — el rewrite se estaría comiendo la ruta).
-curl -s -o /dev/null -w "%{http_code}\n" -X POST https://techstudytracker.com/api/imagenes \
+curl -s -o /dev/null -w "%{http_code}\n" -X POST https://www.techstudytracker.com/api/imagenes \
   -H "content-type: image/png" --data-binary @/dev/null
 
 # Una clave inventada en /img/ debe dar 404 real, no la SPA.
-curl -s -o /dev/null -w "%{http_code}\n" https://techstudytracker.com/img/no-existe.png
+curl -s -o /dev/null -w "%{http_code}\n" https://www.techstudytracker.com/img/no-existe.png
 ```
 
 Expected: `401` y `404` respectivamente.
@@ -787,7 +790,8 @@ Crea `scripts/dev/subir-imagen.mjs`:
 // `set -a && source .env && set +a`):
 //   VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, ADMIN_EMAIL, ADMIN_PASSWORD
 // Opcional:
-//   API_BASE_URL (por defecto https://techstudytracker.com)
+//   API_BASE_URL (por defecto https://www.techstudytracker.com — el
+//   dominio raíz redirige ahí con 308, evita el salto de más)
 
 import { createClient } from '@supabase/supabase-js'
 import { readFile } from 'node:fs/promises'
@@ -822,7 +826,7 @@ const {
   VITE_SUPABASE_ANON_KEY,
   ADMIN_EMAIL,
   ADMIN_PASSWORD,
-  API_BASE_URL = 'https://techstudytracker.com',
+  API_BASE_URL = 'https://www.techstudytracker.com',
 } = process.env
 
 for (const [nombre, valor] of Object.entries({
@@ -897,7 +901,7 @@ set -a && source .env && set +a
 npm run subir-imagen -- /tmp/prueba.png "Imagen de prueba del pipeline de subida"
 ```
 
-Expected: imprime `Subida: https://techstudytracker.com/img/<hash>.png`
+Expected: imprime `Subida: https://www.techstudytracker.com/img/<hash>.png`
 seguido del bloque JSON. Abre esa URL directamente en el navegador — debe
 mostrar la imagen (servida por `api/imagenes-servir.ts`, no por R2
 directamente). Vuelve a ejecutar el mismo comando con el mismo archivo:
@@ -957,7 +961,7 @@ describe('LeccionForm — subir imagen arrastrándola al editor', () => {
 
     const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
       new Response(
-        JSON.stringify({ publicUrl: 'https://techstudytracker.com/img/abc123.png' }),
+        JSON.stringify({ publicUrl: 'https://www.techstudytracker.com/img/abc123.png' }),
         { status: 200 },
       ),
     )
@@ -972,7 +976,7 @@ describe('LeccionForm — subir imagen arrastrándola al editor', () => {
     fireEvent.drop(textarea, { dataTransfer: { files: [archivo] } })
 
     await waitFor(() => expect(textarea.value).toContain('"tipo": "imagen"'))
-    expect(textarea.value).toContain('https://techstudytracker.com/img/abc123.png')
+    expect(textarea.value).toContain('https://www.techstudytracker.com/img/abc123.png')
     expect(fetchMock).toHaveBeenCalledWith(
       '/api/imagenes',
       expect.objectContaining({ method: 'POST' }),
@@ -1186,7 +1190,7 @@ High/Medium, arréglalo antes de continuar (nueva rama corta,
 
 - [ ] **Paso 2: Verificación end-to-end real — camino del navegador**
 
-Entra al admin real (`https://techstudytracker.com/admin/...`) con tu
+Entra al admin real (`https://www.techstudytracker.com/admin/...`) con tu
 cuenta de admin, abre una lección de prueba (o crea un borrador), arrastra
 una imagen real al textarea de contenido. Confirma con tus propios ojos:
 aparece "Subiendo imagen…", luego el bloque `imagen` en el textarea, y al
@@ -1204,7 +1208,7 @@ confirma visualmente que se ve bien en la lección real.
 
 Repite la comprobación que originó el pivote de este plan: desde la misma
 red donde se detectó el bloqueo, visita cualquier URL real de
-`https://techstudytracker.com/img/...` y confirma que carga con
+`https://www.techstudytracker.com/img/...` y confirma que carga con
 normalidad (candado válido, sin ningún aviso de "no seguro"). Es la
 prueba definitiva de que el nuevo diseño resuelve el problema real, no
 solo sobre el papel.

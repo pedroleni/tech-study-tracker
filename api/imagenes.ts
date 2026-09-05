@@ -106,7 +106,7 @@ export default {
     )
 
     return new Response(
-      JSON.stringify({ publicUrl: `https://techstudytracker.com/img/${clave}` }),
+      JSON.stringify({ publicUrl: `https://www.techstudytracker.com/img/${clave}` }),
       { status: 200, headers: { 'Content-Type': 'application/json' } },
     )
   },
