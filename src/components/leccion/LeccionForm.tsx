@@ -1,10 +1,19 @@
-import { useEffect, useMemo, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ClipboardEvent,
+  type DragEvent,
+} from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { supabase } from '@/lib/supabaseClient'
 import type { Leccion } from '@/types'
 
 const leccionSchema = z.object({
@@ -71,8 +80,88 @@ export function LeccionForm({
   pending: boolean
   onSubmit: (values: LeccionFormValues) => Promise<void>
 }) {
-  const { register, handleSubmit, setError, reset, control, formState } =
+  const { register, handleSubmit, setError, reset, control, formState, setValue } =
     useForm<LeccionFields>({ defaultValues: defaults(leccion) })
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null)
+  const [subiendoImagen, setSubiendoImagen] = useState(false)
+  const [errorImagen, setErrorImagen] = useState('')
+
+  const subirImagenEnCursor = useCallback(
+    async (archivo: File) => {
+      setErrorImagen('')
+      // Mismo conjunto que api/imagenes.ts — SVG queda fuera a propósito
+      // (riesgo de XSS vía script embebido si alguien visita /img/<hash>.svg
+      // directo, no como <img>).
+      const tiposPermitidos = ['image/png', 'image/jpeg', 'image/webp']
+      if (!tiposPermitidos.includes(archivo.type)) {
+        setErrorImagen('Solo se admiten imágenes PNG, JPEG o WebP.')
+        return
+      }
+      if (archivo.size > 4 * 1024 * 1024) {
+        setErrorImagen('La imagen no puede superar 4 MB.')
+        return
+      }
+
+      setSubiendoImagen(true)
+      try {
+        const { data: sesion } = await supabase.auth.getSession()
+        const token = sesion.session?.access_token
+        if (!token) throw new Error('No hay sesión activa.')
+
+        const respuesta = await fetch('/api/imagenes', {
+          method: 'POST',
+          headers: { 'content-type': archivo.type, authorization: `Bearer ${token}` },
+          body: archivo,
+        })
+        if (!respuesta.ok) {
+          throw new Error(`La función devolvió ${respuesta.status}`)
+        }
+        const { publicUrl } = await respuesta.json()
+
+        const bloque = `\`\`\`laboratorio\n${JSON.stringify(
+          { tipo: 'imagen', src: publicUrl, alt: archivo.name.replace(/\.[^.]+$/, '') },
+          null,
+          2,
+        )}\n\`\`\`\n`
+
+        const textarea = textareaRef.current
+        const valorActual = textarea?.value ?? ''
+        const inicio = textarea?.selectionStart ?? valorActual.length
+        const fin = textarea?.selectionEnd ?? valorActual.length
+        const nuevoValor = valorActual.slice(0, inicio) + bloque + valorActual.slice(fin)
+        setValue('contenido', nuevoValor, { shouldDirty: true })
+      } catch (error) {
+        setErrorImagen(error instanceof Error ? error.message : 'No se pudo subir la imagen.')
+      } finally {
+        setSubiendoImagen(false)
+      }
+    },
+    [setValue],
+  )
+
+  const manejarDrop = useCallback(
+    (event: DragEvent<HTMLTextAreaElement>) => {
+      const archivo = event.dataTransfer.files[0]
+      if (!archivo) return
+      event.preventDefault()
+      void subirImagenEnCursor(archivo)
+    },
+    [subirImagenEnCursor],
+  )
+
+  const manejarPaste = useCallback(
+    (event: ClipboardEvent<HTMLTextAreaElement>) => {
+      const archivo = [...event.clipboardData.items]
+        .find((item) => item.type.startsWith('image/'))
+        ?.getAsFile()
+      if (!archivo) return
+      event.preventDefault()
+      void subirImagenEnCursor(archivo)
+    },
+    [subirImagenEnCursor],
+  )
+
+  const { ref: contenidoRef, ...contenidoRegister } = register('contenido')
   const [submitError, setSubmitError] = useState('')
   const title = useWatch({ control, name: 'titulo' })
   const slug = useMemo(() => leccion?.slug ?? slugify(title), [leccion?.slug, title])
@@ -272,9 +361,28 @@ export function LeccionForm({
           placeholder="Escribe la lección en Markdown…"
           className="w-full resize-y rounded-lg border border-input bg-background px-3 py-2 font-mono text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           aria-invalid={Boolean(formState.errors.contenido)}
-          aria-describedby="leccion-contenido-error"
-          {...register('contenido')}
+          aria-describedby="leccion-contenido-error leccion-contenido-imagen-ayuda"
+          onDrop={manejarDrop}
+          onPaste={manejarPaste}
+          ref={(el) => {
+            contenidoRef(el)
+            textareaRef.current = el
+          }}
+          {...contenidoRegister}
         />
+        {subiendoImagen && (
+          <p role="status" className="text-sm text-muted-foreground">
+            Subiendo imagen…
+          </p>
+        )}
+        {errorImagen && (
+          <p role="alert" className="text-sm text-destructive">
+            {errorImagen}
+          </p>
+        )}
+        <p id="leccion-contenido-imagen-ayuda" className="text-xs text-muted-foreground">
+          Arrastra o pega una imagen aquí para subirla e insertar el bloque automáticamente.
+        </p>
         <p id="leccion-contenido-error" className="text-sm text-destructive">
           {formState.errors.contenido?.message}
         </p>
