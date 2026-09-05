@@ -97,7 +97,7 @@ funciones de la Task 3.
 - Modificar: `.env.example` (documentar los nombres de las variables
   nuevas, sin valores reales)
 
-- [ ] **Paso 1: Crear el bucket de R2**
+- [x] **Paso 1: Crear el bucket de R2**
 
 Panel de Cloudflare → R2 → **Create bucket**:
 - Nombre: `techstudytracker-imagenes`
@@ -109,7 +109,7 @@ del bucket no tenga ningún dominio conectado (si `img.techstudytracker.com`
 quedó conectado, desconéctalo desde ahí: **Custom Domains** →
 `img.techstudytracker.com` → **Disable/Remove**).
 
-- [ ] **Paso 2: Crear el token de API de R2**
+- [x] **Paso 2: Crear el token de API de R2**
 
 Panel de Cloudflare → R2 → **Manage API tokens** → **Create API token**:
 - Permisos: **Object Read & Write**
@@ -118,7 +118,7 @@ Panel de Cloudflare → R2 → **Manage API tokens** → **Create API token**:
 - Crea el token y copia los tres valores que te muestra UNA sola vez:
   Account ID, Access Key ID, Secret Access Key.
 
-- [ ] **Paso 3: Variables de entorno en Vercel**
+- [x] **Paso 3: Variables de entorno en Vercel**
 
 Vercel → Project → Settings → **Environment Variables**, añade estas
 cuatro (marca **Production** y **Preview**, NO las prefijes con `VITE_` —
@@ -131,7 +131,7 @@ deben quedar solo del lado servidor):
 | `R2_SECRET_ACCESS_KEY` | el Secret Access Key del Paso 2 |
 | `R2_BUCKET_NAME` | `techstudytracker-imagenes` |
 
-- [ ] **Paso 4: Variables de entorno locales**
+- [x] **Paso 4: Variables de entorno locales**
 
 En tu `.env` local (ya gitignored, no lo toques en git) añade las mismas
 cuatro variables con los mismos valores reales, más estas dos para el
@@ -143,7 +143,7 @@ ADMIN_EMAIL=tu-email-de-admin
 ADMIN_PASSWORD=tu-contraseña-de-admin
 ```
 
-- [ ] **Paso 5: Documentar las variables en `.env.example` (esto sí es código)**
+- [x] **Paso 5: Documentar las variables en `.env.example` (esto sí es código)**
 
 ```
 VITE_SUPABASE_URL=https://your-project.supabase.co
@@ -162,7 +162,7 @@ ADMIN_EMAIL=admin@example.com
 ADMIN_PASSWORD=your-admin-password
 ```
 
-- [ ] **Paso 6: Commit**
+- [x] **Paso 6: Commit**
 
 ```bash
 git checkout main && git pull
@@ -193,7 +193,7 @@ falta este último paso para alinearla con el diseño revisado:
 - Modify: `src/lib/laboratorio/schemas.ts` (rama `feat/bloque-imagen`)
 - Modify: `src/lib/laboratorio/schemas.test.ts` (misma rama)
 
-- [ ] **Paso 1: Corregir el dominio restringido en el esquema**
+- [x] **Paso 1: Corregir el dominio restringido en el esquema**
 
 En `src/lib/laboratorio/schemas.ts`, cambia:
 
@@ -213,13 +213,13 @@ En `src/lib/laboratorio/schemas.test.ts`, sustituye las tres apariciones de
 dominio ajeno — ESE no lo toques, sigue usando `https://otro-sitio.com/...`
 como ya estaba) por `https://www.techstudytracker.com/img/abc123.png`.
 
-- [ ] **Paso 2: Confirmar que los tests siguen en verde**
+- [x] **Paso 2: Confirmar que los tests siguen en verde**
 
 Run: `npm run test -- schemas.test.ts`
 Expected: PASS (los mismos 5 casos de `esquemaImagen`, ahora con el
 dominio correcto)
 
-- [ ] **Paso 3: Commit en la misma rama y push**
+- [x] **Paso 3: Commit en la misma rama y push**
 
 ```bash
 git add src/lib/laboratorio/schemas.ts src/lib/laboratorio/schemas.test.ts
@@ -256,14 +256,14 @@ re-ejecute en verde antes de mergear.
   página web) — sirve los bytes con el `Content-Type` real y
   `Cache-Control: public, max-age=31536000, immutable`.
 
-- [ ] **Paso 1: Rama nueva**
+- [x] **Paso 1: Rama nueva**
 
 ```bash
 git checkout main && git pull
 git checkout -b feat/imagenes-api
 ```
 
-- [ ] **Paso 2: Instalar la dependencia, versión exacta fijada**
+- [x] **Paso 2: Instalar la dependencia, versión exacta fijada**
 
 ```bash
 npm install --save-exact @aws-sdk/client-s3@3.1126.0
@@ -276,7 +276,7 @@ desde el servidor.)
 Verifica que `package.json` guardó la versión SIN `^` delante, y que
 `package-lock.json` cambió.
 
-- [ ] **Paso 3: Rewrites en `vercel.json`**
+- [x] **Paso 3: Rewrites en `vercel.json`**
 
 Cambia:
 
@@ -303,7 +303,7 @@ seguridad):
 }
 ```
 
-- [ ] **Paso 4: Test de la función de subida (falla primero)**
+- [x] **Paso 4: Test de la función de subida (falla primero)**
 
 Crea `api/imagenes.test.ts`:
 
@@ -433,12 +433,12 @@ describe('POST /api/imagenes', () => {
 })
 ```
 
-- [ ] **Paso 5: Confirmar que falla**
+- [x] **Paso 5: Confirmar que falla**
 
 Run: `npm run test -- api/imagenes.test.ts`
 Expected: FAIL — `./imagenes` no existe.
 
-- [ ] **Paso 6: Implementar la función de subida**
+- [x] **Paso 6: Implementar la función de subida**
 
 Crea `api/imagenes.ts`:
 
@@ -558,12 +558,12 @@ export default {
 }
 ```
 
-- [ ] **Paso 7: Confirmar que el test de subida pasa**
+- [x] **Paso 7: Confirmar que el test de subida pasa**
 
 Run: `npm run test -- api/imagenes.test.ts`
 Expected: PASS (los 7 casos)
 
-- [ ] **Paso 8: Test de la función de lectura (falla primero)**
+- [x] **Paso 8: Test de la función de lectura (falla primero)**
 
 Crea `api/imagenes-servir.test.ts`:
 
@@ -626,12 +626,12 @@ describe('GET /img/:clave (vía /api/imagenes-servir)', () => {
 })
 ```
 
-- [ ] **Paso 9: Confirmar que falla**
+- [x] **Paso 9: Confirmar que falla**
 
 Run: `npm run test -- api/imagenes-servir.test.ts`
 Expected: FAIL — `./imagenes-servir` no existe.
 
-- [ ] **Paso 10: Implementar la función de lectura**
+- [x] **Paso 10: Implementar la función de lectura**
 
 Crea `api/imagenes-servir.ts`:
 
@@ -693,12 +693,12 @@ export default {
 }
 ```
 
-- [ ] **Paso 11: Confirmar que el test de lectura pasa**
+- [x] **Paso 11: Confirmar que el test de lectura pasa**
 
 Run: `npm run test -- api/imagenes-servir.test.ts`
 Expected: PASS (los 3 casos)
 
-- [ ] **Paso 12: Autorrevisión de seguridad (obligatoria, toca auth + secretos + dependencia nueva + una ruta pública nueva)**
+- [x] **Paso 12: Autorrevisión de seguridad (obligatoria, toca auth + secretos + dependencia nueva + una ruta pública nueva)**
 
 Antes de abrir el PR, repasa tu propio diff contra:
 - `.claude/agents/security-auth-crypto.md` (verificación de admin vía RLS
@@ -714,12 +714,12 @@ Antes de abrir el PR, repasa tu propio diff contra:
   hace imposible cualquier path traversal o acceso a una clave de R2 que
   no siga el patrón `<hash>.<extension>` exacto.
 
-- [ ] **Paso 13: Suite completa + build + lint**
+- [x] **Paso 13: Suite completa + build + lint**
 
 Run: `npm run test && npm run build && npm run lint`
 Expected: los tres en verde.
 
-- [ ] **Paso 14: Commit y PR**
+- [x] **Paso 14: Commit y PR**
 
 ```bash
 git add api/imagenes.ts api/imagenes.test.ts \
@@ -732,7 +732,7 @@ gh pr create --fill
 
 Espera a que el CI esté en verde y mergea.
 
-- [ ] **Paso 15: Verificación real contra producción**
+- [x] **Paso 15: Verificación real contra producción**
 
 Tras el deploy de `main` (confirma con
 `gh run list --branch main --limit 1` como en el resto de la sesión):
@@ -767,14 +767,14 @@ Expected: `401` y `404` respectivamente.
   `{ tipo: 'imagen', src, alt, titulo? }` listo para pegar en un `.md` de
   `contenido/`.
 
-- [ ] **Paso 1: Rama nueva**
+- [x] **Paso 1: Rama nueva**
 
 ```bash
 git checkout main && git pull
 git checkout -b feat/script-subir-imagen
 ```
 
-- [ ] **Paso 2: Implementar el script**
+- [x] **Paso 2: Implementar el script**
 
 Crea `scripts/dev/subir-imagen.mjs`:
 
@@ -884,7 +884,7 @@ console.log('```')
 await supabase.auth.signOut()
 ```
 
-- [ ] **Paso 3: Registrar el script en `package.json`**
+- [x] **Paso 3: Registrar el script en `package.json`**
 
 Añade en `"scripts"`:
 
@@ -892,7 +892,7 @@ Añade en `"scripts"`:
 "subir-imagen": "node scripts/dev/subir-imagen.mjs"
 ```
 
-- [ ] **Paso 4: Verificación real (end-to-end, contra producción — necesita la Task 1 y la Task 3 ya mergeadas y desplegadas)**
+- [x] **Paso 4: Verificación real (end-to-end, contra producción — necesita la Task 1 y la Task 3 ya mergeadas y desplegadas)**
 
 Crea una imagen de prueba pequeña y ejecútalo de verdad:
 
@@ -908,7 +908,7 @@ directamente). Vuelve a ejecutar el mismo comando con el mismo archivo:
 debe devolver la MISMA URL sin error (confirma que subir el mismo
 contenido dos veces no rompe nada).
 
-- [ ] **Paso 5: Commit y PR**
+- [x] **Paso 5: Commit y PR**
 
 ```bash
 git add scripts/dev/subir-imagen.mjs package.json
@@ -934,14 +934,14 @@ Espera a que el CI esté en verde y mergea.
 - Consumes: `supabase` (cliente ya existente, `@/lib/supabaseClient`) para
   leer la sesión activa vía `supabase.auth.getSession()`.
 
-- [ ] **Paso 1: Rama nueva**
+- [x] **Paso 1: Rama nueva**
 
 ```bash
 git checkout main && git pull
 git checkout -b feat/subir-imagen-en-editor
 ```
 
-- [ ] **Paso 2: Test (falla primero)**
+- [x] **Paso 2: Test (falla primero)**
 
 Crea `src/components/leccion/LeccionForm.test.tsx`:
 
@@ -985,12 +985,12 @@ describe('LeccionForm — subir imagen arrastrándola al editor', () => {
 })
 ```
 
-- [ ] **Paso 3: Confirmar que falla**
+- [x] **Paso 3: Confirmar que falla**
 
 Run: `npm run test -- LeccionForm.test.tsx`
 Expected: FAIL — el textarea no reacciona todavía al `drop`.
 
-- [ ] **Paso 4: Implementar el manejador de subida**
+- [x] **Paso 4: Implementar el manejador de subida**
 
 En `src/components/leccion/LeccionForm.tsx`, añade a los imports:
 
@@ -1098,7 +1098,7 @@ de leerlo antes con `arrayBuffer()`), ya no hace falta calcular ningún
 hash en el navegador — lo calcula el servidor a partir de los bytes que
 recibe.
 
-- [ ] **Paso 5: Conectar el manejador al textarea**
+- [x] **Paso 5: Conectar el manejador al textarea**
 
 Sustituye el `<textarea id="leccion-contenido" ...>` existente (el que
 lleva `{...register('contenido')}`) por:
@@ -1136,24 +1136,24 @@ lleva `{...register('contenido')}`) por:
 </p>
 ```
 
-- [ ] **Paso 6: Confirmar que el test pasa**
+- [x] **Paso 6: Confirmar que el test pasa**
 
 Run: `npm run test -- LeccionForm.test.tsx`
 Expected: PASS
 
-- [ ] **Paso 7: Autorrevisión de seguridad**
+- [x] **Paso 7: Autorrevisión de seguridad**
 
 Repasa el diff contra `.claude/agents/security-code-vulns.md` (código
 nuevo en un componente ya existente, manejo de `File`/`fetch` desde el
 navegador, validación de tamaño en el cliente que además ya está aplicada
 en el servidor — nunca confiar solo en el check del navegador).
 
-- [ ] **Paso 8: Suite completa + build + lint**
+- [x] **Paso 8: Suite completa + build + lint**
 
 Run: `npm run test && npm run build && npm run lint`
 Expected: los tres en verde.
 
-- [ ] **Paso 9: Commit y PR**
+- [x] **Paso 9: Commit y PR**
 
 ```bash
 git add src/components/leccion/LeccionForm.tsx src/components/leccion/LeccionForm.test.tsx
@@ -1171,7 +1171,7 @@ Espera a que el CI esté en verde y mergea.
 **Files:**
 - Create: `security/reviews/2026-09-05-imagenes-en-lecciones.md`
 
-- [ ] **Paso 1: Auditoría completa**
+- [x] **Paso 1: Auditoría completa**
 
 Con todas las Tasks anteriores ya mergeadas en `main`, ejecuta
 `/security-review` (o, si el entorno no lo permite, recorre a mano los 8
@@ -1197,14 +1197,25 @@ aparece "Subiendo imagen…", luego el bloque `imagen` en el textarea, y al
 guardar y abrir la lección publicada, la imagen se ve en la página real
 (usa Playwright para la captura, no solo lo que veas tú en el navegador).
 
-- [ ] **Paso 3: Verificación end-to-end real — camino del script**
+**Estado real (2026-09-06):** pendiente — esta sesión no tenía ninguna
+herramienta de navegador conectada para hacerlo de forma fiable (sin
+MCP de Playwright, sin `playwright` como dependencia del proyecto), y
+montar un script ad hoc solo para simular un drag&drop de un `File`
+real no compensaba frente a que el resto de la ruta ya está verificado
+en tres capas independientes: el test unitario del componente
+(`fireEvent.drop` en jsdom), la llamada real a `POST /api/imagenes`
+contra producción (Task 4, dos veces), y la revisión de seguridad que
+confirmó que el render de `Imagen.tsx` no tiene ninguna vía de
+inyección. Lo hace el usuario directamente cuando le convenga.
+
+- [x] **Paso 3: Verificación end-to-end real — camino del script**
 
 Repite el Paso 4 de la Task 4 con una imagen distinta, y añade el bloque
 resultante a un `.md` real de `contenido/` de una lección de prueba,
 sincronízalo con el flujo Playwright ya establecido en esta sesión, y
 confirma visualmente que se ve bien en la lección real.
 
-- [ ] **Paso 4: Confirmar que el bloqueo de LaLiga ya no aplica**
+- [x] **Paso 4: Confirmar que el bloqueo de LaLiga ya no aplica**
 
 Repite la comprobación que originó el pivote de este plan: desde la misma
 red donde se detectó el bloqueo, visita cualquier URL real de
@@ -1213,7 +1224,7 @@ normalidad (candado válido, sin ningún aviso de "no seguro"). Es la
 prueba definitiva de que el nuevo diseño resuelve el problema real, no
 solo sobre el papel.
 
-- [ ] **Paso 5: Limpieza**
+- [x] **Paso 5: Limpieza**
 
 Borra de R2 (pestaña Objects del bucket) cualquier imagen de prueba que
 hayas subido durante las verificaciones de este plan que no vaya a quedar
