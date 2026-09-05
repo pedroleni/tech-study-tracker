@@ -44,65 +44,103 @@ proveedor, no de memoria):
 | Vercel Blob | "dentro de límites de uso", sin cifra fija publicada | $0.023/GB (ejemplo Pro) | $0.05/GB |
 | Cloudinary | 25 créditos = 25 GB combinados | primer plan de pago: $99/mes | incluido en créditos |
 
-Elegido **Cloudflare R2**, decisión del usuario: el egress gratuito es
-determinante — cada vista de una lección con imágenes las vuelve a servir, y
-es justo el coste que R2 nunca cobra.
+Elegido **Cloudflare R2**, decisión inicial del usuario: el egress gratuito
+es determinante — cada vista de una lección con imágenes las vuelve a
+servir, y es justo el coste que R2 nunca cobra. (Ver más abajo "Hallazgo:
+bloqueo de LaLiga" — esto cambió CÓMO se sirven las imágenes, pero no la
+elección de R2 como almacén.)
 
 ### Dominio
 
-R2 exige un dominio personalizado para servir en producción — la URL de
-desarrollo `r2.dev` está explícitamente desaconsejada por Cloudflare
-("rate-limited and should only be used for development purposes").
-
 Se compró `techstudytracker.com` en Cloudflare Registrar (al coste, sin
-margen) — con doble uso:
+margen) como dominio real de la app en Vercel, sustituyendo al
+`.vercel.app` — **ya configurado y verificado en producción**: registros
+CNAME en Cloudflare DNS (`@` → valor único de Vercel para el proyecto,
+`www` → `cname.vercel-dns.com`), ambos en modo "DNS only" (sin proxy
+naranja, que bloquea la verificación SSL de Vercel). Certificado real
+emitido por Let's Encrypt, confirmado con `openssl s_client` contra el
+dominio en vivo.
 
-- `img.techstudytracker.com` → bucket público de R2 (este diseño).
-- `techstudytracker.com` / `www.techstudytracker.com` → dominio real de la
-  app en Vercel, sustituyendo al `.vercel.app` — **ya configurado y
-  verificado en producción** como parte de este trabajo: registros CNAME en
-  Cloudflare DNS (`@` → valor único de Vercel para el proyecto, `www` →
-  `cname.vercel-dns.com`), ambos en modo "DNS only" (sin proxy naranja, que
-  bloquea la verificación SSL de Vercel). Certificado real emitido por Let's
-  Encrypt, confirmado con `openssl s_client` contra el dominio en vivo.
+No hace falta ningún subdominio adicional para las imágenes (ver siguiente
+sección) — `techstudytracker.com` es el único dominio que el navegador de
+un visitante llega a tocar.
 
-Pendiente (parte de la implementación, no bloquea el resto del diseño):
-conectar `img.techstudytracker.com` al bucket de R2 desde la pestaña "Custom
-Domains" del bucket — Cloudflare crea el registro proxied necesario
-automáticamente, sin pasos manuales de DNS.
+### Hallazgo: bloqueo judicial de LaLiga sobre IPs de Cloudflare
 
-## Cómo se sube sin exponer credenciales
+Al intentar conectar `img.techstudytracker.com` al bucket de R2 (el diseño
+original: un dominio personalizado de Cloudflare sirviendo directamente el
+bucket público), la URL resultó inaccesible en la propia red del usuario,
+con un error de certificado autofirmado genérico y, al forzar el aviso,
+la página de bloqueo real de un ISP español citando la Sentencia de 18 de
+diciembre de 2024 del Juzgado de lo Mercantil nº 6 de Barcelona (LaLiga /
+Telefónica Audiovisual Digital contra la piratería).
+
+Verificado, no asumido: las IPs a las que resolvía el dominio
+(`188.114.96.5` / `188.114.97.5`) están documentadas públicamente en varios
+hilos de la comunidad de Cloudflare como parte del rango bloqueado — LaLiga
+pide a los ISP españoles bloquear rangos de IP compartidas de Cloudflare
+porque ahí se esconde streaming pirata, y como esas IPs las comparten miles
+de webs legítimas (entre ellas, ahora, la nuestra), el bloqueo cae también
+sobre ellas. Comprobado desde la misma red: otro dominio conocido detrás de
+Cloudflare (`discord.com`, en un rango de IP distinto) cargaba con
+normalidad — no es un bloqueo de Cloudflare en general, es específico de
+ese rango.
+
+Un dominio personalizado de R2 no admite "modo DNS only" como una zona
+normal — su propio mecanismo de entrega depende de pasar por la red
+proxied de Cloudflare, así que no hay forma de esquivarlo dentro del propio
+R2. La solución: que el navegador del visitante **nunca** hable
+directamente con ninguna IP de Cloudflare — solo con `techstudytracker.com`
+(Vercel, ya confirmado fuera de cualquier rango bloqueado).
+
+## Cómo se sube y se sirve, sin exponer credenciales y sin pasar por Cloudflare
 
 R2 usa credenciales tipo AWS (Access Key + Secret) — no se pueden usar desde
 el navegador sin exponerlas en el bundle JS. El proyecto es hoy una SPA pura
 (Vite + React, sin backend propio, todo habla directo con Supabase desde el
-navegador), así que hace falta una pieza de servidor nueva:
+navegador), así que hacen falta dos piezas de servidor nuevas, ambas
+funciones serverless de Vercel (Vercel detecta `api/` automáticamente):
 
-1. Una función serverless de Vercel, `api/imagenes-url-subida.ts` (Vercel
-   detecta `api/` automáticamente, sin configuración extra).
-2. El llamante (navegador o script) manda su sesión de Supabase ya
-   autenticada.
-3. La función verifica **en el servidor** que esa sesión es de admin — nunca
-   basta con un check solo en el navegador, cualquiera podría llamar a la
-   función directamente saltándose la UI.
-4. Si es admin, genera una **URL prefirmada** de R2 (válida unos minutos,
-   usando las credenciales secretas que solo viven como variable de entorno
-   en Vercel) y la devuelve.
-5. El llamante sube el archivo directamente a esa URL — los bytes van
-   derechos a R2, sin pasar por la función ni acercarse a las credenciales
-   reales.
+**Subida — `POST /api/imagenes`:**
+1. El llamante (navegador o script) manda el archivo junto con su sesión de
+   Supabase ya autenticada.
+2. La función verifica **en el servidor** que esa sesión es de admin —
+   nunca basta con un check solo en el navegador.
+3. Si es admin, sube el archivo a R2 directamente desde el servidor
+   (`PutObjectCommand`, usando las credenciales secretas que solo viven
+   como variable de entorno en Vercel) y devuelve la URL pública final:
+   `https://techstudytracker.com/img/<hash>.<ext>`.
 
-Una única función sirve **los dos caminos de subida** (drag&drop del usuario
-en el navegador, y el script de Claude) — no hay lógica de subida duplicada.
+**Lectura — `GET /img/[clave]`:**
+1. Cualquier visitante pide esa URL como pediría cualquier imagen normal.
+2. La función lee el objeto de R2 (`GetObjectCommand`) y lo devuelve con su
+   `Content-Type` real y una cabecera de caché muy larga
+   (`Cache-Control: public, max-age=31536000, immutable`) — como el nombre
+   del archivo es un hash de su contenido, nunca cambia, así que cachearlo
+   para siempre es seguro. Tras la primera visita, la CDN de Vercel sirve
+   la imagen directamente sin volver a pedirla a R2.
+
+Como ninguna de las dos rutas expone R2 directamente al navegador, ya no
+hace falta una URL prefirmada ni un dominio personalizado de R2 — la
+credencial nunca sale del servidor, y el navegador del visitante nunca
+resuelve ninguna IP de Cloudflare, con lo que el bloqueo deja de ser
+relevante sin más coste que el ancho de banda de Vercel al reenviar la
+imagen (gratuito al volumen que maneja este proyecto, y R2 sigue sin cobrar
+egress por servir a la función).
+
+Ambas rutas las usan **los dos caminos de subida** (drag&drop del usuario
+en el navegador, y el script de Claude) — no hay lógica duplicada.
 
 ### Variables de entorno necesarias
 
 `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`,
-`R2_BUCKET_NAME`, `R2_PUBLIC_URL_BASE` (=`https://img.techstudytracker.com`)
-— como variables de entorno de Vercel (para la función) y en un `.env` local
-gitignored (para el script de Claude). El token de API de R2 se crea con
-permiso de escritura **solo sobre ese bucket**, nunca uno con acceso a toda
-la cuenta de Cloudflare.
+`R2_BUCKET_NAME` — como variables de entorno de Vercel (para las dos
+funciones) y en un `.env` local gitignored (para el script de Claude). El
+token de API de R2 se crea con permiso de escritura **solo sobre ese
+bucket**, nunca uno con acceso a toda la cuenta de Cloudflare. Ya no hace
+falta `R2_PUBLIC_URL_BASE` — la URL pública es siempre
+`https://techstudytracker.com/img/<clave>`, un valor fijo, no configurable
+por entorno.
 
 ### Nombrado de archivos
 
@@ -118,7 +156,7 @@ siguiendo el mismo patrón que los bloques existentes:
 ```typescript
 export const esquemaImagen = z.object({
   tipo: z.literal('imagen'),
-  src: z.string().url().startsWith('https://img.techstudytracker.com/'),
+  src: z.string().url().startsWith('https://techstudytracker.com/img/'),
   alt: z.string().min(1).max(200),
   titulo: z.string().min(1).max(160).optional(),
 })
@@ -128,11 +166,13 @@ Decisiones:
 
 - **`alt` obligatorio**, no opcional — coherente con lo que las propias
   lecciones de HTML enseñan sobre accesibilidad.
-- **`src` restringido a nuestro propio dominio de R2** — evita el mismo
-  problema ya vivido con dominios externos que pueden bloquear el framing o
-  desaparecer (MDN, en la lección de iframes): si un bloque `imagen` existe,
-  pasó por nuestro pipeline de subida, nunca es un enlace suelto a un sitio
-  que no controlamos.
+- **`src` restringido a `techstudytracker.com/img/`** (nuestro propio
+  dominio, nunca el de R2 directamente) — evita el mismo problema ya vivido
+  con dominios externos que pueden bloquear el framing o desaparecer (MDN,
+  en la lección de iframes) y, ahora también, con el bloqueo de LaLiga: si
+  un bloque `imagen` existe, pasó por nuestro pipeline de subida y se sirve
+  desde nuestro propio dominio, nunca un enlace suelto a un sitio que no
+  controlamos.
 - **Sin campo de ancho/alineación por ahora** — YAGNI; se añade si aparece un
   caso real, no antes.
 
@@ -146,24 +186,32 @@ HTML ya enseñan como buena práctica.
 ## Los dos caminos de subida
 
 1. **Usuario, en el navegador**: un manejador de drop/paste en el textarea
-   `#leccion-contenido` de `LessonForm` — al soltar o pegar una imagen, la
-   sube usando la sesión ya autenticada, y en cuanto termina inserta el
-   bloque ```laboratorio``` con la URL ya rellena en la posición del cursor.
+   `#leccion-contenido` de `LeccionForm` — al soltar o pegar una imagen, la
+   manda a `POST /api/imagenes` usando la sesión ya autenticada, y en cuanto
+   responde inserta el bloque ```laboratorio``` con la URL ya rellena en la
+   posición del cursor.
 2. **Claude, por script**: un script Node (mismo patrón que los ya
-   existentes para sincronizar contenido) que sube un archivo local al mismo
-   bucket vía la función serverless, y devuelve la URL para escribir el
-   bloque en el `.md` correspondiente.
+   existentes para sincronizar contenido) que manda un archivo local al
+   mismo `POST /api/imagenes`, y devuelve la URL para escribir el bloque en
+   el `.md` correspondiente.
 
 ## Autorevisión del spec
 
 - **Placeholders**: ninguno — cada sección tiene valores concretos (nombres
   de archivo, variables de entorno, esquema Zod completo).
-- **Consistencia interna**: el dominio (`img.techstudytracker.com`), la
-  restricción de `src` en el esquema, y la URL pública que genera la función
-  de subida son la misma cadena en las tres secciones.
+- **Consistencia interna**: el dominio (`techstudytracker.com/img/`), la
+  restricción de `src` en el esquema, y la URL pública que devuelve
+  `POST /api/imagenes` son la misma cadena en todas las secciones.
 - **Alcance**: enfocado — cubre un único plan de implementación (subida +
-  bloque + componente). La ampliación futura a subida de alumnos queda fuera
-  a propósito, mencionada solo para no perderla de vista.
-- **Ambigüedad**: el punto del `.md` como fuente de verdad frente a ediciones
-  directas en el admin ya estaba señalado como matiz operativo, no como
-  requisito a resolver con código en este diseño.
+  lectura + bloque + componente). La ampliación futura a subida de alumnos
+  queda fuera a propósito, mencionada solo para no perderla de vista.
+- **Ambigüedad**: el punto del `.md` como fuente de verdad frente a
+  ediciones directas en el admin ya estaba señalado como matiz operativo,
+  no como requisito a resolver con código en este diseño.
+- **Revisión post-hallazgo (bloqueo de LaLiga)**: el pivote de "R2 sirve
+  directamente vía dominio personalizado" a "Vercel hace de intermediario
+  en subida y lectura" no cambia la elección de almacén (sigue siendo R2,
+  sigue siendo prácticamente gratis a este volumen) ni el modelo de
+  seguridad (la autorización de admin sigue apoyándose en la misma RLS de
+  `profiles`) — solo cambia qué servidor habla con R2 y qué dominio ve el
+  navegador.
