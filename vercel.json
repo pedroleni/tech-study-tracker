@@ -1,6 +1,7 @@
 {
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/img/:clave", "destination": "/api/imagenes-servir?clave=:clave" },
+    { "source": "/((?!api/|img/).*)", "destination": "/index.html" }
   ],
   "headers": [
     {
