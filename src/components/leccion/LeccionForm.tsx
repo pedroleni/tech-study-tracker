@@ -139,6 +139,17 @@ export function LeccionForm({
     [setValue],
   )
 
+  // El navegador solo trata este elemento como una zona de soltar válida si
+  // dragover llama a preventDefault() — sin esto, al soltar el archivo el
+  // navegador ejecuta su acción por defecto (abrir/navegar al archivo) en
+  // vez de disparar drop con los datos utilizables. jsdom no reproduce esta
+  // negociación, así que un test con fireEvent.drop no detecta su ausencia.
+  const manejarDragOver = useCallback((event: DragEvent<HTMLTextAreaElement>) => {
+    if (event.dataTransfer.types.includes('Files')) {
+      event.preventDefault()
+    }
+  }, [])
+
   const manejarDrop = useCallback(
     (event: DragEvent<HTMLTextAreaElement>) => {
       const archivo = event.dataTransfer.files[0]
@@ -362,6 +373,7 @@ export function LeccionForm({
           className="w-full resize-y rounded-lg border border-input bg-background px-3 py-2 font-mono text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           aria-invalid={Boolean(formState.errors.contenido)}
           aria-describedby="leccion-contenido-error leccion-contenido-imagen-ayuda"
+          onDragOver={manejarDragOver}
           onDrop={manejarDrop}
           onPaste={manejarPaste}
           ref={(el) => {
