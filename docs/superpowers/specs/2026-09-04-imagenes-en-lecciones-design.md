@@ -62,8 +62,10 @@ emitido por Let's Encrypt, confirmado con `openssl s_client` contra el
 dominio en vivo.
 
 No hace falta ningún subdominio adicional para las imágenes (ver siguiente
-sección) — `techstudytracker.com` es el único dominio que el navegador de
-un visitante llega a tocar.
+sección) — Vercel usa `www.techstudytracker.com` como dominio canónico
+(el raíz redirige ahí con 308), así que las imágenes se sirven siempre
+desde `www.techstudytracker.com/img/`, nunca desde ningún dominio de
+Cloudflare/R2.
 
 ### Hallazgo: bloqueo judicial de LaLiga sobre IPs de Cloudflare
 
@@ -109,7 +111,7 @@ funciones serverless de Vercel (Vercel detecta `api/` automáticamente):
 3. Si es admin, sube el archivo a R2 directamente desde el servidor
    (`PutObjectCommand`, usando las credenciales secretas que solo viven
    como variable de entorno en Vercel) y devuelve la URL pública final:
-   `https://techstudytracker.com/img/<hash>.<ext>`.
+   `https://www.techstudytracker.com/img/<hash>.<ext>`.
 
 **Lectura — `GET /img/[clave]`:**
 1. Cualquier visitante pide esa URL como pediría cualquier imagen normal.
@@ -139,7 +141,7 @@ funciones) y en un `.env` local gitignored (para el script de Claude). El
 token de API de R2 se crea con permiso de escritura **solo sobre ese
 bucket**, nunca uno con acceso a toda la cuenta de Cloudflare. Ya no hace
 falta `R2_PUBLIC_URL_BASE` — la URL pública es siempre
-`https://techstudytracker.com/img/<clave>`, un valor fijo, no configurable
+`https://www.techstudytracker.com/img/<clave>`, un valor fijo, no configurable
 por entorno.
 
 ### Nombrado de archivos
@@ -156,7 +158,7 @@ siguiendo el mismo patrón que los bloques existentes:
 ```typescript
 export const esquemaImagen = z.object({
   tipo: z.literal('imagen'),
-  src: z.string().url().startsWith('https://techstudytracker.com/img/'),
+  src: z.string().url().startsWith('https://www.techstudytracker.com/img/'),
   alt: z.string().min(1).max(200),
   titulo: z.string().min(1).max(160).optional(),
 })
@@ -166,7 +168,7 @@ Decisiones:
 
 - **`alt` obligatorio**, no opcional — coherente con lo que las propias
   lecciones de HTML enseñan sobre accesibilidad.
-- **`src` restringido a `techstudytracker.com/img/`** (nuestro propio
+- **`src` restringido a `www.techstudytracker.com/img/`** (nuestro propio
   dominio, nunca el de R2 directamente) — evita el mismo problema ya vivido
   con dominios externos que pueden bloquear el framing o desaparecer (MDN,
   en la lección de iframes) y, ahora también, con el bloqueo de LaLiga: si
@@ -199,7 +201,7 @@ HTML ya enseñan como buena práctica.
 
 - **Placeholders**: ninguno — cada sección tiene valores concretos (nombres
   de archivo, variables de entorno, esquema Zod completo).
-- **Consistencia interna**: el dominio (`techstudytracker.com/img/`), la
+- **Consistencia interna**: el dominio (`www.techstudytracker.com/img/`), la
   restricción de `src` en el esquema, y la URL pública que devuelve
   `POST /api/imagenes` son la misma cadena en todas las secciones.
 - **Alcance**: enfocado — cubre un único plan de implementación (subida +

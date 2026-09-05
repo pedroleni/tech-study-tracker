@@ -385,7 +385,7 @@ describe('esquemaImagen', () => {
   it('acepta un bloque válido con src en nuestro dominio y alt', () => {
     const resultado = esquemaImagen.safeParse({
       tipo: 'imagen',
-      src: 'https://techstudytracker.com/img/abc123.png',
+      src: 'https://www.techstudytracker.com/img/abc123.png',
       alt: 'Captura de la pestaña Network de DevTools',
     })
 
@@ -395,7 +395,7 @@ describe('esquemaImagen', () => {
   it('acepta titulo opcional', () => {
     const resultado = esquemaImagen.safeParse({
       tipo: 'imagen',
-      src: 'https://techstudytracker.com/img/abc123.png',
+      src: 'https://www.techstudytracker.com/img/abc123.png',
       alt: 'Captura',
       titulo: 'Figura 1: la pestaña Network',
     })
@@ -419,7 +419,7 @@ describe('esquemaImagen', () => {
   it('rechaza sin alt', () => {
     const resultado = esquemaImagen.safeParse({
       tipo: 'imagen',
-      src: 'https://techstudytracker.com/img/abc123.png',
+      src: 'https://www.techstudytracker.com/img/abc123.png',
     })
 
     expect(resultado.success).toBe(false)
@@ -428,7 +428,7 @@ describe('esquemaImagen', () => {
   it('participa en esquemaBloqueLaboratorio', () => {
     const resultado = esquemaBloqueLaboratorio.safeParse({
       tipo: 'imagen',
-      src: 'https://techstudytracker.com/img/abc123.png',
+      src: 'https://www.techstudytracker.com/img/abc123.png',
       alt: 'Captura',
     })
 
