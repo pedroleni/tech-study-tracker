@@ -34,6 +34,9 @@ function crearPeticion(
 }
 
 const BYTES_DE_PRUEBA = new Uint8Array([1, 2, 3, 4])
+const PNG_VALIDO = new Uint8Array([
+  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00,
+])
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -83,6 +86,24 @@ describe('POST /api/imagenes', () => {
     expect(respuesta.status).toBe(400)
   })
 
+  it('rechaza una propiedad heredada como Content-Type', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'admin-1' } }, error: null })
+    mockSingle.mockResolvedValue({ data: { role: 'admin' }, error: null })
+
+    const respuesta = await handler.fetch(
+      crearPeticion(BYTES_DE_PRUEBA, {
+        authorization: 'Bearer token-admin',
+        'content-type': '__proto__',
+      }),
+    )
+
+    expect(respuesta.status).toBe(400)
+    await expect(respuesta.json()).resolves.toEqual({
+      error: 'El Content-Type debe ser image/png, image/jpeg o image/webp',
+    })
+    expect(mockSend).not.toHaveBeenCalled()
+  })
+
   it('rechaza específicamente image/svg+xml (riesgo de XSS vía script embebido)', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'admin-1' } }, error: null })
     mockSingle.mockResolvedValue({ data: { role: 'admin' }, error: null })
@@ -117,13 +138,35 @@ describe('POST /api/imagenes', () => {
     expect(respuesta.status).toBe(413)
   })
 
-  it('un admin con un archivo válido sube a R2 y devuelve la URL pública', async () => {
+  it.each([
+    ['PNG', 'image/png'],
+    ['JPEG', 'image/jpeg'],
+    ['WebP', 'image/webp'],
+  ])('rechaza bytes que no corresponden a una imagen %s', async (tipo, contentType) => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'admin-1' } }, error: null })
+    mockSingle.mockResolvedValue({ data: { role: 'admin' }, error: null })
+
+    const respuesta = await handler.fetch(
+      crearPeticion(BYTES_DE_PRUEBA, {
+        authorization: 'Bearer token-admin',
+        'content-type': contentType,
+      }),
+    )
+
+    expect(respuesta.status).toBe(400)
+    await expect(respuesta.json()).resolves.toEqual({
+      error: `El archivo no es una imagen ${tipo} válida`,
+    })
+    expect(mockSend).not.toHaveBeenCalled()
+  })
+
+  it('un admin con bytes PNG válidos sube a R2 y devuelve la URL pública', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'admin-1' } }, error: null })
     mockSingle.mockResolvedValue({ data: { role: 'admin' }, error: null })
     mockSend.mockResolvedValue({})
 
     const respuesta = await handler.fetch(
-      crearPeticion(BYTES_DE_PRUEBA, { authorization: 'Bearer token-admin' }),
+      crearPeticion(PNG_VALIDO, { authorization: 'Bearer token-admin' }),
     )
     const cuerpo = await respuesta.json()
 
