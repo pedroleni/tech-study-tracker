@@ -151,7 +151,7 @@ puntos de mayor riesgo aparente, sin éxito:
 ## Estado
 
 - [x] Auditoría completa realizada — 8/8 dominios, 0 hallazgos High/Medium/Critical.
-- [ ] Hallazgo LOW #1 (`Object.hasOwn`) — pendiente, opcional.
-- [ ] Hallazgo LOW #2 (magic bytes) — pendiente, opcional.
+- [x] Hallazgo LOW #1 (`Object.hasOwn`) — arreglado, PR #51 (`7da2e04`).
+- [x] Hallazgo LOW #2 (magic bytes) — arreglado en el mismo PR #51 (`7da2e04`); verificado en producción que una imagen real sigue subiéndose sin problema.
 - [x] Hallazgo INFO #3 (imagen de borrador accesible sin sesión) — aceptado como diseño consciente, sin acción.
 - [ ] Hallazgo INFO #4 (alcance real del token de R2) — pendiente de reconfirmación manual del usuario en el panel de Cloudflare.
