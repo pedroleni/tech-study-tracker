@@ -292,6 +292,13 @@ export const esquemaGitEnVivo = z.object({
   mostrarGrafo: z.boolean().default(false),
 })
 
+export const esquemaImagen = z.object({
+  tipo: z.literal('imagen'),
+  src: z.string().url().startsWith('https://techstudytracker.com/img/'),
+  alt: z.string().min(1).max(200),
+  titulo: z.string().min(1).max(160).optional(),
+})
+
 export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaPrediceElResultado,
   esquemaCodigoAnotado,
@@ -312,6 +319,7 @@ export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaSqlEnVivo,
   esquemaGitAnotado,
   esquemaGitEnVivo,
+  esquemaImagen,
 ])
 
 export type DatosPrediceElResultado = z.infer<typeof esquemaPrediceElResultado>
@@ -335,4 +343,5 @@ export type DatosSqlAnotado = z.infer<typeof esquemaSqlAnotado>
 export type DatosSqlEnVivo = z.infer<typeof esquemaSqlEnVivo>
 export type DatosGitAnotado = z.infer<typeof esquemaGitAnotado>
 export type DatosGitEnVivo = z.infer<typeof esquemaGitEnVivo>
+export type DatosImagen = z.infer<typeof esquemaImagen>
 export type DatosBloqueLaboratorio = z.infer<typeof esquemaBloqueLaboratorio>
