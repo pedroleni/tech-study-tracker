@@ -14,6 +14,32 @@ const EXTENSIONES_PERMITIDAS: Record<string, string> = {
 
 const TAMANO_MAXIMO_BYTES = 4 * 1024 * 1024
 
+function empiezaCon(bytes: Uint8Array, firma: readonly number[], offset = 0): boolean {
+  return firma.every((byte, indice) => bytes[offset + indice] === byte)
+}
+
+function tieneFirmaValida(bytes: Uint8Array, contentType: string): boolean {
+  switch (contentType) {
+    case 'image/png':
+      return empiezaCon(bytes, [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
+    case 'image/jpeg':
+      return empiezaCon(bytes, [0xff, 0xd8, 0xff])
+    case 'image/webp':
+      return (
+        empiezaCon(bytes, [0x52, 0x49, 0x46, 0x46]) &&
+        empiezaCon(bytes, [0x57, 0x45, 0x42, 0x50], 8)
+      )
+    default:
+      return false
+  }
+}
+
+function nombreFormato(contentType: string): string {
+  if (contentType === 'image/jpeg') return 'JPEG'
+  if (contentType === 'image/webp') return 'WebP'
+  return 'PNG'
+}
+
 function jsonError(mensaje: string, status: number): Response {
   return new Response(JSON.stringify({ error: mensaje }), {
     status,
@@ -58,7 +84,9 @@ export default {
     }
 
     const contentType = request.headers.get('content-type') ?? ''
-    const extension = EXTENSIONES_PERMITIDAS[contentType]
+    const extension = Object.hasOwn(EXTENSIONES_PERMITIDAS, contentType)
+      ? EXTENSIONES_PERMITIDAS[contentType]
+      : undefined
     if (!extension) {
       return jsonError(
         'El Content-Type debe ser image/png, image/jpeg o image/webp',
@@ -74,6 +102,12 @@ export default {
       // que Vercel corte la petición con un 413 genérico antes de llegar
       // aquí.
       return jsonError('La imagen no puede superar 4 MB', 413)
+    }
+    if (!tieneFirmaValida(bytes, contentType)) {
+      return jsonError(
+        `El archivo no es una imagen ${nombreFormato(contentType)} válida`,
+        400,
+      )
     }
 
     const sha256 = createHash('sha256').update(bytes).digest('hex')
