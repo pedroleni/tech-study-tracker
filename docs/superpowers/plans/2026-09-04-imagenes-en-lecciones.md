@@ -246,7 +246,8 @@ re-ejecute en verde antes de mergear.
 **Interfaces:**
 - Produces: `POST /api/imagenes` — cuerpo: los bytes crudos del archivo,
   cabecera `Content-Type` con el mime real de la imagen (`image/png`,
-  `image/jpeg`, `image/webp` o `image/svg+xml`) y
+  `image/jpeg` o `image/webp` — SVG queda fuera a propósito, ver la nota
+  de seguridad más abajo) y
   `Authorization: Bearer <access_token>`. Respuesta 200:
   `{ publicUrl: "https://techstudytracker.com/img/<hash>.<ext>" }`. Usado
   por la Task 4 (script) y la Task 5 (drag&drop en el editor).
@@ -446,11 +447,14 @@ import { createClient } from '@supabase/supabase-js'
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
 import { createHash } from 'node:crypto'
 
+// SVG queda fuera a propósito: puede llevar <script> embebido, y visitar
+// /img/<hash>.svg directamente (documento de nivel superior, no <img>) lo
+// ejecutaría en el origen de techstudytracker.com — un XSS evitable del
+// todo simplemente no aceptando ese formato.
 const EXTENSIONES_PERMITIDAS: Record<string, string> = {
   'image/png': 'png',
   'image/jpeg': 'jpg',
   'image/webp': 'webp',
-  'image/svg+xml': 'svg',
 }
 
 const TAMANO_MAXIMO_BYTES = 4 * 1024 * 1024
@@ -502,7 +506,7 @@ export default {
     const extension = EXTENSIONES_PERMITIDAS[contentType]
     if (!extension) {
       return jsonError(
-        'El Content-Type debe ser image/png, image/jpeg, image/webp o image/svg+xml',
+        'El Content-Type debe ser image/png, image/jpeg o image/webp',
         400,
       )
     }
@@ -639,13 +643,14 @@ const EXTENSION_A_CONTENT_TYPE: Record<string, string> = {
   jpg: 'image/jpeg',
   jpeg: 'image/jpeg',
   webp: 'image/webp',
-  svg: 'image/svg+xml',
 }
 
 // La clave siempre es un hash sha256 (64 hex) + una de las extensiones
 // permitidas — cualquier otra cosa (incluidos intentos de path traversal
-// como ../../algo) se rechaza sin llegar a tocar R2.
-const CLAVE_VALIDA = /^[0-9a-f]{64}\.(png|jpg|jpeg|webp|svg)$/
+// como ../../algo) se rechaza sin llegar a tocar R2. SVG queda fuera a
+// propósito (ver api/imagenes.ts) para no poder servir jamás un XSS vía
+// script embebido en el propio origen.
+const CLAVE_VALIDA = /^[0-9a-f]{64}\.(png|jpg|jpeg|webp)$/
 
 export default {
   async fetch(request: Request): Promise<Response> {
@@ -788,12 +793,13 @@ import { createClient } from '@supabase/supabase-js'
 import { readFile } from 'node:fs/promises'
 import { extname } from 'node:path'
 
+// Mismo conjunto que api/imagenes.ts — SVG queda fuera a propósito (riesgo
+// de XSS vía script embebido si alguien visita /img/<hash>.svg directo).
 const TIPOS_POR_EXTENSION = {
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
   '.jpeg': 'image/jpeg',
   '.webp': 'image/webp',
-  '.svg': 'image/svg+xml',
 }
 
 const [, , rutaArchivo, alt, titulo] = process.argv
@@ -806,7 +812,7 @@ if (!rutaArchivo || !alt) {
 const contentType = TIPOS_POR_EXTENSION[extname(rutaArchivo).toLowerCase()]
 if (!contentType) {
   console.error(
-    `Extensión no soportada: ${extname(rutaArchivo)}. Usa png, jpg, jpeg, webp o svg.`,
+    `Extensión no soportada: ${extname(rutaArchivo)}. Usa png, jpg, jpeg o webp.`,
   )
   process.exit(1)
 }
@@ -1008,9 +1014,12 @@ const [errorImagen, setErrorImagen] = useState('')
 const subirImagenEnCursor = useCallback(
   async (archivo: File) => {
     setErrorImagen('')
-    const tiposPermitidos = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml']
+    // Mismo conjunto que api/imagenes.ts — SVG queda fuera a propósito
+    // (riesgo de XSS vía script embebido si alguien visita /img/<hash>.svg
+    // directo, no como <img>).
+    const tiposPermitidos = ['image/png', 'image/jpeg', 'image/webp']
     if (!tiposPermitidos.includes(archivo.type)) {
-      setErrorImagen('Solo se admiten imágenes PNG, JPEG, WebP o SVG.')
+      setErrorImagen('Solo se admiten imágenes PNG, JPEG o WebP.')
       return
     }
     if (archivo.size > 4 * 1024 * 1024) {
