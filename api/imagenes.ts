@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
+import { DeleteObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
 import { createHash } from 'node:crypto'
 
 // SVG queda fuera a propósito: puede llevar <script> embebido, y visitar
@@ -13,6 +13,7 @@ const EXTENSIONES_PERMITIDAS: Record<string, string> = {
 }
 
 const TAMANO_MAXIMO_BYTES = 4 * 1024 * 1024
+const CLAVE_VALIDA = /^[0-9a-f]{64}\.(png|jpg|jpeg|webp)$/
 
 function empiezaCon(bytes: Uint8Array, firma: readonly number[], offset = 0): boolean {
   return firma.every((byte, indice) => bytes[offset + indice] === byte)
@@ -47,40 +48,125 @@ function jsonError(mensaje: string, status: number): Response {
   })
 }
 
+async function autenticarAdmin(
+  request: Request,
+): Promise<{ supabase: ReturnType<typeof createClient> } | { respuesta: Response }> {
+  const authHeader = request.headers.get('authorization')
+  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null
+  if (!token) return { respuesta: jsonError('Falta autenticación', 401) }
+
+  const supabaseUrl = process.env.VITE_SUPABASE_URL
+  const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return { respuesta: jsonError('Configuración de Supabase ausente', 500) }
+  }
+
+  // Un único cliente, con el token del usuario en las cabeceras: getUser()
+  // valida ese token explícitamente contra Supabase Auth, y el select de
+  // profiles que sigue lo usa para que auth.uid() se resuelva a este
+  // usuario dentro de la política RLS profiles_select_own — nunca puede
+  // devolver el perfil de otra persona, aunque este código tuviera un bug.
+  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    global: { headers: { Authorization: `Bearer ${token}` } },
+  })
+
+  const { data: userData, error: userError } = await supabase.auth.getUser(token)
+  if (userError || !userData.user) {
+    return { respuesta: jsonError('Sesión no válida', 401) }
+  }
+
+  const { data: perfil, error: perfilError } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', userData.user.id)
+    .single()
+
+  if (perfilError || perfil?.role !== 'admin') {
+    return { respuesta: jsonError('Solo un admin puede gestionar imágenes', 403) }
+  }
+
+  return { supabase }
+}
+
+async function leerDatosDelete(
+  request: Request,
+): Promise<{ clave: string; leccionId?: string } | Response> {
+  let body: unknown
+  try {
+    body = await request.json()
+  } catch {
+    return jsonError('El cuerpo debe ser JSON válido', 400)
+  }
+
+  if (typeof body !== 'object' || body === null) {
+    return jsonError('El cuerpo debe incluir una clave válida', 400)
+  }
+
+  const { clave, leccionId } = body as Record<string, unknown>
+  if (typeof clave !== 'string' || !CLAVE_VALIDA.test(clave)) {
+    return jsonError('La clave de imagen no es válida', 400)
+  }
+  if (leccionId !== undefined && typeof leccionId !== 'string') {
+    return jsonError('El identificador de lección no es válido', 400)
+  }
+
+  return { clave, leccionId }
+}
+
 export default {
   async fetch(request: Request): Promise<Response> {
-    if (request.method !== 'POST') return jsonError('Método no permitido', 405)
-
-    const authHeader = request.headers.get('authorization')
-    const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null
-    if (!token) return jsonError('Falta autenticación', 401)
-
-    const supabaseUrl = process.env.VITE_SUPABASE_URL
-    const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY
-    if (!supabaseUrl || !supabaseAnonKey) {
-      return jsonError('Configuración de Supabase ausente', 500)
+    if (request.method !== 'POST' && request.method !== 'DELETE') {
+      return jsonError('Método no permitido', 405)
     }
 
-    // Un único cliente, con el token del usuario en las cabeceras: getUser()
-    // valida ese token explícitamente contra Supabase Auth, y el select de
-    // profiles que sigue lo usa para que auth.uid() se resuelva a este
-    // usuario dentro de la política RLS profiles_select_own — nunca puede
-    // devolver el perfil de otra persona, aunque este código tuviera un bug.
-    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: `Bearer ${token}` } },
-    })
+    const datosDelete = request.method === 'DELETE' ? await leerDatosDelete(request) : null
+    if (datosDelete instanceof Response) return datosDelete
 
-    const { data: userData, error: userError } = await supabase.auth.getUser(token)
-    if (userError || !userData.user) return jsonError('Sesión no válida', 401)
+    const autenticacion = await autenticarAdmin(request)
+    if ('respuesta' in autenticacion) return autenticacion.respuesta
+    const { supabase } = autenticacion
 
-    const { data: perfil, error: perfilError } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', userData.user.id)
-      .single()
+    if (datosDelete) {
+      const { data: lecciones, error: leccionesError } = await supabase
+        .from('lecciones')
+        .select('id')
+        .ilike('contenido', `%${datosDelete.clave}%`)
 
-    if (perfilError || perfil?.role !== 'admin') {
-      return jsonError('Solo un admin puede subir imágenes', 403)
+      if (leccionesError || !lecciones) {
+        return jsonError('No se pudo comprobar si la imagen sigue en uso', 500)
+      }
+
+      const usadaEnOtraLeccion = lecciones.some(
+        ({ id }) => id !== datosDelete.leccionId,
+      )
+      if (usadaEnOtraLeccion) {
+        return new Response(JSON.stringify({ borradoDeR2: false }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        })
+      }
+
+      const accountId = process.env.R2_ACCOUNT_ID
+      const accessKeyId = process.env.R2_ACCESS_KEY_ID
+      const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY
+      const bucketName = process.env.R2_BUCKET_NAME
+      if (!accountId || !accessKeyId || !secretAccessKey || !bucketName) {
+        return jsonError('Configuración de R2 ausente', 500)
+      }
+
+      const s3 = new S3Client({
+        region: 'auto',
+        endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
+        credentials: { accessKeyId, secretAccessKey },
+      })
+      await s3.send(
+        new DeleteObjectCommand({ Bucket: bucketName, Key: datosDelete.clave }),
+      )
+
+      return new Response(JSON.stringify({ borradoDeR2: true }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      })
     }
 
     const contentType = request.headers.get('content-type') ?? ''

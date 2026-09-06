@@ -4,7 +4,11 @@ const mockGetUser = vi.fn()
 const mockSingle = vi.fn()
 const mockEq = vi.fn(() => ({ single: mockSingle }))
 const mockSelect = vi.fn(() => ({ eq: mockEq }))
-const mockFrom = vi.fn(() => ({ select: mockSelect }))
+const mockIlike = vi.fn()
+const mockLeccionesSelect = vi.fn(() => ({ ilike: mockIlike }))
+const mockFrom = vi.fn((tabla: string) =>
+  tabla === 'lecciones' ? { select: mockLeccionesSelect } : { select: mockSelect },
+)
 
 vi.mock('@supabase/supabase-js', () => ({
   createClient: vi.fn(() => ({
@@ -14,10 +18,15 @@ vi.mock('@supabase/supabase-js', () => ({
 }))
 
 const mockSend = vi.fn()
+const mockDeleteObjectCommand = vi.fn((input: unknown) => ({
+  __tipo: 'DeleteObjectCommand',
+  input,
+}))
 vi.mock('@aws-sdk/client-s3', () => ({
   S3Client: vi.fn(() => ({ send: mockSend })),
   PutObjectCommand: vi.fn((input: unknown) => ({ __tipo: 'PutObjectCommand', input })),
   GetObjectCommand: vi.fn((input: unknown) => ({ __tipo: 'GetObjectCommand', input })),
+  DeleteObjectCommand: mockDeleteObjectCommand,
 }))
 
 const { default: handler } = await import('./imagenes')
@@ -30,6 +39,17 @@ function crearPeticion(
     method: 'POST',
     headers: { 'content-type': 'image/png', ...headers },
     body: bytes,
+  })
+}
+
+function crearPeticionDelete(
+  body: unknown,
+  headers: Record<string, string> = {},
+) {
+  return new Request('https://techstudytracker.com/api/imagenes', {
+    method: 'DELETE',
+    headers: { 'content-type': 'application/json', ...headers },
+    body: JSON.stringify(body),
   })
 }
 
@@ -175,5 +195,151 @@ describe('POST /api/imagenes', () => {
       /^https:\/\/www.techstudytracker\.com\/img\/[0-9a-f]{64}\.png$/,
     )
     expect(mockSend).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('DELETE /api/imagenes', () => {
+  const CLAVE = `${'a'.repeat(64)}.png`
+
+  function autenticarComoAdmin() {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'admin-1' } }, error: null })
+    mockSingle.mockResolvedValue({ data: { role: 'admin' }, error: null })
+  }
+
+  it('rechaza sin cabecera Authorization', async () => {
+    const respuesta = await handler.fetch(crearPeticionDelete({ clave: CLAVE }))
+
+    expect(respuesta.status).toBe(401)
+  })
+
+  it('rechaza un usuario autenticado que no es admin', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } }, error: null })
+    mockSingle.mockResolvedValue({ data: { role: 'user' }, error: null })
+
+    const respuesta = await handler.fetch(
+      crearPeticionDelete(
+        { clave: CLAVE },
+        { authorization: 'Bearer token-user' },
+      ),
+    )
+
+    expect(respuesta.status).toBe(403)
+  })
+
+  it.each(['../imagen.png', 'imagen.png'])(
+    'rechaza la clave mal formada %s sin consultar Supabase ni R2',
+    async (clave) => {
+      const respuesta = await handler.fetch(
+        crearPeticionDelete(
+          { clave },
+          { authorization: 'Bearer token-admin' },
+        ),
+      )
+
+      expect(respuesta.status).toBe(400)
+      expect(mockGetUser).not.toHaveBeenCalled()
+      expect(mockFrom).not.toHaveBeenCalled()
+      expect(mockDeleteObjectCommand).not.toHaveBeenCalled()
+      expect(mockSend).not.toHaveBeenCalled()
+    },
+  )
+
+  it('no borra de R2 cuando otra lección usa la misma clave', async () => {
+    autenticarComoAdmin()
+    mockIlike.mockResolvedValue({ data: [{ id: 'leccion-otra' }], error: null })
+
+    const respuesta = await handler.fetch(
+      crearPeticionDelete(
+        { clave: CLAVE, leccionId: 'leccion-actual' },
+        { authorization: 'Bearer token-admin' },
+      ),
+    )
+
+    expect(respuesta.status).toBe(200)
+    await expect(respuesta.json()).resolves.toEqual({ borradoDeR2: false })
+    expect(mockIlike).toHaveBeenCalledWith('contenido', `%${CLAVE}%`)
+    expect(mockDeleteObjectCommand).not.toHaveBeenCalled()
+    expect(mockSend).not.toHaveBeenCalled()
+  })
+
+  it('excluye la lección actual y borra de R2 si era la única que usaba la clave', async () => {
+    autenticarComoAdmin()
+    mockIlike.mockResolvedValue({ data: [{ id: 'leccion-actual' }], error: null })
+    mockSend.mockResolvedValue({})
+
+    const respuesta = await handler.fetch(
+      crearPeticionDelete(
+        { clave: CLAVE, leccionId: 'leccion-actual' },
+        { authorization: 'Bearer token-admin' },
+      ),
+    )
+
+    expect(respuesta.status).toBe(200)
+    await expect(respuesta.json()).resolves.toEqual({ borradoDeR2: true })
+    expect(mockDeleteObjectCommand).toHaveBeenCalledWith({
+      Bucket: 'techstudytracker-imagenes',
+      Key: CLAVE,
+    })
+    expect(mockSend).toHaveBeenCalledWith(
+      expect.objectContaining({ __tipo: 'DeleteObjectCommand' }),
+    )
+  })
+
+  it('borra de R2 cuando ninguna lección usa la clave', async () => {
+    autenticarComoAdmin()
+    mockIlike.mockResolvedValue({ data: [], error: null })
+    mockSend.mockResolvedValue({})
+
+    const respuesta = await handler.fetch(
+      crearPeticionDelete(
+        { clave: CLAVE },
+        { authorization: 'Bearer token-admin' },
+      ),
+    )
+
+    expect(respuesta.status).toBe(200)
+    await expect(respuesta.json()).resolves.toEqual({ borradoDeR2: true })
+    expect(mockDeleteObjectCommand).toHaveBeenCalledWith({
+      Bucket: 'techstudytracker-imagenes',
+      Key: CLAVE,
+    })
+    expect(mockSend).toHaveBeenCalledWith(
+      expect.objectContaining({ __tipo: 'DeleteObjectCommand' }),
+    )
+  })
+
+  it('no borra de R2 si Supabase falla al consultar las lecciones', async () => {
+    autenticarComoAdmin()
+    mockIlike.mockResolvedValue({ data: null, error: new Error('consulta fallida') })
+
+    const respuesta = await handler.fetch(
+      crearPeticionDelete(
+        { clave: CLAVE },
+        { authorization: 'Bearer token-admin' },
+      ),
+    )
+
+    expect(respuesta.status).toBe(500)
+    await expect(respuesta.json()).resolves.toEqual({
+      error: 'No se pudo comprobar si la imagen sigue en uso',
+    })
+    expect(mockDeleteObjectCommand).not.toHaveBeenCalled()
+    expect(mockSend).not.toHaveBeenCalled()
+  })
+
+  it('no borra de R2 si Supabase no devuelve un resultado concluyente', async () => {
+    autenticarComoAdmin()
+    mockIlike.mockResolvedValue({ data: null, error: null })
+
+    const respuesta = await handler.fetch(
+      crearPeticionDelete(
+        { clave: CLAVE },
+        { authorization: 'Bearer token-admin' },
+      ),
+    )
+
+    expect(respuesta.status).toBe(500)
+    expect(mockDeleteObjectCommand).not.toHaveBeenCalled()
+    expect(mockSend).not.toHaveBeenCalled()
   })
 })
