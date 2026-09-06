@@ -14,6 +14,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { supabase } from '@/lib/supabaseClient'
+import {
+  extraerImagenesDeLaboratorio,
+  type BloqueImagenEncontrado,
+} from '@/lib/utils/extraerImagenesDeLaboratorio'
 import type { Leccion } from '@/types'
 
 const leccionSchema = z.object({
@@ -80,11 +84,13 @@ export function LeccionForm({
   pending: boolean
   onSubmit: (values: LeccionFormValues) => Promise<void>
 }) {
-  const { register, handleSubmit, setError, reset, control, formState, setValue } =
+  const { register, handleSubmit, setError, reset, control, formState, getValues, setValue } =
     useForm<LeccionFields>({ defaultValues: defaults(leccion) })
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
   const [subiendoImagen, setSubiendoImagen] = useState(false)
   const [errorImagen, setErrorImagen] = useState('')
+  const [mensajeImagen, setMensajeImagen] = useState('')
+  const [imagenBorrandose, setImagenBorrandose] = useState('')
 
   const subirImagenEnCursor = useCallback(
     async (archivo: File) => {
@@ -175,7 +181,12 @@ export function LeccionForm({
   const { ref: contenidoRef, ...contenidoRegister } = register('contenido')
   const [submitError, setSubmitError] = useState('')
   const title = useWatch({ control, name: 'titulo' })
+  const contenidoActual = useWatch({ control, name: 'contenido' })
   const slug = useMemo(() => leccion?.slug ?? slugify(title), [leccion?.slug, title])
+  const imagenes = useMemo(
+    () => extraerImagenesDeLaboratorio(contenidoActual ?? ''),
+    [contenidoActual],
+  )
 
   useEffect(() => {
     reset(defaults(leccion))
@@ -190,6 +201,49 @@ export function LeccionForm({
     window.addEventListener('beforeunload', warnBeforeUnload)
     return () => window.removeEventListener('beforeunload', warnBeforeUnload)
   }, [formState.isDirty])
+
+  async function borrarImagen(imagen: BloqueImagenEncontrado) {
+    if (!window.confirm(`¿Borrar la imagen "${imagen.datos.alt}"? Esta acción no se puede deshacer.`)) {
+      return
+    }
+
+    setErrorImagen('')
+    setMensajeImagen('')
+    setImagenBorrandose(imagen.bloqueCompleto)
+
+    try {
+      const clave = imagen.datos.src.slice(imagen.datos.src.lastIndexOf('/') + 1)
+      const { data: sesion } = await supabase.auth.getSession()
+      const token = sesion.session?.access_token
+      if (!token) throw new Error('No hay sesión activa.')
+
+      const respuesta = await fetch('/api/imagenes', {
+        method: 'DELETE',
+        headers: {
+          'content-type': 'application/json',
+          authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ clave, leccionId: leccion?.id }),
+      })
+      if (!respuesta.ok) {
+        throw new Error(`La función devolvió ${respuesta.status}`)
+      }
+
+      const { borradoDeR2 } = (await respuesta.json()) as { borradoDeR2: boolean }
+      const nuevoValor = getValues('contenido').replace(imagen.bloqueCompleto, '')
+      setValue('contenido', nuevoValor, { shouldDirty: true })
+
+      if (!borradoDeR2) {
+        setMensajeImagen(
+          'Imagen quitada de esta lección — sigue en uso en otra, así que no se ha borrado del almacenamiento.',
+        )
+      }
+    } catch (error) {
+      setErrorImagen(error instanceof Error ? error.message : 'No se pudo borrar la imagen.')
+    } finally {
+      setImagenBorrandose('')
+    }
+  }
 
   async function submit(values: LeccionFields) {
     const result = leccionSchema.safeParse(values)
@@ -395,6 +449,48 @@ export function LeccionForm({
         <p id="leccion-contenido-imagen-ayuda" className="text-xs text-muted-foreground">
           Arrastra o pega una imagen aquí para subirla e insertar el bloque automáticamente.
         </p>
+        {imagenes.length > 0 && (
+          <section
+            aria-labelledby="leccion-imagenes-titulo"
+            className="space-y-3 rounded-lg border bg-muted/30 p-4"
+          >
+            <h3 id="leccion-imagenes-titulo" className="text-sm font-medium">
+              Imágenes en esta lección
+            </h3>
+            <ul className="grid gap-3 sm:grid-cols-2">
+              {imagenes.map((imagen) => (
+                <li
+                  key={imagen.bloqueCompleto}
+                  className="flex min-w-0 items-center gap-3 rounded-lg border bg-background p-3"
+                >
+                  <img
+                    src={imagen.datos.src}
+                    alt={imagen.datos.alt}
+                    width={64}
+                    height={64}
+                    loading="lazy"
+                    className="h-16 w-16 shrink-0 rounded object-cover"
+                  />
+                  <p className="min-w-0 flex-1 break-words text-sm">{imagen.datos.alt}</p>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    disabled={Boolean(imagenBorrandose)}
+                    onClick={() => void borrarImagen(imagen)}
+                  >
+                    {imagenBorrandose === imagen.bloqueCompleto ? 'Borrando…' : 'Borrar'}
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+        {mensajeImagen && (
+          <p role="status" className="text-sm text-muted-foreground">
+            {mensajeImagen}
+          </p>
+        )}
         <p id="leccion-contenido-error" className="text-sm text-destructive">
           {formState.errors.contenido?.message}
         </p>
