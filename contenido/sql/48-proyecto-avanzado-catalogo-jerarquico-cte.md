@@ -21,6 +21,34 @@ Un catálogo de productos organizado en un árbol de categorías sin límite de 
 }
 ```
 
+## Antes de empezar
+
+### La primera vez que sales del navegador en este temario
+
+Hasta ahora todo este curso se ha podido hacer en el editor SQL
+embebido de la propia lección. Este proyecto es distinto: es una
+aplicación real, en TypeScript, que corre en tu ordenador. Necesitas:
+
+- **Node.js.** Descarga la versión **LTS** desde [nodejs.org](https://nodejs.org)
+  e instálala como cualquier otro programa. Comprueba tu versión con
+  `node --version` en una terminal (pide la 20 o superior).
+- **Un editor de código.** [Visual Studio Code](https://code.visualstudio.com)
+  (gratis) es el más usado, y trae su propia terminal integrada
+  (menú `Terminal` → `New Terminal`).
+- **El código de este proyecto**, de una de estas dos formas:
+  - **Con git**: `git clone https://github.com/pedroleni/sql-proyectos.git`
+  - **Sin git**: entra en [github.com/pedroleni/sql-proyectos](https://github.com/pedroleni/sql-proyectos),
+    botón verde **Code** → **Download ZIP**, y descomprímelo donde
+    quieras.
+
+No hace falta instalar ningún motor de base de datos aparte: usa
+`better-sqlite3`, que guarda todo en un fichero local — `npm install`
+lo descarga como cualquier otra dependencia.
+
+Luego `cd sql-proyectos/catalogo-jerarquico-cte` y `npm install` — cada
+carpeta de este repositorio es un proyecto independiente con su propio
+`package.json`.
+
 ## El punto de partida: una CTE sin la parte recursiva
 
 ```laboratorio

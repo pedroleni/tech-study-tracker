@@ -21,6 +21,35 @@ Un sistema de tracking de eventos de producto (piensa en analítica tipo Mixpane
 }
 ```
 
+## Antes de empezar
+
+### La primera vez que sales del navegador en este temario — y la primera vez con Docker
+
+Hasta ahora todo este curso se ha podido hacer en el editor de Postgres
+embebido de la propia lección. Este proyecto es distinto: corre contra
+un Postgres real en tu ordenador, dentro de un contenedor. Necesitas:
+
+- **Node.js.** Descarga la versión **LTS** desde [nodejs.org](https://nodejs.org)
+  e instálala como cualquier otro programa. Comprueba tu versión con
+  `node --version` en una terminal (pide la 20 o superior).
+- **Docker Desktop.** Descárgalo desde [docker.com](https://www.docker.com/products/docker-desktop/)
+  e instálalo — trae Docker Compose incluido, que es lo que este
+  proyecto usa para levantar Postgres con un solo comando. No hace
+  falta instalar Postgres por separado: vive dentro del contenedor.
+- **Un editor de código.** [Visual Studio Code](https://code.visualstudio.com)
+  (gratis) es el más usado, y trae su propia terminal integrada
+  (menú `Terminal` → `New Terminal`).
+- **El código de este proyecto**, de una de estas dos formas:
+  - **Con git**: `git clone https://github.com/pedroleni/postgresql-proyectos.git`
+  - **Sin git**: entra en [github.com/pedroleni/postgresql-proyectos](https://github.com/pedroleni/postgresql-proyectos),
+    botón verde **Code** → **Download ZIP**, y descomprímelo donde
+    quieras.
+
+Luego, desde `postgresql-proyectos/analitica-eventos-jsonb`:
+`docker compose up -d` para levantar Postgres y `npm install` para las
+dependencias — cada carpeta de este repositorio es un proyecto
+independiente con su propio `package.json`.
+
 ## El punto de partida: dos consultas que nunca encuentran nada
 
 ```laboratorio

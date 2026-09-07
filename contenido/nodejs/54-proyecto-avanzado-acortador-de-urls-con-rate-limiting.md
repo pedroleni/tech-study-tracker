@@ -27,6 +27,27 @@ en memoria.
 }
 ```
 
+## Antes de empezar
+
+### Lo nuevo aquí no es Node.js — es conseguir el código de este proyecto en concreto
+
+- **Node.js.** Si has llegado hasta aquí en este temario ya lo tienes
+  instalado — comprueba tu versión con `node --version` en una
+  terminal. Este proyecto pide la **22.5.0 o superior**, por el mismo
+  motivo que el proyecto anterior: usa `node:sqlite`.
+- **Un editor de código**, si todavía no usas uno. [Visual Studio Code](https://code.visualstudio.com)
+  (gratis) es el más usado, y trae su propia terminal integrada
+  (menú `Terminal` → `New Terminal`).
+- **El código de este proyecto**, de una de estas dos formas:
+  - **Con git**: `git clone https://github.com/pedroleni/nodejs-proyectos.git`
+  - **Sin git**: entra en [github.com/pedroleni/nodejs-proyectos](https://github.com/pedroleni/nodejs-proyectos),
+    botón verde **Code** → **Download ZIP**, y descomprímelo donde
+    quieras.
+
+Luego `cd nodejs-proyectos/acortador-rate-limit` y `npm install` — cada
+carpeta de este repositorio es un proyecto independiente con su propio
+`package.json`.
+
 ## El problema real: un contador simple no es lo mismo que un token bucket
 
 ```laboratorio

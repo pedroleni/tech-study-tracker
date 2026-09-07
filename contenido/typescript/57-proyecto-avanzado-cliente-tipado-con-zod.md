@@ -25,6 +25,27 @@ de verdad, dato a dato, en tiempo de ejecución.
 }
 ```
 
+## Antes de empezar
+
+### Si ya hiciste los proyectos 76/77 de JavaScript, esto ya lo tienes — si no, repásalo
+
+- **Node.js.** Descarga la versión **LTS** desde [nodejs.org](https://nodejs.org)
+  e instálala como cualquier otro programa. Comprueba tu versión con
+  `node --version` en una terminal.
+- **Un editor de código.** [Visual Studio Code](https://code.visualstudio.com)
+  (gratis) es el más usado, y trae su propia terminal integrada
+  (menú `Terminal` → `New Terminal`).
+- **El código de este proyecto en concreto**, de una de estas dos formas:
+  - **Con git**: `git clone https://github.com/pedroleni/typescript-proyectos.git`
+  - **Sin git**: entra en [github.com/pedroleni/typescript-proyectos](https://github.com/pedroleni/typescript-proyectos),
+    botón verde **Code** → **Download ZIP**, y descomprímelo donde
+    quieras.
+
+No hace falta instalar TypeScript por separado — `tsc` llega como
+dependencia del propio proyecto al ejecutar `npm install`.
+
+Luego `cd typescript-proyectos/cliente-zod` y `npm install`.
+
 ## El problema real: `as T` es una promesa, no una comprobación
 
 ```laboratorio

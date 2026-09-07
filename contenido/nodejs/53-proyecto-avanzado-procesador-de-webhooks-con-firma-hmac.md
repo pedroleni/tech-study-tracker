@@ -27,6 +27,27 @@ verdad transitorio.
 }
 ```
 
+## Antes de empezar
+
+### Lo nuevo aquí no es Node.js — es conseguir el código de este proyecto en concreto
+
+- **Node.js.** Si has llegado hasta aquí en este temario ya lo tienes
+  instalado — comprueba tu versión con `node --version` en una
+  terminal. Este proyecto pide la **20 o superior**: usa `node:test` y
+  `fetch` global.
+- **Un editor de código**, si todavía no usas uno. [Visual Studio Code](https://code.visualstudio.com)
+  (gratis) es el más usado, y trae su propia terminal integrada
+  (menú `Terminal` → `New Terminal`).
+- **El código de este proyecto**, de una de estas dos formas:
+  - **Con git**: `git clone https://github.com/pedroleni/nodejs-proyectos.git`
+  - **Sin git**: entra en [github.com/pedroleni/nodejs-proyectos](https://github.com/pedroleni/nodejs-proyectos),
+    botón verde **Code** → **Download ZIP**, y descomprímelo donde
+    quieras.
+
+Luego `cd nodejs-proyectos/procesador-webhooks` y `npm install` — cada
+carpeta de este repositorio es un proyecto independiente con su propio
+`package.json`.
+
 ## El problema real: ¿cómo sabe el receptor que el webhook es legítimo?
 
 ```laboratorio
