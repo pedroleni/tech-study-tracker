@@ -4,12 +4,16 @@ import { Link } from 'react-router-dom'
 
 import { TechnologyBrand } from '@/components/technology/TechnologyCard'
 import { Card } from '@/components/ui/card'
+import { Pagination } from '@/components/ui/pagination'
 import { useProyectos } from '@/lib/hooks/useLecciones'
 import { cn } from '@/lib/utils'
+
+const PROYECTOS_POR_PAGINA = 9
 
 export function ProyectosPage() {
   const proyectosQuery = useProyectos()
   const [technologyId, setTechnologyId] = useState<string | null>(null)
+  const [pagina, setPagina] = useState(1)
   const proyectos = (proyectosQuery.data ?? []).filter(
     (proyecto) =>
       proyecto.esProyecto &&
@@ -22,6 +26,22 @@ export function ProyectosPage() {
   const proyectosVisibles = technologyId
     ? proyectos.filter((proyecto) => proyecto.technology.id === technologyId)
     : proyectos
+  const totalPaginas = Math.ceil(proyectosVisibles.length / PROYECTOS_POR_PAGINA)
+  const proyectosDeEstaPagina = proyectosVisibles.slice(
+    (pagina - 1) * PROYECTOS_POR_PAGINA,
+    pagina * PROYECTOS_POR_PAGINA,
+  )
+
+  // Ajuste de estado durante el render (patrón recomendado por React para
+  // "resetear estado cuando cambia otro valor"), no un useEffect — evita un
+  // ciclo de render de más: React ve el cambio de estado antes de pintar y
+  // vuelve a renderizar en el mismo turno, en vez de pintar con la página
+  // vieja y corregirla un instante después en un efecto separado.
+  const [technologyIdAlPaginar, setTechnologyIdAlPaginar] = useState(technologyId)
+  if (technologyId !== technologyIdAlPaginar) {
+    setTechnologyIdAlPaginar(technologyId)
+    setPagina(1)
+  }
 
   if (proyectosQuery.isLoading) return <p role="status">Cargando proyectos…</p>
   if (proyectosQuery.isError) {
@@ -100,8 +120,9 @@ export function ProyectosPage() {
           </p>
         </Card>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {proyectosVisibles.map((proyecto) => (
+        <>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {proyectosDeEstaPagina.map((proyecto) => (
             <TechnologyBrand key={proyecto.id} iconKey={proyecto.technology.icon}>
               {(brand) => (
                 <Card className="group flex h-full min-w-0 flex-col gap-0 overflow-hidden p-0 transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-md motion-reduce:transition-none motion-reduce:hover:translate-y-0">
@@ -158,7 +179,13 @@ export function ProyectosPage() {
               )}
             </TechnologyBrand>
           ))}
-        </div>
+          </div>
+          <Pagination
+            paginaActual={pagina}
+            totalPaginas={totalPaginas}
+            onCambiarPagina={setPagina}
+          />
+        </>
       )}
     </div>
   )
