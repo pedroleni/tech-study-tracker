@@ -51,6 +51,27 @@ En el proyecto anterior serviste los archivos con `python3 -m http.server` — s
 
 ## Antes de empezar
 
+### Si es la primera vez que sales del navegador en este curso
+
+- **Node.js.** Vite necesita **20.19 o superior** (o 22.12+). Descarga
+  la versión **LTS** desde [nodejs.org](https://nodejs.org) e
+  instálala como cualquier otro programa. Comprueba tu versión con
+  `node --version` en una terminal.
+- **Un editor de código.** [Visual Studio Code](https://code.visualstudio.com)
+  (gratis) es el más usado, y trae su propia terminal integrada
+  (menú `Terminal` → `New Terminal`), así que no hace falta buscar la
+  terminal del sistema operativo por separado.
+- **El código del proyecto**, de una de estas dos formas:
+  - **Con git** (si ya lo tienes instalado):
+    `git clone https://github.com/pedroleni/javascript-proyectos.git`
+  - **Sin git**: entra en [github.com/pedroleni/javascript-proyectos](https://github.com/pedroleni/javascript-proyectos),
+    botón verde **Code** → **Download ZIP**, y descomprímelo donde
+    quieras.
+
+Abre la carpeta en VS Code (`Archivo` → `Abrir carpeta...`), abre su
+terminal integrada, y entra en `explorador-personajes/` antes de
+seguir con lo de abajo.
+
 ```laboratorio
 {
   "tipo": "callout",

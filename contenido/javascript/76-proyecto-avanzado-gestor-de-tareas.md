@@ -21,6 +21,27 @@ El mismo gestor de tareas que ya construiste en el proyecto sencillo — pero he
 }
 ```
 
+### Si es la primera vez que sales del navegador en este curso
+
+- **Node.js.** Hace falta para `npx` (lo usas más abajo). Descarga la
+  versión **LTS** desde [nodejs.org](https://nodejs.org) e instálala
+  como cualquier otro programa. Para comprobar que quedó bien
+  instalada, abre una terminal y escribe `node --version` — debería
+  imprimir algo como `v22.x.x`.
+- **Un editor de código.** [Visual Studio Code](https://code.visualstudio.com)
+  (gratis) es el más usado, y trae su propia terminal integrada
+  (menú `Terminal` → `New Terminal`), así que no hace falta buscar la
+  terminal del sistema operativo por separado.
+- **El código del proyecto**, de una de estas dos formas:
+  - **Con git** (si ya lo tienes instalado):
+    `git clone https://github.com/pedroleni/javascript-proyectos.git`
+  - **Sin git**: entra en [github.com/pedroleni/javascript-proyectos](https://github.com/pedroleni/javascript-proyectos),
+    botón verde **Code** → **Download ZIP**, y descomprímelo donde
+    quieras.
+
+Con eso ya puedes abrir la carpeta en VS Code (`Archivo` → `Abrir
+carpeta...`) y seguir con lo de abajo.
+
 ```laboratorio
 {
   "tipo": "callout",
