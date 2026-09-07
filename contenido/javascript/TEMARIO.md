@@ -498,8 +498,41 @@ sostenida en las tres pasadas.
   `cargando` sea `true`) y la propia historia de cómo se diagnosticó se
   convirtieron en la sección más valiosa de la lección — un bug
   encontrado de verdad vale más que uno inventado para la ocasión.
-- **Proyecto avanzado 3: buscador con TypeScript (78, 2026-08-30)**:
-  tercer escalón de la serie de proyectos avanzados, tras un simple
+- **Proyecto avanzado 3: recetario con router propio (78, 2026-09-08)**:
+  pedido explícito de una serie más larga de proyectos avanzados que
+  además prepare el terreno para entender frameworks — routing propio
+  con la History API (páginas reales: inicio/listado/detalle/categoría,
+  sin recargar el documento), `pages/` + `components/` como carpetas
+  nuevas junto a las capas ya conocidas del `76`/`77`. Reusa
+  `fetchConReintento` y el patrón estado→render tal cual, y usa la API
+  gratuita y sin clave de TheMealDB (verificada con `curl`, CORS
+  abierto) — a diferencia del `77`, sin necesitar `.env`. La imagen de
+  portada la generó Codex con su herramienta nativa `image_gen`
+  (fotografía de un plato casero, sin marca de agua). Repositorio:
+  [github.com/pedroleni/javascript-proyectos/recetario](https://github.com/pedroleni/javascript-proyectos/tree/main/recetario).
+  Bug real encontrado construyendo la solución: navegar rápido entre
+  páginas (buscar y cambiar de categoría antes de que respondiera la
+  búsqueda) podía dejar visible el error de una petición vieja sobre
+  una página nueva — arreglado con un contador de petición por acción
+  más un origen etiquetado en el estado, mismo patrón que usa por
+  dentro React Query. De paso, al escribir el README se encontró y
+  arregló un bug real preexistente: el README de `explorador-personajes`
+  (en sus dos ramas) enlazaba a `gestor-de-tareas-js` y
+  `explorador-personajes` como repos aparte — ambos dan 404 de verdad
+  desde la consolidación en un único monorepo, incluido un `git clone`
+  literal que habría fallado para cualquiera que lo siguiera.
+  Aprovechando esta serie, también se detectó y corrigió un hueco real
+  en las lecciones `76` y `77`: ninguna explicaba instalar Node.js, un
+  editor de código, ni cómo conseguir el código sin `git` — se añadió
+  una sección compartida "Si es la primera vez que sales del navegador
+  en este curso" a ambas.
+- **Proyecto avanzado (histórico) — buscador con TypeScript**: ocupó
+  este mismo número de fichero (`78`) hasta el 2026-08-30, cuando se
+  trasladó a `contenido/typescript/55-...md` por pertenecer de verdad
+  al temario de TypeScript (ver nota más abajo). El número quedó libre
+  y lo reutiliza el recetario de arriba — no hay colisión de ficheros,
+  solo de numeración histórica dentro de esta nota.
+  Tercer escalón de la serie de proyectos avanzados, tras un simple
   "sigue" del usuario. Deliberadamente el más pequeño en funcionalidad
   (solo búsqueda, sin pestañas ni paginación) porque la complejidad
   nueva está en los tipos, no en la interfaz: `EstadoBusqueda` como
