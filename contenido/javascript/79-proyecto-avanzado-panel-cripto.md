@@ -98,8 +98,8 @@ descomprimir — `router.js` y las capas ya completos, y
    dashboard. No la cierres mientras trabajas (para pararlo, `Ctrl+C`
    dentro de ella).
 7. **El ciclo de trabajo**: abre `tarjetaMoneda.js` o `dashboard.js`,
-   busca el `TODO`, escribe la implementación, guarda con `Cmd`/`Ctrl`
-   + `S`, y vuelve al navegador — el cambio aparece solo.
+   busca el `TODO`, escribe la implementación, guarda con
+   `Cmd`/`Ctrl` + `S`, y vuelve al navegador — el cambio aparece solo.
 
 ## Arquitectura: el router y las capas ya las conoces
 

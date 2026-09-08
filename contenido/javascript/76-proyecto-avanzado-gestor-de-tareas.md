@@ -76,9 +76,9 @@ dentro — tu trabajo es abrirlos y completarlos, no crearlos.
    botón hace nada) sin ningún error visible salvo en la consola. Si
    al abrir el proyecto parece "bloqueado", es casi siempre esto.
 5. **Abre la URL que imprime la terminal** en el navegador (algo como
-   `http://localhost:3000`) — no la adivines, cópiala de ahí; Cmd/Ctrl
-   + clic sobre ella en la propia terminal suele abrirla directamente.
-   No cierres esa terminal mientras trabajas — el comando sigue
+   `http://localhost:3000`) — no la adivines, cópiala de ahí; haz clic
+   sobre ella con Cmd (Mac) o Ctrl (Windows/Linux) pulsado y suele
+   abrirse directamente. No cierres esa terminal mientras trabajas — el comando sigue
    corriendo ahí (para pararlo, `Ctrl+C` dentro de ella).
 6. **El ciclo de trabajo**: abre uno de los cuatro archivos de `src/`,
    busca el `TODO`, escribe la implementación ahí, guarda con
