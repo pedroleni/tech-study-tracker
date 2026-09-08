@@ -72,14 +72,34 @@ Esto es, en miniatura, el problema que resuelve el `useEffect` con función de l
     botón verde **Code** → **Download ZIP**, y descomprímelo donde
     quieras.
 
-Entra en `panel-cripto/` y ejecuta `npm install` seguido de `npm run dev`
-— tampoco hay aquí ningún paso de `.env`: CoinGecko no pide ninguna clave
-para las consultas que usa este proyecto.
+### Del cero al proyecto abierto en el navegador, paso a paso
 
-`npm run dev` imprime en la terminal la URL del servidor de desarrollo
-(normalmente `http://localhost:5173`, o el siguiente puerto libre si
-tienes otro proyecto Vite corriendo a la vez) — ábrela en el navegador
-para ver el dashboard.
+No hace falta crear ningún archivo nuevo: todos los archivos de
+`src/` **ya existen** dentro de lo que acabas de clonar o
+descomprimir — `router.js` y las capas ya completos, y
+`tarjetaMoneda.js`/`dashboard.js` con los `TODO` de este proyecto.
+
+1. **Abre la carpeta del proyecto en VS Code**: menú `Archivo` →
+   `Abrir carpeta...`, y elige la carpeta `panel-cripto/` de dentro de
+   lo que clonaste (la de este proyecto en concreto, no la del
+   repositorio `javascript-proyectos` entero).
+2. **Mira el explorador de archivos**, en la barra lateral izquierda:
+   verás `src/components/tarjetaMoneda.js` y `src/pages/dashboard.js`
+   entre otros — ábrelos con un clic, no crees ninguno.
+3. **Abre la terminal integrada**: menú `Terminal` → `New Terminal`
+   (o el atajo `` Ctrl+` ``, igual en Windows, Linux y Mac).
+4. **Instala las dependencias**: escribe `npm install` y pulsa Intro.
+5. **Arranca el servidor de desarrollo**: escribe `npm run dev` y
+   pulsa Intro — tampoco hay aquí ningún paso de `.env`: CoinGecko no
+   pide ninguna clave para las consultas que usa este proyecto.
+6. **Abre la URL que imprime la terminal** en el navegador
+   (normalmente `http://localhost:5173`, o el siguiente puerto libre
+   si tienes otro proyecto Vite corriendo a la vez) para ver el
+   dashboard. No la cierres mientras trabajas (para pararlo, `Ctrl+C`
+   dentro de ella).
+7. **El ciclo de trabajo**: abre `tarjetaMoneda.js` o `dashboard.js`,
+   busca el `TODO`, escribe la implementación, guarda con `Cmd`/`Ctrl`
+   + `S`, y vuelve al navegador — el cambio aparece solo.
 
 ## Arquitectura: el router y las capas ya las conoces
 

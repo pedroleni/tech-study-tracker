@@ -52,10 +52,33 @@ No hace falta instalar TypeScript por separado — `tsc` llega como
 dependencia del propio proyecto al ejecutar `npm install`, igual que
 Vite en los proyectos anteriores.
 
-`npm run dev` imprime en la terminal la URL del servidor de desarrollo
-(normalmente `http://localhost:5173`) — ábrela en el navegador para ver
-el buscador. `npm run typecheck` no abre nada: solo comprueba los tipos
-en la propia terminal, sin generar ni servir nada.
+### Del cero al proyecto abierto en el navegador, paso a paso
+
+No hace falta crear ningún archivo nuevo: los seis archivos de `src/`
+**ya existen** dentro de lo que acabas de clonar o descomprimir —
+`tipos.ts` completo (es el diseño del proyecto), el resto con `TODO`.
+
+1. **Abre la carpeta del proyecto en VS Code**: menú `Archivo` →
+   `Abrir carpeta...`, y elige la carpeta `buscador-personajes/` de
+   dentro de lo que clonaste (nota: es el repositorio
+   `typescript-proyectos`, distinto al de los proyectos anteriores).
+2. **Mira el explorador de archivos**, en la barra lateral izquierda:
+   verás `tipos.ts`, `api.ts`, `estado.ts`, `vista.ts` y `main.ts`
+   dentro de `src/`. Ábrelos con un clic — no crees ninguno.
+3. **Abre la terminal integrada**: menú `Terminal` → `New Terminal`
+   (o el atajo `` Ctrl+` ``, igual en Windows, Linux y Mac).
+4. **Instala las dependencias**: escribe `npm install` y pulsa Intro.
+5. **Arranca el servidor de desarrollo**: escribe `npm run dev` y
+   pulsa Intro.
+6. **Abre la URL que imprime la terminal** en el navegador
+   (normalmente `http://localhost:5173`) para ver el buscador. No la
+   cierres mientras trabajas (para pararlo, `Ctrl+C` dentro de ella).
+7. **El ciclo de trabajo**: abre un archivo con `TODO`, escribe la
+   implementación, guarda con `Cmd`/`Ctrl` + `S`, y vuelve al
+   navegador — el cambio aparece solo. Para comprobar los TIPOS (no
+   solo que la app funcione), abre una SEGUNDA terminal (icono `+` en
+   el panel de terminal) y ejecuta `npm run typecheck` ahí — no abre
+   nada, solo comprueba los tipos en la propia terminal.
 
 ## El problema real que resuelve TypeScript aquí
 

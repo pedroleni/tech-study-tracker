@@ -77,24 +77,43 @@ En el proyecto anterior serviste los archivos con `python3 -m http.server` — s
     botón verde **Code** → **Download ZIP**, y descomprímelo donde
     quieras.
 
-Abre la carpeta en VS Code (`Archivo` → `Abrir carpeta...`), abre su
-terminal integrada, y entra en `explorador-personajes/` antes de
-seguir con lo de abajo.
+### Del cero al proyecto abierto en el navegador, paso a paso
 
-```laboratorio
-{
-  "tipo": "callout",
-  "variante": "aviso",
-  "titulo": "El .env no se sube al repositorio",
-  "contenido": "Clona javascript-proyectos, entra en explorador-personajes/, ejecuta npm install, y copia .env.example a .env (cp .env.example .env) antes de npm run dev. El propio repositorio no lleva un .env real — solo la plantilla — exactamente igual que en tech-study-tracker."
-}
-```
+Si nunca has trabajado así, este es el camino completo. No hace falta
+crear ningún archivo nuevo: todos los archivos de `src/` **ya
+existen** dentro de lo que acabas de clonar o descomprimir, cada uno
+con TODOs marcando qué falta escribir — tu trabajo es completarlos, no
+crearlos.
 
-`npm run dev` deja el servidor de desarrollo escuchando e imprime en la
-terminal la URL exacta que tienes que abrir en el navegador — con Vite,
-casi siempre `http://localhost:5173`, pero cópiala siempre de lo que
-imprima tu terminal, no la des por hecha (si ese puerto está ocupado,
-Vite usa el siguiente libre y te lo dice ahí mismo).
+1. **Abre la carpeta del proyecto en VS Code**: menú `Archivo` →
+   `Abrir carpeta...`, y elige la carpeta `explorador-personajes/` de
+   dentro de lo que clonaste (la de este proyecto en concreto, no la
+   del repositorio `javascript-proyectos` entero).
+2. **Mira el explorador de archivos**, en la barra lateral izquierda:
+   verás una carpeta `src/` con varios `.js` dentro — son los que vas
+   a ir abriendo y completando con un clic. No crees ninguno nuevo.
+3. **Abre la terminal integrada**: menú `Terminal` → `New Terminal`
+   (o el atajo `` Ctrl+` ``, igual en Windows, Linux y Mac). Se abre ya
+   situada dentro de la carpeta del proyecto.
+4. **Instala las dependencias**: escribe `npm install` y pulsa Intro.
+   Tarda unos segundos la primera vez.
+5. **Copia el archivo de variables de entorno**: escribe
+   `cp .env.example .env` y pulsa Intro (en Windows, si `cp` no
+   funciona, usa `copy .env.example .env`). El repositorio no lleva un
+   `.env` real, solo la plantilla — exactamente igual que en
+   tech-study-tracker.
+6. **Arranca el servidor de desarrollo**: escribe `npm run dev` y
+   pulsa Intro.
+7. **Abre la URL que imprime la terminal** en el navegador — con Vite,
+   casi siempre `http://localhost:5173`, pero cópiala siempre de lo
+   que imprima tu terminal, no la des por hecha (si ese puerto está
+   ocupado, Vite usa el siguiente libre y te lo dice ahí mismo). No
+   cierres esa terminal mientras trabajas — el servidor sigue vivo ahí
+   (para pararlo, `Ctrl+C` dentro de ella).
+8. **El ciclo de trabajo**: abre uno de los archivos con `TODO`,
+   escribe la implementación, guarda con `Cmd`/`Ctrl` + `S`, y vuelve
+   al navegador — con Vite el cambio aparece solo, sin refrescar nada
+   a mano, así sabrás al instante si lo que escribiste funciona.
 
 ## Arquitectura: seis capas, una responsabilidad cada una
 

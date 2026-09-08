@@ -72,16 +72,37 @@ Hasta ahora, cada proyecto de esta serie ha sido **una** pantalla: el gestor de 
     botón verde **Code** → **Download ZIP**, y descomprímelo donde
     quieras.
 
-Abre la carpeta en VS Code, abre su terminal integrada, entra en
-`recetario/`, y ejecuta `npm install` seguido de `npm run dev` — a
-diferencia del proyecto anterior, aquí no hay ningún paso de `.env`:
-TheMealDB no pide ninguna clave para las consultas que usa este
-proyecto.
+### Del cero al proyecto abierto en el navegador, paso a paso
 
-En cuanto lances `npm run dev`, Vite imprime en la terminal la URL del
-servidor de desarrollo (normalmente `http://localhost:5173`) — ábrela
-en el navegador para ver la app; copia siempre la URL exacta que
-imprime tu terminal, puede variar si ese puerto ya está en uso.
+Si nunca has trabajado así, este es el camino completo. No hace falta
+crear ningún archivo nuevo — ni siquiera `router.js`: **ya existe**
+dentro de lo que acabas de clonar o descomprimir, con la firma de cada
+función y varios `TODO` marcando qué falta escribir dentro.
+
+1. **Abre la carpeta del proyecto en VS Code**: menú `Archivo` →
+   `Abrir carpeta...`, y elige la carpeta `recetario/` de dentro de lo
+   que clonaste (la de este proyecto en concreto, no la del
+   repositorio `javascript-proyectos` entero).
+2. **Mira el explorador de archivos**, en la barra lateral izquierda:
+   verás `router.js` y el resto de archivos de `src/`, más las
+   carpetas nuevas `pages/` y `components/`. Ábrelos con un clic — no
+   crees ninguno.
+3. **Abre la terminal integrada**: menú `Terminal` → `New Terminal`
+   (o el atajo `` Ctrl+` ``, igual en Windows, Linux y Mac). Se abre ya
+   situada dentro de la carpeta del proyecto.
+4. **Instala las dependencias**: escribe `npm install` y pulsa Intro.
+5. **Arranca el servidor de desarrollo**: escribe `npm run dev` y
+   pulsa Intro — a diferencia del proyecto anterior, aquí no hay
+   ningún paso de `.env`: TheMealDB no pide ninguna clave para las
+   consultas que usa este proyecto.
+6. **Abre la URL que imprime la terminal** en el navegador —
+   normalmente `http://localhost:5173`, pero copia siempre la URL
+   exacta que imprime tu terminal, puede variar si ese puerto ya está
+   en uso. No la cierres mientras trabajas (para pararlo, `Ctrl+C`
+   dentro de ella).
+7. **El ciclo de trabajo**: abre un archivo con `TODO`, escribe la
+   implementación, guarda con `Cmd`/`Ctrl` + `S`, y vuelve al
+   navegador — el cambio aparece solo, sin refrescar nada a mano.
 
 ## Arquitectura: páginas y componentes, no solo capas
 

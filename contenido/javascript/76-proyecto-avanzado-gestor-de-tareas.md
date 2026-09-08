@@ -48,17 +48,44 @@ El mismo gestor de tareas que ya construiste en el proyecto sencillo — pero he
     botón verde **Code** → **Download ZIP**, y descomprímelo donde
     quieras.
 
-Con eso ya puedes abrir la carpeta en VS Code (`Archivo` → `Abrir
-carpeta...`) y seguir con lo de abajo.
+### Del cero al proyecto abierto en el navegador, paso a paso
 
-```laboratorio
-{
-  "tipo": "callout",
-  "variante": "aviso",
-  "titulo": "Antes de nada: los módulos ES necesitan un servidor, no file://",
-  "contenido": "Clona javascript-proyectos y ejecuta cd gestor-de-tareas && npx serve . (o python3 -m http.server si no tienes Node) — abrir index.html haciendo doble clic no funciona: los navegadores bloquean import/export cuando la página se carga desde el disco directamente, y la página se queda completamente inerte (ningún botón hace nada) sin ningún error visible salvo en la consola. Si al abrir el proyecto parece \"bloqueado\", es casi siempre esto. El propio comando imprime en la terminal la URL que tienes que abrir en el navegador (algo como http://localhost:3000) — no la adivines, cópiala de ahí."
-}
-```
+Si nunca has trabajado así, este es el camino completo. No hace falta
+crear ningún archivo nuevo: los cuatro archivos de `src/` **ya
+existen** dentro de lo que acabas de clonar o descomprimir, cada uno
+con la firma de sus funciones y un `TODO` marcando qué falta escribir
+dentro — tu trabajo es abrirlos y completarlos, no crearlos.
+
+1. **Abre la carpeta del proyecto en VS Code**: menú `Archivo` →
+   `Abrir carpeta...`, y elige la carpeta `gestor-de-tareas/` de
+   dentro de lo que clonaste (la de este proyecto en concreto, no la
+   del repositorio `javascript-proyectos` entero).
+2. **Mira el explorador de archivos**, en la barra lateral izquierda:
+   verás `index.html`, `styles.css`, y una carpeta `src/` con cuatro
+   archivos dentro (`estado.js`, `almacenamiento.js`, `vista.js`,
+   `main.js`). Ábrelos haciendo clic — no crees ninguno.
+3. **Abre la terminal integrada**: menú `Terminal` → `New Terminal`
+   (o el atajo `` Ctrl+` ``, igual en Windows, Linux y Mac). Se abre ya
+   situada dentro de la carpeta del proyecto, sin que tengas que
+   escribir ninguna ruta.
+4. **Sirve la carpeta**: escribe `npx serve .` y pulsa Intro (o
+   `python3 -m http.server` si no tienes Node instalado). Abrir
+   `index.html` haciendo doble clic NO funciona: los navegadores
+   bloquean `import`/`export` cuando la página se carga desde el disco
+   directamente, y la página se queda completamente inerte (ningún
+   botón hace nada) sin ningún error visible salvo en la consola. Si
+   al abrir el proyecto parece "bloqueado", es casi siempre esto.
+5. **Abre la URL que imprime la terminal** en el navegador (algo como
+   `http://localhost:3000`) — no la adivines, cópiala de ahí; Cmd/Ctrl
+   + clic sobre ella en la propia terminal suele abrirla directamente.
+   No cierres esa terminal mientras trabajas — el comando sigue
+   corriendo ahí (para pararlo, `Ctrl+C` dentro de ella).
+6. **El ciclo de trabajo**: abre uno de los cuatro archivos de `src/`,
+   busca el `TODO`, escribe la implementación ahí, guarda con
+   `Cmd`/`Ctrl` + `S`, y vuelve al navegador — **aquí hace falta
+   refrescar la página a mano** (`Cmd`/`Ctrl` + `R`) para ver el
+   cambio: a diferencia de los proyectos con Vite que vienen después
+   en esta serie, `npx serve` no recarga solo.
 
 ## Por qué esto no cabe en un editor en vivo
 

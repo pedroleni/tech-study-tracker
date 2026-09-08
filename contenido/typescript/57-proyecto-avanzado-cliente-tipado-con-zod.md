@@ -53,11 +53,31 @@ de verdad, dato a dato, en tiempo de ejecución.
 No hace falta instalar TypeScript por separado — `tsc` llega como
 dependencia del propio proyecto al ejecutar `npm install`.
 
-Luego `cd typescript-proyectos/cliente-zod` y `npm install`.
+### Del cero al proyecto abierto en el navegador, paso a paso
 
-`npm run dev` imprime en la terminal la URL del servidor de desarrollo
-(normalmente `http://localhost:5173`) — ábrela en el navegador para
-buscar un Pokémon real.
+No hace falta crear ningún archivo nuevo: `src/esquemas.ts` y
+`src/cliente.ts` **ya existen** dentro de lo que acabas de clonar o
+descomprimir — el primero completo (el diseño del proyecto), el
+segundo con el `TODO` que tienes que resolver.
+
+1. **Abre la carpeta del proyecto en VS Code**: menú `Archivo` →
+   `Abrir carpeta...`, y elige la carpeta `cliente-zod/` de dentro de
+   lo que clonaste (repositorio `typescript-proyectos`).
+2. **Mira el explorador de archivos**, en la barra lateral izquierda:
+   verás `esquemas.ts`, `cliente.ts`, `api.ts`, `ErrorHttp.ts` y
+   `main.ts` dentro de `src/`. Ábrelos con un clic — no crees ninguno.
+3. **Abre la terminal integrada**: menú `Terminal` → `New Terminal`
+   (o el atajo `` Ctrl+` ``, igual en Windows, Linux y Mac).
+4. **Instala las dependencias**: escribe `npm install` y pulsa Intro.
+5. **Arranca el servidor de desarrollo**: escribe `npm run dev` y
+   pulsa Intro.
+6. **Abre la URL que imprime la terminal** en el navegador
+   (normalmente `http://localhost:5173`) para buscar un Pokémon real.
+   No la cierres mientras trabajas (para pararlo, `Ctrl+C` dentro de
+   ella).
+7. **El ciclo de trabajo**: abre `cliente.ts`, busca el `TODO`,
+   escribe la implementación, guarda con `Cmd`/`Ctrl` + `S`, y vuelve
+   al navegador — el cambio aparece solo.
 
 ## El problema real: `as T` es una promesa, no una comprobación
 
