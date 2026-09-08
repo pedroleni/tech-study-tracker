@@ -186,8 +186,23 @@ La última lección del temario. Dos retos que no introducen nada nuevo — comb
 También puedes resolver estos ejercicios fuera del navegador, en un editor real — la misma dinámica que vas a usar en el resto de tu carrera:
 
 1. **Crea una carpeta**, ábrela en VS Code (`Archivo` → `Abrir carpeta...`), y dentro crea `index.html` y `script.js`.
-2. **Copia el código de partida** de las pestañas HTML y JavaScript del editor en vivo de abajo en el archivo que corresponda.
-3. **Enlázalos**: justo antes de `</body>` en `index.html`, añade `<script src="script.js"></script>` — el editor en vivo hace este enlace por ti, pero en un archivo real hay que escribirlo a mano.
+2. **Escribe en `index.html` la estructura completa** que ya viste en el temario de HTML (doctype, `html`, `head` con charset y viewport, `body`) — el editor en vivo te la esconde por ti, pero en un archivo real hace falta escribirla:
+   ```html
+   <!doctype html>
+   <html lang="es">
+     <head>
+       <meta charset="utf-8">
+       <meta name="viewport" content="width=device-width, initial-scale=1">
+       <title>Retos finales</title>
+     </head>
+     <body>
+       <!-- El código de la pestaña HTML de abajo va aquí dentro -->
+
+       <script src="script.js"></script>
+     </body>
+   </html>
+   ```
+3. **Copia el código de partida** de la pestaña HTML del editor en vivo de abajo dentro de `<body>` (donde dice el comentario), y el de la pestaña JavaScript en `script.js`. El `<script>` que ya has puesto arriba es el que enlaza los dos archivos — eso el editor en vivo lo hace por ti, pero en un archivo real hay que escribirlo a mano.
 4. **Abre la terminal integrada** (`Terminal` → `New Terminal`, o el atajo `` Ctrl+` ``) y escribe `npx serve .` para verlo en el navegador — o instala la extensión "Live Server" y pulsa "Go Live", que además recarga sola con cada guardado.
 5. Edita, guarda con `Cmd`/`Ctrl` + `S`, y refresca el navegador (o deja que Live Server lo haga por ti) para ver el cambio.
 

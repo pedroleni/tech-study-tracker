@@ -36,9 +36,24 @@ Puedes hacer este mismo proyecto fuera del navegador, en un editor real. Aquí h
 1. **Instala Node.js** si todavía no lo tienes: versión **LTS** desde [nodejs.org](https://nodejs.org).
 2. **Crea una carpeta** en tu ordenador con el nombre que quieras para este proyecto.
 3. **Ábrela en VS Code**: menú `Archivo` → `Abrir carpeta...`.
-4. **Crea dos archivos**: `index.html` y `script.ts` — el nombre `script.ts` importa, es el que compilas en el siguiente paso.
-5. **Copia el código de partida** de cada pestaña del editor en vivo de abajo (HTML, TypeScript) en el archivo que corresponda.
-6. **Enlaza el archivo compilado, no el `.ts`** — dentro de `<head>` o justo antes de `</body>` en `index.html`, añade `<script src="script.js"></script>` (fíjate: `.js`, no `.ts` — el navegador nunca ejecuta TypeScript directamente).
+4. **Crea dos archivos**: `index.html` y `script.ts` — el nombre `script.ts` importa, es el que compilas en un paso posterior.
+5. **Escribe en `index.html` la estructura completa** que ya viste en el temario de HTML (doctype, `html`, `head` con charset y viewport, `body`) — el editor en vivo de abajo te la esconde por ti, pero en un archivo real hace falta escribirla. Fíjate en que el `<script>` apunta a `script.js` y no a `script.ts` — el navegador nunca ejecuta TypeScript directamente, solo el archivo ya compilado:
+   ```html
+   <!doctype html>
+   <html lang="es">
+     <head>
+       <meta charset="utf-8">
+       <meta name="viewport" content="width=device-width, initial-scale=1">
+       <title>Lista de tareas tipada</title>
+     </head>
+     <body>
+       <!-- El código de la pestaña HTML de abajo va aquí dentro -->
+
+       <script src="script.js"></script>
+     </body>
+   </html>
+   ```
+6. **Copia el código de partida** de la pestaña TypeScript del editor en vivo de abajo dentro de `script.ts`.
 7. **Abre la terminal integrada**: menú `Terminal` → `New Terminal` (o el atajo `` Ctrl+` ``, igual en Windows, Linux y Mac).
 8. **Compila en modo vigilancia**: escribe `npx tsc script.ts --watch` y pulsa Intro — deja esta terminal abierta; cada vez que guardes `script.ts`, genera un `script.js` actualizado solo.
 9. **Abre una SEGUNDA terminal** (icono `+` en el panel), y en esa sirve la carpeta: `npx serve .` — abre en el navegador la URL que imprima.

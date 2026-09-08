@@ -35,9 +35,25 @@ Puedes hacer este mismo proyecto fuera del navegador, en un editor real — la m
 
 1. **Crea una carpeta** en tu ordenador (Escritorio, Documentos... donde quieras) con el nombre que quieras para este proyecto.
 2. **Ábrela en VS Code**: menú `Archivo` → `Abrir carpeta...`.
-3. **Crea tres archivos** dentro, con el icono de "Nuevo archivo" del explorador (o clic derecho → `New File`): `index.html`, `style.css` y `script.js` — los nombres importan, son los que enlazas en el siguiente paso.
-4. **Copia el código de partida** de cada pestaña de los editores en vivo de abajo (HTML, CSS, JavaScript) en el archivo que corresponda — es el mismo código, solo que ahora en archivos de verdad, no en un widget.
-5. **Enlaza los tres archivos** — esto el editor en vivo lo hace por ti, pero en un proyecto real hay que escribirlo a mano: dentro de `<head>` en `index.html`, añade `<link rel="stylesheet" href="style.css">`; justo antes de `</body>`, añade `<script src="script.js"></script>`.
+3. **Crea tres archivos** dentro, con el icono de "Nuevo archivo" del explorador (o clic derecho → `New File`): `index.html`, `style.css` y `script.js` — los nombres importan, son los que enlazas en los siguientes pasos.
+4. **Escribe en `index.html` la estructura completa** que ya viste en el temario de HTML (doctype, `html`, `head` con charset y viewport, `body`) — el editor en vivo de abajo te la esconde por ti, pero en un archivo real hace falta escribirla:
+   ```html
+   <!doctype html>
+   <html lang="es">
+     <head>
+       <meta charset="utf-8">
+       <meta name="viewport" content="width=device-width, initial-scale=1">
+       <title>Buscador de Pokémon</title>
+       <link rel="stylesheet" href="style.css">
+     </head>
+     <body>
+       <!-- El código de la pestaña HTML de abajo va aquí dentro -->
+
+       <script src="script.js"></script>
+     </body>
+   </html>
+   ```
+5. **Copia el código de partida** de la pestaña HTML del editor en vivo de abajo dentro de `<body>` (donde dice el comentario), el de la pestaña CSS en `style.css`, y el de la pestaña JavaScript en `script.js` — es el mismo código, solo que ahora en archivos de verdad, no en un widget. El `<link>` y el `<script>` que ya has puesto arriba son los que enlazan los tres archivos entre sí — eso el editor en vivo lo hace por ti, pero en un proyecto real hay que escribirlo a mano.
 6. **Abre la terminal integrada**: menú `Terminal` → `New Terminal` (o el atajo `` Ctrl+` ``, igual en Windows, Linux y Mac).
 7. **Sirve la carpeta**: escribe `npx serve .` y pulsa Intro — abre en el navegador la URL que imprima. (Alternativa sin terminal: instala la extensión "Live Server" y pulsa "Go Live" — además recarga sola con cada guardado.)
 8. **El ciclo de trabajo**: edita el archivo que toque, guarda con `Cmd`/`Ctrl` + `S`, y refresca el navegador para ver el cambio.
