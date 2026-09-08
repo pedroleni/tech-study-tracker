@@ -43,7 +43,7 @@ function getTechnologyBrandPresentation(
     foregroundClassName: usesDarkTone ? 'text-neutral-900' : 'text-white',
     glassClassName: usesDarkTone
       ? 'border-black/15 bg-black/10 text-neutral-900 backdrop-blur-sm'
-      : 'border-white/30 bg-white/15 text-white backdrop-blur-sm',
+      : 'border-white/20 bg-black/50 text-white backdrop-blur-sm',
   }
 }
 
