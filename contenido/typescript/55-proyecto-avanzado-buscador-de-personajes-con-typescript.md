@@ -52,9 +52,14 @@ No hace falta instalar TypeScript por separado — `tsc` llega como
 dependencia del propio proyecto al ejecutar `npm install`, igual que
 Vite en los proyectos anteriores.
 
+`npm run dev` imprime en la terminal la URL del servidor de desarrollo
+(normalmente `http://localhost:5173`) — ábrela en el navegador para ver
+el buscador. `npm run typecheck` no abre nada: solo comprueba los tipos
+en la propia terminal, sin generar ni servir nada.
+
 ## El problema real que resuelve TypeScript aquí
 
-En los dos proyectos anteriores, el estado tenía `cargando`, `error` y `personajes` como campos **independientes** — nada impedía, por error de programación, tener `cargando: true` y `error: 'algo falló'` a la vez, un estado que no debería poder existir pero que el propio JavaScript no evita.
+En los dos proyectos anteriores, el estado tenía `cargando`, `error` y `personajes` como campos **independientes** — nada impedía, por error de programación, tener `cargando: true` y `error: 'algo falló'` a la vez, un estado que no debería poder existir pero que el propio JavaScript no evita. El tipo `EstadoBusqueda` que resuelve esto vive en `buscador-personajes/src/tipos.ts` — ya está completo, es el diseño del proyecto (léelo antes que nada).
 
 ```laboratorio
 {
@@ -66,6 +71,8 @@ En los dos proyectos anteriores, el estado tenía `cargando`, `error` y `persona
 ```
 
 ## La comprobación de exhaustividad: la prueba de que funciona
+
+Versión simplificada de lo que hay en `buscador-personajes/src/vista.ts`:
 
 ```laboratorio
 {
@@ -103,6 +110,8 @@ En los dos proyectos anteriores, el estado tenía `cargando`, `error` y `persona
 
 ## Genéricos: funciones que conservan el tipo de lo que les pasas
 
+Versión simplificada de lo que hay en `buscador-personajes/src/api.ts`:
+
 ```laboratorio
 {
   "tipo": "codigo-anotado",
@@ -122,6 +131,8 @@ En los dos proyectos anteriores, el estado tenía `cargando`, `error` y `persona
 ```
 
 ## Un error real de configuración: `erasableSyntaxOnly`
+
+La clase `ErrorHttp` también vive en `buscador-personajes/src/api.ts`:
 
 ```laboratorio
 {

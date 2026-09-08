@@ -76,6 +76,11 @@ Entra en `panel-cripto/` y ejecuta `npm install` seguido de `npm run dev`
 — tampoco hay aquí ningún paso de `.env`: CoinGecko no pide ninguna clave
 para las consultas que usa este proyecto.
 
+`npm run dev` imprime en la terminal la URL del servidor de desarrollo
+(normalmente `http://localhost:5173`, o el siguiente puerto libre si
+tienes otro proyecto Vite corriendo a la vez) — ábrela en el navegador
+para ver el dashboard.
+
 ## Arquitectura: el router y las capas ya las conoces
 
 ```laboratorio
@@ -92,6 +97,9 @@ para las consultas que usa este proyecto.
 `buscador.js` es deliberadamente el más simple de los dos componentes: pinta un input y un `<select>`, y no escucha nada fuera de sí mismo — por eso `crear()` le basta, no necesita `actualizar()` ni `destruir()`. `tarjetaMoneda.js` sí los necesita, y es donde está la parte nueva de este proyecto.
 
 ## El contrato de un componente con ciclo de vida
+
+Abre `panel-cripto/src/components/tarjetaMoneda.js` — `crear()` ya está
+completa; `actualizar()` y `destruir()` tienen `TODO`:
 
 ```laboratorio
 {
@@ -153,7 +161,7 @@ Es exactamente la misma familia de bug que la fuga de memoria de un `setInterval
 
 ## dashboard.js: decidir qué tarjeta sobrevive a un re-render
 
-La otra pieza nueva no está en el componente, sino en quien lo usa: `pages/dashboard.js` guarda un `Map` con las tarjetas actualmente vivas, y en cada render debe decidir, moneda a moneda, si ya existe (entonces `actualizar()`), es nueva (entonces `crear()`), o ha dejado de estar visible (entonces `destruir()` y se borra del `Map`).
+La otra pieza nueva no está en el componente, sino en quien lo usa: `panel-cripto/src/pages/dashboard.js` guarda un `Map` con las tarjetas actualmente vivas, y en cada render debe decidir, moneda a moneda, si ya existe (entonces `actualizar()`), es nueva (entonces `crear()`), o ha dejado de estar visible (entonces `destruir()` y se borra del `Map`). La función `reconciliarTarjetas()` de ese archivo tiene el `TODO` de este paso.
 
 ```laboratorio
 {

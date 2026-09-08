@@ -90,9 +90,15 @@ seguir con lo de abajo.
 }
 ```
 
+`npm run dev` deja el servidor de desarrollo escuchando e imprime en la
+terminal la URL exacta que tienes que abrir en el navegador — con Vite,
+casi siempre `http://localhost:5173`, pero cópiala siempre de lo que
+imprima tu terminal, no la des por hecha (si ese puerto está ocupado,
+Vite usa el siguiente libre y te lo dice ahí mismo).
+
 ## Arquitectura: seis capas, una responsabilidad cada una
 
-Más piezas que el gestor de tareas, porque hay más que coordinar: red, estado, persistencia, orquestación y vista, cada una en su propio archivo.
+Más piezas que el gestor de tareas, porque hay más que coordinar: red, estado, persistencia, orquestación y vista, cada una en su propio archivo dentro de `explorador-personajes/src/`.
 
 ```laboratorio
 {
@@ -104,6 +110,9 @@ Más piezas que el gestor de tareas, porque hay más que coordinar: red, estado,
   "footer": "acciones.js conecta todo; vista.js pinta; main.js conecta el DOM"
 }
 ```
+
+Esto es `explorador-personajes/src/acciones.js` — la capa de
+orquestación:
 
 ```laboratorio
 {
@@ -124,6 +133,8 @@ Más piezas que el gestor de tareas, porque hay más que coordinar: red, estado,
 ```
 
 ## La API: paginación, búsqueda y un detalle real de su forma de responder
+
+Esto es `explorador-personajes/src/api.js`:
 
 ```laboratorio
 {
@@ -156,7 +167,7 @@ Esto no es un ejemplo inventado para la lección — pasó de verdad al construi
 }
 ```
 
-La causa real estaba en `vista.js`: `renderizar()` reconstruía la rejilla de tarjetas en **cada** cambio de estado — incluido el momento en que `cargando` pasaba a `true`, antes de que llegaran datos nuevos.
+La causa real estaba en `explorador-personajes/src/vista.js`: `renderizar()` reconstruía la rejilla de tarjetas en **cada** cambio de estado — incluido el momento en que `cargando` pasaba a `true`, antes de que llegaran datos nuevos.
 
 ```laboratorio
 {
@@ -188,6 +199,9 @@ La causa real estaba en `vista.js`: `renderizar()` reconstruía la rejilla de ta
 ```
 
 ## Reintentos: cuando SÍ tiene sentido volver a intentarlo
+
+Esto también vive en `explorador-personajes/src/api.js`, justo encima
+de las funciones que ya viste arriba:
 
 ```laboratorio
 {

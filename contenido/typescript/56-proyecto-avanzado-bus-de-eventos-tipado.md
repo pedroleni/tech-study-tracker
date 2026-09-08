@@ -56,6 +56,10 @@ dependencia del propio proyecto al ejecutar `npm install`.
 
 Luego `cd typescript-proyectos/bus-eventos` y `npm install`.
 
+`npm run dev` imprime en la terminal la URL del servidor de desarrollo
+(normalmente `http://localhost:5173`) — ábrela en el navegador para ver
+la demo con el contador y el registro de eventos en vivo.
+
 ## El problema real: un `EventEmitter` normal no sabe qué forma tiene cada evento
 
 ```laboratorio
@@ -68,6 +72,9 @@ Luego `cd typescript-proyectos/bus-eventos` y `npm install`.
 ```
 
 ## El diseño: MapaEventos como única fuente de verdad
+
+Esto es `bus-eventos/src/tipos.ts` — ya está completo, es el diseño del
+proyecto:
 
 ```laboratorio
 {
@@ -82,6 +89,9 @@ Luego `cd typescript-proyectos/bus-eventos` y `npm install`.
 ```
 
 ## La firma genérica que enlaza evento y payload
+
+Esto es `bus-eventos/src/EventBus.ts` — el archivo con `TODO` de este
+proyecto:
 
 ```laboratorio
 {
@@ -108,6 +118,8 @@ Luego `cd typescript-proyectos/bus-eventos` y `npm install`.
 ```
 
 ## Un gotcha real de tipos: `Record<string, unknown>` no es lo que parece
+
+También en `bus-eventos/src/EventBus.ts`, en la propia declaración de la clase:
 
 ```laboratorio
 {

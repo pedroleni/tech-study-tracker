@@ -55,6 +55,10 @@ dependencia del propio proyecto al ejecutar `npm install`.
 
 Luego `cd typescript-proyectos/cliente-zod` y `npm install`.
 
+`npm run dev` imprime en la terminal la URL del servidor de desarrollo
+(normalmente `http://localhost:5173`) — ábrela en el navegador para
+buscar un Pokémon real.
+
 ## El problema real: `as T` es una promesa, no una comprobación
 
 ```laboratorio
@@ -68,6 +72,9 @@ Luego `cd typescript-proyectos/cliente-zod` y `npm install`.
 
 ## z.infer: el tipo se deriva del esquema, nunca al revés
 
+Esto es `cliente-zod/src/esquemas.ts` — ya está completo, es el diseño
+del proyecto:
+
 ```laboratorio
 {
   "tipo": "codigo-anotado",
@@ -80,6 +87,9 @@ Luego `cd typescript-proyectos/cliente-zod` y `npm install`.
 ```
 
 ## La función que hace todo el trabajo pesado
+
+Esto es `cliente-zod/src/cliente.ts` — el archivo con `TODO` de este
+proyecto:
 
 ```laboratorio
 {

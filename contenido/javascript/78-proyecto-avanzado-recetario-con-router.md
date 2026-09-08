@@ -78,6 +78,11 @@ diferencia del proyecto anterior, aquí no hay ningún paso de `.env`:
 TheMealDB no pide ninguna clave para las consultas que usa este
 proyecto.
 
+En cuanto lances `npm run dev`, Vite imprime en la terminal la URL del
+servidor de desarrollo (normalmente `http://localhost:5173`) — ábrela
+en el navegador para ver la app; copia siempre la URL exacta que
+imprime tu terminal, puede variar si ese puerto ya está en uso.
+
 ## Arquitectura: páginas y componentes, no solo capas
 
 Las capas que ya conoces (`api.js`, `estado.js`, `acciones.js`, `utilidades.js`) siguen aquí igual que en el proyecto anterior. Lo nuevo son dos carpetas:
@@ -96,6 +101,9 @@ Las capas que ya conoces (`api.js`, `estado.js`, `acciones.js`, `utilidades.js`)
 La diferencia clave con "una función que pinta todo": cada página de `pages/` solo sabe pintarse a sí misma. Ninguna sabe que existen las demás, ni cómo se llegó hasta ella — eso es responsabilidad exclusiva del router.
 
 ## El corazón del router: convertir un patrón en una expresión regular
+
+Abre `recetario/src/router.js` — ya existe, con la firma de cada
+función y varios `TODO` explicando qué falta:
 
 ```laboratorio
 {
@@ -133,7 +141,7 @@ Con eso, resolver una ruta es solo probar el patrón contra el `pathname` actual
 
 ## Navegar sin recargar: interceptar el clic, no el enlace
 
-Los enlaces del proyecto son `<a href="/receta/52772">` normales y corrientes — a propósito. Funcionan aunque JavaScript falle al cargar, y un lector de pantalla los entiende sin nada especial. El router intercepta el **clic**, no cambia cómo se escriben los enlaces:
+Los enlaces del proyecto son `<a href="/receta/52772">` normales y corrientes — a propósito. Funcionan aunque JavaScript falle al cargar, y un lector de pantalla los entiende sin nada especial. El router intercepta el **clic**, no cambia cómo se escriben los enlaces — esto sigue en el mismo `recetario/src/router.js`:
 
 ```laboratorio
 {
@@ -168,7 +176,7 @@ Esto no es un ejemplo inventado para la lección — pasó de verdad al construi
 }
 ```
 
-La causa: `buscarRecetas()`, `cargarReceta()` y `cargarPorCategoria()` compartían el mismo `establecerError()` del estado, sin ninguna forma de saber si la respuesta que acababa de llegar seguía siendo la que le importaba a la pantalla actual.
+La causa: en `recetario/src/acciones.js`, `buscarRecetas()`, `cargarReceta()` y `cargarPorCategoria()` compartían el mismo `establecerError()` del estado, sin ninguna forma de saber si la respuesta que acababa de llegar seguía siendo la que le importaba a la pantalla actual.
 
 ```laboratorio
 {

@@ -57,7 +57,14 @@ dependencia del propio proyecto al ejecutar `npm install`.
 
 Luego `cd typescript-proyectos/maquina-estados` y `npm install`.
 
+`npm run dev` imprime en la terminal la URL del servidor de desarrollo
+(normalmente `http://localhost:5173`) — ábrela en el navegador para ver
+la demo del seguimiento de un pedido.
+
 ## El diseño: una tabla de transiciones, tipada en dos niveles
+
+Esto es `maquina-estados/src/tipos.ts` — ya está completo, es el diseño
+del proyecto:
 
 ```laboratorio
 {
@@ -86,6 +93,9 @@ Luego `cd typescript-proyectos/maquina-estados` y `npm install`.
 
 ## La clase genérica: dos parámetros de tipo relacionados
 
+Esto es `maquina-estados/src/MaquinaEstados.ts` — el archivo con `TODO`
+de este proyecto:
+
 ```laboratorio
 {
   "tipo": "codigo-anotado",
@@ -99,6 +109,8 @@ Luego `cd typescript-proyectos/maquina-estados` y `npm install`.
 ```
 
 ## Un gotcha real, encontrado sin buscarlo
+
+También en `maquina-estados/src/MaquinaEstados.ts`, en el propio constructor:
 
 ```laboratorio
 {

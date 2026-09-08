@@ -56,7 +56,7 @@ carpeta...`) y seguir con lo de abajo.
   "tipo": "callout",
   "variante": "aviso",
   "titulo": "Antes de nada: los módulos ES necesitan un servidor, no file://",
-  "contenido": "Clona javascript-proyectos y ejecuta cd gestor-de-tareas && npx serve . (o python3 -m http.server si no tienes Node) — abrir index.html haciendo doble clic no funciona: los navegadores bloquean import/export cuando la página se carga desde el disco directamente, y la página se queda completamente inerte (ningún botón hace nada) sin ningún error visible salvo en la consola. Si al abrir el proyecto parece \"bloqueado\", es casi siempre esto."
+  "contenido": "Clona javascript-proyectos y ejecuta cd gestor-de-tareas && npx serve . (o python3 -m http.server si no tienes Node) — abrir index.html haciendo doble clic no funciona: los navegadores bloquean import/export cuando la página se carga desde el disco directamente, y la página se queda completamente inerte (ningún botón hace nada) sin ningún error visible salvo en la consola. Si al abrir el proyecto parece \"bloqueado\", es casi siempre esto. El propio comando imprime en la terminal la URL que tienes que abrir en el navegador (algo como http://localhost:3000) — no la adivines, cópiala de ahí."
 }
 ```
 
@@ -118,9 +118,9 @@ Cuatro archivos en `src/`, cada uno con una única responsabilidad — el princi
 }
 ```
 
-## Paso 1: el estado centralizado (`estado.js`)
+## Paso 1: el estado centralizado (`gestor-de-tareas/src/estado.js`)
 
-Todo cuelga de un array `tareas` y un `filtroActual`, ninguno de los dos exportado directamente — solo se puede tocarlos a través de las funciones de este archivo. Es el mismo principio que ya viste en `property-descriptors` (lección 26): decidir qué queda encapsulado y qué se expone.
+Abre ese archivo en tu editor — ya existe, con la firma de cada función y un `TODO` explicando qué falta. Todo cuelga de un array `tareas` y un `filtroActual`, ninguno de los dos exportado directamente — solo se puede tocarlos a través de las funciones de este archivo. Es el mismo principio que ya viste en `property-descriptors` (lección 26): decidir qué queda encapsulado y qué se expone.
 
 ```laboratorio
 {
@@ -144,7 +144,7 @@ Todo cuelga de un array `tareas` y un `filtroActual`, ninguno de los dos exporta
 }
 ```
 
-## Paso 2: persistencia real (`almacenamiento.js`)
+## Paso 2: persistencia real (`gestor-de-tareas/src/almacenamiento.js`)
 
 El archivo más corto, y el que de verdad no se podía enseñar en vivo hasta ahora.
 
@@ -166,7 +166,7 @@ El archivo más corto, y el que de verdad no se podía enseñar en vivo hasta ah
 }
 ```
 
-## Paso 3: la vista que se redibuja sola (`vista.js`)
+## Paso 3: la vista que se redibuja sola (`gestor-de-tareas/src/vista.js`)
 
 El patrón "estado → render": en vez de buscar el `<li>` exacto que cambió y mutarlo a mano, se destruye la lista entera y se reconstruye desde el estado en cada cambio. Suena más caro, pero es muchísimo más difícil de dejar en un estado inconsistente — es la misma idea que hace tan predecible a React, sin usar React.
 
@@ -188,7 +188,7 @@ El patrón "estado → render": en vez de buscar el `<li>` exacto que cambió y 
 }
 ```
 
-## Paso 4: conectar todo (`main.js`)
+## Paso 4: conectar todo (`gestor-de-tareas/src/main.js`)
 
 El único archivo que sabe que existen tanto `estado.js` como `vista.js` como `almacenamiento.js` — y el orden en que se conectan importa.
 
