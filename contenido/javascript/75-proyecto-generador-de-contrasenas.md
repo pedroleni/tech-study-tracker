@@ -15,6 +15,15 @@ Un generador de contraseñas con longitud configurable y checkboxes para incluir
 {
   "tipo": "callout",
   "variante": "info",
+  "titulo": "Esto se hace aquí mismo, en el navegador — no hace falta instalar nada",
+  "contenido": "A diferencia de los \"proyecto avanzado\" de más adelante, este NO necesita VS Code, terminal, ni clonar ningún repositorio. Cada bloque \"EDITOR EN VIVO\" de abajo es un editor real: pestañas HTML/CSS/JavaScript arriba, tu código en medio, y \"Vista previa\" debajo, que se actualiza sola mientras escribes — no hay ningún botón de \"ejecutar\". Escribe en la pestaña que toque, sustituyendo los comentarios que ya están puestos como guía. Si algo se rompe, \"Reiniciar\" (arriba a la derecha del bloque) te devuelve al punto de partida."
+}
+```
+
+```laboratorio
+{
+  "tipo": "callout",
+  "variante": "info",
   "titulo": "Sin botón de copiar",
   "contenido": "Un generador real suele incluir un botón \"Copiar\" con la API del portapapeles — pero esa API exige un contexto seguro que este iframe aislado no proporciona (el mismo tipo de restricción que ya viste con localStorage). Aquí la contraseña se muestra en un campo de texto seleccionable a mano; el reto 3 de abajo te propone añadir el botón en tu propio archivo."
 }

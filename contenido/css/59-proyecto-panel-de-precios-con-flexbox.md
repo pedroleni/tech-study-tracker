@@ -15,6 +15,15 @@ El panel de "Planes y precios" que tiene casi cualquier producto SaaS: tres tarj
 {
   "tipo": "callout",
   "variante": "info",
+  "titulo": "Esto se hace aquí mismo, en el navegador — no hace falta instalar nada",
+  "contenido": "A diferencia de los \"proyecto avanzado\" de otros temarios, este NO necesita VS Code, terminal, ni clonar ningún repositorio. Cada bloque \"EDITOR EN VIVO\" de abajo es un editor real: pestañas HTML/CSS arriba, tu código en medio, y \"Vista previa\" debajo, que se actualiza sola mientras escribes — no hay ningún botón de \"ejecutar\". Escribe en la pestaña que toque, sustituyendo los comentarios que ya están puestos como guía. Si algo se rompe, \"Reiniciar\" (arriba a la derecha del bloque) te devuelve al punto de partida."
+}
+```
+
+```laboratorio
+{
+  "tipo": "callout",
+  "variante": "info",
   "titulo": "El HTML no cambia en ningún paso",
   "contenido": "Las tres tarjetas de precio ya están escritas en la pestaña HTML de cada editor de abajo. Todo lo que construyes en este proyecto vive en la pestaña CSS."
 }

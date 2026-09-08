@@ -15,6 +15,15 @@ Una lista de tareas pequeña, pensada para aplicar de golpe lo que ya viste en l
 {
   "tipo": "callout",
   "variante": "info",
+  "titulo": "Esto se hace aquí mismo, en el navegador — no hace falta instalar nada",
+  "contenido": "A diferencia de los \"proyecto avanzado\" de más adelante, este NO necesita VS Code, terminal, ni clonar ningún repositorio. Cada bloque \"EDITOR EN VIVO\" de abajo es un editor real: pestañas HTML/TypeScript arriba, tu código en medio, y \"Vista previa\" debajo, que se actualiza sola mientras escribes — no hay ningún botón de \"ejecutar\". Escribe en la pestaña que toque, sustituyendo los comentarios que ya están puestos como guía. Si algo se rompe, \"Reiniciar\" (arriba a la derecha del bloque) te devuelve al punto de partida."
+}
+```
+
+```laboratorio
+{
+  "tipo": "callout",
+  "variante": "info",
   "titulo": "Antes de escribir código",
   "contenido": "Diseña primero los tipos, en prosa o en un papel: ¿qué campos tiene una Tarea? ¿Qué estados puede tener la lista completa (vacía, con tareas, filtrando por completadas...)? El diseño de tipos ANTES de la implementación es, en sí mismo, la parte más importante de este ejercicio."
 }

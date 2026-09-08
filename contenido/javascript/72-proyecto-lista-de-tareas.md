@@ -15,6 +15,15 @@ Una lista de tareas real: añadir una tarea escribiendo y pulsando Enter (o un b
 {
   "tipo": "callout",
   "variante": "info",
+  "titulo": "Esto se hace aquí mismo, en el navegador — no hace falta instalar nada",
+  "contenido": "A diferencia de los \"proyecto avanzado\" de más adelante, este NO necesita VS Code, terminal, ni clonar ningún repositorio. Cada bloque \"EDITOR EN VIVO\" de abajo es un editor real: pestañas HTML/CSS/JavaScript arriba, tu código en medio, y \"Vista previa\" debajo, que se actualiza sola mientras escribes — no hay ningún botón de \"ejecutar\". Escribe en la pestaña que toque, sustituyendo los comentarios que ya están puestos como guía. Si algo se rompe, \"Reiniciar\" (arriba a la derecha del bloque) te devuelve al punto de partida."
+}
+```
+
+```laboratorio
+{
+  "tipo": "callout",
+  "variante": "info",
   "titulo": "Sin persistencia, a propósito",
   "contenido": "Este proyecto no guarda las tareas al recargar la página — eso necesitaría localStorage, y este editor vive en un iframe aislado donde esa API está deshabilitada por seguridad. Cuando llegues a la lección de localStorage, vuelve aquí como reto de ampliación y pruébalo en un archivo .html normal."
 }

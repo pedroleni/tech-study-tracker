@@ -11,6 +11,15 @@
 
 Un modo oscuro real, del mismo tipo que el que ya usa esta propia web: un conjunto de variables de color declaradas una vez en `:root`, redefinidas dentro de una clase `.oscuro`, y un botón que añade o quita esa clase. Este proyecto combina CSS con una pizca de JavaScript — lo justo para alternar una clase, no para calcular ningún color.
 
+```laboratorio
+{
+  "tipo": "callout",
+  "variante": "info",
+  "titulo": "Esto se hace aquí mismo, en el navegador — no hace falta instalar nada",
+  "contenido": "A diferencia de los \"proyecto avanzado\" de otros temarios, este NO necesita VS Code, terminal, ni clonar ningún repositorio. Cada bloque \"EDITOR EN VIVO\" de abajo es un editor real: pestañas HTML/CSS/JavaScript arriba, tu código en medio, y \"Vista previa\" debajo, que se actualiza sola mientras escribes — no hay ningún botón de \"ejecutar\". Escribe en la pestaña que toque, sustituyendo los comentarios que ya están puestos como guía. Si algo se rompe, \"Reiniciar\" (arriba a la derecha del bloque) te devuelve al punto de partida."
+}
+```
+
 ## Paso 1: los tokens de color en `:root`
 
 Declara las variables de un tema claro: fondo, texto y un color de acento.

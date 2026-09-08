@@ -13,6 +13,15 @@ Una página de "un solo scroll" — el formato que usan casi todas las landing p
 
 ```laboratorio
 {
+  "tipo": "callout",
+  "variante": "info",
+  "titulo": "Esto se hace aquí mismo, en el navegador — no hace falta instalar nada",
+  "contenido": "A diferencia de los \"proyecto avanzado\" de otros temarios, este NO necesita VS Code, terminal, ni clonar ningún repositorio. Cada bloque \"EDITOR EN VIVO\" de abajo es un editor real: pestañas HTML/CSS arriba, tu código en medio, y \"Vista previa\" debajo, que se actualiza sola mientras escribes — no hay ningún botón de \"ejecutar\". Escribe en la pestaña que toque, sustituyendo los comentarios que ya están puestos como guía. Si algo se rompe, \"Reiniciar\" (arriba a la derecha del bloque) te devuelve al punto de partida."
+}
+```
+
+```laboratorio
+{
   "tipo": "esquema-de-pagina",
   "header": "Logo + menú (Inicio · Servicios · Opiniones · Contacto)",
   "nav": "Los 4 enlaces de ancla del menú",

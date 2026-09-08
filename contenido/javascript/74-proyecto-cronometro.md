@@ -11,6 +11,15 @@
 
 Un cronómetro de verdad: Iniciar, Pausar y Reiniciar, con el tiempo mostrado en formato `mm:ss`. El reto real no es la interfaz, es controlar bien `setInterval`/`clearInterval` para que pausar de verdad detenga el conteo (un error muy común es acumular varios intervals a la vez sin darse cuenta).
 
+```laboratorio
+{
+  "tipo": "callout",
+  "variante": "info",
+  "titulo": "Esto se hace aquí mismo, en el navegador — no hace falta instalar nada",
+  "contenido": "A diferencia de los \"proyecto avanzado\" de más adelante, este NO necesita VS Code, terminal, ni clonar ningún repositorio. Cada bloque \"EDITOR EN VIVO\" de abajo es un editor real: pestañas HTML/CSS/JavaScript arriba, tu código en medio, y \"Vista previa\" debajo, que se actualiza sola mientras escribes — no hay ningún botón de \"ejecutar\". Escribe en la pestaña que toque, sustituyendo los comentarios que ya están puestos como guía. Si algo se rompe, \"Reiniciar\" (arriba a la derecha del bloque) te devuelve al punto de partida."
+}
+```
+
 ## Paso 1: formatear el tiempo
 
 Antes de tocar el temporizador, resuelve el problema de formato: convierte un número de segundos en `mm:ss`, con ceros a la izquierda.
