@@ -49,6 +49,37 @@ Luego `cd sql-proyectos/inventario-transaccional` y `npm install` —
 cada carpeta de este repositorio es un proyecto independiente con su
 propio `package.json`.
 
+### Del cero a los tests pasando, paso a paso
+
+Este proyecto no tiene servidor ni interfaz visual — todo se ve en la
+terminal, incluidos los tests. No hace falta crear ningún archivo
+nuevo: `src/inventario.ts` **ya existe**, con la firma de cada función
+y un `TODO` en `transferirStock()` marcando qué falta escribir;
+`src/db.ts` ya está completo.
+
+1. **Abre la carpeta del proyecto en VS Code**: menú `Archivo` →
+   `Abrir carpeta...`, y elige la carpeta `inventario-transaccional/`
+   de dentro de lo que clonaste (no la del repositorio `sql-proyectos`
+   entero).
+2. **Mira el explorador de archivos**, en la barra lateral izquierda:
+   dentro de `src/` verás `inventario.ts` — ábrelo con un clic, no
+   crees ninguno. En `migrations/` verás el esquema SQL, ya completo.
+3. **Abre la terminal integrada**: menú `Terminal` → `New Terminal`
+   (o el atajo `` Ctrl+` ``, igual en Windows, Linux y Mac).
+4. **Instala las dependencias**: escribe `npm install` y pulsa Intro.
+5. **Crea la base de datos**: escribe `npm run migrate` y pulsa
+   Intro — crea `db.sqlite` en la raíz del proyecto aplicando el
+   esquema de `migrations/`.
+6. **Ejecuta los tests**: escribe `npm test` y pulsa Intro — fallan
+   al principio, es tu punto de partida. Cada test migra su propia
+   base de datos temporal, así que no hace falta repetir el paso 5
+   entre ejecuciones.
+7. **El ciclo de trabajo**: abre `inventario.ts`, busca el `TODO` en
+   `transferirStock()`, escribe la implementación, guarda con
+   `Cmd`/`Ctrl` + `S`, y vuelve a lanzar `npm test` en la terminal
+   para comprobarlo — el resultado (verde o rojo) aparece ahí mismo,
+   no hay nada que abrir en el navegador en este proyecto.
+
 ## El punto de partida: sin comprobación explícita, el error se vuelve genérico
 
 ```laboratorio

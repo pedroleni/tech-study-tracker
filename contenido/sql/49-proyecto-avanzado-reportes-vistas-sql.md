@@ -49,6 +49,39 @@ Luego `cd sql-proyectos/reportes-vistas-sql` y `npm install` — cada
 carpeta de este repositorio es un proyecto independiente con su propio
 `package.json`.
 
+### Del cero a los tests pasando, paso a paso
+
+Este proyecto no tiene servidor ni interfaz visual — todo se ve en la
+terminal. Aquí el `TODO` no está en un archivo `.ts`, sino dentro de
+`migrations/002_vistas.sql`: la columna `total` de la vista
+`resumen_pedidos` está incompleta. No hace falta crear ningún archivo
+nuevo — todos, incluido ese, **ya existen**.
+
+1. **Abre la carpeta del proyecto en VS Code**: menú `Archivo` →
+   `Abrir carpeta...`, y elige la carpeta `reportes-vistas-sql/` de
+   dentro de lo que clonaste (no la del repositorio `sql-proyectos`
+   entero).
+2. **Mira el explorador de archivos**, en la barra lateral izquierda:
+   dentro de `migrations/` verás `002_vistas.sql` — ábrelo con un
+   clic, no crees ninguno. El resto de `src/` ya está completo.
+3. **Abre la terminal integrada**: menú `Terminal` → `New Terminal`
+   (o el atajo `` Ctrl+` ``, igual en Windows, Linux y Mac).
+4. **Instala las dependencias**: escribe `npm install` y pulsa Intro.
+5. **Ejecuta los tests**: escribe `npm test` y pulsa Intro — fallan
+   al principio, es tu punto de partida. Los tests usan una base de
+   datos en memoria, distinta en cada ejecución, así que no hace
+   falta ejecutar `npm run migrate` a mano para probar tus cambios.
+6. **El ciclo de trabajo**: abre `002_vistas.sql`, completa la
+   definición de la columna `total`, guarda con `Cmd`/`Ctrl` + `S`, y
+   vuelve a lanzar `npm test` en la terminal para comprobarlo — el
+   resultado aparece ahí mismo, no hay nada que abrir en el
+   navegador en este proyecto.
+7. **Si además quieres ver los datos con tus propios ojos**: `npm run
+   migrate` y `npm run seed` crean y rellenan `ventas.sqlite` con
+   clientes, productos y ocho pedidos de ejemplo — puedes abrir ese
+   fichero con cualquier explorador de SQLite si quieres inspeccionar
+   la vista ya resuelta.
+
 ## El punto de partida: una vista que siempre dice 0
 
 ```laboratorio

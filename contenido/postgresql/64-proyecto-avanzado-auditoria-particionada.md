@@ -50,6 +50,50 @@ Luego, desde `postgresql-proyectos/auditoria-particionada`:
 dependencias — cada carpeta de este repositorio es un proyecto
 independiente con su propio `package.json`.
 
+### Del cero a los tests pasando, paso a paso
+
+Este proyecto no tiene servidor ni interfaz visual — todo se ve en la
+terminal. Aquí el `TODO` no está en un archivo `.ts`, sino dentro de
+`migrations/003_trigger_auditoria.sql`: la función `fn_auditar_cambio()`
+está recortada. No hace falta crear ningún archivo nuevo — todos,
+incluido ese, **ya existen**.
+
+1. **Abre la carpeta del proyecto en VS Code**: menú `Archivo` →
+   `Abrir carpeta...`, y elige la carpeta `auditoria-particionada/`
+   de dentro de lo que clonaste (no la del repositorio
+   `postgresql-proyectos` entero).
+2. **Mira el explorador de archivos**, en la barra lateral izquierda:
+   dentro de `migrations/` verás `003_trigger_auditoria.sql` — ábrelo
+   con un clic, no crees ninguno. El resto de `src/` ya está completo.
+3. **Abre la terminal integrada**: menú `Terminal` → `New Terminal`
+   (o el atajo `` Ctrl+` ``, igual en Windows, Linux y Mac).
+4. **Levanta Postgres**: escribe `docker compose up -d` y pulsa
+   Intro — tarda un poco la primera vez, luego te devuelve el cursor.
+5. **Instala las dependencias**: escribe `npm install` y pulsa Intro.
+6. **Crea las tablas**: escribe `npm run migrate` y pulsa Intro —
+   aplica los archivos de `migrations/` en orden, incluido el que
+   tiene el `TODO`.
+7. **Ejecuta los tests**: escribe `npm test` y pulsa Intro — fallan
+   al principio, es tu punto de partida.
+8. **El ciclo de trabajo — con un matiz importante**: abre
+   `003_trigger_auditoria.sql`, completa `fn_auditar_cambio()`, guarda
+   con `Cmd`/`Ctrl` + `S`. **`npm run migrate` NO vale para volver a
+   aplicarlo**: el script recuerda qué migraciones ya ejecutó por
+   nombre de archivo, así que la segunda vez la salta (verás "Omitida"
+   en la terminal) aunque hayas cambiado el contenido. Y aquí hay una
+   trampa extra: el `npm run db:down` de este proyecto en concreto NO
+   borra los datos (a propósito, según su propio README) — así que
+   tienes que saltarte ese script y llamar a Docker directamente, con
+   `-v`:
+   ```bash
+   docker compose down -v
+   docker compose up -d
+   npm run migrate
+   npm test
+   ```
+   (el `-v` sí borra los datos del contenedor — es justo lo que
+   quieres aquí, para partir de cero).
+
 ## El punto de partida: un trigger que no registra nada
 
 ```laboratorio

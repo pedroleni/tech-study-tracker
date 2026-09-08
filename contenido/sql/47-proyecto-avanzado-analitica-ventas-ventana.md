@@ -49,6 +49,37 @@ Luego `cd sql-proyectos/analitica-ventas-ventana` y `npm install` —
 cada carpeta de este repositorio es un proyecto independiente con su
 propio `package.json`.
 
+### Del cero a los tests pasando, paso a paso
+
+Este proyecto no tiene servidor ni interfaz visual — todo se ve en la
+terminal. No hace falta crear ningún archivo nuevo: `src/analitica.ts`
+**ya existe**, con la firma de cada función y un `TODO` en
+`topClientesPorCategoria()` marcando qué falta escribir; el resto de
+`src/` ya está completo.
+
+1. **Abre la carpeta del proyecto en VS Code**: menú `Archivo` →
+   `Abrir carpeta...`, y elige la carpeta `analitica-ventas-ventana/`
+   de dentro de lo que clonaste (no la del repositorio `sql-proyectos`
+   entero).
+2. **Mira el explorador de archivos**, en la barra lateral izquierda:
+   dentro de `src/` verás `analitica.ts` — ábrelo con un clic, no
+   crees ninguno.
+3. **Abre la terminal integrada**: menú `Terminal` → `New Terminal`
+   (o el atajo `` Ctrl+` ``, igual en Windows, Linux y Mac).
+4. **Instala las dependencias**: escribe `npm install` y pulsa Intro.
+5. **Crea y carga la base de datos**: escribe `npm run migrate` y
+   pulsa Intro, y luego `npm run seed` — los dos juntos crean y
+   rellenan `data/ventas.sqlite` con datos de ejemplo.
+6. **Ejecuta los tests**: escribe `npm test` y pulsa Intro — fallan
+   al principio, es tu punto de partida.
+7. **El ciclo de trabajo**: abre `analitica.ts`, busca el `TODO` en
+   `topClientesPorCategoria()`, escribe la implementación, guarda con
+   `Cmd`/`Ctrl` + `S`, y vuelve a lanzar `npm test` en la terminal
+   para comprobarlo.
+8. **Para ver los tres informes con datos reales**, una vez pasen los
+   tests: `npm run dev` — imprime los resultados directamente en la
+   terminal, no hay nada que abrir en el navegador en este proyecto.
+
 ## El punto de partida: todos empatan en el primer puesto
 
 ```laboratorio

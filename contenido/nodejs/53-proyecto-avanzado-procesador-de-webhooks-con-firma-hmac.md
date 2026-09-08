@@ -48,6 +48,38 @@ Luego `cd nodejs-proyectos/procesador-webhooks` y `npm install` — cada
 carpeta de este repositorio es un proyecto independiente con su propio
 `package.json`.
 
+### Del cero al webhook recibido de verdad, paso a paso
+
+Este proyecto no tiene interfaz visual — se prueba desde la terminal.
+No hace falta crear ningún archivo nuevo: `src/firma.js` y
+`src/cliente-reintentos.js` **ya existen**, con `TODO` marcando qué
+falta escribir; `src/servidor.js` ya está completo.
+
+1. **Abre la carpeta del proyecto en VS Code**: menú `Archivo` →
+   `Abrir carpeta...`, y elige la carpeta `procesador-webhooks/` de
+   dentro de lo que clonaste (no la del repositorio
+   `nodejs-proyectos` entero).
+2. **Mira el explorador de archivos**, en la barra lateral izquierda:
+   dentro de `src/` verás `firma.js` y `cliente-reintentos.js` —
+   ábrelos con un clic, no crees ninguno.
+3. **Abre la terminal integrada**: menú `Terminal` → `New Terminal`
+   (o el atajo `` Ctrl+` ``, igual en Windows, Linux y Mac).
+4. **Instala las dependencias**: escribe `npm install` y pulsa Intro.
+5. **Ejecuta los tests**: escribe `npm test` y pulsa Intro — fallan
+   al principio, es tu punto de partida.
+6. **El ciclo de trabajo**: abre uno de los dos archivos, busca el
+   `TODO`, escribe la implementación, guarda con `Cmd`/`Ctrl` + `S`, y
+   vuelve a lanzar `npm test` en la terminal para comprobarlo.
+7. **Cuando los tests pasen, pruébalo de extremo a extremo**: escribe
+   `npm start` — arranca el servidor en el puerto 3000 y se queda
+   escuchando ahí (no te devuelve el cursor, es normal). **Abre una
+   SEGUNDA terminal** sin cerrar esta (icono `+` en el panel de
+   terminal), y en esa nueva pestaña ejecuta `npm run enviar` — envía
+   un webhook firmado real al servidor de la primera terminal. Revisa
+   el archivo `eventos.jsonl` que aparece en la carpeta del proyecto:
+   cada evento aceptado queda registrado ahí. Para parar el servidor,
+   vuelve a la primera terminal y pulsa `Ctrl+C`.
+
 ## El problema real: ¿cómo sabe el receptor que el webhook es legítimo?
 
 ```laboratorio

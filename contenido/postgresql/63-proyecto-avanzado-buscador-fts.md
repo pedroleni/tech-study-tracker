@@ -50,6 +50,39 @@ para levantar Postgres y `npm install` para las dependencias — cada
 carpeta de este repositorio es un proyecto independiente con su propio
 `package.json`.
 
+### Del cero a los tests pasando, paso a paso
+
+Este proyecto no tiene servidor ni interfaz visual — todo se ve en la
+terminal. No hace falta crear ningún archivo nuevo: `src/articulos.ts`
+**ya existe**, con la firma de cada función y un `TODO` en el filtro y
+el ranking de `buscarArticulos()` marcando qué falta escribir.
+
+1. **Abre la carpeta del proyecto en VS Code**: menú `Archivo` →
+   `Abrir carpeta...`, y elige la carpeta `buscador-fts/` de dentro de
+   lo que clonaste (no la del repositorio `postgresql-proyectos`
+   entero).
+2. **Mira el explorador de archivos**, en la barra lateral izquierda:
+   dentro de `src/` verás `articulos.ts` — ábrelo con un clic, no
+   crees ninguno.
+3. **Abre la terminal integrada**: menú `Terminal` → `New Terminal`
+   (o el atajo `` Ctrl+` ``, igual en Windows, Linux y Mac).
+4. **Levanta Postgres**: escribe `docker compose up -d` y pulsa
+   Intro — tarda un poco la primera vez, luego te devuelve el cursor
+   enseguida.
+5. **Instala las dependencias**: escribe `npm install` y pulsa Intro.
+6. **Crea las tablas**: escribe `npm run migrate` y pulsa Intro.
+7. **Ejecuta los tests**: escribe `npm test` y pulsa Intro — fallan
+   al principio, es tu punto de partida. Cada test prepara sus propios
+   datos, así que no hace falta el seed para que los tests pasen.
+8. **El ciclo de trabajo**: abre `articulos.ts`, busca el `TODO` en
+   `buscarArticulos()`, escribe la implementación, guarda con
+   `Cmd`/`Ctrl` + `S`, y vuelve a lanzar `npm test` en la terminal
+   para comprobarlo — al ser TypeScript (no una migración), el cambio
+   se recoge solo, sin nada que resetear.
+9. **Si quieres explorar el buscador con datos variados**: `npm run
+   seed` añade diez artículos de ejemplo cada vez que lo ejecutas —
+   útil para probar a mano, no hace falta para que pasen los tests.
+
 ## El punto de partida: una consulta que nunca encuentra nada
 
 ```laboratorio

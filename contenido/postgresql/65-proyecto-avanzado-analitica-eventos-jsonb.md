@@ -50,6 +50,37 @@ Luego, desde `postgresql-proyectos/analitica-eventos-jsonb`:
 dependencias — cada carpeta de este repositorio es un proyecto
 independiente con su propio `package.json`.
 
+### Del cero a los tests pasando, paso a paso
+
+Este proyecto no tiene servidor ni interfaz visual — todo se ve en la
+terminal. No hace falta crear ningún archivo nuevo: `src/eventos.ts`
+**ya existe**, con la firma de cada función y un `TODO` en las dos
+consultas de búsqueda por `payload` marcando qué falta escribir.
+
+1. **Abre la carpeta del proyecto en VS Code**: menú `Archivo` →
+   `Abrir carpeta...`, y elige la carpeta `analitica-eventos-jsonb/`
+   de dentro de lo que clonaste (no la del repositorio
+   `postgresql-proyectos` entero).
+2. **Mira el explorador de archivos**, en la barra lateral izquierda:
+   dentro de `src/` verás `eventos.ts` — ábrelo con un clic, no crees
+   ninguno.
+3. **Abre la terminal integrada**: menú `Terminal` → `New Terminal`
+   (o el atajo `` Ctrl+` ``, igual en Windows, Linux y Mac).
+4. **Levanta Postgres**: escribe `docker compose up -d` y pulsa
+   Intro — tarda un poco la primera vez, luego te devuelve el cursor.
+5. **Instala las dependencias**: escribe `npm install` y pulsa Intro.
+6. **Crea las tablas**: escribe `npm run migrate` y pulsa Intro.
+7. **Ejecuta los tests**: escribe `npm test` y pulsa Intro — fallan
+   al principio, es tu punto de partida.
+8. **El ciclo de trabajo**: abre `eventos.ts`, busca los dos `TODO`,
+   escribe la implementación, guarda con `Cmd`/`Ctrl` + `S`, y vuelve
+   a lanzar `npm test` en la terminal para comprobarlo — al ser
+   TypeScript (no una migración), el cambio se recoge solo, sin nada
+   que resetear.
+9. **Para cargar 45 eventos de muestra y ver el dashboard**: `npm run
+   seed` — imprime el resultado directamente en la terminal, no hace
+   falta ningún navegador.
+
 ## El punto de partida: dos consultas que nunca encuentran nada
 
 ```laboratorio

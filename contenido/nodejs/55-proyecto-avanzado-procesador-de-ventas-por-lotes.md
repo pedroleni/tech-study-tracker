@@ -48,6 +48,40 @@ Luego `cd nodejs-proyectos/procesador-ventas-streams` y `npm install` —
 cada carpeta de este repositorio es un proyecto independiente con su
 propio `package.json`.
 
+### Del cero al informe generado de verdad, paso a paso
+
+Este proyecto no tiene servidor ni interfaz visual — es una
+herramienta de línea de comandos que procesa un fichero y escribe un
+informe. No hace falta crear ningún archivo nuevo:
+`src/divisor-lineas.ts` y `src/agregador.ts` **ya existen**, con
+`TODO` marcando qué falta escribir; el resto de `src/` ya está
+completo.
+
+1. **Abre la carpeta del proyecto en VS Code**: menú `Archivo` →
+   `Abrir carpeta...`, y elige la carpeta
+   `procesador-ventas-streams/` de dentro de lo que clonaste (no la
+   del repositorio `nodejs-proyectos` entero).
+2. **Mira el explorador de archivos**, en la barra lateral izquierda:
+   dentro de `src/` verás `divisor-lineas.ts` y `agregador.ts` —
+   ábrelos con un clic, no crees ninguno.
+3. **Abre la terminal integrada**: menú `Terminal` → `New Terminal`
+   (o el atajo `` Ctrl+` ``, igual en Windows, Linux y Mac).
+4. **Instala las dependencias**: escribe `npm install` y pulsa Intro.
+5. **Ejecuta los tests**: escribe `npm test` y pulsa Intro — fallan
+   al principio, es tu punto de partida.
+6. **El ciclo de trabajo**: abre uno de los dos archivos, busca el
+   `TODO`, escribe la implementación, guarda con `Cmd`/`Ctrl` + `S`, y
+   vuelve a lanzar `npm test` en la terminal para comprobarlo.
+7. **Cuando los tests pasen, pruébalo con un fichero real y grande**:
+   ```bash
+   npm run generar-datos -- ventas.csv 300000
+   npm start -- ventas.csv
+   ```
+   La primera línea crea un CSV real de 300.000 filas; la segunda lo
+   procesa y muestra el informe final directamente en la terminal —
+   no hay navegador que abrir en este proyecto, el resultado se ve
+   ahí mismo.
+
 ## El problema real: `readFileSync` funciona... hasta que el fichero no cabe en memoria
 
 ```laboratorio

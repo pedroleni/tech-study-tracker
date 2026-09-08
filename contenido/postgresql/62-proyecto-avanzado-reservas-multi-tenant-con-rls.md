@@ -50,6 +50,52 @@ Luego, desde `postgresql-proyectos/reservas-multi-tenant-rls`:
 dependencias — cada carpeta de este repositorio es un proyecto
 independiente con su propio `package.json`.
 
+### Del cero a los tests pasando, paso a paso
+
+Este proyecto no tiene servidor ni interfaz visual — todo se ve en la
+terminal. Aquí el `TODO` no está en un archivo `.ts`, sino dentro de
+`migrations/003_rls.sql`: las políticas RLS están recortadas a
+`using(false)`/`with check(false)`. No hace falta crear ningún archivo
+nuevo — todos, incluido ese, **ya existen**.
+
+1. **Abre la carpeta del proyecto en VS Code**: menú `Archivo` →
+   `Abrir carpeta...`, y elige la carpeta
+   `reservas-multi-tenant-rls/` de dentro de lo que clonaste (no la
+   del repositorio `postgresql-proyectos` entero).
+2. **Mira el explorador de archivos**, en la barra lateral izquierda:
+   dentro de `migrations/` verás `003_rls.sql` — ábrelo con un clic,
+   no crees ninguno. El resto de `src/` ya está completo.
+3. **Abre la terminal integrada**: menú `Terminal` → `New Terminal`
+   (o el atajo `` Ctrl+` ``, igual en Windows, Linux y Mac).
+4. **Levanta Postgres**: escribe `docker compose up -d` y pulsa
+   Intro — descarga la imagen la primera vez (tarda un poco) y luego
+   deja el contenedor corriendo en segundo plano; te devuelve el
+   cursor enseguida, no hace falta dejarlo "abierto" en primer plano.
+5. **Instala las dependencias**: escribe `npm install` y pulsa Intro.
+6. **Crea las tablas**: escribe `npm run migrate` y pulsa Intro —
+   aplica los archivos de `migrations/` en orden, incluido el que
+   tiene el `TODO`.
+7. **Ejecuta los tests**: escribe `npm test` y pulsa Intro — fallan
+   al principio, es tu punto de partida.
+8. **El ciclo de trabajo — con un matiz importante**: abre
+   `003_rls.sql`, escribe las políticas, guarda con `Cmd`/`Ctrl` +
+   `S`. **`npm run migrate` NO vale para volver a aplicarlo**: el
+   script recuerda qué migraciones ya ejecutó por nombre de archivo,
+   así que la segunda vez la salta (verás "Omitida... (ya aplicada)"
+   en la terminal) aunque hayas cambiado el contenido. Para que tu
+   cambio se aplique de verdad, resetea la base de datos entera:
+   ```bash
+   docker compose down -v
+   docker compose up -d
+   npm run migrate
+   npm test
+   ```
+   (el `-v` sí borra los datos del contenedor — es justo lo que
+   quieres aquí, para partir de cero).
+9. **Si quieres ver los datos con tus propios ojos**: `npm run seed`
+   y luego `npm run dev` muestran, directamente en la terminal, qué
+   filas ve cada organización — sin abrir ningún navegador.
+
 ## El punto de partida: `using (false)` deniega todo, a propósito
 
 ```laboratorio

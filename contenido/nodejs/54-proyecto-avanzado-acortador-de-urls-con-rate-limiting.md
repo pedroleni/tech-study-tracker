@@ -48,6 +48,46 @@ Luego `cd nodejs-proyectos/acortador-rate-limit` y `npm install` — cada
 carpeta de este repositorio es un proyecto independiente con su propio
 `package.json`.
 
+### Del cero al enlace acortado de verdad, paso a paso
+
+Este proyecto no tiene interfaz visual — se prueba desde la terminal.
+No hace falta crear ningún archivo nuevo: `src/limitador.js` y
+`src/csv.js` **ya existen**, con `TODO` marcando qué falta escribir;
+`db.js`, `codigo.js` y `servidor.js` ya están completos.
+
+1. **Abre la carpeta del proyecto en VS Code**: menú `Archivo` →
+   `Abrir carpeta...`, y elige la carpeta `acortador-rate-limit/` de
+   dentro de lo que clonaste (no la del repositorio
+   `nodejs-proyectos` entero).
+2. **Mira el explorador de archivos**, en la barra lateral izquierda:
+   dentro de `src/` verás `limitador.js` y `csv.js` — ábrelos con un
+   clic, no crees ninguno.
+3. **Abre la terminal integrada**: menú `Terminal` → `New Terminal`
+   (o el atajo `` Ctrl+` ``, igual en Windows, Linux y Mac).
+4. **Instala las dependencias**: escribe `npm install` y pulsa Intro.
+5. **Ejecuta los tests**: escribe `npm test` y pulsa Intro — fallan
+   al principio, es tu punto de partida.
+6. **El ciclo de trabajo**: abre uno de los dos archivos, busca el
+   `TODO`, escribe la implementación, guarda con `Cmd`/`Ctrl` + `S`, y
+   vuelve a lanzar `npm test` en la terminal para comprobarlo.
+7. **Cuando los tests pasen, pruébalo de extremo a extremo**: escribe
+   `npm start` — arranca el servidor en el puerto 3000 y se queda
+   escuchando ahí. **Abre una SEGUNDA terminal** sin cerrar esta
+   (icono `+` en el panel de terminal), y en esa nueva pestaña
+   ejecuta:
+   ```bash
+   curl -X POST http://localhost:3000/acortar \
+     -H 'Content-Type: application/json' \
+     -d '{"url":"https://developer.mozilla.org/es/docs/Web/JavaScript"}'
+   ```
+   y con el código que devuelva:
+   ```bash
+   curl -i http://localhost:3000/<codigo>
+   ```
+   repítelo varias veces seguidas y verás el 429 real en cuanto se
+   agote el cubo de fichas. Para parar el servidor, vuelve a la
+   primera terminal y pulsa `Ctrl+C`.
+
 ## El problema real: un contador simple no es lo mismo que un token bucket
 
 ```laboratorio

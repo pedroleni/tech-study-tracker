@@ -51,6 +51,54 @@ Luego `cd nodejs-proyectos/api-auth-jwt` y `npm install` — cada carpeta
 de este repositorio es un proyecto independiente con su propio
 `package.json`.
 
+### Del cero a la API respondiendo de verdad, paso a paso
+
+Este proyecto no tiene interfaz visual — es una API, y se prueba desde
+la terminal, no desde un navegador. No hace falta crear ningún archivo
+nuevo: `src/contrasenas.ts` y `src/jwt.ts` **ya existen**, con la firma
+de cada función y un `TODO` marcando qué falta escribir; `tipos.ts`,
+`db.ts` y `servidor.ts` ya están completos.
+
+1. **Abre la carpeta del proyecto en VS Code**: menú `Archivo` →
+   `Abrir carpeta...`, y elige la carpeta `api-auth-jwt/` de dentro de
+   lo que clonaste (la de este proyecto en concreto, no la del
+   repositorio `nodejs-proyectos` entero).
+2. **Mira el explorador de archivos**, en la barra lateral izquierda:
+   dentro de `src/` verás `contrasenas.ts` y `jwt.ts` — ábrelos con un
+   clic, no crees ninguno.
+3. **Abre la terminal integrada**: menú `Terminal` → `New Terminal`
+   (o el atajo `` Ctrl+` ``, igual en Windows, Linux y Mac).
+4. **Instala las dependencias**: escribe `npm install` y pulsa Intro.
+5. **Ejecuta los tests**: escribe `npm test` y pulsa Intro — al
+   principio fallan, porque `contrasenas.ts`/`jwt.ts` solo tienen
+   `TODO`. Ese fallo es tu punto de partida, no un error tuyo.
+6. **El ciclo de trabajo**: abre uno de los dos archivos, busca el
+   `TODO`, escribe la implementación, guarda con `Cmd`/`Ctrl` + `S`, y
+   vuelve a la terminal a ejecutar `npm test` otra vez — no hay
+   recarga automática aquí: cada cambio se comprueba volviendo a
+   lanzar el comando a mano.
+7. **Cuando los tests pasen, prueba la API de verdad**: escribe
+   `npm start` — arranca el servidor en el puerto 3000 y se queda
+   ahí, escuchando (no te devuelve el cursor, es normal). **Abre una
+   SEGUNDA terminal** sin cerrar esta: icono `+` en la esquina del
+   panel de terminal (o menú `Terminal` → `New Terminal` otra vez), y
+   en esa nueva pestaña ejecuta:
+   ```bash
+   curl -X POST http://localhost:3000/registro \
+     -H 'Content-Type: application/json' \
+     -d '{"email":"ana@test.com","contrasena":"secreto123"}'
+   ```
+   y luego, con el token que devuelva ese `login`:
+   ```bash
+   curl -X POST http://localhost:3000/login \
+     -H 'Content-Type: application/json' \
+     -d '{"email":"ana@test.com","contrasena":"secreto123"}'
+
+   curl http://localhost:3000/perfil -H "Authorization: Bearer <token>"
+   ```
+   Para parar el servidor cuando termines, vuelve a la primera
+   terminal (la que quedó ocupada) y pulsa `Ctrl+C`.
+
 ## El problema real: dos formas de meter la pata con contraseñas
 
 ```laboratorio
