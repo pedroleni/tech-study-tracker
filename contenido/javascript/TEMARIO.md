@@ -526,6 +526,22 @@ sostenida en las tres pasadas.
   editor de código, ni cómo conseguir el código sin `git` — se añadió
   una sección compartida "Si es la primera vez que sales del navegador
   en este curso" a ambas.
+- **Proyecto avanzado: panel de criptomonedas (79, 2026-09-08)**: segundo
+  escalón del recorrido pedagógico principal tras el `77` (el recetario
+  del `78` es el proyecto paralelo/opcional sobre routing) — introduce
+  componentes reutilizables con **ciclo de vida explícito**
+  (`crear`/`actualizar`/`destruir`), la pieza que un framework gestiona
+  por ti. Usa la API real y sin clave de CoinGecko (verificada con
+  `curl`, CORS abierto). Bug real plantado a propósito: un listener de
+  `resize` registrado en `window` dentro de `crear()` no desaparece solo
+  cuando se quita el nodo del DOM — si `destruir()` no lo retira con la
+  misma referencia de función, cada tarjeta filtrada deja un listener
+  fantasma colgado para siempre. Repositorio:
+  [github.com/pedroleni/javascript-proyectos/panel-cripto](https://github.com/pedroleni/javascript-proyectos/tree/main/panel-cripto).
+  `tarjetaMoneda.test.js` (rama `solucion`) falla de verdad si
+  `destruir()` no quita exactamente esa referencia — se verificó
+  leyendo el código generado, sin necesidad de revertirlo a mano porque
+  la comparación de referencias de función deja la lógica sin ambigüedad.
 - **Proyecto avanzado (histórico) — buscador con TypeScript**: ocupó
   este mismo número de fichero (`78`) hasta el 2026-08-30, cuando se
   trasladó a `contenido/typescript/55-...md` por pertenecer de verdad
