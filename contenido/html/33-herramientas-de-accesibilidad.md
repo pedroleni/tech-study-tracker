@@ -60,6 +60,32 @@
 | Lighthouse | Integrado en Chrome DevTools | Auditoría de accesibilidad junto con rendimiento y SEO |
 | WAVE | Extensión o herramienta web | Resalta visualmente cada problema directamente sobre la página |
 
+Esto no es una captura de ejemplo — es Lighthouse auditando de verdad la página de Proyectos de esta misma web, ahora mismo:
+
+```laboratorio
+{
+  "tipo": "imagen",
+  "src": "https://www.techstudytracker.com/img/aa1fca887b040d9e758089fb2f2094c104d6c61472795fba17a4f6cadf114a2e.png",
+  "alt": "Informe real de Lighthouse sobre techstudytracker.com/proyectos: 95 sobre 100 en accesibilidad, con un problema real de contraste detectado y los elementos exactos que lo causan",
+  "titulo": "Lighthouse auditando esta misma web, de verdad"
+}
+```
+
+95 sobre 100 — y aun así encontró un problema real de contraste, con el elemento exacto y su CSS. Ni un 95 significa "sin nada que revisar".
+
+Y esto es WAVE, sobre la misma página real:
+
+```laboratorio
+{
+  "tipo": "imagen",
+  "src": "https://www.techstudytracker.com/img/6d814f9ada51b9ce3801188a97839f04951bad8df1749956663131f57ef5c3d4.png",
+  "alt": "Resumen real de WAVE sobre techstudytracker.com/proyectos: 0 errores, 2 alertas reales (sin estructura de encabezados, sin regiones de página)",
+  "titulo": "WAVE evaluando esta misma web, de verdad"
+}
+```
+
+0 errores, pero 2 alertas reales — ninguna herramienta automática da nunca un aprobado absoluto, ni siquiera en una web ya cuidada.
+
 ```laboratorio
 {
   "tipo": "callout",

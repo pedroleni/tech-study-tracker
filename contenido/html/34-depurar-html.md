@@ -110,6 +110,19 @@ El navegador nunca se rinde ante HTML roto: si falta una etiqueta de cierre o un
 | End tag strong violates nesting rules | Las etiquetas se cierran en el orden equivocado |
 | End of file reached when inside an attribute value | Falta una comilla de cierre en algún atributo |
 
+Esto no es teórico — es el resultado real de pasar por validator.w3.org el `strong` sin cerrar y la comilla sin cerrar de los dos ejemplos de arriba, en el mismo documento:
+
+```laboratorio
+{
+  "tipo": "imagen",
+  "src": "https://www.techstudytracker.com/img/8724b69bc8d73eb23649e6e34d09d947809045eb0be559deca1e1a7a2b67aebb.png",
+  "alt": "Resultado real del validador del W3C sobre un HTML con los mismos errores de esta lección: strong sin cerrar, anidamiento cruzado y una comilla de atributo sin cerrar",
+  "titulo": "El validador del W3C encontrando estos errores reales"
+}
+```
+
+Fíjate en el mensaje "Unclosed element strong" — la línea exacta de la tabla de arriba, no una paráfrasis.
+
 ```laboratorio
 {
   "tipo": "callout",
