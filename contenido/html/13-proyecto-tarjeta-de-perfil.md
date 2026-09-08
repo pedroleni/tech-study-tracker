@@ -55,6 +55,19 @@ Una tarjeta de perfil como la que verías en la página "Sobre el equipo" de cua
 }
 ```
 
+### Si prefieres hacerlo en tu propio ordenador, con VS Code
+
+Puedes hacer este mismo proyecto fuera del navegador, en un editor real — la misma dinámica que vas a usar en el resto de tu carrera, y la que usan los "proyecto avanzado" más adelante en otros temarios.
+
+1. **Crea una carpeta** en tu ordenador (Escritorio, Documentos... donde quieras) con el nombre que quieras para este proyecto.
+2. **Ábrela en VS Code**: menú `Archivo` → `Abrir carpeta...`.
+3. **Crea dos archivos** dentro, con el icono de "Nuevo archivo" del explorador (o clic derecho → `New File`): `index.html` y `style.css` — los nombres importan, son los que enlazas en el siguiente paso.
+4. **Copia el código de partida** de cada pestaña de los editores en vivo de abajo (HTML, CSS) en el archivo que corresponda — es el mismo código, solo que ahora en archivos de verdad, no en un widget.
+5. **Enlaza los dos archivos** — esto el editor en vivo lo hace por ti, pero en un proyecto real hay que escribirlo a mano: dentro de `<head>` en `index.html`, añade `<link rel="stylesheet" href="style.css">`.
+6. **Abre la terminal integrada**: menú `Terminal` → `New Terminal` (o el atajo `` Ctrl+` ``, igual en Windows, Linux y Mac).
+7. **Sirve la carpeta**: escribe `npx serve .` y pulsa Intro — abre en el navegador la URL que imprima. (Alternativa sin terminal: instala la extensión "Live Server" y pulsa "Go Live" — además recarga sola con cada guardado.)
+8. **El ciclo de trabajo**: edita el archivo que toque, guarda con `Cmd`/`Ctrl` + `S`, y refresca el navegador para ver el cambio.
+
 ## Paso 1: la estructura y la foto
 
 Recuerda cómo funciona una imagen en HTML: `<img>` es una etiqueta que no lleva cierre, y necesita un `src` (de dónde sale la imagen) y un `alt` (el texto que la describe si no se puede ver, por ejemplo con un lector de pantalla). En este proyecto el `src` es una imagen de prueba en formato `data:`: el propio dibujo va codificado ahí dentro, así que se ve igual en cualquier sitio sin depender de ningún archivo externo ni de conexión a internet.

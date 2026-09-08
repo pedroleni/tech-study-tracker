@@ -181,6 +181,16 @@ La última lección del temario. Dos retos que no introducen nada nuevo — comb
 3. Implementa un filtro sobre un array de datos usando el patrón "valor vacío = cualquier valor" con `&&`.
 4. Construye el DOM de un resultado usando `createElement()`/`appendChild()`/`textContent`, sin usar `innerHTML` en ningún momento.
 
+### Si prefieres hacerlo en tu propio ordenador, con VS Code
+
+También puedes resolver estos ejercicios fuera del navegador, en un editor real — la misma dinámica que vas a usar en el resto de tu carrera:
+
+1. **Crea una carpeta**, ábrela en VS Code (`Archivo` → `Abrir carpeta...`), y dentro crea `index.html` y `script.js`.
+2. **Copia el código de partida** de las pestañas HTML y JavaScript del editor en vivo de abajo en el archivo que corresponda.
+3. **Enlázalos**: justo antes de `</body>` en `index.html`, añade `<script src="script.js"></script>` — el editor en vivo hace este enlace por ti, pero en un archivo real hay que escribirlo a mano.
+4. **Abre la terminal integrada** (`Terminal` → `New Terminal`, o el atajo `` Ctrl+` ``) y escribe `npx serve .` para verlo en el navegador — o instala la extensión "Live Server" y pulsa "Go Live", que además recarga sola con cada guardado.
+5. Edita, guarda con `Cmd`/`Ctrl` + `S`, y refresca el navegador (o deja que Live Server lo haga por ti) para ver el cambio.
+
 ```laboratorio
 {
   "tipo": "editor-en-vivo",

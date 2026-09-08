@@ -29,6 +29,19 @@ Un generador de contraseñas con longitud configurable y checkboxes para incluir
 }
 ```
 
+### Si prefieres hacerlo en tu propio ordenador, con VS Code
+
+Puedes hacer este mismo proyecto fuera del navegador, en un editor real — la misma dinámica que vas a usar en el resto de tu carrera, y la que usan los "proyecto avanzado" más adelante en este temario.
+
+1. **Crea una carpeta** en tu ordenador (Escritorio, Documentos... donde quieras) con el nombre que quieras para este proyecto.
+2. **Ábrela en VS Code**: menú `Archivo` → `Abrir carpeta...`.
+3. **Crea tres archivos** dentro, con el icono de "Nuevo archivo" del explorador (o clic derecho → `New File`): `index.html`, `style.css` y `script.js` — los nombres importan, son los que enlazas en el siguiente paso.
+4. **Copia el código de partida** de cada pestaña de los editores en vivo de abajo (HTML, CSS, JavaScript) en el archivo que corresponda — es el mismo código, solo que ahora en archivos de verdad, no en un widget.
+5. **Enlaza los tres archivos** — esto el editor en vivo lo hace por ti, pero en un proyecto real hay que escribirlo a mano: dentro de `<head>` en `index.html`, añade `<link rel="stylesheet" href="style.css">`; justo antes de `</body>`, añade `<script src="script.js"></script>`.
+6. **Abre la terminal integrada**: menú `Terminal` → `New Terminal` (o el atajo `` Ctrl+` ``, igual en Windows, Linux y Mac).
+7. **Sirve la carpeta**: escribe `npx serve .` y pulsa Intro — abre en el navegador la URL que imprima. (Alternativa sin terminal: instala la extensión "Live Server" y pulsa "Go Live" — además recarga sola con cada guardado.)
+8. **El ciclo de trabajo**: edita el archivo que toque, guarda con `Cmd`/`Ctrl` + `S`, y refresca el navegador para ver el cambio.
+
 ## Paso 1: elegir un carácter al azar de un string
 
 Antes de la interfaz, resuelve el problema base: dado un string de caracteres posibles, devuelve uno al azar.

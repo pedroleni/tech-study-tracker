@@ -29,6 +29,21 @@ Una lista de tareas pequeña, pensada para aplicar de golpe lo que ya viste en l
 }
 ```
 
+### Si prefieres hacerlo en tu propio ordenador, con VS Code
+
+Puedes hacer este mismo proyecto fuera del navegador, en un editor real. Aquí hay un paso extra respecto a los proyectos de JavaScript: el navegador no entiende `.ts` directamente, así que hace falta compilarlo a `.js` antes de poder verlo.
+
+1. **Instala Node.js** si todavía no lo tienes: versión **LTS** desde [nodejs.org](https://nodejs.org).
+2. **Crea una carpeta** en tu ordenador con el nombre que quieras para este proyecto.
+3. **Ábrela en VS Code**: menú `Archivo` → `Abrir carpeta...`.
+4. **Crea dos archivos**: `index.html` y `script.ts` — el nombre `script.ts` importa, es el que compilas en el siguiente paso.
+5. **Copia el código de partida** de cada pestaña del editor en vivo de abajo (HTML, TypeScript) en el archivo que corresponda.
+6. **Enlaza el archivo compilado, no el `.ts`** — dentro de `<head>` o justo antes de `</body>` en `index.html`, añade `<script src="script.js"></script>` (fíjate: `.js`, no `.ts` — el navegador nunca ejecuta TypeScript directamente).
+7. **Abre la terminal integrada**: menú `Terminal` → `New Terminal` (o el atajo `` Ctrl+` ``, igual en Windows, Linux y Mac).
+8. **Compila en modo vigilancia**: escribe `npx tsc script.ts --watch` y pulsa Intro — deja esta terminal abierta; cada vez que guardes `script.ts`, genera un `script.js` actualizado solo.
+9. **Abre una SEGUNDA terminal** (icono `+` en el panel), y en esa sirve la carpeta: `npx serve .` — abre en el navegador la URL que imprima.
+10. **El ciclo de trabajo**: edita `script.ts`, guarda con `Cmd`/`Ctrl` + `S` — la primera terminal recompila sola a `script.js` — y refresca el navegador para ver el cambio.
+
 ## El tipo Tarea
 
 ```laboratorio
