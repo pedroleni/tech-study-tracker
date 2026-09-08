@@ -195,18 +195,31 @@ Con esas cuatro propiedades puestas, así es exactamente lo que aparece cuando a
 }
 ```
 
-Esa es la maqueta de cómo se vería CON las cuatro propiedades puestas. Y esto no es una maqueta — es un inspector de Open Graph real, pasado ahora mismo sobre `techstudytracker.com`, la web de este mismo curso:
+Esa es la maqueta de cómo se vería CON las cuatro propiedades puestas. Y esto no es una maqueta — es un inspector de Open Graph real, pasado sobre `techstudytracker.com`, la web de este mismo curso, cuando esta lección se escribió, antes de tener ninguna de las cuatro propiedades:
 
 ```laboratorio
 {
   "tipo": "imagen",
   "src": "https://www.techstudytracker.com/img/e6776a67aac578a491cbe29dc175c83c09c6ab3d8a7a3d1e6533d8cf580f977f.png",
   "alt": "Resultado real de opengraph.xyz sobre techstudytracker.com: sin og:title, sin og:image y sin twitter:image — 3 errores reales, la tarjeta de Facebook se ve pelada, sin imagen ni título propio",
-  "titulo": "Cómo se ve de verdad un enlace sin Open Graph: esta misma web"
+  "titulo": "Antes: sin Open Graph, esta misma web"
 }
 ```
 
-3 errores reales: falta `og:title`, falta `og:image`, falta `twitter:image` — exactamente el "enlace pelado, solo texto azul" del callout de arriba, pero no como advertencia teórica, sino como lo que de verdad pasa hoy al pegar `techstudytracker.com` en un chat. Todavía no tiene las cuatro propiedades que acabas de ver — un ejemplo real de que hasta un sitio ya en producción puede tener este hueco.
+3 errores reales: falta `og:title`, falta `og:image`, falta `twitter:image` — exactamente el "enlace pelado, solo texto azul" del callout de arriba, pero no como advertencia teórica, sino como lo que de verdad pasaba al pegar `techstudytracker.com` en un chat. Ni un sitio ya en producción se libra de este hueco.
+
+Y esto es el mismo inspector, sobre la misma web, después de añadir exactamente las cuatro propiedades de la tabla de arriba:
+
+```laboratorio
+{
+  "tipo": "imagen",
+  "src": "https://www.techstudytracker.com/img/8ae7975445ec8a0d05c6543f611947d5641339fce6798ece5d4e51ca33c0f5f4.png",
+  "alt": "Resultado real de opengraph.xyz sobre techstudytracker.com tras añadir las etiquetas: 0 errores, tarjeta de Facebook con imagen, título y descripción reales",
+  "titulo": "Después: las mismas cuatro propiedades, aplicadas de verdad"
+}
+```
+
+0 errores, tarjeta con imagen real — el mismo cambio que acabas de ver en la tabla de arriba, resuelto de verdad, no simulado.
 
 ## Enlazar CSS y JavaScript desde el head
 
