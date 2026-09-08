@@ -14,6 +14,15 @@ Un explorador de personajes de Rick and Morty con búsqueda, paginación y favor
 
 ```laboratorio
 {
+  "tipo": "imagen",
+  "src": "https://www.techstudytracker.com/img/04ed4dccac7558f1e03a51e86e151daae220166dbb57bc6e722fa09ff0a32696.png",
+  "alt": "Captura del explorador de personajes: rejilla de tarjetas de Rick and Morty con buscador y favoritos",
+  "titulo": "El explorador de personajes terminado"
+}
+```
+
+```laboratorio
+{
   "tipo": "callout",
   "variante": "info",
   "titulo": "El repositorio",

@@ -14,6 +14,15 @@ Una SPA de recetas contra una API real (TheMealDB) — pero esta vez con **varia
 
 ```laboratorio
 {
+  "tipo": "imagen",
+  "src": "https://www.techstudytracker.com/img/bb3b587924036f5d3da1f14a326f849d0fb3fd0fffb66dfb00e72be61ba05c1d.png",
+  "alt": "Captura de la portada del recetario, con la llamada a buscar una receta",
+  "titulo": "La portada del recetario"
+}
+```
+
+```laboratorio
+{
   "tipo": "callout",
   "variante": "info",
   "titulo": "El repositorio",

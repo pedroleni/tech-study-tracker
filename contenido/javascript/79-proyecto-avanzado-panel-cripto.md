@@ -14,6 +14,15 @@ Un dashboard de criptomonedas contra una API real (CoinGecko): una rejilla con l
 
 ```laboratorio
 {
+  "tipo": "imagen",
+  "src": "https://www.techstudytracker.com/img/ddb64a39f81ae1b6ff542c6a84528b4f0e44e9dc87ce276ac6e054e685e7213e.png",
+  "alt": "Captura del panel de criptomonedas: rejilla de tarjetas con precio, variación y sparkline de cada moneda",
+  "titulo": "El panel de criptomonedas terminado"
+}
+```
+
+```laboratorio
+{
   "tipo": "callout",
   "variante": "info",
   "titulo": "El repositorio",

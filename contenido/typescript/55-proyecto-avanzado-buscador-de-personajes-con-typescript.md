@@ -15,6 +15,15 @@ La versión más pequeña de esta serie de proyectos — a propósito. Aquí no 
 
 ```laboratorio
 {
+  "tipo": "imagen",
+  "src": "https://www.techstudytracker.com/img/bac5ea702c71a7b1e4a63cd6ea5b489e5e5ea927e3d0ba1f0f62fd7a4c15d8fc.png",
+  "alt": "Captura del buscador de personajes en TypeScript, con resultados para 'rick'",
+  "titulo": "El buscador de personajes con TypeScript"
+}
+```
+
+```laboratorio
+{
   "tipo": "callout",
   "variante": "info",
   "titulo": "El repositorio",

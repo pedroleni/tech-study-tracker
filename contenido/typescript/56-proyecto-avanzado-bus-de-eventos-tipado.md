@@ -19,6 +19,15 @@ sin casts, con autocompletado real.
 
 ```laboratorio
 {
+  "tipo": "imagen",
+  "src": "https://www.techstudytracker.com/img/ab1e206aa3da4c27e177c130f5e69aebcaad313ffac190395ddb60d768a41b2a.png",
+  "alt": "Captura del bus de eventos tipado, con un contador y un registro de eventos en vivo",
+  "titulo": "El bus de eventos tipado"
+}
+```
+
+```laboratorio
+{
   "tipo": "callout",
   "variante": "info",
   "titulo": "El repositorio",

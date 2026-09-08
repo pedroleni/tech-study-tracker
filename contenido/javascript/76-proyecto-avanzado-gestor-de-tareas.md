@@ -14,6 +14,15 @@ El mismo gestor de tareas que ya construiste en el proyecto sencillo — pero he
 
 ```laboratorio
 {
+  "tipo": "imagen",
+  "src": "https://www.techstudytracker.com/img/b41e3be8440f5eea4919a8751f3530e3a2295a6f4ea85ea7be5fd45784af29ad.png",
+  "alt": "Captura del gestor de tareas: lista con dos tareas pendientes, filtros Todas/Pendientes/Completadas",
+  "titulo": "El gestor de tareas terminado"
+}
+```
+
+```laboratorio
+{
   "tipo": "callout",
   "variante": "info",
   "titulo": "El repositorio",

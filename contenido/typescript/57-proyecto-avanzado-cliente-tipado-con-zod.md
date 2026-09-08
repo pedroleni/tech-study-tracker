@@ -18,6 +18,15 @@ de verdad, dato a dato, en tiempo de ejecución.
 
 ```laboratorio
 {
+  "tipo": "imagen",
+  "src": "https://www.techstudytracker.com/img/15ecd8a20807f0ef92bf7953a02189e3f76cc03f96b30ced6ab83458d89aa261.png",
+  "alt": "Captura del cliente tipado con Zod, mostrando el resultado de buscar 'pikachu' en la PokeAPI",
+  "titulo": "El cliente tipado con Zod"
+}
+```
+
+```laboratorio
+{
   "tipo": "callout",
   "variante": "info",
   "titulo": "El repositorio",

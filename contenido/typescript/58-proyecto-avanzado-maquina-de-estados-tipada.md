@@ -20,6 +20,15 @@ ni expresar si te falta un caso.
 
 ```laboratorio
 {
+  "tipo": "imagen",
+  "src": "https://www.techstudytracker.com/img/afb0c9f5bb1aad3260e9b0a0f4240898e9e0adf0fc9ab07c118368fc785d3f63.png",
+  "alt": "Captura de la máquina de estados tipada, con el seguimiento de un pedido en estado 'Pendiente de pago'",
+  "titulo": "La máquina de estados tipada"
+}
+```
+
+```laboratorio
+{
   "tipo": "callout",
   "variante": "info",
   "titulo": "El repositorio",
