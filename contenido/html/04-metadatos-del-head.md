@@ -195,6 +195,19 @@ Con esas cuatro propiedades puestas, así es exactamente lo que aparece cuando a
 }
 ```
 
+Esa es la maqueta de cómo se vería CON las cuatro propiedades puestas. Y esto no es una maqueta — es un inspector de Open Graph real, pasado ahora mismo sobre `techstudytracker.com`, la web de este mismo curso:
+
+```laboratorio
+{
+  "tipo": "imagen",
+  "src": "https://www.techstudytracker.com/img/e6776a67aac578a491cbe29dc175c83c09c6ab3d8a7a3d1e6533d8cf580f977f.png",
+  "alt": "Resultado real de opengraph.xyz sobre techstudytracker.com: sin og:title, sin og:image y sin twitter:image — 3 errores reales, la tarjeta de Facebook se ve pelada, sin imagen ni título propio",
+  "titulo": "Cómo se ve de verdad un enlace sin Open Graph: esta misma web"
+}
+```
+
+3 errores reales: falta `og:title`, falta `og:image`, falta `twitter:image` — exactamente el "enlace pelado, solo texto azul" del callout de arriba, pero no como advertencia teórica, sino como lo que de verdad pasa hoy al pegar `techstudytracker.com` en un chat. Todavía no tiene las cuatro propiedades que acabas de ver — un ejemplo real de que hasta un sitio ya en producción puede tener este hueco.
+
 ## Enlazar CSS y JavaScript desde el head
 
 Antes del ejercicio que viene hace falta una palabra que vas a ver todo el rato a partir de aquí: el **DOM**.

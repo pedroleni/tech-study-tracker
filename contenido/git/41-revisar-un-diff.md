@@ -21,6 +21,19 @@ Revisar un pull request es, en el fondo, leer un `git diff` con comentarios enci
 }
 ```
 
+Esto no es una recreación — es la pestaña real Files changed de un PR real de este mismo proyecto:
+
+```laboratorio
+{
+  "tipo": "imagen",
+  "src": "https://www.techstudytracker.com/img/e31955402b7bde12995783ac4af6a33d7f39bae1840210072f997f468f8e0aea.png",
+  "alt": "Pestaña real Files changed del PR #44 en GitHub: diff línea a línea con números antes/después, líneas añadidas en verde y el encabezado por fichero con su icono de despliegue",
+  "titulo": "El diff real de un PR de este proyecto, en GitHub"
+}
+```
+
+Fíjate en las dos columnas de números de línea (antes/después) y en cómo cada hunk empieza con `@@ -13,6 +13,7 @@` — el mismo formato de `git diff` del Módulo 2, solo que GitHub lo colorea y lo organiza fichero a fichero.
+
 ## Tres formas de cerrar una revisión
 
 ```laboratorio

@@ -50,6 +50,19 @@ f2c4b69 feat(git-en-vivo): motor real con wasm-git — ejecutarComandosGit + obt
 }
 ```
 
+Y esto no es una recreación del PR — es el PR #44 real, tal cual se ve hoy en github.com/pedroleni/tech-study-tracker:
+
+```laboratorio
+{
+  "tipo": "imagen",
+  "src": "https://www.techstudytracker.com/img/f0c1fde4bfd069d8c681a43a4be199d975fd6669e09b22df1432bf94e43e0586.png",
+  "alt": "Vista real del PR #44 fusionado en GitHub: pedroleni merged 11 commits into main, con las estadísticas reales +4.949 -3 y la descripción real del PR",
+  "titulo": "El PR real que esta lección describe, en GitHub"
+}
+```
+
+La insignia morada "Merged", las cifras +4,949 −3 en verde y rojo, la descripción con checklist — nada de esto se ha reescrito para la lección, es exactamente lo que hay en esa URL ahora mismo.
+
 ## El merge (Módulo 4 y Módulo 14)
 
 ```text
