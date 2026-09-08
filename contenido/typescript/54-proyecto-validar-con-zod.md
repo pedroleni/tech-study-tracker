@@ -49,11 +49,27 @@ Este proyecto se hace en tu propio editor, no en el sandbox de esta lección —
 
 ## Pruébalo en un proyecto real
 
+A diferencia de los proyectos anteriores, aquí no clonas nada — el proyecto no existe todavía, lo creas tú desde cero con una única orden. Es la primera vez en este temario que haces esto, así que va paso a paso.
+
+1. **Instala Node.js** si todavía no lo tienes: versión **LTS** desde [nodejs.org](https://nodejs.org). Comprueba con `node --version` en una terminal.
+2. **Abre VS Code en una carpeta cualquiera** donde quieras que viva el proyecto (tu Escritorio, una carpeta de "Proyectos"...): menú `Archivo` → `Abrir carpeta...`.
+3. **Abre la terminal integrada**: menú `Terminal` → `New Terminal` (o el atajo `` Ctrl+` ``, igual en Windows, Linux y Mac).
+4. **Crea el proyecto con una sola orden**: escribe
+   ```bash
+   npm create vite@latest validar-con-zod -- --template vanilla-ts
+   ```
+   y pulsa Intro — `validar-con-zod` es el nombre de carpeta que va a crear (puedes poner el que quieras); `vanilla-ts` le dice a Vite que monte un proyecto de TypeScript sin ningún framework.
+5. **Entra en la carpeta que se acaba de crear**: `cd validar-con-zod` (o el nombre que hayas puesto), y luego `npm install` para las dependencias del propio Vite.
+6. **Vuelve a abrir esa carpeta en VS Code** — `Archivo` → `Abrir carpeta...` otra vez, eligiendo ahora la carpeta `validar-con-zod` recién creada — así el explorador de archivos y la terminal quedan situados dentro del proyecto de verdad, no en la carpeta de fuera.
+7. **Instala Zod**: en la terminal (ya dentro del proyecto), escribe `npm install zod`.
+8. **Mira el explorador de archivos**: Vite ya creó `src/main.ts` con código de ejemplo — ábrelo y **borra todo su contenido**. Ahí es donde escribes el esquema Zod y la función `obtenerPersonaje` de esta lección.
+9. **Arranca el servidor de desarrollo**: escribe `npm run dev` y pulsa Intro — imprime en la terminal la URL a abrir (normalmente `http://localhost:5173`).
+10. **Este proyecto no tiene interfaz visual** — compruébalo con `console.log()` al final de `main.ts` (por ejemplo, `console.log(await obtenerPersonaje(...))`) y mirando la consola del navegador: `F12` (o clic derecho → `Inspeccionar`) → pestaña `Console`.
+
 ```laboratorio
 {
   "tipo": "notas-clave",
   "items": [
-    { "titulo": "Monta un proyecto con Vite (npm create vite@latest -- --template vanilla-ts) y añade Zod (npm install zod).", "texto": "Necesitas un proyecto real con node_modules — este ejercicio no cabe en el sandbox de la lección, ver la nota de arriba." },
     { "titulo": "Usa cualquier API pública real (PokeAPI, Rick and Morty API...) y define un esquema Zod para su respuesta.", "texto": "Comprueba primero, con curl o el navegador, la forma REAL de la respuesta, y modélala en el esquema — no adivines la forma sin mirar." },
     { "titulo": "Rompe la validación a propósito.", "texto": "Cambia un campo del esquema por un tipo que no coincida con la API real, y confirma que .parse() lanza un error inmediato y localizado — la prueba real de que la validación funciona, del mismo espíritu que el reto de exhaustividad de la lección 24." }
   ]
