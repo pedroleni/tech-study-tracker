@@ -173,6 +173,18 @@ Cada criatura en el HTML lleva dos atributos: `data-d` (en qué punto del recorr
 }
 ```
 
+```laboratorio
+{
+  "tipo": "editor-en-vivo",
+  "titulo": "El mismo parallax de colocarFauna(), en miniatura",
+  "consigna": "Este recuadro tiene su propio scroll — bájalo a él (no la página) con la rueda o el dedo. Fíjate en la diferencia: las ✦ del fondo (data-v=\"0.12\") casi no se mueven, los peces del medio (0.4) se mueven algo más, y los del primer plano (0.85) se mueven mucho más rápido. Es exactamente el cálculo de colocarFauna() del proyecto real, aplicado dentro de esta caja en vez de a toda la ventana — por eso el editor en vivo no puede reproducir la versión a pantalla completa, pero sí la técnica.",
+  "html": "<div class=\"escaparate\" id=\"escaparate\">\n  <div class=\"capa capa--lejos\" data-v=\"0.12\" style=\"top:40px\">✦&nbsp;&nbsp;&nbsp;✦&nbsp;&nbsp;&nbsp;✦</div>\n  <div class=\"capa capa--lejos\" data-v=\"0.12\" style=\"top:520px\">✦&nbsp;&nbsp;&nbsp;✦</div>\n  <div class=\"capa capa--lejos\" data-v=\"0.12\" style=\"top:980px\">✦&nbsp;&nbsp;&nbsp;✦&nbsp;&nbsp;&nbsp;✦</div>\n  <div class=\"capa capa--media\" data-v=\"0.4\" style=\"top:180px\">🐠</div>\n  <div class=\"capa capa--media\" data-v=\"0.4\" style=\"top:640px\">🐡</div>\n  <div class=\"capa capa--media\" data-v=\"0.4\" style=\"top:1080px\">🐠</div>\n  <div class=\"capa capa--cerca\" data-v=\"0.85\" style=\"top:80px\">🐟</div>\n  <div class=\"capa capa--cerca\" data-v=\"0.85\" style=\"top:420px\">🐙</div>\n  <div class=\"capa capa--cerca\" data-v=\"0.85\" style=\"top:900px\">🦑</div>\n  <div class=\"relleno\"></div>\n</div>",
+  "css": ".escaparate {\n  position: relative;\n  height: 300px;\n  overflow-x: hidden;\n  overflow-y: auto;\n  border-radius: 12px;\n  background: linear-gradient(to bottom, #2fd4c4 0%, #12718f 25%, #0a4a68 55%, #062b42 80%, #01131f 100%);\n}\n.capa {\n  position: absolute;\n  left: 0;\n  right: 0;\n  text-align: center;\n  pointer-events: none;\n  will-change: transform;\n}\n.capa--lejos { font-size: 1.1rem; letter-spacing: .6rem; color: #cdeef0; opacity: .5; }\n.capa--media { font-size: 1.8rem; filter: drop-shadow(0 0 6px rgba(139,247,208,.45)); }\n.capa--cerca { font-size: 2.6rem; filter: drop-shadow(0 2px 5px rgba(0,0,0,.4)); }\n.relleno { height: 1400px; }",
+  "js": "const escaparate = document.getElementById('escaparate');\nconst capas = Array.from(document.querySelectorAll('.capa'));\n\nfunction colocar() {\n  const y = escaparate.scrollTop;\n  for (const capa of capas) {\n    const v = parseFloat(capa.dataset.v);\n    const destino = -y * v;\n    capa.style.transform = 'translate3d(0,' + destino.toFixed(1) + 'px,0)';\n  }\n}\n\nescaparate.addEventListener('scroll', colocar, { passive: true });\ncolocar();",
+  "pestañaInicial": "js"
+}
+```
+
 ## Paso 3: nieve marina en canvas (`sembrar` y `dibujar`)
 
 El fondo de toda la página es un `<canvas>` con partículas cayendo sin parar. `sembrar()` las crea una vez (y cada vez que cambia el tamaño de ventana); `dibujar()` se llama en cada frame para pintarlas y, si toca, hacerlas avanzar.
