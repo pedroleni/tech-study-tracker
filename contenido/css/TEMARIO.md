@@ -266,3 +266,21 @@ este documento se pueda leer solo:
   todavía — el código sigue siendo correcto, es una limitación de
   soporte, no del bloque. La 54 es la única con pestaña JS, porque
   `document.startViewTransition()` es una API de JavaScript, no CSS.
+- **Proyecto avanzado: descenso animado con parallax real (`63`,
+  2026-09-09)**: pedido explícito de "un proyecto completo en
+  animaciones", con efecto parallax y muy visual — primer "Proyecto
+  avanzado" (repositorio externo, rama `main` con TODOs / `solucion`
+  completa) de este track, mismo patrón que ya existía en JavaScript,
+  TypeScript, Node.js, SQL y PostgreSQL pero nunca en CSS. Landing de
+  una sola página sobre el descenso a la fosa de las Marianas: el
+  scroll es la profundidad, con parallax por capas (cada criatura con
+  su propia velocidad vía `data-d`/`data-v`), interpolación continua
+  de color de fondo entre siete paradas, un HUD fijo que lee el tramo
+  de profundidad real de la sección en pantalla (no una regla de tres
+  sobre el alto de la página), y un canvas de partículas para la nieve
+  marina. Vive en `github.com/pedroleni/css-proyectos` (carpeta
+  `descenso-challenger`), primer repo de un patrón `<tecnología>-proyectos`
+  para CSS. Las 11 ilustraciones SVG de la fauna las generó Codex;
+  tres funciones de JS (`colorAgua`, `colocarFauna`, `sembrar`/
+  `dibujar`) llevan TODO en la rama `main` para que se pueda hacer como
+  ejercicio guiado, igual que los demás proyectos avanzados.
