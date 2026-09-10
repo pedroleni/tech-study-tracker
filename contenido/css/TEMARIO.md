@@ -284,3 +284,30 @@ este documento se pueda leer solo:
   tres funciones de JS (`colorAgua`, `colocarFauna`, `sembrar`/
   `dibujar`) llevan TODO en la rama `main` para que se pueda hacer como
   ejercicio guiado, igual que los demás proyectos avanzados.
+- **Proyectos avanzados 2 y 3 de animación (`64` y `65`, 2026-09-10)**:
+  pedido explícito de "otros dos proyectos, uno de escalada y montaña y
+  otro a elegir". Se eligieron técnicas deliberadamente distintas a las
+  del `63` para que la serie no repita el mismo truco tres veces:
+  - `64` **ascenso al Everest**: el trazado de la ruta se dibuja solo con
+    `stroke-dasharray`/`stroke-dashoffset` a partir de
+    `getTotalLength()`, los campamentos se colocan sobre la línea con
+    `getPointAtLength()` (sin coordenadas escritas a mano: se derivan de
+    su altitud real) y el macizo se queda fijo con `position: sticky`.
+    Datos reales de la ruta del Collado Sur; el oxígeno disponible sale
+    de la fórmula barométrica (33 % en la cumbre, que es el valor real).
+  - `65` **anatomía de un tocadiscos**: primer proyecto de la serie que
+    NO va con scroll — anima por tiempo e interacción. `perspective` +
+    `rotateX` para el plato, surcos con `repeating-radial-gradient`,
+    etiqueta con `conic-gradient`, y la duración de la animación
+    derivada de las rpm reales (60/rpm). El bloque con más contenido es
+    `v = ω·r`: la velocidad lineal cae de 51 a 21 cm/s del borde a la
+    etiqueta, que es la razón física de que el final de una cara suene
+    peor. Los dos ángulos extremos del brazo se midieron recorriéndolo
+    grado a grado hasta dar con los radios reales (14,6 y 6,0 cm), no se
+    eligieron a ojo.
+  Ambos viven en `github.com/pedroleni/css-proyectos` (carpetas
+  `ascenso-everest` y `tocadiscos`), con el mismo patrón `main` (TODOs) /
+  `solucion`. Los SVG (macizo, ruta, alpinista, brazo, cápsula) los
+  generó Codex; se le exigió que la ruta y el macizo compartieran
+  viewBox y que la ruta fuera un único subpath, requisito de
+  `getTotalLength()`.
