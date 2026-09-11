@@ -14,10 +14,11 @@ El mismo gestor de tareas que ya construiste en el proyecto sencillo — pero he
 
 ```laboratorio
 {
-  "tipo": "imagen",
-  "src": "https://www.techstudytracker.com/img/b41e3be8440f5eea4919a8751f3530e3a2295a6f4ea85ea7be5fd45784af29ad.png",
-  "alt": "Captura del gestor de tareas: lista con dos tareas pendientes, filtros Todas/Pendientes/Completadas",
-  "titulo": "El gestor de tareas terminado"
+  "tipo": "video",
+  "src": "https://www.techstudytracker.com/img/3d2e26b8d6d201d770c6d7af36a576d22f3f615ee0d3223099e05eb215c32ba7.mp4",
+  "poster": "https://www.techstudytracker.com/img/5ab1c33cd8604e44ada2fa2890d4263f647b948618123426755d59ac27a5ab59.jpg",
+  "descripcion": "Se añaden tres tareas, se completa una y se filtra por pendientes; al recargar la página siguen ahí, porque el estado vive en localStorage.",
+  "titulo": "El gestor de tareas funcionando"
 }
 ```
 

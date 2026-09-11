@@ -14,10 +14,11 @@ Una SPA de recetas contra una API real (TheMealDB) — pero esta vez con **varia
 
 ```laboratorio
 {
-  "tipo": "imagen",
-  "src": "https://www.techstudytracker.com/img/bb3b587924036f5d3da1f14a326f849d0fb3fd0fffb66dfb00e72be61ba05c1d.png",
-  "alt": "Captura de la portada del recetario, con la llamada a buscar una receta",
-  "titulo": "La portada del recetario"
+  "tipo": "video",
+  "src": "https://www.techstudytracker.com/img/ca6b0d0f40d90f927b57ba9b351bfbca0df254c44c9570e1b7cef5c419907d55.mp4",
+  "poster": "https://www.techstudytracker.com/img/0cc9ba1f72c1cf0f407f90c1991ea843cff8cd0d8da72f75d4bc60ea5ce2c9d5.jpg",
+  "descripcion": "El router propio en marcha: se entra en una receta, se vuelve atrás con el botón del navegador y se salta a Categorías, todo sin recargar la página.",
+  "titulo": "El recetario y su router, sin recargas"
 }
 ```
 

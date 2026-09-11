@@ -14,10 +14,11 @@ Un explorador de personajes de Rick and Morty con búsqueda, paginación y favor
 
 ```laboratorio
 {
-  "tipo": "imagen",
-  "src": "https://www.techstudytracker.com/img/04ed4dccac7558f1e03a51e86e151daae220166dbb57bc6e722fa09ff0a32696.png",
-  "alt": "Captura del explorador de personajes: rejilla de tarjetas de Rick and Morty con buscador y favoritos",
-  "titulo": "El explorador de personajes terminado"
+  "tipo": "video",
+  "src": "https://www.techstudytracker.com/img/c58d47ac9e57799db81740d9ffc98fafe7836d881a813f829ca82db37de766aa.mp4",
+  "poster": "https://www.techstudytracker.com/img/05e64b6ff684a86ba80f0d981692d60d462a85c34fa1ad17590bc77cb632d5d9.jpg",
+  "descripcion": "Datos reales de la API de Rick and Morty: se busca por nombre, se limpia la búsqueda y se pasa a la página siguiente.",
+  "titulo": "El explorador contra la API real"
 }
 ```
 
