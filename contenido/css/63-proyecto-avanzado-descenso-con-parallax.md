@@ -14,10 +14,11 @@ Una landing de una sola página donde el scroll **es** la profundidad: bajas 10.
 
 ```laboratorio
 {
-  "tipo": "imagen",
-  "src": "https://www.techstudytracker.com/img/a5909815db53de029ae8979c68bc0d6b7b90f8281cd88922647021b13acdbdc5.png",
-  "alt": "Captura del proyecto terminado: el instrumento fijo marca 818 m en la zona mesopelágica, con un pez linterna y un cachalote de paso visibles por parallax",
-  "titulo": "El descenso animado, terminado"
+  "tipo": "video",
+  "src": "https://www.techstudytracker.com/img/38b2df587b95d5371185a1f24cdd95fa17665f3986856987933ad158544c0adb.mp4",
+  "poster": "https://www.techstudytracker.com/img/f691f789a706f063e3af388bd86a680b9733eb85b4ec93416b828adb4dd67790.jpg",
+  "descripcion": "Recorrido completo del descenso: el agua se oscurece sin saltos, las criaturas pasan a distinta velocidad por el parallax y el instrumento cuenta los metros hasta el fondo.",
+  "titulo": "El descenso completo, en 15 segundos"
 }
 ```
 

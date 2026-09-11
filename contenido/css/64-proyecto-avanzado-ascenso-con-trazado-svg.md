@@ -14,10 +14,11 @@ El ascenso al Everest, del Campo Base (5.364 m) a la cumbre (8.849 m). El macizo
 
 ```laboratorio
 {
-  "tipo": "imagen",
-  "src": "https://www.techstudytracker.com/img/7cdc81258e5521e6a32ab333c3efd21615ec2ddb06669dc1339c1e42ebeb4b58.png",
-  "alt": "Captura del proyecto terminado: la ruta naranja dibujada hasta 7.459 m sobre la silueta del Everest, con los campamentos C II y C III ya alcanzados y el instrumento marcando 39 % de oxígeno",
-  "titulo": "El ascenso, a media subida"
+  "tipo": "video",
+  "src": "https://www.techstudytracker.com/img/abfefe348cfbc6c3f3711b023befbe276192741f24a2dccb276277afe64e97d0.mp4",
+  "poster": "https://www.techstudytracker.com/img/516607e59fd92333f6d9e12fd16f983df5632be87dbf2e767eb253f131561b15.jpg",
+  "descripcion": "La ruta se dibuja sola sobre el macizo según sube la altitud, los campamentos se encienden al alcanzarlos y el alpinista avanza por el trazado real.",
+  "titulo": "El ascenso completo, en 14 segundos"
 }
 ```
 

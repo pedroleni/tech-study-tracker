@@ -14,10 +14,11 @@ Un tocadiscos que gira **de verdad** a 33⅓ o 45 revoluciones por minuto, dibuj
 
 ```laboratorio
 {
-  "tipo": "imagen",
-  "src": "https://www.techstudytracker.com/img/0e4c7a8c91f251c3911cafd93ba7206bac26e8c134a539b866adfada8027101e.png",
-  "alt": "Captura del proyecto terminado: el tocadiscos en perspectiva 3D con el disco girando, el brazo a media cara y las lecturas de velocidad lineal y tiempo",
-  "titulo": "El tocadiscos, en marcha"
+  "tipo": "video",
+  "src": "https://www.techstudytracker.com/img/e4722636e6e3e591ce4e07287d5270f7e2cbe531707fb87b4e46cb9c28883dd7.mp4",
+  "poster": "https://www.techstudytracker.com/img/b648506bc0605c87ada5da956bb6b446415bd2eb3b614c0780e87b3eaa3b29ed.jpg",
+  "descripcion": "El plato arranca a 33⅓ rpm, la aguja recorre la cara entera mientras la velocidad lineal cae de 51 a 21 cm/s, y al final se cambia a 45 rpm.",
+  "titulo": "El tocadiscos en marcha"
 }
 ```
 
