@@ -19,6 +19,7 @@ import { Recursos } from '@/components/bloques-laboratorio/Recursos'
 import { Roles } from '@/components/bloques-laboratorio/Roles'
 import { SqlAnotado } from '@/components/bloques-laboratorio/SqlAnotado'
 import { SqlEnVivo } from '@/components/bloques-laboratorio/SqlEnVivo'
+import { Video } from '@/components/bloques-laboratorio/Video'
 import { VistaPreviaSocial } from '@/components/bloques-laboratorio/VistaPreviaSocial'
 
 // El registro es deliberadamente cerrado: el JSON solo puede escoger uno de
@@ -45,4 +46,5 @@ export const registroBloquesLaboratorio: Record<string, ComponentType<any>> = {
   'git-anotado': GitAnotado,
   'git-en-vivo': GitEnVivo,
   imagen: Imagen,
+  video: Video,
 }

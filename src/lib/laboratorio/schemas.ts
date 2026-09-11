@@ -299,6 +299,18 @@ export const esquemaImagen = z.object({
   titulo: z.string().min(1).max(160).optional(),
 })
 
+export const esquemaVideo = z.object({
+  tipo: z.literal('video'),
+  src: z.string().url().startsWith('https://www.techstudytracker.com/img/'),
+  poster: z
+    .string()
+    .url()
+    .startsWith('https://www.techstudytracker.com/img/')
+    .optional(),
+  descripcion: z.string().min(1).max(200),
+  titulo: z.string().min(1).max(160).optional(),
+})
+
 export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaPrediceElResultado,
   esquemaCodigoAnotado,
@@ -320,6 +332,7 @@ export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaGitAnotado,
   esquemaGitEnVivo,
   esquemaImagen,
+  esquemaVideo,
 ])
 
 export type DatosPrediceElResultado = z.infer<typeof esquemaPrediceElResultado>
@@ -344,4 +357,5 @@ export type DatosSqlEnVivo = z.infer<typeof esquemaSqlEnVivo>
 export type DatosGitAnotado = z.infer<typeof esquemaGitAnotado>
 export type DatosGitEnVivo = z.infer<typeof esquemaGitEnVivo>
 export type DatosImagen = z.infer<typeof esquemaImagen>
+export type DatosVideo = z.infer<typeof esquemaVideo>
 export type DatosBloqueLaboratorio = z.infer<typeof esquemaBloqueLaboratorio>

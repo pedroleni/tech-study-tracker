@@ -1,10 +1,16 @@
-import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3'
+import {
+  GetObjectCommand,
+  HeadObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3'
 
 const EXTENSION_A_CONTENT_TYPE: Record<string, string> = {
   png: 'image/png',
   jpg: 'image/jpeg',
   jpeg: 'image/jpeg',
   webp: 'image/webp',
+  webm: 'video/webm',
+  mp4: 'video/mp4',
 }
 
 // La clave siempre es un hash sha256 (64 hex) + una de las extensiones
@@ -12,7 +18,8 @@ const EXTENSION_A_CONTENT_TYPE: Record<string, string> = {
 // como ../../algo) se rechaza sin llegar a tocar R2. SVG queda fuera a
 // propósito (ver api/imagenes.ts) para no poder servir jamás un XSS vía
 // script embebido en el propio origen.
-const CLAVE_VALIDA = /^[0-9a-f]{64}\.(png|jpg|jpeg|webp)$/
+// El vídeo necesita peticiones Range para permitir búsquedas y funcionar en Safari.
+const CLAVE_VALIDA = /^[0-9a-f]{64}\.(png|jpg|jpeg|webp|webm|mp4)$/
 
 export default {
   async fetch(request: Request): Promise<Response> {
@@ -36,16 +43,57 @@ export default {
     })
 
     try {
-      const objeto = await s3.send(new GetObjectCommand({ Bucket: bucketName, Key: clave }))
+      const range = request.headers.get('range')
+      if (range && !/^bytes=\d*-\d*$/.test(range)) {
+        const metadata = await s3.send(
+          new HeadObjectCommand({ Bucket: bucketName, Key: clave }),
+        )
+        return new Response(null, {
+          status: 416,
+          headers: {
+            'Content-Range': `bytes */${metadata.ContentLength ?? 0}`,
+            'Accept-Ranges': 'bytes',
+          },
+        })
+      }
+
+      const objeto = await s3.send(
+        new GetObjectCommand({
+          Bucket: bucketName,
+          Key: clave,
+          Range: range ?? undefined,
+        }),
+      )
       const bytes = await objeto.Body?.transformToByteArray()
       if (!bytes) return new Response('No encontrada', { status: 404 })
 
       const extension = clave.split('.').pop() ?? ''
+      const contentType = EXTENSION_A_CONTENT_TYPE[extension] ?? 'application/octet-stream'
+      const cacheControl = 'public, max-age=31536000, immutable'
+
+      if (range) {
+        if (!objeto.ContentRange || objeto.ContentLength === undefined) {
+          return new Response('Respuesta parcial no válida', { status: 502 })
+        }
+
+        return new Response(bytes, {
+          status: 206,
+          headers: {
+            'Content-Type': contentType,
+            'Content-Range': objeto.ContentRange,
+            'Content-Length': objeto.ContentLength.toString(),
+            'Accept-Ranges': 'bytes',
+            'Cache-Control': cacheControl,
+          },
+        })
+      }
+
       return new Response(bytes, {
         status: 200,
         headers: {
-          'Content-Type': EXTENSION_A_CONTENT_TYPE[extension] ?? 'application/octet-stream',
-          'Cache-Control': 'public, max-age=31536000, immutable',
+          'Content-Type': contentType,
+          'Accept-Ranges': 'bytes',
+          'Cache-Control': cacheControl,
         },
       })
     } catch {

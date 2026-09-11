@@ -13,7 +13,7 @@ const EXTENSIONES_PERMITIDAS: Record<string, string> = {
 }
 
 const TAMANO_MAXIMO_BYTES = 4 * 1024 * 1024
-const CLAVE_VALIDA = /^[0-9a-f]{64}\.(png|jpg|jpeg|webp)$/
+const CLAVE_VALIDA = /^[0-9a-f]{64}\.(png|jpg|jpeg|webp|webm|mp4)$/
 
 function empiezaCon(bytes: Uint8Array, firma: readonly number[], offset = 0): boolean {
   return firma.every((byte, indice) => bytes[offset + indice] === byte)
