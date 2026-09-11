@@ -15,8 +15,8 @@ Un dashboard de criptomonedas contra una API real (CoinGecko): una rejilla con l
 ```laboratorio
 {
   "tipo": "video",
-  "src": "https://www.techstudytracker.com/img/5eac05b3179ffe24e3772aec6ed1671cbbde350af19e8c7455253d3a1fd0b2fb.mp4",
-  "poster": "https://www.techstudytracker.com/img/e23e8a3bcd417ba241543879bf094d3d0df59450fc69e52ad0defd0b0fa78d28.jpg",
+  "src": "https://www.techstudytracker.com/img/600ad9d1e5a0522743f4995644b80bfce9cdb1e0f82661fb9f59c244e1eea89d.mp4",
+  "poster": "https://www.techstudytracker.com/img/6b6d72127ed39539431dc9c7ef3904bb4ddf281b0743c86de3b88b3def1cc81d.jpg",
   "descripcion": "Precios reales de CoinGecko: se filtra escribiendo, se marca una moneda como favorita y se activa la vista de solo favoritas.",
   "titulo": "El panel con precios reales"
 }

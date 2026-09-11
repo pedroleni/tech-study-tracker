@@ -15,8 +15,8 @@ Una landing de una sola página donde el scroll **es** la profundidad: bajas 10.
 ```laboratorio
 {
   "tipo": "video",
-  "src": "https://www.techstudytracker.com/img/38b2df587b95d5371185a1f24cdd95fa17665f3986856987933ad158544c0adb.mp4",
-  "poster": "https://www.techstudytracker.com/img/f691f789a706f063e3af388bd86a680b9733eb85b4ec93416b828adb4dd67790.jpg",
+  "src": "https://www.techstudytracker.com/img/6fda5352818df7118343eca757332902f9dd5cf22a55a61c5e832c2ef8bea15d.mp4",
+  "poster": "https://www.techstudytracker.com/img/0b0fdb31d0a12d466e33268d32cd30d65c8453eb40e6bf34d9842dfeab751791.jpg",
   "descripcion": "Recorrido completo del descenso: el agua se oscurece sin saltos, las criaturas pasan a distinta velocidad por el parallax y el instrumento cuenta los metros hasta el fondo.",
   "titulo": "El descenso completo, en 15 segundos"
 }
