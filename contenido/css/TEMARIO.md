@@ -311,3 +311,29 @@ este documento se pueda leer solo:
   generó Codex; se le exigió que la ruta y el macizo compartieran
   viewBox y que la ruta fuera un único subpath, requisito de
   `getTotalLength()`.
+- **Proyecto avanzado 4: animación dirigida por scroll (`66`, 2026-09-11)**:
+  pedido tras ver que la primera versión «no tenía apenas animaciones».
+  Es el proyecto de la serie con más peso en movimiento y el único que
+  usa la API nueva de verdad en vez de resolver el scroll a mano:
+  - `animation-timeline: view()` para el parallax de cada foto y los
+    revelados; `scroll(root)` para la barra de progreso y el parallax de
+    tres planos de la portada.
+  - **Línea de tiempo con nombre** (`view-timeline: --gal`) publicada por
+    la sección y leída por su descendiente: es lo que permite la galería
+    que corre en horizontal mientras la sección está anclada con
+    `position: sticky`, acotada con `animation-range: contain`.
+  - **Contador sin JavaScript**: `@property` de tipo `<integer>` animada
+    con línea de tiempo de scroll y mostrada con `counter()`. Es el
+    bloque que más sorprende y el que mejor explica para qué sirve
+    registrar una propiedad — sin `syntax`, el navegador no sabe
+    interpolarla y el número saltaría de golpe.
+  - Respaldo real: 14 líneas de JS que **solo se ejecutan si
+    `CSS.supports('animation-timeline','view()')` da falso**, y un bloque
+    de `prefers-reduced-motion` que lo apaga todo dejando la página
+    completa y legible.
+  Las cinco fotografías las generó Codex con `image_gen` — el mismo
+  camino que la portada del recetario (`javascript/78`). Tema: un estudio
+  ficticio de arquitectura en tapial, elegido porque los estratos del
+  muro dan una paleta sacada del propio material y justifican fotografía
+  grande. Los datos técnicos del tapial sí son reales y la nota al pie
+  aclara que el estudio es ficticio y las fotos generadas.
