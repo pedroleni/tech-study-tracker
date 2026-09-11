@@ -15,10 +15,10 @@ Un tocadiscos que gira **de verdad** a 33⅓ o 45 revoluciones por minuto, dibuj
 ```laboratorio
 {
   "tipo": "video",
-  "src": "https://www.techstudytracker.com/img/cad52e2e0dfc4b7150ee9ab4364abba3eb032a0d89ea941667c2c06ec6270d0f.mp4",
-  "poster": "https://www.techstudytracker.com/img/2e0d2d0931d7755e11a369bb36c80eebfe21f230a49c13e46fd06e7e875088e7.jpg",
-  "descripcion": "El plato arranca a 33⅓ rpm, la aguja recorre la cara entera mientras la velocidad lineal cae de 51 a 21 cm/s, y al final se cambia a 45 rpm.",
-  "titulo": "El tocadiscos en marcha"
+  "src": "https://www.techstudytracker.com/img/a8e15e3e370b0b160741bbb75f7aa3cb4e0868f812048201c580b27988938109.mp4",
+  "poster": "https://www.techstudytracker.com/img/e144083bbff3414f128b1da653b4199f3228688bdd1b21999fc3a5480068964f.jpg",
+  "descripcion": "El plato arranca a 33⅓ rpm, la aguja recorre la cara entera mientras la velocidad lineal cae de 51 a 21 cm/s, se cambia a 45 rpm y después se recorre el resto de la página.",
+  "titulo": "El tocadiscos y la página entera"
 }
 ```
 

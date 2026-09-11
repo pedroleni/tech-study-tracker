@@ -16,7 +16,7 @@ Una landing de una sola página donde el scroll **es** la profundidad: bajas 10.
 {
   "tipo": "video",
   "src": "https://www.techstudytracker.com/img/14825ea0fdc4c0cfe64f965d137edd26b8aabbc97a8ed3e6f7e9caf78ae80bff.mp4",
-  "poster": "https://www.techstudytracker.com/img/996c2939e3425b92f12545dd6df1516c320eb21fb6c143003b4418703b1259b8.jpg",
+  "poster": "https://www.techstudytracker.com/img/0fb3747e0b3a358bfd93344d1135639bd74a2cd883fea603d365d92b187113b1.jpg",
   "descripcion": "Recorrido completo del descenso, a paso lento: el agua se oscurece sin saltos, las criaturas pasan a distinta velocidad por el parallax y el instrumento cuenta los metros hasta el fondo.",
   "titulo": "El descenso completo, a 1080p"
 }
