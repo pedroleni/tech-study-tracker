@@ -48,6 +48,7 @@
     }
   }
   let commits = 0
+  window.__numeroCommitReactEnVivo = () => commits
   const avisarCommit = (raiz) => {
     commits += 1
     enviar({ tipo: 'commit', numero: commits })

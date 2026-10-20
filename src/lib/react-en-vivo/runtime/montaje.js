@@ -1,13 +1,13 @@
 // Monta el código del alumno dentro del iframe aislado de react-en-vivo:
 // registro de módulos tipo CommonJS, montaje con createRoot y ejecutor de
 // comprobaciones. Lee la configuración que deja la lección en
-// window.__configReactEnVivo = { modulos, archivosCss, strictMode, api?, red? }.
+// window.__configReactEnVivo = { modulos, archivosCss, strictMode, api?, red?, efectos? }.
 // Se incrusta en el srcdoc como texto (documento.ts lo importa con ?raw).
 // Ver specs/features/react-en-vivo.md.
 ;(() => {
   const R = window.__reactEnVivo
   const enviar = window.__enviarReactEnVivo
-  const { modulos, archivosCss, strictMode } = window.__configReactEnVivo
+  const { modulos, archivosCss, strictMode, efectos } = window.__configReactEnVivo
 
   // Si react.js no llegó (red caída, versión retirada), se dice, y las
   // comprobaciones contestan en vez de dejar al comprobador esperando.
@@ -29,8 +29,16 @@
   // new Function añade dos líneas antes del código de cada módulo.
   const DESFASE_LINEAS = 2
   const ESPERA_MS = 1500
+  let reactDelAlumno = R.React
+  if (efectos && window.__efectosReactEnVivo) {
+    try {
+      reactDelAlumno = window.__efectosReactEnVivo.envolver(R.React, modulos)
+    } catch {
+      // El registro es una ayuda visual; la app conserva el React original.
+    }
+  }
   const EXTERNOS = {
-    react: R.React,
+    react: reactDelAlumno,
     'react-dom': R.ReactDOM,
     'react-dom/client': R.ReactDOMClient,
     'react/jsx-runtime': R.JsxRuntime,

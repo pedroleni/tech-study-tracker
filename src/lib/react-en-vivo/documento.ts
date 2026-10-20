@@ -1,5 +1,6 @@
 import { VERSION_REACT_EN_VIVO } from './constantes'
 import CODIGO_ARBOL from './runtime/arbol.js?raw'
+import CODIGO_EFECTOS from './runtime/efectos.js?raw'
 import CODIGO_MONTAJE from './runtime/montaje.js?raw'
 import CODIGO_PUENTE from './runtime/puente.js?raw'
 import CODIGO_RED from './runtime/red.js?raw'
@@ -14,6 +15,7 @@ export type OpcionesDocumentoReact = {
   // Árbol de renders (fase 2): solo en la vista previa visible, nunca en el
   // iframe de las comprobaciones.
   conArbol?: boolean
+  conEfectos?: boolean
   api?: Record<string, unknown[]>
   red?: { latencia: number; desordenar: boolean }
 }
@@ -35,6 +37,7 @@ export function construirDocumentoReact({
   strictMode,
   conPruebas,
   conArbol = false,
+  conEfectos = false,
   api,
   red,
 }: OpcionesDocumentoReact): string {
@@ -50,6 +53,7 @@ export function construirDocumentoReact({
     modulos,
     archivosCss,
     strictMode,
+    ...(conEfectos ? { efectos: true } : {}),
     ...(api ? { api, red: redDelDocumento } : {}),
   }).replace(/</g, '\\u003c')
   const pruebas = conPruebas ? `\n    <script src="${runtime}/pruebas.js"></script>` : ''
@@ -58,6 +62,7 @@ export function construirDocumentoReact({
   // La API tiene que existir antes de evaluar App.jsx: un módulo puede llamar
   // a fetch en su nivel superior, antes incluso del primer render.
   const codigoRed = api ? `\n    <script>${escaparScript(CODIGO_RED)}</script>` : ''
+  const codigoEfectos = conEfectos ? `\n    <script>${escaparScript(CODIGO_EFECTOS)}</script>` : ''
 
   return `<!doctype html>
 <html lang="es">
@@ -71,7 +76,7 @@ export function construirDocumentoReact({
   </head>
   <body>
     <div id="root"></div>${arbol}
-    <script>window.__configReactEnVivo = ${configuracion}</script>${codigoRed}
+    <script>window.__configReactEnVivo = ${configuracion}</script>${codigoRed}${codigoEfectos}
     <script>${escaparScript(CODIGO_MONTAJE)}</script>
   </body>
 </html>`

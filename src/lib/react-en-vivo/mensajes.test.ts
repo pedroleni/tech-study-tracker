@@ -105,6 +105,38 @@ describe('leerMensajeReactEnVivo', () => {
       leerMensajeReactEnVivo(evento({ ...peticion, ruta: `/${'a'.repeat(200)}` }), iframe.contentWindow),
     ).toBeNull()
   })
+
+  it('acepta un mensaje efecto válido y rechaza 9 cambios', () => {
+    const { iframe, evento } = prepararIframe()
+    const efecto = {
+      canal: 'react-en-vivo',
+      tipo: 'efecto',
+      commit: 4,
+      componente: 'Chat',
+      gancho: 'useConexion',
+      archivo: 'App.jsx',
+      linea: 3,
+      accion: 'efecto',
+      clase: 'useEffect',
+      motivo: 'dependencias',
+      cambios: [{ nombre: 'sala', antes: '"general"', ahora: '"viaje"' }],
+    }
+
+    expect(leerMensajeReactEnVivo(evento(efecto), iframe.contentWindow)).toEqual(efecto)
+    expect(
+      leerMensajeReactEnVivo(
+        evento({
+          ...efecto,
+          cambios: Array.from({ length: 9 }, (_, indice) => ({
+            nombre: `dependencia ${indice + 1}`,
+            antes: '0',
+            ahora: '1',
+          })),
+        }),
+        iframe.contentWindow,
+      ),
+    ).toBeNull()
+  })
 })
 
 describe('mensaje arbol', () => {

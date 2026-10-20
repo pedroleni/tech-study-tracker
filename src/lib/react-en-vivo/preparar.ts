@@ -15,6 +15,7 @@ export async function prepararDocumento(
     strictMode: boolean
     conPruebas: boolean
     conArbol?: boolean
+    conEfectos?: boolean
     api?: Record<string, unknown[]>
     red?: { latencia: number; desordenar: boolean }
   },
@@ -43,6 +44,7 @@ export async function prepararDocumento(
       strictMode: opciones.strictMode,
       conPruebas: opciones.conPruebas,
       conArbol: opciones.conArbol,
+      conEfectos: opciones.conEfectos,
       api: opciones.api,
       red: opciones.red,
     }),

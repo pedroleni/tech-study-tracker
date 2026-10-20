@@ -62,6 +62,21 @@ export const esquemaMensajeReactEnVivo = z.discriminatedUnion('tipo', [
   z.object({ canal, tipo: z.literal('error'), texto }),
   z.object({
     canal,
+    tipo: z.literal('efecto'),
+    commit: entero,
+    componente: z.string().max(60),
+    gancho: z.string().max(60).optional(),
+    archivo: z.string().regex(/^[A-Za-z][A-Za-z0-9-]*\.jsx$/),
+    linea: z.number().int().min(1),
+    accion: z.enum(['efecto', 'limpieza']),
+    clase: z.enum(['useEffect', 'useLayoutEffect', 'useInsertionEffect']),
+    motivo: z.enum(['montaje', 'strict-mode', 'dependencias', 'cada-render', 'desmontaje']).optional(),
+    cambios: z
+      .array(z.object({ nombre: z.string().max(40), antes: valorCorto, ahora: valorCorto }))
+      .max(8),
+  }),
+  z.object({
+    canal,
     tipo: z.literal('peticion'),
     id: z.number().int().min(1),
     metodo: z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']),
@@ -86,6 +101,7 @@ export const esquemaMensajeReactEnVivo = z.discriminatedUnion('tipo', [
 export type MensajeReactEnVivo = z.infer<typeof esquemaMensajeReactEnVivo>
 export type MensajeArbol = Extract<MensajeReactEnVivo, { tipo: 'arbol' }>
 export type MensajePeticion = Extract<MensajeReactEnVivo, { tipo: 'peticion' }>
+export type MensajeEfecto = Extract<MensajeReactEnVivo, { tipo: 'efecto' }>
 export type NodoArbolRender = MensajeArbol['nodos'][number]
 export type MotivoRender = NodoArbolRender['motivos'][number]
 
