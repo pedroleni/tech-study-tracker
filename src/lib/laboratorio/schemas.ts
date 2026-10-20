@@ -348,6 +348,8 @@ export const esquemaReactEnVivo = z
     strictMode: z.boolean().default(true),
     mostrarConsola: z.boolean().default(true),
     mostrarJsGenerado: z.boolean().default(false),
+    // Árbol de renders (fase 2): qué se renderiza en cada commit y por qué.
+    mostrarArbol: z.boolean().default(false),
     comprobaciones: z.array(esquemaComprobacionReact).min(1).max(8).optional(),
   })
   .refine((datos) => datos.archivos.some((archivo) => archivo.nombre === 'App.jsx'), {
@@ -371,7 +373,38 @@ export const esquemaReactAnotado = z.object({
     .max(8),
   strictMode: z.boolean().default(true),
   mostrarConsola: z.boolean().default(false),
+  mostrarArbol: z.boolean().default(false),
 })
+
+// Árbol de componentes estático: el mismo dibujo que el árbol de renders,
+// pero escrito por el autor, para diagramas que no salen de ejecutar código
+// (árbol de render frente a dependencias, dónde vive el estado, proveedor y
+// consumidores de un contexto...). Ver specs/features/react-en-vivo.md.
+export const ESTADOS_NODO_ARBOL = ['montado', 'renderizado', 'sin-cambios', 'desmontado'] as const
+
+export const esquemaArbolDeComponentes = z
+  .object({
+    tipo: z.literal('arbol-de-componentes'),
+    titulo: z.string().min(1).max(140).optional(),
+    nodos: z
+      .array(
+        z.strictObject({
+          nombre: z.string().min(1).max(60),
+          nivel: z.number().int().min(0).max(8),
+          clave: z.string().min(1).max(40).optional(),
+          estado: z.enum(ESTADOS_NODO_ARBOL).optional(),
+          etiqueta: z.string().min(1).max(40).optional(),
+          nota: z.string().min(1).max(160).optional(),
+        }),
+      )
+      .min(1)
+      .max(40),
+  })
+  .refine(
+    (datos) =>
+      datos.nodos.every((nodo, i) => (i === 0 ? nodo.nivel === 0 : nodo.nivel <= datos.nodos[i - 1].nivel + 1)),
+    { message: 'El primer nodo va en el nivel 0 y cada nodo baja como mucho un nivel respecto al anterior' },
+  )
 
 export const esquemaImagen = z.object({
   tipo: z.literal('imagen'),
@@ -414,6 +447,7 @@ export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaGitEnVivo,
   esquemaReactEnVivo,
   esquemaReactAnotado,
+  esquemaArbolDeComponentes,
   esquemaImagen,
   esquemaVideo,
 ])
@@ -441,6 +475,7 @@ export type DatosGitAnotado = z.infer<typeof esquemaGitAnotado>
 export type DatosGitEnVivo = z.infer<typeof esquemaGitEnVivo>
 export type DatosReactEnVivo = z.infer<typeof esquemaReactEnVivo>
 export type DatosReactAnotado = z.infer<typeof esquemaReactAnotado>
+export type DatosArbolDeComponentes = z.infer<typeof esquemaArbolDeComponentes>
 export type ComprobacionReact = z.infer<typeof esquemaComprobacionReact>
 export type ArchivoReact = z.infer<typeof esquemaArchivoReact>
 export type ConsultaElementoReact = z.infer<typeof esquemaConsultaElementoReact>

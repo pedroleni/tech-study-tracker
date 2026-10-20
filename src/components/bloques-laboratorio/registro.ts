@@ -1,5 +1,6 @@
 import type { ComponentType } from 'react'
 
+import { ArbolDeComponentes } from '@/components/bloques-laboratorio/ArbolDeComponentes'
 import { Callout } from '@/components/bloques-laboratorio/Callout'
 import { CapasDeCaja } from '@/components/bloques-laboratorio/CapasDeCaja'
 import { CodigoAnotado } from '@/components/bloques-laboratorio/CodigoAnotado'
@@ -49,6 +50,7 @@ export const registroBloquesLaboratorio: Record<string, ComponentType<any>> = {
   'git-en-vivo': GitEnVivo,
   'react-anotado': ReactAnotado,
   'react-en-vivo': ReactEnVivo,
+  'arbol-de-componentes': ArbolDeComponentes,
   imagen: Imagen,
   video: Video,
 }

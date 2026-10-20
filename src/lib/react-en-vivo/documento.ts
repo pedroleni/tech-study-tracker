@@ -1,4 +1,5 @@
 import { VERSION_REACT_EN_VIVO } from './constantes'
+import CODIGO_ARBOL from './runtime/arbol.js?raw'
 import CODIGO_MONTAJE from './runtime/montaje.js?raw'
 import CODIGO_PUENTE from './runtime/puente.js?raw'
 
@@ -9,6 +10,9 @@ export type OpcionesDocumentoReact = {
   archivosCss: string[]
   strictMode: boolean
   conPruebas: boolean
+  // Árbol de renders (fase 2): solo en la vista previa visible, nunca en el
+  // iframe de las comprobaciones.
+  conArbol?: boolean
 }
 
 // Un </script> o </style> dentro del código cerraría la etiqueta antes de tiempo.
@@ -27,6 +31,7 @@ export function construirDocumentoReact({
   archivosCss,
   strictMode,
   conPruebas,
+  conArbol = false,
 }: OpcionesDocumentoReact): string {
   // En /vendor/: código de terceros empaquetado, que los escáneres de
   // seguridad del repo tratan como tal (igual que node_modules).
@@ -38,6 +43,8 @@ export function construirDocumentoReact({
     '\\u003c',
   )
   const pruebas = conPruebas ? `\n    <script src="${runtime}/pruebas.js"></script>` : ''
+  // Después de #root (observa sus cambios) y antes del montaje (ve el primer commit).
+  const arbol = conArbol && !conPruebas ? `\n    <script>${escaparScript(CODIGO_ARBOL)}</script>` : ''
 
   return `<!doctype html>
 <html lang="es">
@@ -50,7 +57,7 @@ export function construirDocumentoReact({
     <script src="${runtime}/react.js"></script>${pruebas}
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"></div>${arbol}
     <script>window.__configReactEnVivo = ${configuracion}</script>
     <script>${escaparScript(CODIGO_MONTAJE)}</script>
   </body>

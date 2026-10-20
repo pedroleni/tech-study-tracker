@@ -1,11 +1,12 @@
 # React: nueva tecnología + React real en el navegador (`react-en-vivo`)
 
-**Estado:** ✅ fases 0 y 1 implementadas y verificadas el 2026-10-20
-(rama `feat/react-en-vivo`): 476 tests, revisión independiente de todo
+**Estado:** ✅ fases 0 y 1 implementadas, verificadas e integradas en
+`main` el 2026-10-20 (PR #55): 476 tests, revisión independiente de todo
 el trabajo y verificación con React 19.3.1 real en Chromium. Pendiente:
-probar a mano en Firefox y Safari (ver "Pendiente" al final). Las fases
-2-4 quedan descritas a nivel de diseño en el temario y se especifican en
-detalle cuando toquen.
+probar a mano en Firefox y Safari (ver "Pendiente" al final). 🔨 Fase 2
+(árbol de renders y árbol estático) especificada abajo, en construcción.
+Las fases 3-4 quedan descritas a nivel de diseño en el temario y se
+especifican en detalle cuando toquen.
 
 **Configuración manual requerida:** ninguna en Supabase (`technologies`
 y `lecciones` no ganan columnas). La tecnología "React" se crea desde el
@@ -387,6 +388,158 @@ La línea de un error se calcula en el iframe: primer marco de
 - `specs/features/laboratorios.md`: los dos tipos nuevos en la lista de
   bloques.
 
+## Alcance de la fase 2: árbol de renders y árbol estático
+
+Diseño aprobado con el temario (componentes 5 y 7). Desbloquea la
+revisión de las lecciones 13, 16–19 y 25–28, y parte del módulo 9.
+
+### Validación (2026-10-20)
+
+Prueba aislada en jsdom con el `react.js` 19.3.1 del sandbox: un hook de
+DevTools propio recorre `root.current` en cada `onCommitFiberRoot`, con
+`App` (dos estados) → proveedor de contexto `Tema` → `Cabecera`, dos
+`Tarea` con `key` y una prop función, `Contador` con estado propio, `Pie`
+con `memo` y `Etiqueta` que lee el contexto.
+
+| Qué se probó | Resultado |
+|---|---|
+| Montaje | Todos los nodos `montado`, con sus estados (`[["a","b"],"claro"]`, `[0]`) |
+| Pulsar el contador | **Solo** `Contador` re-renderizado ("cambió su estado"); los demás, sin cambios. El subárbol saltado se detecta porque `fiber.child` es el mismo objeto que en el commit anterior |
+| Añadir una tarea | `App` (estado), `Tarea key=c` montada, las otras `Tarea` "cambió la prop «alPulsar» (función nueva)", `Cabecera`/`Contador`/`Etiqueta` "se renderizó su padre", **`Pie` (memo) sin cambios** |
+| Cambiar el contexto | `Etiqueta`: "cambió el contexto «Tema»" (sale repetido en `dependencies` con `StrictMode`: hay que quitar duplicados) |
+| Contadores de render | Correctos por instancia, con un id estable por pareja fiber/alternate |
+| Nombre de los nodos | `type.displayName ?? type.name`; `forwardRef` → `type.render.name`; proveedor → `displayName` del contexto |
+
+Hechos de los internos usados (React 19.3.1, build de desarrollo):
+etiquetas de fiber `0` función, `1` clase, `10` proveedor de contexto,
+`11` forwardRef, `13` Suspense, `14` memo con comparador, `15` memo
+simple; flag `PerformedWork = 1`; ganchos en `fiber.memoizedState`
+encadenados por `next`, y los de estado (`useState`, `useReducer`) son
+los que tienen `queue` con `dispatch` y `lastRenderedReducer`; contextos
+leídos en `fiber.dependencies.firstContext` (`context`,
+`memoizedValue`, `next`).
+
+### Esquemas
+
+- `react-en-vivo` y `react-anotado` ganan `mostrarArbol:
+  z.boolean().default(false)`.
+- Bloque nuevo **`arbol-de-componentes`** (estático, lo escribe el autor):
+
+```ts
+{
+  tipo: 'arbol-de-componentes',
+  titulo?: string (1–140),
+  nodos: {                          // 1–40, en orden de recorrido
+    nombre: string (1–60),          // "App", "Tarea"
+    nivel: entero 0–8,              // el primero 0; cada uno ≤ anterior + 1
+    clave?: string (1–40),          // se pinta "key=…"
+    estado?: 'montado' | 'renderizado' | 'sin-cambios' | 'desmontado',
+    etiqueta?: string (1–40),       // insignia: "estado: tareas", "cliente"
+    nota?: string (1–160),          // texto a la derecha: "← aquí vive el estado"
+  }[],                              // objetos estrictos
+}
+```
+
+### Runtime: `src/lib/react-en-vivo/runtime/arbol.js`
+
+Archivo `.js` de verdad importado con `?raw`, como el puente y el
+montaje. Solo se incluye en el documento de la **vista previa visible**
+de un bloque con `mostrarArbol` (nunca en el iframe de las
+comprobaciones), entre `react.js` y el montaje. Define
+`window.__arbolReactEnVivo(raiz)`; el puente lo llama desde su
+`onCommitFiberRoot` (también cuando encadena el hook de la extensión
+React DevTools) pasándole el `FiberRoot`.
+
+En cada commit:
+
+1. **Recorrido** de `raiz.current` emparejando cada fiber con su
+   anterior (`fiber.alternate`). Si `siguiente.child === previo.child`,
+   todo el subárbol se saltó: sus nodos son `sin-cambios` sin mirar sus
+   flags (que pueden ser de un render antiguo).
+2. **Nodos que se emiten:** componentes de función (0), de clase (1),
+   `forwardRef` (11) y `memo` simple (15, `marca: 'memo'`); de un `memo`
+   con comparador (14) se emite su hijo, con `marca: 'memo'`;
+   proveedores de contexto (10, `marca: 'proveedor'`, nombre = el
+   `displayName` del contexto o "Context") y `Suspense` (13, `marca:
+   'suspense'`). Todo lo demás (DOM, texto, fragmentos, `StrictMode`) se
+   atraviesa sin emitirse.
+3. **Estado del nodo:** `montado` (sin pareja anterior), `renderizado`
+   (componente con el flag `PerformedWork`; proveedor o Suspense con
+   `memoizedProps` distintos), `sin-cambios`, o `desmontado`: estaba en
+   el commit anterior y ya no está; se emite **una sola vez**, en su
+   posición anterior, con sus últimos datos.
+4. **Motivos** de un `renderizado`, sin duplicados y como mucho 6:
+   `{ tipo: 'estado', indice }` (gancho de estado cuyo valor cambió,
+   `Object.is`; contando desde 1 entre los ganchos de estado),
+   `{ tipo: 'prop', nombre, detalle? }` (comparación superficial de
+   `memoizedProps`; `detalle` es `funcion-nueva`, `objeto-nuevo` o
+   `array-nuevo` si antes y ahora son de ese tipo), `{ tipo: 'contexto',
+   nombre }`, `{ tipo: 'gancho' }` si cambió otro gancho con cola, y
+   `{ tipo: 'padre' }` si no hay otro motivo y el componente emitido más
+   cercano por encima se montó o se renderizó. Sin un padre ejecutado, un
+   render sin otro motivo detectable también se atribuye a `gancho`.
+5. **Contador de renders** por instancia: id estable guardado para el
+   fiber y su `alternate`; suma 1 en `montado` y `renderizado`.
+6. **Props y estado** para el detalle de cada nodo: como mucho 12 props
+   (incluida `children`) y 12 valores de estado (ganchos de estado en
+   orden; en una clase, `this.state`), cada valor como texto de ≤ 80
+   caracteres: cadenas entre comillas, números y booleanos tal cual,
+   `ƒ nombre()` para funciones, `<Nombre />` para elementos de React,
+   `[3 elementos]` o el JSON corto de arrays y objetos (profundidad 2,
+   a prueba de ciclos).
+7. **Cambios reales en el DOM:** un `MutationObserver` sobre `#root`
+   (`childList`, `characterData`, `attributes`, `subtree`) y
+   `takeRecords()` dentro del propio commit. `cambiosDom` = nº de nodos
+   distintos afectados (texto cambiado → su elemento padre; atributo →
+   el elemento; nodos añadidos → cada uno; nodos quitados → su padre). A
+   partir del segundo commit, cada elemento afectado se marca con un
+   recuadro superpuesto (contenedor propio fuera de `#root`,
+   `aria-hidden`, `pointer-events: none`) que se va en 700 ms; con
+   `prefers-reduced-motion`, sin animación.
+8. Como mucho **200 nodos** por mensaje (`truncado: true` si había más).
+
+### Mensaje `arbol` (iframe → página)
+
+| Campo | Contenido |
+|---|---|
+| `commit` | Número de commit (el mismo que el mensaje `commit`) |
+| `nodos` | ≤ 200: `{ id, nivel (0–40), nombre (≤ 60), clave? (≤ 40), marca? ('memo' \| 'proveedor' \| 'suspense'), estado, renders, motivos (≤ 6), props ({ nombre ≤ 40, valor ≤ 80 }, ≤ 12), estados ({ valor ≤ 80 }, ≤ 12) }` |
+| `truncado` | Booleano |
+| `cambiosDom` | Entero ≥ 0 |
+
+Se valida con Zod en `mensajes.ts`, con esos límites, y se pinta solo
+como texto.
+
+### Componentes
+
+- **`ArbolVisual.tsx`** (presentacional): lista de nodos por `nivel` con
+  guías de árbol, nombre en monoespaciada, `key=…`, contador `·N`,
+  insignia de `marca` o `etiqueta`, y el estado con **color y texto**
+  (nunca solo color): montado (verde), re-render (ámbar), sin cambios
+  (gris), desmontado (rojo, tachado). Leyenda opcional.
+- **`ArbolDeRenders.tsx`** (panel en vivo, debajo de la vista previa y
+  antes de la consola): resumen del último commit ("Commit 4 · 3
+  renderizados · 1 montado · 2 cambios en el DOM"), el árbol con el
+  motivo de cada re-render en español ("cambió su estado", "cambió la
+  prop «alPulsar» (función nueva)", "cambió el contexto «Tema»", "se
+  renderizó su padre"), un destello en los nodos que se renderizaron en
+  ese commit (sin animación con `prefers-reduced-motion`), y cada nodo
+  es un botón que despliega sus props y su estado. Antes del primer
+  mensaje: "Usa la vista previa para ver qué se vuelve a renderizar." Se
+  vacía cuando la vista previa se reconstruye.
+- **`ArbolDeComponentes.tsx`**: el bloque estático con `ArbolVisual`,
+  título y leyenda si algún nodo trae `estado`.
+- `ReactEnVivo` y `ReactAnotado` muestran el panel si `mostrarArbol`;
+  `registro.ts` gana `'arbol-de-componentes'`.
+- Catálogo de referencia y `specs/features/laboratorios.md`: un
+  `ReactEnVivo` con `mostrarArbol` y un `ArbolDeComponentes`.
+
+### Alarma ante cambios de React
+
+Un test monta un caso conocido con el `react.js` del sandbox y compara
+el árbol completo de varios commits con el esperado. Si una versión
+nueva de React cambia los internos, ese test es el que avisa.
+
 ## Checkpoints de seguridad
 
 - **El código del alumno nunca toca la web.** Iframe sin
@@ -414,6 +567,9 @@ La línea de un error se calcula en el iframe: primer marco de
 - **El contenido de los bloques** (archivos, comprobaciones) viene del
   JSON de la lección, validado con Zod y escrito por admins.
 - **Bucle infinito:** riesgo aceptado, igual que en `editor-en-vivo`.
+
+Pendiente: mientras un Suspense enseña su fallback, el árbol oculto sale como
+si estuviera en pantalla; se resolverá con el módulo 7.
 
 ## Notas para quien escriba lecciones
 
