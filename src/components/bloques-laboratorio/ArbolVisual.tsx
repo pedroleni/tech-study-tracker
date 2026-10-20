@@ -91,13 +91,18 @@ export function ArbolVisual({
         const claseNombre = cn('font-semibold', nodo.estado === 'desmontado' && 'line-through opacity-70')
         return (
           <li
-            // Con el número de commit en la key, la fila se vuelve a crear y el destello se repite.
-            key={destella ? `${nodo.id}-${destello}` : nodo.id}
-            className={cn(
-              'flex flex-wrap items-baseline gap-x-2 gap-y-0.5 rounded px-1 py-0.5',
-              destella && 'animate-[arbol-destello_900ms_ease-out] motion-reduce:animate-none',
-            )}
+            // La fila conserva su identidad entre commits para no sustituir el
+            // botón ni perder el foco. Solo se remonta la capa del destello.
+            key={nodo.id}
+            className="relative flex flex-wrap items-baseline gap-x-2 gap-y-0.5 rounded px-1 py-0.5"
           >
+            {destella && (
+              <span
+                key={destello}
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 rounded animate-[arbol-destello_900ms_ease-out] motion-reduce:animate-none"
+              />
+            )}
             <span className="flex min-w-0 items-baseline">
               <span aria-hidden="true" className="whitespace-pre text-muted-foreground/70">
                 {guias[i]}
@@ -110,7 +115,7 @@ export function ArbolVisual({
                   onClick={() => onSeleccionar(nodo.id)}
                   className={cn(
                     claseNombre,
-                    'rounded underline decoration-dotted underline-offset-2 hover:decoration-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
+                    '-mx-1 inline-flex min-h-6 items-center rounded px-1 underline decoration-dotted underline-offset-2 hover:decoration-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
                   )}
                 >
                   {nodo.nombre}

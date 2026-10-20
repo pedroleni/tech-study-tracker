@@ -211,6 +211,7 @@ describe('ReactEnVivo', () => {
     expect(screen.getByRole('heading', { name: 'Árbol de renders' })).toBeInTheDocument()
     expect(screen.getByText('Usa la vista previa para ver qué se vuelve a renderizar.')).toBeInTheDocument()
 
+    enviarDesde(vista().contentWindow, { canal: 'react-en-vivo', tipo: 'montado', version: '19.3.1' })
     enviarDesde(vista().contentWindow, {
       canal: 'react-en-vivo',
       tipo: 'arbol',
@@ -229,8 +230,9 @@ describe('ReactEnVivo', () => {
     expect(screen.queryByRole('heading', { name: 'Árbol de renders' })).toBeNull()
   })
 
-  it('al reconstruir la vista previa el panel vuelve al estado inicial', async () => {
+  it('al reconstruir ignora árboles rezagados hasta que el documento nuevo está montado', async () => {
     await renderizarListo({ ...datos, mostrarArbol: true })
+    enviarDesde(vista().contentWindow, { canal: 'react-en-vivo', tipo: 'montado', version: '19.3.1' })
     enviarDesde(vista().contentWindow, {
       canal: 'react-en-vivo',
       tipo: 'arbol',
@@ -247,6 +249,28 @@ describe('ReactEnVivo', () => {
     await waitFor(() => expect(vista().getAttribute('srcdoc')).toContain('Adiós'), { timeout: 3000 })
     expect(screen.queryByText(/^Commit 1/)).toBeNull()
     expect(screen.getByText('Usa la vista previa para ver qué se vuelve a renderizar.')).toBeInTheDocument()
+
+    enviarDesde(vista().contentWindow, {
+      canal: 'react-en-vivo',
+      tipo: 'arbol',
+      commit: 2,
+      nodos: [{ id: 1, nivel: 0, nombre: 'Viejo', estado: 'montado', renders: 1, motivos: [], props: [], estados: [] }],
+      truncado: false,
+      cambiosDom: 1,
+    })
+    expect(screen.getByText('Usa la vista previa para ver qué se vuelve a renderizar.')).toBeInTheDocument()
+    expect(screen.queryByText('Viejo')).toBeNull()
+
+    enviarDesde(vista().contentWindow, { canal: 'react-en-vivo', tipo: 'montado', version: '19.3.1' })
+    enviarDesde(vista().contentWindow, {
+      canal: 'react-en-vivo',
+      tipo: 'arbol',
+      commit: 1,
+      nodos: [{ id: 1, nivel: 0, nombre: 'Nuevo', estado: 'montado', renders: 1, motivos: [], props: [], estados: [] }],
+      truncado: false,
+      cambiosDom: 1,
+    })
+    expect(await screen.findByText('Nuevo')).toBeInTheDocument()
   })
 
   it('sin comprobaciones no ofrece Comprobar; sin consola no la pinta', async () => {

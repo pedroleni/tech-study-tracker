@@ -47,4 +47,16 @@ describe('ArbolVisual', () => {
     expect(filas[2]).toHaveTextContent(/^│ └─ Tarea/)
     expect(filas[3]).toHaveTextContent(/^└─ Pie/)
   })
+
+  it('da al botón del nodo un área táctil mínima de 24 px', () => {
+    render(
+      <ArbolVisual
+        etiqueta="Árbol interactivo"
+        nodos={[{ id: 1, nivel: 0, nombre: 'App' }]}
+        onSeleccionar={() => {}}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: 'App' })).toHaveClass('min-h-6')
+  })
 })

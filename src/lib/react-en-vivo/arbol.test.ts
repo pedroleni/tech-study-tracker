@@ -202,12 +202,66 @@ describe('árbol de renders', () => {
     expect(siguiente.nodos.some((n) => n.clave === 'a')).toBe(false)
   })
 
+  it('conserva la key y el nombre de un memo con comparador, también al desmontarlo', async () => {
+    const codigo = `import { memo, useState } from 'react'
+
+const Fila = memo(function Fila({ texto }) {
+  return <li>{texto}</li>
+}, (a, b) => a.texto === b.texto)
+Fila.displayName = 'Fila'
+
+export default function App() {
+  const [items, setItems] = useState(['a', 'b'])
+  return (
+    <>
+      <ul>{items.map((t) => <Fila key={t} texto={t} />)}</ul>
+      <button onClick={() => setItems(items.filter((t) => t !== 'b'))}>Quitar b</button>
+    </>
+  )
+}
+`
+    const montaje = await montar([{ nombre: 'App.jsx', codigo }])
+
+    expect(montaje.nodos.map(forma)).toContain('  Fila key=a [memo]: montado')
+    expect(montaje.nodos.map(forma)).toContain('  Fila key=b [memo]: montado')
+
+    const quitar = await pulsar('Quitar b')
+    expect(quitar.nodos.map(forma)).toContain('  Fila key=b [memo]: desmontado')
+  })
+
   it('cambiar el contexto lo dice una sola vez', async () => {
     await montar([{ nombre: 'App.jsx', codigo: APP }])
     const commit = await pulsar('Oscuro')
 
     expect(nodo(commit, 'Etiqueta').motivos).toEqual([{ tipo: 'contexto', nombre: 'Tema' }])
     expect(nodo(commit, 'Tema').motivos).toContainEqual({ tipo: 'prop', nombre: 'value' })
+  })
+
+  it('atribuye a otro gancho el cambio de isPending de useTransition', async () => {
+    const codigo = `import { useState, useTransition } from 'react'
+
+export default function App() {
+  const [pendiente, iniciar] = useTransition()
+  const [n, setN] = useState(0)
+  return (
+    <button onClick={() => iniciar(() => setN(n + 1))}>
+      {pendiente ? 'Pendiente' : 'Iniciar'} {n}
+    </button>
+  )
+}
+`
+    await montar([{ nombre: 'App.jsx', codigo }])
+    const vistos = arboles().length
+    fireEvent.click(within(document.body).getByRole('button', { name: 'Iniciar 0' }))
+
+    await waitFor(() => {
+      const appConGancho = arboles()
+        .slice(vistos)
+        .map((mensaje) => nodo(mensaje, 'App'))
+        .find((app) => app?.motivos.some((motivo) => motivo.tipo === 'gancho'))
+      expect(appConGancho?.motivos).toContainEqual({ tipo: 'gancho' })
+      expect(appConGancho?.motivos).not.toContainEqual({ tipo: 'padre' })
+    })
   })
 
   it('los valores raros no rompen el recorrido', async () => {
@@ -266,14 +320,24 @@ export default function App() {
   })
 
   it('los cambios del DOM se resaltan desde el segundo commit', async () => {
-    await montar([{ nombre: 'App.jsx', codigo: APP }])
+    await montar([
+      { nombre: 'App.jsx', codigo: APP },
+      { nombre: 'estilos.css', codigo: 'div { background: hotpink; margin: 4px; padding: 8px; }' },
+    ])
     expect(document.getElementById('__resaltados-react-en-vivo')?.childElementCount ?? 0).toBe(0)
 
     await pulsar('Sumar')
     const resaltados = document.getElementById('__resaltados-react-en-vivo')!
     expect(resaltados.getAttribute('aria-hidden')).toBe('true')
+    expect(resaltados.style.position).toBe('fixed')
+    expect(resaltados.style.overflow).toBe('hidden')
     expect(resaltados.childElementCount).toBeGreaterThan(0)
     expect(document.getElementById('root')!.contains(resaltados)).toBe(false)
+    for (const marco of Array.from(resaltados.children) as HTMLElement[]) {
+      expect(['0', '0px']).toContain(marco.style.margin)
+      expect(marco.style.background).toBe('transparent')
+      expect(marco.style.pointerEvents).toBe('none')
+    }
     await waitFor(() => expect(resaltados.childElementCount).toBe(0), { timeout: 2000 })
   })
 

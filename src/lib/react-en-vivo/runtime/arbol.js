@@ -163,6 +163,26 @@
     return valores
   }
 
+  // Otros ganchos también pueden tener cola, aunque no expongan el par
+  // dispatch + lastRenderedReducer de useState/useReducer (por ejemplo,
+  // useTransition y useSyncExternalStore).
+  const ganchosConCola = (fiber) => {
+    if (!esComponente(fiber.tag) || fiber.tag === CLASE) return []
+    const ganchos = []
+    let gancho = fiber.memoizedState
+    for (let vueltas = 0; gancho && typeof gancho === 'object' && 'next' in gancho && vueltas < 200; vueltas += 1) {
+      const cola = gancho.queue
+      if (cola) {
+        ganchos.push({
+          valor: gancho.memoizedState,
+          estadoVisible: typeof cola.dispatch === 'function' && 'lastRenderedReducer' in cola,
+        })
+      }
+      gancho = gancho.next
+    }
+    return ganchos
+  }
+
   const contextosDe = (fiber) => {
     const lista = []
     let dependencia = fiber.dependencies && fiber.dependencies.firstContext
@@ -180,7 +200,7 @@
     return undefined
   }
 
-  const motivosDe = (siguiente, previo) => {
+  const motivosDe = (siguiente, previo, padreSeRenderizo) => {
     const motivos = []
     const vistos = new Set()
     const anadir = (motivo, clave) => {
@@ -192,6 +212,16 @@
     const antes = valoresEstado(previo)
     valoresEstado(siguiente).forEach((valor, i) => {
       if (i >= antes.length || !Object.is(valor, antes[i])) anadir({ tipo: 'estado', indice: i + 1 }, 'estado' + i)
+    })
+
+    const ganchosAntes = ganchosConCola(previo)
+    ganchosConCola(siguiente).forEach((gancho, i) => {
+      if (
+        !gancho.estadoVisible &&
+        (i >= ganchosAntes.length || !Object.is(gancho.valor, ganchosAntes[i].valor))
+      ) {
+        anadir({ tipo: 'gancho' }, 'gancho')
+      }
     })
 
     const propsAntes = previo.memoizedProps
@@ -220,7 +250,7 @@
       anadir({ tipo: 'contexto', nombre }, contexto)
     }
 
-    if (motivos.length === 0) motivos.push({ tipo: 'padre' })
+    if (motivos.length === 0) motivos.push({ tipo: padreSeRenderizo ? 'padre' : 'gancho' })
     return motivos
   }
 
@@ -245,7 +275,7 @@
   // Devuelve los nodos raíz (con sus hijos anidados) del árbol de componentes.
   const construir = (raiz) => {
     const raices = []
-    const visitar = (siguiente, previo, padre, saltado, dentroDeMemo) => {
+    const visitar = (siguiente, previo, padre, saltado, memoPadre) => {
       let contenedor = padre
       if (seEmite(siguiente)) {
         const id = idDe(siguiente)
@@ -257,18 +287,29 @@
         if (estado !== 'sin-cambios') renders.set(id, (renders.get(id) || 0) + 1)
         const nodo = {
           id,
-          nombre: nombreDe(siguiente),
+          nombre:
+            (memoPadre && memoPadre.elementType && memoPadre.elementType.displayName
+              ? recortar(String(memoPadre.elementType.displayName), MAX_NOMBRE)
+              : null) || nombreDe(siguiente),
           estado,
           renders: renders.get(id) || 0,
-          motivos: estado === 'renderizado' ? motivosDe(siguiente, previo) : [],
+          motivos:
+            estado === 'renderizado'
+              ? motivosDe(
+                  siguiente,
+                  previo,
+                  Boolean(padre && (padre.estado === 'montado' || padre.estado === 'renderizado')),
+                )
+              : [],
           props: propsDe(siguiente),
           estados: valoresEstado(siguiente).slice(0, MAX_VALORES).map((valor) => ({ valor: vista(valor) })),
           hijos: [],
         }
-        if (siguiente.key !== null && siguiente.key !== undefined) nodo.clave = recortar(String(siguiente.key), MAX_CLAVE)
+        const clave = memoPadre ? memoPadre.key : siguiente.key
+        if (clave !== null && clave !== undefined) nodo.clave = recortar(String(clave), MAX_CLAVE)
         if (siguiente.tag === PROVEEDOR) nodo.marca = 'proveedor'
         else if (siguiente.tag === SUSPENSE) nodo.marca = 'suspense'
-        else if (siguiente.tag === MEMO_SIMPLE || dentroDeMemo) nodo.marca = 'memo'
+        else if (siguiente.tag === MEMO_SIMPLE || memoPadre) nodo.marca = 'memo'
         ;(padre ? padre.hijos : raices).push(nodo)
         contenedor = nodo
       }
@@ -277,9 +318,9 @@
       // antiguo y no se miran.
       const hijosSaltados = saltado || (previo !== null && siguiente.child === previo.child)
       // De un memo con comparador (14) se emite su hijo, marcado como memo.
-      const hijoDeMemo = siguiente.tag === MEMO
+      const memoDelHijo = siguiente.tag === MEMO ? siguiente : null
       for (let hijo = siguiente.child; hijo; hijo = hijo.sibling) {
-        visitar(hijo, hijosSaltados ? hijo : hijo.alternate || null, contenedor, hijosSaltados, hijoDeMemo)
+        visitar(hijo, hijosSaltados ? hijo : hijo.alternate || null, contenedor, hijosSaltados, memoDelHijo)
       }
     }
     if (raiz && raiz.current) visitar(raiz.current, raiz.current.alternate || null, null, false, false)
@@ -376,11 +417,16 @@
       contenedor.id = ID_RESALTADOS
       contenedor.setAttribute('aria-hidden', 'true')
       Object.assign(contenedor.style, {
-        position: 'absolute',
+        all: 'initial',
+        position: 'fixed',
         top: '0',
         left: '0',
-        width: '0',
-        height: '0',
+        right: '0',
+        bottom: '0',
+        overflow: 'hidden',
+        background: 'transparent',
+        margin: '0',
+        padding: '0',
         pointerEvents: 'none',
         zIndex: '2147483646',
       })
@@ -398,14 +444,19 @@
       const caja = elemento.getBoundingClientRect()
       const marco = document.createElement('div')
       Object.assign(marco.style, {
+        all: 'initial',
         position: 'absolute',
-        left: caja.left + window.scrollX - 2 + 'px',
-        top: caja.top + window.scrollY - 2 + 'px',
+        left: caja.left - 2 + 'px',
+        top: caja.top - 2 + 'px',
         width: caja.width + 4 + 'px',
         height: caja.height + 4 + 'px',
         border: '2px solid #f59e0b',
         borderRadius: '4px',
         boxSizing: 'border-box',
+        background: 'transparent',
+        margin: '0',
+        padding: '0',
+        pointerEvents: 'none',
         opacity: '1',
         transition: sinMovimiento ? 'none' : 'opacity ' + DURACION_RESALTADO_MS + 'ms ease-out',
       })

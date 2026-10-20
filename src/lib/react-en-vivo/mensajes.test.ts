@@ -95,7 +95,10 @@ describe('mensaje arbol', () => {
     nombre: 'App',
     estado: 'renderizado',
     renders: 2,
-    motivos: [{ tipo: 'prop', nombre: 'alPulsar', detalle: 'funcion-nueva' }, { tipo: 'padre' }],
+    motivos: [
+      { tipo: 'prop', nombre: 'alPulsar', detalle: 'funcion-nueva' },
+      { tipo: 'gancho' },
+    ],
     props: [{ nombre: 'titulo', valor: '"Hola"' }],
     estados: [{ valor: '0' }],
   }

@@ -81,6 +81,7 @@ describe('ArbolDeRenders', () => {
           }),
           nodo({ id: 4, nombre: 'Etiqueta', estado: 'renderizado', motivos: [{ tipo: 'contexto', nombre: 'Tema' }] }),
           nodo({ id: 5, nombre: 'Cabecera', estado: 'renderizado', motivos: [{ tipo: 'padre' }] }),
+          nodo({ id: 6, nombre: 'Busqueda', estado: 'renderizado', motivos: [{ tipo: 'gancho' }] }),
         ])}
       />,
     )
@@ -94,6 +95,7 @@ describe('ArbolDeRenders', () => {
     ).toBeInTheDocument()
     expect(screen.getByText('cambió el contexto «Tema»')).toBeInTheDocument()
     expect(screen.getByText('se renderizó su padre')).toBeInTheDocument()
+    expect(screen.getByText('cambió otro de sus ganchos')).toBeInTheDocument()
   })
 
   it('al pulsar un nodo enseña sus props y su estado', () => {
@@ -110,6 +112,7 @@ describe('ArbolDeRenders', () => {
     expect(app).toHaveAttribute('aria-expanded', 'false')
     fireEvent.click(app)
     expect(app).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByRole('heading', { name: 'Detalle de App' })).toBeInTheDocument()
     expect(screen.getByText('Sin props')).toBeInTheDocument()
     expect(screen.getByText('["a","b"]')).toBeInTheDocument()
 
@@ -121,6 +124,61 @@ describe('ArbolDeRenders', () => {
     expect(screen.queryByText('texto: "a"')).toBeNull()
   })
 
+  it('vacía la selección cuando el árbol se reinicia y no recicla el mismo id', () => {
+    const { rerender } = render(
+      <ArbolDeRenders
+        arbol={arbol([
+          nodo({ id: 1, nombre: 'App', nivel: 0 }),
+          nodo({ id: 2, nombre: 'Contador' }),
+        ])}
+      />,
+    )
+    fireEvent.click(screen.getByRole('button', { name: /^Contador/ }))
+    expect(screen.getByRole('heading', { name: 'Detalle de Contador' })).toBeInTheDocument()
+
+    rerender(<ArbolDeRenders arbol={null} />)
+    rerender(
+      <ArbolDeRenders
+        arbol={arbol([
+          nodo({ id: 1, nombre: 'App', nivel: 0 }),
+          nodo({ id: 2, nombre: 'Formulario' }),
+        ])}
+      />,
+    )
+
+    for (const boton of screen.getAllByRole('button')) {
+      expect(boton).not.toHaveAttribute('aria-expanded', 'true')
+    }
+    expect(screen.getByRole('button', { name: /^Formulario/ })).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.queryByText(/^Detalle de /)).toBeNull()
+  })
+
+  it('conserva el botón y su foco cuando el mismo nodo destella en otro commit', () => {
+    const { rerender } = render(
+      <ArbolDeRenders
+        arbol={arbol(
+          [nodo({ id: 2, nombre: 'Reloj', nivel: 0, estado: 'renderizado' })],
+          { commit: 1 },
+        )}
+      />,
+    )
+    const boton = screen.getByRole('button', { name: /^Reloj/ })
+    boton.focus()
+
+    rerender(
+      <ArbolDeRenders
+        arbol={arbol(
+          [nodo({ id: 2, nombre: 'Reloj', nivel: 0, estado: 'renderizado' })],
+          { commit: 2 },
+        )}
+      />,
+    )
+
+    expect(boton).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /^Reloj/ })).toBe(boton)
+    expect(document.activeElement).toBe(boton)
+  })
+
   it('avisa si el árbol se truncó', () => {
     render(<ArbolDeRenders arbol={arbol([nodo({ id: 1, nombre: 'App', nivel: 0 })], { truncado: true })} />)
     expect(screen.getByText('Solo se muestran los primeros 200 componentes.')).toBeInTheDocument()
@@ -129,5 +187,13 @@ describe('ArbolDeRenders', () => {
   it('sin componentes montados lo dice', () => {
     render(<ArbolDeRenders arbol={arbol([], { cambiosDom: 0 })} />)
     expect(screen.getByText('No hay ningún componente montado.')).toBeInTheDocument()
+  })
+
+  it('permite desplazar horizontalmente un árbol profundo', () => {
+    render(<ArbolDeRenders arbol={arbol([nodo({ id: 1, nombre: 'NombreMuyLargo', nivel: 0 })])} />)
+
+    expect(screen.getByRole('list', { name: 'Árbol de renders del último commit' }).parentElement).toHaveClass(
+      'overflow-x-auto',
+    )
   })
 })

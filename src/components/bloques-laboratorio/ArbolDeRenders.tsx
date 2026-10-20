@@ -24,6 +24,8 @@ function textoMotivo(motivo: MotivoRender, nodo: NodoArbolRender) {
       return `cambió el contexto «${motivo.nombre}»`
     case 'padre':
       return 'se renderizó su padre'
+    case 'gancho':
+      return 'cambió otro de sus ganchos'
   }
 }
 
@@ -46,6 +48,9 @@ function resumen(arbol: MensajeArbol) {
 export function ArbolDeRenders({ arbol }: { arbol: MensajeArbol | null }) {
   const [seleccionado, setSeleccionado] = useState<number | null>(null)
   const idDetalle = useId()
+  // Los ids empiezan de nuevo en cada documento. Se limpia durante el render
+  // que recibe null para no abrir por accidente otro nodo con el mismo id.
+  if (arbol === null && seleccionado !== null) setSeleccionado(null)
   const nodoSeleccionado = arbol?.nodos.find((nodo) => nodo.id === seleccionado)
 
   return (
@@ -62,20 +67,22 @@ export function ArbolDeRenders({ arbol }: { arbol: MensajeArbol | null }) {
             {arbol.nodos.length === 0 ? (
               <p className="px-1 text-muted-foreground">No hay ningún componente montado.</p>
             ) : (
-              <ArbolVisual
-                etiqueta="Árbol de renders del último commit"
-                destello={arbol.commit}
-                seleccionado={seleccionado}
-                idDetalle={idDetalle}
-                onSeleccionar={(id) => setSeleccionado((actual) => (actual === id ? null : Number(id)))}
-                nodos={arbol.nodos.map((nodo) => ({
-                  ...nodo,
-                  motivo:
-                    nodo.estado === 'renderizado'
-                      ? nodo.motivos.map((motivo) => textoMotivo(motivo, nodo)).join(' · ')
-                      : undefined,
-                }))}
-              />
+              <div className="min-w-0 overflow-x-auto">
+                <ArbolVisual
+                  etiqueta="Árbol de renders del último commit"
+                  destello={arbol.commit}
+                  seleccionado={seleccionado}
+                  idDetalle={idDetalle}
+                  onSeleccionar={(id) => setSeleccionado((actual) => (actual === id ? null : Number(id)))}
+                  nodos={arbol.nodos.map((nodo) => ({
+                    ...nodo,
+                    motivo:
+                      nodo.estado === 'renderizado'
+                        ? nodo.motivos.map((motivo) => textoMotivo(motivo, nodo)).join(' · ')
+                        : undefined,
+                  }))}
+                />
+              </div>
             )}
             {arbol.truncado && (
               <p className="px-1 text-muted-foreground">Solo se muestran los primeros 200 componentes.</p>
@@ -85,6 +92,9 @@ export function ArbolDeRenders({ arbol }: { arbol: MensajeArbol | null }) {
                 id={idDetalle}
                 className="grid min-w-0 gap-3 rounded-md border bg-background p-2 font-mono sm:grid-cols-2"
               >
+                <h5 className="font-sans font-semibold sm:col-span-2">
+                  Detalle de {nodoSeleccionado.nombre}
+                </h5>
                 <div className="min-w-0 space-y-1">
                   <p className="font-sans font-semibold">Props</p>
                   {nodoSeleccionado.props.length === 0 ? (

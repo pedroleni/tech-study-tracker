@@ -24,6 +24,7 @@ const motivoRender = z.discriminatedUnion('tipo', [
   }),
   z.object({ tipo: z.literal('contexto'), nombre: z.string().max(60) }),
   z.object({ tipo: z.literal('padre') }),
+  z.object({ tipo: z.literal('gancho') }),
 ])
 const valorCorto = z.string().max(80)
 const nodoArbol = z.object({

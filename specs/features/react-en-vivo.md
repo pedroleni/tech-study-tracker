@@ -474,7 +474,10 @@ En cada commit:
    `{ tipo: 'prop', nombre, detalle? }` (comparación superficial de
    `memoizedProps`; `detalle` es `funcion-nueva`, `objeto-nuevo` o
    `array-nuevo` si antes y ahora son de ese tipo), `{ tipo: 'contexto',
-   nombre }`, y `{ tipo: 'padre' }` si no hay ninguno de los anteriores.
+   nombre }`, `{ tipo: 'gancho' }` si cambió otro gancho con cola, y
+   `{ tipo: 'padre' }` si no hay otro motivo y el componente emitido más
+   cercano por encima se montó o se renderizó. Sin un padre ejecutado, un
+   render sin otro motivo detectable también se atribuye a `gancho`.
 5. **Contador de renders** por instancia: id estable guardado para el
    fiber y su `alternate`; suma 1 en `montado` y `renderizado`.
 6. **Props y estado** para el detalle de cada nodo: como mucho 12 props
@@ -564,6 +567,9 @@ nueva de React cambia los internos, ese test es el que avisa.
 - **El contenido de los bloques** (archivos, comprobaciones) viene del
   JSON de la lección, validado con Zod y escrito por admins.
 - **Bucle infinito:** riesgo aceptado, igual que en `editor-en-vivo`.
+
+Pendiente: mientras un Suspense enseña su fallback, el árbol oculto sale como
+si estuviera en pantalla; se resolverá con el módulo 7.
 
 ## Notas para quien escriba lecciones
 

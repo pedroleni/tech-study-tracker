@@ -54,10 +54,12 @@ export function ReactEnVivo({
   const [comprobacion, setComprobacion] = useState<EstadoComprobacion>({ estado: 'inactivo' })
   const { entradas, recibirMensaje, limpiar } = useEntradasConsola()
   const [arbol, setArbol] = useState<MensajeArbol | null>(null)
+  const documentoMontadoRef = useRef(false)
   const recibir = useCallback(
     (mensaje: MensajeReactEnVivo) => {
       recibirMensaje(mensaje)
-      if (mensaje.tipo === 'arbol') setArbol(mensaje)
+      if (mensaje.tipo === 'montado') documentoMontadoRef.current = true
+      if (mensaje.tipo === 'arbol' && documentoMontadoRef.current) setArbol(mensaje)
     },
     [recibirMensaje],
   )
@@ -91,6 +93,7 @@ export function ReactEnVivo({
         setErrorSintaxis(null)
         limpiar()
         // El árbol de la vista previa anterior ya no describe nada.
+        documentoMontadoRef.current = false
         setArbol(null)
         setSrcDoc(preparado.srcDoc)
       })
@@ -135,6 +138,7 @@ export function ReactEnVivo({
     setPestana(primeraPestana)
     setComprobacion({ estado: 'inactivo' })
     setReinicios((anteriores) => anteriores + 1)
+    documentoMontadoRef.current = false
     setArbol(null)
     limpiar()
   }

@@ -1,5 +1,5 @@
 import { Atom } from 'lucide-react'
-import { useCallback, useEffect, useId, useMemo, useState } from 'react'
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 
 import { ArbolDeRenders } from '@/components/bloques-laboratorio/ArbolDeRenders'
 import { ConsolaReact } from '@/components/bloques-laboratorio/ConsolaReact'
@@ -40,10 +40,12 @@ export function ReactAnotado({
   const [error, setError] = useState<string | null>(null)
   const { entradas, recibirMensaje, limpiar } = useEntradasConsola()
   const [arbol, setArbol] = useState<MensajeArbol | null>(null)
+  const documentoMontadoRef = useRef(false)
   const recibir = useCallback(
     (mensaje: MensajeReactEnVivo) => {
       recibirMensaje(mensaje)
-      if (mensaje.tipo === 'arbol') setArbol(mensaje)
+      if (mensaje.tipo === 'montado') documentoMontadoRef.current = true
+      if (mensaje.tipo === 'arbol' && documentoMontadoRef.current) setArbol(mensaje)
     },
     [recibirMensaje],
   )
@@ -62,8 +64,10 @@ export function ReactAnotado({
     }).then((preparado) => {
       if (cancelado) return
       setArbol(null)
-      if (preparado.ok) setSrcDoc(preparado.srcDoc)
-      else setError(preparado.error)
+      if (preparado.ok) {
+        documentoMontadoRef.current = false
+        setSrcDoc(preparado.srcDoc)
+      } else setError(preparado.error)
     })
     return () => {
       cancelado = true
