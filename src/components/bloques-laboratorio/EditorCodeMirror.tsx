@@ -1,6 +1,10 @@
 import type { html as lenguajeHtml } from '@codemirror/lang-html'
+import { HighlightStyle, syntaxHighlighting } from '@codemirror/language'
+import { tags } from '@lezer/highlight'
 import { basicSetup, EditorView } from 'codemirror'
 import { useEffect, useRef, useState } from 'react'
+
+import '@/components/codigo/sintaxis.css'
 
 // Editor CodeMirror con el tema de la web, compartido por editor-en-vivo y
 // react-en-vivo. Extraído tal cual de EditorEnVivo.tsx.
@@ -46,6 +50,51 @@ const estilosTemaAplicacion = {
     borderLeftColor: 'var(--foreground)',
   },
 } as const
+
+// Los colores salen de la misma paleta que los bloques de código estáticos
+// (sintaxis.css, contraste comprobado en claro y en oscuro). La paleta por
+// defecto de CodeMirror está pensada para fondo claro: en modo oscuro las
+// palabras clave apenas se leían.
+const resaltadoAplicacion = syntaxHighlighting(
+  HighlightStyle.define([
+    {
+      tag: [
+        tags.keyword,
+        tags.controlKeyword,
+        tags.moduleKeyword,
+        tags.operatorKeyword,
+        tags.definitionKeyword,
+        tags.modifier,
+        tags.self,
+        tags.null,
+        tags.bool,
+        tags.atom,
+      ],
+      color: 'var(--sintaxis-palabra-clave)',
+    },
+    { tag: [tags.string, tags.special(tags.string), tags.regexp], color: 'var(--sintaxis-cadena)' },
+    { tag: [tags.number, tags.integer, tags.float], color: 'var(--sintaxis-numero)' },
+    {
+      tag: [tags.comment, tags.lineComment, tags.blockComment, tags.docComment],
+      color: 'var(--sintaxis-comentario)',
+    },
+    {
+      tag: [tags.function(tags.variableName), tags.function(tags.propertyName)],
+      color: 'var(--sintaxis-funcion)',
+    },
+    { tag: [tags.tagName, tags.angleBracket], color: 'var(--sintaxis-etiqueta)' },
+    { tag: tags.attributeName, color: 'var(--sintaxis-atributo)' },
+    { tag: tags.attributeValue, color: 'var(--sintaxis-cadena)' },
+    { tag: tags.propertyName, color: 'var(--sintaxis-propiedad)' },
+    { tag: [tags.className, tags.typeName], color: 'var(--sintaxis-selector)' },
+    { tag: [tags.unit, tags.color, tags.constant(tags.name)], color: 'var(--sintaxis-valor)' },
+    {
+      tag: [tags.punctuation, tags.bracket, tags.operator, tags.separator],
+      color: 'var(--sintaxis-puntuacion)',
+    },
+    { tag: tags.invalid, color: 'var(--sintaxis-etiqueta)' },
+  ]),
+)
 
 function crearTemaAplicacion(modoOscuro: boolean) {
   return EditorView.theme(estilosTemaAplicacion, { dark: modoOscuro })
@@ -99,6 +148,7 @@ export function EditorCodeMirror({
       extensions: [
         basicSetup,
         extension,
+        resaltadoAplicacion,
         crearTemaAplicacion(modoOscuro),
         EditorView.contentAttributes.of({
           'aria-label': etiqueta,

@@ -319,6 +319,23 @@ describe('puente del iframe', () => {
     })
   })
 
+  it('mide la altura del contenido, no la del iframe', () => {
+    // scrollHeight nunca baja de la altura actual del iframe: una vista
+    // previa con poco contenido se quedaba siempre más alta de lo necesario.
+    const postMessage = vi.spyOn(window.parent, 'postMessage').mockImplementation(() => {})
+    vi.spyOn(document.documentElement, 'getBoundingClientRect').mockReturnValue({
+      height: 123.4,
+    } as DOMRect)
+
+    new Function(puente)()
+    window.dispatchEvent(new Event('load'))
+
+    expect(postMessage).toHaveBeenCalledWith(
+      { canal: 'react-en-vivo', tipo: 'alto', alto: 124 },
+      '*',
+    )
+  })
+
   it('encadena un hook de DevTools que ya existía', () => {
     const original = vi.fn()
     ventana.__REACT_DEVTOOLS_GLOBAL_HOOK__ = { onCommitFiberRoot: original }

@@ -67,7 +67,10 @@
     const razon = evento.reason instanceof Error ? evento.reason.message : String(evento.reason)
     enviar({ tipo: 'error', texto: razon.slice(0, 2000) })
   })
-  const avisarAlto = () => enviar({ tipo: 'alto', alto: document.documentElement.scrollHeight })
+  // La altura del contenido, no scrollHeight: scrollHeight nunca baja de la
+  // altura actual del iframe, y una vista previa corta no podría encogerse.
+  const avisarAlto = () =>
+    enviar({ tipo: 'alto', alto: Math.ceil(document.documentElement.getBoundingClientRect().height) })
   if (typeof ResizeObserver === 'function') new ResizeObserver(avisarAlto).observe(document.documentElement)
   window.addEventListener('load', avisarAlto)
 })()
