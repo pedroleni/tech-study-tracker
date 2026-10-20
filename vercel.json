@@ -11,7 +11,7 @@
       ]
     },
     {
-      "source": "/react-en-vivo/(.*)",
+      "source": "/vendor/react-en-vivo/(.*)",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
       ]

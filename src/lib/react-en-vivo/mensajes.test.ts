@@ -11,7 +11,7 @@ function prepararIframe() {
 }
 
 afterEach(() => {
-  document.body.innerHTML = ''
+  document.body.replaceChildren()
 })
 
 describe('leerMensajeReactEnVivo', () => {

@@ -70,8 +70,8 @@ describe('ReactEnVivo', () => {
   it('la vista previa carga el runtime propio y el código transformado', async () => {
     await renderizarListo()
 
-    expect(vista().getAttribute('srcdoc')).toContain('/react-en-vivo/19.3.1/react.js')
-    expect(vista().getAttribute('srcdoc')).not.toContain('/react-en-vivo/19.3.1/pruebas.js')
+    expect(vista().getAttribute('srcdoc')).toContain('/vendor/react-en-vivo/19.3.1/react.js')
+    expect(vista().getAttribute('srcdoc')).not.toContain('/vendor/react-en-vivo/19.3.1/pruebas.js')
   })
 
   it('un error de sintaxis no rompe la vista previa', async () => {
@@ -130,7 +130,7 @@ describe('ReactEnVivo', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Comprobar' }))
     const oculto = (await screen.findByTitle('Comprobaciones')) as HTMLIFrameElement
     expect(oculto).toHaveAttribute('aria-hidden', 'true')
-    expect(oculto.getAttribute('srcdoc')).toContain('/react-en-vivo/19.3.1/pruebas.js')
+    expect(oculto.getAttribute('srcdoc')).toContain('/vendor/react-en-vivo/19.3.1/pruebas.js')
 
     const enviado = vi.spyOn(oculto.contentWindow!, 'postMessage')
     enviarDesde(oculto.contentWindow, { canal: 'react-en-vivo', tipo: 'montado', version: '19.3.1' })

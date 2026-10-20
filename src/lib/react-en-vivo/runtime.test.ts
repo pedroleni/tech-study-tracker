@@ -79,7 +79,7 @@ async function ejecutarMontaje(archivos: ArchivoReact[], strictMode = false) {
   const transformacion = await transformarArchivos(archivos)
   if (!transformacion.ok) throw new Error(transformacion.mensaje)
 
-  document.body.innerHTML = '<div id="root"></div>'
+  document.body.replaceChildren(Object.assign(document.createElement('div'), { id: 'root' }))
   const enviar = vi.fn()
   instalarReact()
   ventana.__enviarReactEnVivo = enviar
@@ -107,7 +107,7 @@ afterEach(() => {
   console.info = consolaOriginal.info
   console.warn = consolaOriginal.warn
   console.error = consolaOriginal.error
-  document.body.innerHTML = ''
+  document.body.replaceChildren()
   delete ventana.__configReactEnVivo
   delete ventana.__enviarReactEnVivo
   delete ventana.__comprobarReactEnVivo
@@ -327,7 +327,7 @@ export default function App() {
 describe('runtime que no llegó a cargar', () => {
   it('sin React, avisa en vez de quedarse en blanco y no cuelga las comprobaciones', async () => {
     const enviar = vi.fn()
-    document.body.innerHTML = '<div id="root"></div>'
+    document.body.replaceChildren(Object.assign(document.createElement('div'), { id: 'root' }))
     ventana.__enviarReactEnVivo = enviar
     ventana.__configReactEnVivo = { modulos: {}, archivosCss: [], strictMode: false }
 

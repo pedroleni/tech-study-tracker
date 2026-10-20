@@ -240,7 +240,7 @@ componentes, hace clic y ve cómo responden.
   depender de un tercero en cada lección; y la versión queda fijada.
   React 19 ya no publica builds UMD, así que un script genera un
   bundle IIFE desde los paquetes de npm fijados y lo deja en
-  `public/react-en-vivo/19.3.1/`, igual que `public/ts-libs/`.
+  `public/vendor/react-en-vivo/19.3.1/`, igual que `public/ts-libs/`.
 - **Build de desarrollo a propósito.** Pesa más (≈200 KB gzip entre
   `react` y `react-dom/client`, medido) pero trae los avisos que
   enseñan: "Each child in a list should have a unique key", hooks

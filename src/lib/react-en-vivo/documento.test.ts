@@ -16,10 +16,10 @@ describe('construirDocumentoReact', () => {
     const doc = construirDocumentoReact(base)
 
     expect(doc).toContain(
-      '<script src="https://ejemplo.test/react-en-vivo/19.3.1/react.js"></script>',
+      '<script src="https://ejemplo.test/vendor/react-en-vivo/19.3.1/react.js"></script>',
     )
     // La URL del script, no el nombre suelto: el propio montaje lo menciona en un comentario.
-    expect(doc).not.toContain('/react-en-vivo/19.3.1/pruebas.js')
+    expect(doc).not.toContain('/vendor/react-en-vivo/19.3.1/pruebas.js')
     expect(doc.indexOf('__REACT_DEVTOOLS_GLOBAL_HOOK__')).toBeLessThan(
       doc.indexOf('react.js'),
     )
@@ -37,7 +37,7 @@ describe('construirDocumentoReact', () => {
 
   it('añade Testing Library solo cuando hay comprobaciones', () => {
     expect(construirDocumentoReact({ ...base, conPruebas: true })).toContain(
-      '<script src="https://ejemplo.test/react-en-vivo/19.3.1/pruebas.js"></script>',
+      '<script src="https://ejemplo.test/vendor/react-en-vivo/19.3.1/pruebas.js"></script>',
     )
   })
 

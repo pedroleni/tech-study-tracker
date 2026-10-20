@@ -11,7 +11,7 @@ detalle cuando toquen.
 y `lecciones` no ganan columnas). La tecnología "React" se crea desde el
 admin cuando exista el primer borrador de lección, no antes, para no
 publicar una ficha vacía. `vercel.json` gana una regla de caché para los
-ficheros de `public/react-en-vivo/` (va en el propio repo, no hace falta
+ficheros de `public/vendor/react-en-vivo/` (va en el propio repo, no hace falta
 tocar el panel de Vercel).
 
 ## Por qué existe esta feature
@@ -75,7 +75,7 @@ una lista sin `key` y un error de render provocado:
    cuando la lección tiene un bloque de React. El compilador de
    TypeScript solo se cargará para `lenguaje: 'tsx'` con diagnósticos de
    tipos (módulo 10 del temario, fase posterior).
-2. **React desde `public/react-en-vivo/19.3.1/`**, nunca desde un CDN
+2. **React desde `public/vendor/react-en-vivo/19.3.1/`**, nunca desde un CDN
    (esm.sh, unpkg, jsDelivr): los cortes judiciales de LaLiga bloquean
    IPs de Cloudflare durante los partidos, no se depende de un tercero en
    cada lección y la versión queda fijada. La web sigue en React 19.2.4;
@@ -253,7 +253,7 @@ export const esquemaReactAnotado = z.object({
 Los dos se añaden a la unión discriminada `esquemaBloqueLaboratorio`,
 con sus tipos `DatosReactEnVivo` y `DatosReactAnotado`.
 
-### Runtime (`public/react-en-vivo/19.3.1/`)
+### Runtime (`public/vendor/react-en-vivo/19.3.1/`)
 
 - `react.js`: `react`, `react-dom`, `react-dom/client`,
   `react/jsx-runtime` y `react/jsx-dev-runtime` 19.3.1, build de
@@ -262,6 +262,10 @@ con sus tipos `DatosReactEnVivo` y `DatosReactAnotado`.
 - `pruebas.js`: `@testing-library/dom` 10.4.2 + `@testing-library/user-event`
   14.6.8, IIFE minificado que expone `window.__pruebasEnVivo = { ...dom,
   userEvent }`.
+- Van en `public/vendor/` porque son código de terceros empaquetado: los
+  escáneres de seguridad del repo excluyen `vendor` (como
+  `node_modules`). En `public/react-en-vivo/` el código de React disparaba
+  falsos HIGH (`dangerouslySetInnerHTML`, `innerHTML`, `Math.random`).
 - Los dos conservan los avisos de licencia MIT al final
   (`legalComments: 'eof'`).
 - Los construye `scripts/react-en-vivo/construir.mjs` (esbuild), desde
@@ -269,9 +273,9 @@ con sus tipos `DatosReactEnVivo` y `DatosReactAnotado`.
   versiones exactas. Se ejecuta a mano solo al cambiar de versión de
   React; la salida se commitea, como `public/ts-libs/`.
 - `vercel.json`: cabecera `Cache-Control: public, max-age=31536000,
-  immutable` para `/react-en-vivo/(.*)`. Es seguro porque la versión va
+  immutable` para `/vendor/react-en-vivo/(.*)`. Es seguro porque la versión va
   en la ruta: una versión nueva es una ruta nueva.
-- `eslint.config.js`: `public/react-en-vivo` en `ignores`, como
+- `eslint.config.js`: `public/vendor` en `ignores`, como
   `public/ts-libs`.
 
 ### Motor (`src/lib/react-en-vivo/`)
@@ -304,7 +308,7 @@ con sus tipos `DatosReactEnVivo` y `DatosReactAnotado`.
 - **`documento.ts`**: `construirDocumentoReact({ origen, css, modulos,
   archivosCss, strictMode, conPruebas })` recibe el código ya
   transformado y devuelve el `srcdoc`, en este orden: CSS en un
-  `<style>`, el puente, `<script src="{origen}/react-en-vivo/19.3.1/react.js">`
+  `<style>`, el puente, `<script src="{origen}/vendor/react-en-vivo/19.3.1/react.js">`
   (y `pruebas.js` si `conPruebas`), `<div id="root">`, la configuración
   como JSON (con `<` escapado como `\u003c`, para que el código del
   alumno no pueda cerrar el `<script>`) y el montaje.
