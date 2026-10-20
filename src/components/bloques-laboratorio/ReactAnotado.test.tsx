@@ -25,7 +25,7 @@ describe('ReactAnotado', () => {
       />,
     )
 
-    expect(screen.getByLabelText('Código JSX anotado')).toBeInTheDocument()
+    expect(screen.getByLabelText('Código de React anotado')).toBeInTheDocument()
     const botones = screen.getAllByRole('button', { name: /^Ver anotación/ })
     expect(botones).toHaveLength(2)
 

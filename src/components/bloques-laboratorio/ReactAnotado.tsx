@@ -81,7 +81,9 @@ export function ReactAnotado({
         lenguaje="jsx"
         numerarLineas
         lineasDestacadas={activa ? [activa.linea] : []}
-        etiqueta="Código JSX anotado"
+        // Distinta de la de CodigoAnotado ("Código JSX anotado"): las dos
+        // pueden convivir en una lección y una región no debe repetir nombre.
+        etiqueta="Código de React anotado"
       />
 
       {anotacionesValidas.length > 0 && (

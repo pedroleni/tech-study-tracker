@@ -9,6 +9,8 @@ import { EsquemaDePagina } from '@/components/bloques-laboratorio/EsquemaDePagin
 import { EditorEnVivo } from '@/components/bloques-laboratorio/EditorEnVivo'
 import { GitAnotado } from '@/components/bloques-laboratorio/GitAnotado'
 import { GitEnVivo } from '@/components/bloques-laboratorio/GitEnVivo'
+import { ReactAnotado } from '@/components/bloques-laboratorio/ReactAnotado'
+import { ReactEnVivo } from '@/components/bloques-laboratorio/ReactEnVivo'
 import { LineaDeTiempo } from '@/components/bloques-laboratorio/LineaDeTiempo'
 import { MapaDeRegiones } from '@/components/bloques-laboratorio/MapaDeRegiones'
 import { Mitos } from '@/components/bloques-laboratorio/Mitos'
@@ -632,6 +634,70 @@ export function AdminReferenciaContenidoPage() {
             mostrarGrafo={true}
             anotaciones={[{ fragmento: 'log', nota: 'feature divergió de master en el mismo commit base.' }]}
             etiquetaSeccion="Git anotado (con grafo)"
+          />
+        </Referencia>
+
+        <Referencia nombre="ReactAnotado">
+          <ReactAnotado
+            tipo="react-anotado"
+            codigo={
+              "const tareas = [\n  { id: 1, texto: 'Leer' },\n  { id: 2, texto: 'Correr' },\n]\n\nexport default function App() {\n  console.log('render App')\n  return (\n    <ul>\n      {tareas.map((tarea) => (\n        <li key={tarea.id}>{tarea.texto}</li>\n      ))}\n    </ul>\n  )\n}"
+            }
+            css=""
+            anotaciones={[
+              { fragmento: 'tareas.map', nota: 'map convierte cada dato en un elemento.' },
+              {
+                fragmento: 'key={tarea.id}',
+                nota: 'La key le dice a React qué fila es cuál entre renders.',
+              },
+            ]}
+            strictMode
+            mostrarConsola
+          />
+        </Referencia>
+
+        <Referencia nombre="ReactEnVivo">
+          <ReactEnVivo
+            tipo="react-en-vivo"
+            titulo="Lista de tareas"
+            consigna="Añade tareas a la lista. Después haz que el campo se vacíe al añadir y pulsa «Comprobar»."
+            archivos={[
+              {
+                nombre: 'App.jsx',
+                codigo:
+                  "import { useState } from 'react'\nimport Tarjeta from './Tarjeta'\nimport './estilos.css'\n\nexport default function App() {\n  const [tareas, setTareas] = useState(['Leer', 'Correr'])\n  const [nueva, setNueva] = useState('')\n\n  function anadir() {\n    if (!nueva) return\n    setTareas([...tareas, nueva])\n  }\n\n  return (\n    <main>\n      <label>\n        Nueva tarea <input value={nueva} onChange={(e) => setNueva(e.target.value)} />\n      </label>\n      <button onClick={anadir}>Añadir</button>\n      <ul>\n        {tareas.map((tarea) => (\n          <Tarjeta key={tarea} texto={tarea} />\n        ))}\n      </ul>\n    </main>\n  )\n}",
+              },
+              {
+                nombre: 'Tarjeta.jsx',
+                codigo:
+                  'export default function Tarjeta({ texto }) {\n  return <li className="tarjeta">{texto}</li>\n}',
+              },
+              {
+                nombre: 'estilos.css',
+                codigo: 'main {\n  font-family: system-ui, sans-serif;\n}\n\n.tarjeta {\n  padding: 4px 0;\n}',
+              },
+            ]}
+            strictMode
+            mostrarConsola
+            mostrarJsGenerado
+            comprobaciones={[
+              {
+                descripcion: 'Al añadir una tarea, aparece en la lista',
+                pasos: [
+                  { escribir: { etiqueta: 'Nueva tarea', texto: 'Comprar pan' } },
+                  { pulsar: { rol: 'button', nombre: 'Añadir' } },
+                ],
+                espera: { rol: 'listitem', texto: 'Comprar pan' },
+              },
+              {
+                descripcion: 'El campo se vacía después de añadir',
+                pasos: [
+                  { escribir: { etiqueta: 'Nueva tarea', texto: 'Comprar pan' } },
+                  { pulsar: { rol: 'button', nombre: 'Añadir' } },
+                ],
+                espera: { etiqueta: 'Nueva tarea', valor: '' },
+              },
+            ]}
           />
         </Referencia>
       </GrupoCatalogo>
