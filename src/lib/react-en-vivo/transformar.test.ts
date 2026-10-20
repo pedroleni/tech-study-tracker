@@ -53,3 +53,24 @@ describe('transformarParaMostrar', () => {
     expect(texto).toContain("_jsx('li'")
   })
 })
+
+it('detecta también los errores de sintaxis que solo ve el motor de JavaScript', async () => {
+  // Sucrase deja pasar un const repetido; V8 lo rechaza al compilar. Sin esta
+  // comprobación, la vista previa se rompía sin decir en qué archivo.
+  const r = await transformarArchivos([
+    {
+      nombre: 'App.jsx',
+      codigo: "import Tarjeta from './Tarjeta'\nexport default function App() { return <Tarjeta /> }",
+    },
+    {
+      nombre: 'Tarjeta.jsx',
+      codigo: 'export default function Tarjeta() {\n  const n = 1\n  const n = 2\n  return <p>{n}</p>\n}',
+    },
+  ])
+  expect(r).toEqual({
+    ok: false,
+    archivo: 'Tarjeta.jsx',
+    linea: null,
+    mensaje: "Identifier 'n' has already been declared",
+  })
+})

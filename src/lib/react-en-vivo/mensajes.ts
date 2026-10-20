@@ -8,6 +8,11 @@ import { CANAL_REACT_EN_VIVO } from './constantes'
 const canal = z.literal(CANAL_REACT_EN_VIVO)
 const texto = z.string().max(2000)
 const entero = z.number().int().min(0)
+const resultado = z.object({
+  descripcion: z.string().max(160),
+  ok: z.boolean(),
+  motivo: z.string().max(300).optional(),
+})
 
 export const esquemaMensajeReactEnVivo = z.discriminatedUnion('tipo', [
   z.object({ canal, tipo: z.literal('montado'), version: z.string().max(20) }),
@@ -29,19 +34,9 @@ export const esquemaMensajeReactEnVivo = z.discriminatedUnion('tipo', [
     linea: z.number().int().min(1).optional(),
   }),
   z.object({ canal, tipo: z.literal('error'), texto }),
-  z.object({
-    canal,
-    tipo: z.literal('resultado-comprobaciones'),
-    resultados: z
-      .array(
-        z.object({
-          descripcion: z.string().max(160),
-          ok: z.boolean(),
-          motivo: z.string().max(300).optional(),
-        }),
-      )
-      .max(8),
-  }),
+  // Una por comprobación terminada: el comprobador mide inactividad, no el total.
+  z.object({ canal, tipo: z.literal('progreso-comprobaciones'), resultado }),
+  z.object({ canal, tipo: z.literal('resultado-comprobaciones'), resultados: z.array(resultado).max(8) }),
 ])
 
 export type MensajeReactEnVivo = z.infer<typeof esquemaMensajeReactEnVivo>

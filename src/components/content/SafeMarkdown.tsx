@@ -29,7 +29,10 @@ function lenguajeDelBloque(className?: string): Lenguaje {
 
   if (lenguaje === 'html' || lenguaje === 'xml' || lenguaje === 'markup') return 'html'
   if (lenguaje === 'css') return 'css'
-  if (['js', 'jsx', 'javascript', 'ts', 'tsx', 'typescript'].includes(lenguaje ?? '')) {
+  if (lenguaje === 'jsx') return 'jsx'
+  if (lenguaje === 'tsx') return 'tsx'
+  // ts se queda en 'js': en un .ts, <T>(x) => x es un genérico, no JSX.
+  if (['js', 'javascript', 'ts', 'typescript'].includes(lenguaje ?? '')) {
     return 'js'
   }
   return 'texto'

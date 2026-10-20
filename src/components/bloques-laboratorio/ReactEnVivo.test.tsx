@@ -172,6 +172,37 @@ describe('ReactEnVivo', () => {
     ).toBeInTheDocument()
   })
 
+  it('Reiniciar vuelve a arrancar la app aunque el código no haya cambiado', async () => {
+    await renderizarListo()
+    const antes = vista()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Reiniciar' }))
+
+    expect(vista()).not.toBe(antes)
+  })
+
+  it('Comprobar conserva el foco del teclado', async () => {
+    await renderizarListo()
+    const boton = screen.getByRole('button', { name: 'Comprobar' })
+    boton.focus()
+
+    fireEvent.click(boton)
+    const oculto = (await screen.findByTitle('Comprobaciones')) as HTMLIFrameElement
+    // Mientras comprueba no se desactiva del todo (perdería el foco), solo se marca.
+    expect(boton).not.toBeDisabled()
+    expect(boton).toHaveAttribute('aria-disabled', 'true')
+
+    // user-event, dentro del iframe oculto, se lleva el foco allí.
+    oculto.focus()
+    enviarDesde(oculto.contentWindow, {
+      canal: 'react-en-vivo',
+      tipo: 'resultado-comprobaciones',
+      resultados: [{ descripcion: 'Saluda', ok: true }],
+    })
+    await screen.findByText('1 de 1 comprobaciones superadas')
+    expect(document.activeElement).toBe(boton)
+  })
+
   it('sin comprobaciones no ofrece Comprobar; sin consola no la pinta', async () => {
     await renderizarListo({ ...datos, comprobaciones: undefined, mostrarConsola: false })
 

@@ -60,6 +60,42 @@
       original(...args)
     }
   }
+  // El sandbox no permite ventanas modales (sin allow-modals): alert() no
+  // haría nada y el alumno creería que su onClick no funciona. Se muestran
+  // como un aviso dentro de la vista previa y en la consola. confirm()
+  // responde siempre "aceptar"; prompt(), su valor por defecto o "".
+  const avisar = (tipo, mensaje) => {
+    const texto = mensaje === undefined ? '' : String(mensaje)
+    enviar({ tipo: 'consola', nivel: 'info', texto: (tipo + ': ' + texto).slice(0, 2000), commit: commits })
+    const aviso = document.createElement('div')
+    aviso.textContent = texto
+    Object.assign(aviso.style, {
+      position: 'fixed',
+      top: '8px',
+      left: '50%',
+      transform: 'translateX(-50%)',
+      zIndex: '2147483647',
+      maxWidth: '90%',
+      padding: '8px 12px',
+      borderRadius: '8px',
+      background: '#1f2937',
+      color: '#ffffff',
+      font: '14px system-ui, sans-serif',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.25)',
+      pointerEvents: 'none',
+    })
+    ;(document.body || document.documentElement).append(aviso)
+    setTimeout(() => aviso.remove(), 3000)
+  }
+  window.alert = (mensaje) => avisar('alert', mensaje)
+  window.confirm = (mensaje) => {
+    avisar('confirm', mensaje)
+    return true
+  }
+  window.prompt = (mensaje, valor) => {
+    avisar('prompt', mensaje)
+    return valor === undefined ? '' : String(valor)
+  }
   window.addEventListener('error', (evento) =>
     enviar({ tipo: 'error', texto: String(evento.message).slice(0, 2000) }),
   )

@@ -52,6 +52,10 @@ export function ReactEnVivo({
   const { entradas, recibirMensaje, limpiar } = useEntradasConsola()
   const versionRef = useRef(0)
   const primeraVezRef = useRef(true)
+  const botonComprobarRef = useRef<HTMLButtonElement>(null)
+  // Cambia en cada "Reiniciar": remonta la vista previa aunque el código no
+  // haya cambiado, para que la app vuelva a arrancar de cero.
+  const [reinicios, setReinicios] = useState(0)
 
   useEffect(() => {
     // La primera vista previa sale sin esperar; después, 400 ms tras la última tecla.
@@ -85,10 +89,19 @@ export function ReactEnVivo({
     return () => window.clearTimeout(temporizador)
   }, [archivos, strictMode, mostrarJsGenerado, limpiar])
 
-  const terminarComprobacion = useCallback((fin: FinComprobacion) => setComprobacion(fin), [])
+  const terminarComprobacion = useCallback((fin: FinComprobacion) => {
+    setComprobacion(fin)
+    // user-event escribe dentro del iframe oculto y se lleva el foco; al
+    // quitarlo, el foco caería en <body>. Vuelve al botón, salvo que la
+    // persona ya lo haya llevado a otro sitio.
+    const activo = document.activeElement
+    if (!activo || activo === document.body || activo.tagName === 'IFRAME') {
+      botonComprobarRef.current?.focus()
+    }
+  }, [])
 
   async function comprobar() {
-    if (!comprobaciones) return
+    if (!comprobaciones || comprobacion.estado === 'comprobando') return
     setComprobacion({ estado: 'comprobando', srcDoc: null })
     const preparado = await prepararDocumento(archivos, {
       origen: window.location.origin,
@@ -107,6 +120,8 @@ export function ReactEnVivo({
     setArchivos(archivosOriginales)
     setPestana(primeraPestana)
     setComprobacion({ estado: 'inactivo' })
+    setReinicios((anteriores) => anteriores + 1)
+    limpiar()
   }
 
   const pestanas = [
@@ -135,10 +150,14 @@ export function ReactEnVivo({
         <div className="flex flex-wrap gap-2">
           {comprobaciones && (
             <Button
+              ref={botonComprobarRef}
               type="button"
               size="sm"
               onClick={() => void comprobar()}
-              disabled={comprobacion.estado === 'comprobando'}
+              // aria-disabled y no disabled: un botón desactivado pierde el foco
+              // del teclado y lo manda a <body>.
+              aria-disabled={comprobacion.estado === 'comprobando'}
+              className="aria-disabled:cursor-wait aria-disabled:opacity-60"
             >
               <ListChecks aria-hidden="true" />
               Comprobar
@@ -211,7 +230,7 @@ export function ReactEnVivo({
         {comprobacion.estado !== 'inactivo' && (
           <ResultadosComprobaciones
             estado={comprobacion.estado}
-            resultados={comprobacion.estado === 'listo' ? comprobacion.resultados : []}
+            resultados={'resultados' in comprobacion ? comprobacion.resultados : []}
           />
         )}
 
@@ -220,7 +239,7 @@ export function ReactEnVivo({
           {srcDoc === null ? (
             <p className="text-sm text-muted-foreground">Preparando React…</p>
           ) : (
-            <VistaPreviaReact srcDoc={srcDoc} onMensaje={recibirMensaje} />
+            <VistaPreviaReact key={reinicios} srcDoc={srcDoc} onMensaje={recibirMensaje} />
           )}
         </div>
 

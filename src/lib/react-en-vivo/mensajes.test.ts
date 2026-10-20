@@ -32,6 +32,17 @@ describe('leerMensajeReactEnVivo', () => {
     ).toEqual({ canal: 'react-en-vivo', tipo: 'error-render', texto: 'Roto', archivo: 'App.jsx', linea: 3 })
   })
 
+  it('acepta el progreso de una comprobación', () => {
+    const { iframe, evento } = prepararIframe()
+    const progreso = {
+      canal: 'react-en-vivo',
+      tipo: 'progreso-comprobaciones',
+      resultado: { descripcion: 'd', ok: false, motivo: 'm' },
+    }
+
+    expect(leerMensajeReactEnVivo(evento(progreso), iframe.contentWindow)).toEqual(progreso)
+  })
+
   it('rechaza mensajes de otra ventana, de otro canal o sin ventana esperada', () => {
     const { iframe, evento } = prepararIframe()
     const commit = { canal: 'react-en-vivo', tipo: 'commit', numero: 2 }

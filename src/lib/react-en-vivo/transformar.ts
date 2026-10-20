@@ -21,8 +21,21 @@ type ErrorSucrase = Error & {
 let promesaSucrase: Promise<typeof import('sucrase')> | undefined
 
 function cargarSucrase() {
-  promesaSucrase ??= import('sucrase')
+  promesaSucrase ??= import('sucrase').catch((error: unknown) => {
+    // Un chunk caducado tras un despliegue no se queda cacheado: el siguiente
+    // intento vuelve a pedirlo.
+    promesaSucrase = undefined
+    throw error
+  })
   return promesaSucrase
+}
+
+const ERROR_DE_CARGA = 'No se pudo cargar el editor de React. Recarga la página para intentarlo de nuevo.'
+
+export class ErrorCargaSucrase extends Error {
+  constructor() {
+    super(ERROR_DE_CARGA)
+  }
 }
 
 function describirError(error: unknown, archivo: string): ResultadoTransformacion & { ok: false } {
@@ -45,7 +58,9 @@ function describirError(error: unknown, archivo: string): ResultadoTransformacio
 export async function transformarArchivos(
   archivos: ArchivoReact[],
 ): Promise<ResultadoTransformacion> {
-  const { transform } = await cargarSucrase()
+  const { transform } = await cargarSucrase().catch(() => {
+    throw new ErrorCargaSucrase()
+  })
   const modulos: Record<string, string> = {}
   const archivosCss: string[] = []
   const estilos: string[] = []
@@ -59,8 +74,9 @@ export async function transformarArchivos(
       continue
     }
 
+    let codigo: string
     try {
-      modulos[ruta] = transform(archivo.codigo, {
+      codigo = transform(archivo.codigo, {
         transforms: ['jsx', 'imports'],
         jsxRuntime: 'automatic',
         production: false,
@@ -69,6 +85,19 @@ export async function transformarArchivos(
     } catch (error) {
       return describirError(error, archivo.nombre)
     }
+    // Sucrase deja pasar lo que solo rechaza el motor al compilar (un const
+    // repetido, await fuera de una función async...). Se compila aquí, SIN
+    // ejecutarlo, para dar el mismo error de sintaxis con su archivo en vez de
+    // romper la vista previa. Un EvalError (una CSP futura sin 'unsafe-eval')
+    // no es un error del alumno: se deja pasar.
+    try {
+      new Function('require', 'module', 'exports', codigo)
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        return { ok: false, archivo: archivo.nombre, linea: null, mensaje: error.message }
+      }
+    }
+    modulos[ruta] = codigo
   }
 
   return { ok: true, modulos, archivosCss, css: estilos.join('\n') }
@@ -77,7 +106,12 @@ export async function transformarArchivos(
 export async function transformarParaMostrar(
   archivos: ArchivoReact[],
 ): Promise<string> {
-  const { transform } = await cargarSucrase()
+  let transform: typeof import('sucrase').transform
+  try {
+    ;({ transform } = await cargarSucrase())
+  } catch {
+    return `// ${ERROR_DE_CARGA}`
+  }
   const resultados: string[] = []
 
   for (const archivo of archivos) {

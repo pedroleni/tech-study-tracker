@@ -286,6 +286,76 @@ export default function App() {
   })
 })
 
+describe('comprobaciones: progreso y salida rápida', () => {
+  it('avisa del progreso de cada comprobación y no espera si la app ya reventó', async () => {
+    const enviar = await ejecutarMontaje([
+      {
+        nombre: 'App.jsx',
+        codigo: `import { useState } from 'react'
+export default function App() {
+  const [roto, setRoto] = useState(false)
+  if (roto) throw new Error('Explota')
+  return <button onClick={() => setRoto(true)}>Romper</button>
+}`,
+      },
+    ])
+    ventana.__pruebasEnVivo = {
+      ...await import('@testing-library/dom'),
+      userEvent: userEventFalso,
+    }
+
+    const inicio = performance.now()
+    const resultados = await ventana.__comprobarReactEnVivo?.([
+      {
+        descripcion: 'Romper',
+        pasos: [{ pulsar: { rol: 'button', nombre: 'Romper' } }],
+        espera: { texto: 'nunca' },
+      },
+    ])
+
+    expect(performance.now() - inicio).toBeLessThan(1000)
+    expect(resultados).toEqual([
+      { descripcion: 'Romper', ok: false, motivo: 'Al hacer los pasos, la app falló: Explota' },
+    ])
+    expect(mensajesDe(enviar)).toContainEqual({
+      tipo: 'progreso-comprobaciones',
+      resultado: { descripcion: 'Romper', ok: false, motivo: 'Al hacer los pasos, la app falló: Explota' },
+    })
+  })
+})
+
+describe('runtime que no llegó a cargar', () => {
+  it('sin React, avisa en vez de quedarse en blanco y no cuelga las comprobaciones', async () => {
+    const enviar = vi.fn()
+    document.body.innerHTML = '<div id="root"></div>'
+    ventana.__enviarReactEnVivo = enviar
+    ventana.__configReactEnVivo = { modulos: {}, archivosCss: [], strictMode: false }
+
+    new Function(montaje)()
+
+    const motivo = 'No se pudo cargar React en la vista previa. Recarga la página para intentarlo de nuevo.'
+    expect(mensajesDe(enviar)).toContainEqual({ tipo: 'error-render', texto: motivo })
+    expect(mensajesDe(enviar)).toContainEqual(expect.objectContaining({ tipo: 'montado' }))
+    expect(
+      await ventana.__comprobarReactEnVivo?.([{ descripcion: 'd', pasos: [], espera: { texto: 'x' } }]),
+    ).toEqual([{ descripcion: 'd', ok: false, motivo }])
+  })
+
+  it('sin Testing Library, cada comprobación lo explica', async () => {
+    await ejecutarMontaje([{ nombre: 'App.jsx', codigo: 'export default function App() { return <p>Hola</p> }' }])
+
+    expect(
+      await ventana.__comprobarReactEnVivo?.([{ descripcion: 'd', pasos: [], espera: { texto: 'Hola' } }]),
+    ).toEqual([
+      {
+        descripcion: 'd',
+        ok: false,
+        motivo: 'No se pudieron cargar las herramientas de comprobación. Recarga la página para intentarlo de nuevo.',
+      },
+    ])
+  })
+})
+
 describe('puente del iframe', () => {
   it('recorta textos de consola a 2000 y formatea %s', () => {
     console.log = vi.fn()
@@ -334,6 +404,28 @@ describe('puente del iframe', () => {
       { canal: 'react-en-vivo', tipo: 'alto', alto: 124 },
       '*',
     )
+  })
+
+  it('alert, confirm y prompt se ven en la vista previa y en la consola', () => {
+    // El sandbox no permite ventanas modales: sin esto, alert() no hacía nada
+    // y el alumno creía que su onClick no funcionaba.
+    const postMessage = vi.spyOn(window.parent, 'postMessage').mockImplementation(() => {})
+    const originales = { alert: window.alert, confirm: window.confirm, prompt: window.prompt }
+    try {
+      new Function(puente)()
+      window.alert('Hola')
+
+      expect(postMessage).toHaveBeenCalledWith(
+        { canal: 'react-en-vivo', tipo: 'consola', nivel: 'info', texto: 'alert: Hola', commit: 0 },
+        '*',
+      )
+      expect(document.body).toHaveTextContent('Hola')
+      expect(window.confirm('¿Seguro?')).toBe(true)
+      expect(window.prompt('Nombre', 'Ana')).toBe('Ana')
+      expect(window.prompt('Nombre')).toBe('')
+    } finally {
+      Object.assign(window, originales)
+    }
   })
 
   it('encadena un hook de DevTools que ya existía', () => {

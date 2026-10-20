@@ -1,7 +1,7 @@
 import type { ArchivoReact } from '@/lib/laboratorio/schemas'
 
 import { construirDocumentoReact } from './documento'
-import { transformarArchivos } from './transformar'
+import { ErrorCargaSucrase, transformarArchivos } from './transformar'
 
 export type DocumentoPreparado = { ok: true; srcDoc: string } | { ok: false; error: string }
 
@@ -12,7 +12,13 @@ export async function prepararDocumento(
   archivos: ArchivoReact[],
   opciones: { origen: string; strictMode: boolean; conPruebas: boolean },
 ): Promise<DocumentoPreparado> {
-  const resultado = await transformarArchivos(archivos)
+  let resultado: Awaited<ReturnType<typeof transformarArchivos>>
+  try {
+    resultado = await transformarArchivos(archivos)
+  } catch (error) {
+    if (error instanceof ErrorCargaSucrase) return { ok: false, error: error.message }
+    throw error
+  }
   if (!resultado.ok) {
     const linea = resultado.linea ? `, línea ${resultado.linea}` : ''
     return {

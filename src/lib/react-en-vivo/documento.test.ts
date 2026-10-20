@@ -26,6 +26,15 @@ describe('construirDocumentoReact', () => {
     expect(doc.indexOf('react.js')).toBeLessThan(doc.indexOf('__configReactEnVivo'))
   })
 
+  it('fija la base en about:srcdoc para que un enlace # no saque al iframe de su documento', () => {
+    // Sin <base>, un srcdoc hereda la URL de la página: <a href="#"> cargaba
+    // la propia web dentro del iframe (el bug que EditorEnVivo ya corrigió).
+    const doc = construirDocumentoReact(base)
+
+    expect(doc).toContain('<base href="about:srcdoc" />')
+    expect(doc.indexOf('<base href="about:srcdoc" />')).toBeLessThan(doc.indexOf('<style>'))
+  })
+
   it('añade Testing Library solo cuando hay comprobaciones', () => {
     expect(construirDocumentoReact({ ...base, conPruebas: true })).toContain(
       '<script src="https://ejemplo.test/react-en-vivo/19.3.1/pruebas.js"></script>',

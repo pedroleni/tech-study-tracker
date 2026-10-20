@@ -10,7 +10,8 @@ import { leerMensajeReactEnVivo } from '@/lib/react-en-vivo/mensajes'
 
 export type FinComprobacion =
   | { estado: 'listo'; resultados: ResultadoComprobacion[] }
-  | { estado: 'tiempo-agotado' }
+  | { estado: 'tiempo-agotado'; resultados: ResultadoComprobacion[] }
+  | { estado: 'recarga'; resultados: ResultadoComprobacion[] }
 
 // Las comprobaciones corren en un iframe propio, recién creado y fuera de
 // pantalla (renderizado y enfocable: con display: none user-event no podría
@@ -36,20 +37,46 @@ export function ComprobadorReact({
   // comprobación no empieza nunca (ver VistaPreviaReact).
   useLayoutEffect(() => {
     let terminado = false
+    let montajes = 0
+    let temporizador = 0
+    const hechas: ResultadoComprobacion[] = []
     const terminar = (fin: FinComprobacion) => {
       if (terminado) return
       terminado = true
+      window.clearTimeout(temporizador)
       onTerminarRef.current(fin)
+    }
+    // Plazo de inactividad, no total: se reinicia con cada comprobación
+    // terminada, así una lista larga de ejercicios no se confunde con un bucle.
+    const vigilar = () => {
+      window.clearTimeout(temporizador)
+      temporizador = window.setTimeout(
+        () => terminar({ estado: 'tiempo-agotado', resultados: [...hechas] }),
+        TIEMPO_MAXIMO_COMPROBACION_MS,
+      )
     }
     const recibir = (evento: MessageEvent) => {
       const mensaje = leerMensajeReactEnVivo(evento, iframeRef.current?.contentWindow)
       if (!mensaje) return
       if (mensaje.tipo === 'montado') {
+        montajes += 1
+        // Un segundo "montado" es que el documento se recargó, casi siempre un
+        // formulario enviado sin preventDefault: repetir las comprobaciones
+        // sería un bucle de recargas.
+        if (montajes > 1) {
+          terminar({ estado: 'recarga', resultados: [...hechas] })
+          return
+        }
+        vigilar()
         // '*' porque el iframe tiene origen opaco (sandbox sin allow-same-origin).
         iframeRef.current?.contentWindow?.postMessage(
           { canal: CANAL_REACT_EN_VIVO, tipo: 'comprobar', comprobaciones },
           '*',
         )
+      }
+      if (mensaje.tipo === 'progreso-comprobaciones') {
+        hechas.push(mensaje.resultado)
+        vigilar()
       }
       if (mensaje.tipo === 'resultado-comprobaciones') {
         terminar({ estado: 'listo', resultados: mensaje.resultados })
@@ -57,10 +84,7 @@ export function ComprobadorReact({
     }
 
     window.addEventListener('message', recibir)
-    const temporizador = window.setTimeout(
-      () => terminar({ estado: 'tiempo-agotado' }),
-      TIEMPO_MAXIMO_COMPROBACION_MS,
-    )
+    vigilar()
     return () => {
       terminado = true
       window.removeEventListener('message', recibir)

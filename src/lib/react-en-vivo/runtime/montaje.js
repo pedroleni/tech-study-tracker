@@ -8,6 +8,24 @@
   const R = window.__reactEnVivo
   const enviar = window.__enviarReactEnVivo
   const { modulos, archivosCss, strictMode } = window.__configReactEnVivo
+
+  // Si react.js no llegó (red caída, versión retirada), se dice, y las
+  // comprobaciones contestan en vez de dejar al comprobador esperando.
+  if (!R) {
+    const motivo = 'No se pudo cargar React en la vista previa. Recarga la página para intentarlo de nuevo.'
+    enviar({ tipo: 'error-render', texto: motivo })
+    window.__comprobarReactEnVivo = async (comprobaciones) =>
+      comprobaciones.map((comprobacion) => ({ descripcion: comprobacion.descripcion, ok: false, motivo }))
+    window.addEventListener('message', async (evento) => {
+      if (evento.source !== window.parent) return
+      const datos = evento.data
+      if (!datos || datos.canal !== 'react-en-vivo' || datos.tipo !== 'comprobar') return
+      if (!Array.isArray(datos.comprobaciones)) return
+      enviar({ tipo: 'resultado-comprobaciones', resultados: await window.__comprobarReactEnVivo(datos.comprobaciones) })
+    })
+    enviar({ tipo: 'montado', version: 'sin React' })
+    return
+  }
   // new Function añade dos líneas antes del código de cada módulo.
   const DESFASE_LINEAS = 2
   const ESPERA_MS = 1500
@@ -242,6 +260,11 @@
 
   window.__comprobarReactEnVivo = async (comprobaciones) => {
     const P = window.__pruebasEnVivo
+    if (!P) {
+      const motivo =
+        'No se pudieron cargar las herramientas de comprobación. Recarga la página para intentarlo de nuevo.'
+      return comprobaciones.map((comprobacion) => fallo(comprobacion, motivo))
+    }
     const resultados = []
     for (const comprobacion of comprobaciones) {
       // Cada comprobación empieza de cero, también el estado a nivel de módulo.
@@ -255,6 +278,7 @@
       }
       if (ultimoError) {
         resultados.push(fallo(comprobacion, 'La app no llegó a mostrarse: ' + ultimoError.texto))
+        enviar({ tipo: 'progreso-comprobaciones', resultado: resultados[resultados.length - 1] })
         continue
       }
       // within(document.body) ahora, no `screen`: screen se ata al body que
@@ -265,15 +289,18 @@
         for (const paso of comprobacion.pasos || []) await ejecutarPaso(pantalla, usuario, paso)
         await P.waitFor(
           () => {
-            if (ultimoError) {
-              throw new FalloComprobacion('Al hacer los pasos, la app falló: ' + ultimoError.texto)
-            }
+            // Si la app ya reventó no hay nada que esperar: se sale en el
+            // acto en vez de agotar los 1500 ms (waitFor reintenta todo error).
+            if (ultimoError) return
             const motivo = motivoDeEspera(pantalla, comprobacion.espera)
             if (motivo) throw new FalloComprobacion(motivo)
           },
           // Sin onTimeout, Testing Library pega el DOM entero al mensaje.
           { timeout: ESPERA_MS, onTimeout: (error) => error },
         )
+        if (ultimoError) {
+          throw new FalloComprobacion('Al hacer los pasos, la app falló: ' + ultimoError.texto)
+        }
         resultados.push({ descripcion: comprobacion.descripcion, ok: true })
       } catch (error) {
         resultados.push(
@@ -285,6 +312,7 @@
           ),
         )
       }
+      enviar({ tipo: 'progreso-comprobaciones', resultado: resultados[resultados.length - 1] })
     }
     return resultados
   }

@@ -47,11 +47,18 @@ describe('ComprobadorReact', () => {
     expect(onTerminar).toHaveBeenCalledWith({ estado: 'listo', resultados })
   })
 
-  it('se rinde a los 15 segundos', () => {
+  it('se rinde tras 15 segundos sin noticias, conservando lo que ya terminó', () => {
     vi.useFakeTimers()
     const onTerminar = vi.fn()
     render(<ComprobadorReact srcDoc="<p></p>" comprobaciones={comprobaciones} onTerminar={onTerminar} />)
+    const iframe = screen.getByTitle('Comprobaciones') as HTMLIFrameElement
+    const hecha = { descripcion: 'Aparece el saludo', ok: true }
 
+    act(() => {
+      vi.advanceTimersByTime(14_999)
+    })
+    // Cada comprobación terminada reinicia el plazo: no se cuenta el total.
+    enviarDesde(iframe.contentWindow, { canal: 'react-en-vivo', tipo: 'progreso-comprobaciones', resultado: hecha })
     act(() => {
       vi.advanceTimersByTime(14_999)
     })
@@ -59,6 +66,20 @@ describe('ComprobadorReact', () => {
     act(() => {
       vi.advanceTimersByTime(1)
     })
-    expect(onTerminar).toHaveBeenCalledWith({ estado: 'tiempo-agotado' })
+    expect(onTerminar).toHaveBeenCalledWith({ estado: 'tiempo-agotado', resultados: [hecha] })
+  })
+
+  it('si la página se recarga (un formulario sin preventDefault), termina sin repetir las comprobaciones', () => {
+    const onTerminar = vi.fn()
+    render(<ComprobadorReact srcDoc="<p></p>" comprobaciones={comprobaciones} onTerminar={onTerminar} />)
+    const iframe = screen.getByTitle('Comprobaciones') as HTMLIFrameElement
+    const enviado = vi.spyOn(iframe.contentWindow!, 'postMessage')
+    const montado = { canal: 'react-en-vivo', tipo: 'montado', version: '19.3.1' }
+
+    enviarDesde(iframe.contentWindow, montado)
+    enviarDesde(iframe.contentWindow, montado)
+
+    expect(enviado).toHaveBeenCalledTimes(1)
+    expect(onTerminar).toHaveBeenCalledWith({ estado: 'recarga', resultados: [] })
   })
 })
