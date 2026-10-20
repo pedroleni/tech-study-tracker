@@ -1,12 +1,14 @@
 import { Atom } from 'lucide-react'
-import { useEffect, useId, useMemo, useState } from 'react'
+import { useCallback, useEffect, useId, useMemo, useState } from 'react'
 
+import { ArbolDeRenders } from '@/components/bloques-laboratorio/ArbolDeRenders'
 import { ConsolaReact } from '@/components/bloques-laboratorio/ConsolaReact'
 import { useEntradasConsola } from '@/components/bloques-laboratorio/useEntradasConsola'
 import { VistaPreviaReact } from '@/components/bloques-laboratorio/VistaPreviaReact'
 import { CodigoResaltado } from '@/components/codigo'
 import { Button } from '@/components/ui/button'
 import type { DatosReactAnotado } from '@/lib/laboratorio/schemas'
+import type { MensajeArbol, MensajeReactEnVivo } from '@/lib/react-en-vivo/mensajes'
 import { prepararDocumento } from '@/lib/react-en-vivo/preparar'
 import { cn } from '@/lib/utils'
 
@@ -17,10 +19,11 @@ export function ReactAnotado({
   anotaciones,
   strictMode,
   mostrarConsola,
+  mostrarArbol = false,
   // Fuera del esquema de la lección, como en GitAnotado: solo para no
   // repetir el nombre de la región en la página de referencia.
   etiquetaSeccion = 'React anotado',
-}: DatosReactAnotado & { etiquetaSeccion?: string }) {
+}: Omit<DatosReactAnotado, 'mostrarArbol'> & { mostrarArbol?: boolean; etiquetaSeccion?: string }) {
   const idNota = useId()
   const anotacionesValidas = useMemo(
     () =>
@@ -36,6 +39,14 @@ export function ReactAnotado({
   const [srcDoc, setSrcDoc] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const { entradas, recibirMensaje, limpiar } = useEntradasConsola()
+  const [arbol, setArbol] = useState<MensajeArbol | null>(null)
+  const recibir = useCallback(
+    (mensaje: MensajeReactEnVivo) => {
+      recibirMensaje(mensaje)
+      if (mensaje.tipo === 'arbol') setArbol(mensaje)
+    },
+    [recibirMensaje],
+  )
 
   useEffect(() => {
     let cancelado = false
@@ -47,15 +58,17 @@ export function ReactAnotado({
       origen: window.location.origin,
       strictMode,
       conPruebas: false,
+      conArbol: mostrarArbol,
     }).then((preparado) => {
       if (cancelado) return
+      setArbol(null)
       if (preparado.ok) setSrcDoc(preparado.srcDoc)
       else setError(preparado.error)
     })
     return () => {
       cancelado = true
     }
-  }, [codigo, css, strictMode])
+  }, [codigo, css, strictMode, mostrarArbol])
 
   return (
     <section
@@ -130,8 +143,10 @@ export function ReactAnotado({
         {srcDoc === null && !error && (
           <p className="text-sm text-muted-foreground">Preparando React…</p>
         )}
-        {srcDoc !== null && <VistaPreviaReact srcDoc={srcDoc} onMensaje={recibirMensaje} />}
+        {srcDoc !== null && <VistaPreviaReact srcDoc={srcDoc} onMensaje={recibir} />}
       </div>
+
+      {mostrarArbol && <ArbolDeRenders arbol={arbol} />}
 
       {mostrarConsola && <ConsolaReact entradas={entradas} onLimpiar={limpiar} />}
     </section>

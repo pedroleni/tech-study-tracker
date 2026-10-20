@@ -30,6 +30,7 @@ const datos: DatosReactEnVivo = {
   strictMode: true,
   mostrarConsola: true,
   mostrarJsGenerado: true,
+  mostrarArbol: false,
   comprobaciones: [
     { descripcion: 'Saluda', pasos: [], espera: { texto: 'Hola' } },
     { descripcion: 'Guarda', pasos: [{ pulsar: { rol: 'button', nombre: 'Guardar' } }], espera: { texto: 'Guardado' } },
@@ -201,6 +202,51 @@ describe('ReactEnVivo', () => {
     })
     await screen.findByText('1 de 1 comprobaciones superadas')
     expect(document.activeElement).toBe(boton)
+  })
+
+  it('con mostrarArbol muestra el panel «Árbol de renders» y pinta el mensaje arbol que llega del iframe', async () => {
+    await renderizarListo({ ...datos, mostrarArbol: true })
+
+    expect(vista().getAttribute('srcdoc')).toContain('__resaltados-react-en-vivo')
+    expect(screen.getByRole('heading', { name: 'Árbol de renders' })).toBeInTheDocument()
+    expect(screen.getByText('Usa la vista previa para ver qué se vuelve a renderizar.')).toBeInTheDocument()
+
+    enviarDesde(vista().contentWindow, {
+      canal: 'react-en-vivo',
+      tipo: 'arbol',
+      commit: 1,
+      nodos: [{ id: 1, nivel: 0, nombre: 'App', estado: 'montado', renders: 1, motivos: [], props: [], estados: [] }],
+      truncado: false,
+      cambiosDom: 1,
+    })
+    expect(await screen.findByText('Commit 1 · 0 renderizados · 1 montado · 1 cambio en el DOM')).toBeInTheDocument()
+  })
+
+  it('sin mostrarArbol no hay panel ni se pide arbol.js', async () => {
+    await renderizarListo()
+
+    expect(vista().getAttribute('srcdoc')).not.toContain('__resaltados-react-en-vivo')
+    expect(screen.queryByRole('heading', { name: 'Árbol de renders' })).toBeNull()
+  })
+
+  it('al reconstruir la vista previa el panel vuelve al estado inicial', async () => {
+    await renderizarListo({ ...datos, mostrarArbol: true })
+    enviarDesde(vista().contentWindow, {
+      canal: 'react-en-vivo',
+      tipo: 'arbol',
+      commit: 1,
+      nodos: [{ id: 1, nivel: 0, nombre: 'App', estado: 'montado', renders: 1, motivos: [], props: [], estados: [] }],
+      truncado: false,
+      cambiosDom: 1,
+    })
+    await screen.findByText(/^Commit 1/)
+
+    fireEvent.change(screen.getByLabelText('Editor de App.jsx'), {
+      target: { value: 'export default function App() {\n  return <p>Adiós</p>\n}' },
+    })
+    await waitFor(() => expect(vista().getAttribute('srcdoc')).toContain('Adiós'), { timeout: 3000 })
+    expect(screen.queryByText(/^Commit 1/)).toBeNull()
+    expect(screen.getByText('Usa la vista previa para ver qué se vuelve a renderizar.')).toBeInTheDocument()
   })
 
   it('sin comprobaciones no ofrece Comprobar; sin consola no la pinta', async () => {

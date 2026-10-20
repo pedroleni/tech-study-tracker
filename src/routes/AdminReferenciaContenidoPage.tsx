@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, type ReactNode } from 'react'
 
+import { ArbolDeComponentes } from '@/components/bloques-laboratorio/ArbolDeComponentes'
 import { Callout } from '@/components/bloques-laboratorio/Callout'
 import { CapasDeCaja } from '@/components/bloques-laboratorio/CapasDeCaja'
 import { CodigoAnotado } from '@/components/bloques-laboratorio/CodigoAnotado'
@@ -697,6 +698,41 @@ export function AdminReferenciaContenidoPage() {
                 ],
                 espera: { etiqueta: 'Nueva tarea', valor: '' },
               },
+            ]}
+          />
+        </Referencia>
+
+        <Referencia nombre="ArbolDeRenders">
+          <ReactEnVivo
+            tipo="react-en-vivo"
+            titulo="Qué se vuelve a renderizar"
+            consigna="Pulsa «Sumar» y después «Añadir». En el árbol verás qué componentes se ejecutan en cada commit y por qué, y en la vista previa, qué cambia de verdad en el DOM."
+            archivos={[
+              {
+                nombre: 'App.jsx',
+                codigo:
+                  "import { memo, useState } from 'react'\n\nfunction Cabecera() {\n  return <h2>Lista de la compra</h2>\n}\n\nfunction Producto({ nombre }) {\n  return <li>{nombre}</li>\n}\n\nconst Pie = memo(function Pie() {\n  return <p>Pie con memo</p>\n})\n\nfunction Contador() {\n  const [veces, setVeces] = useState(0)\n  return <button onClick={() => setVeces(veces + 1)}>Sumar ({veces})</button>\n}\n\nexport default function App() {\n  const [productos, setProductos] = useState(['Pan', 'Leche'])\n\n  return (\n    <main>\n      <Cabecera />\n      <ul>\n        {productos.map((producto) => (\n          <Producto key={producto} nombre={producto} />\n        ))}\n      </ul>\n      <button onClick={() => setProductos([...productos, 'Huevos ' + productos.length])}>Añadir</button>\n      <Contador />\n      <Pie />\n    </main>\n  )\n}",
+              },
+            ]}
+            strictMode
+            mostrarConsola={false}
+            mostrarJsGenerado={false}
+            mostrarArbol
+            etiquetaSeccion="React en vivo — árbol de renders"
+          />
+        </Referencia>
+
+        <Referencia nombre="ArbolDeComponentes">
+          <ArbolDeComponentes
+            tipo="arbol-de-componentes"
+            titulo="El estado, levantado a App"
+            nodos={[
+              { nombre: 'App', nivel: 0, etiqueta: 'estado: tareas', estado: 'renderizado' },
+              { nombre: 'Formulario', nivel: 1, estado: 'renderizado', nota: '← llama a onAnadir(tarea)' },
+              { nombre: 'Lista', nivel: 1, estado: 'renderizado', nota: '← recibe tareas por props' },
+              { nombre: 'Tarea', nivel: 2, clave: 'pan', estado: 'renderizado' },
+              { nombre: 'Tarea', nivel: 2, clave: 'leche', estado: 'montado' },
+              { nombre: 'Pie', nivel: 1, estado: 'sin-cambios' },
             ]}
           />
         </Referencia>
