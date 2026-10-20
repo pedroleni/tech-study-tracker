@@ -58,15 +58,51 @@ Cuando un componente usa a otro en su JSX, el primero es el **padre** y el segun
 
 Este es el árbol que acabas de ejecutar:
 
-```text
-App
-├── Cabecera
-├── ListaEpisodios
-│   ├── Episodio  «Cómo se mide un terremoto»
-│   │   └── EtiquetaNuevo
-│   ├── Episodio  «La vida secreta de los pulpos»
-│   └── Episodio  «Por qué el cielo es azul»
-└── Pie
+```laboratorio
+{
+  "tipo": "arbol-de-componentes",
+  "titulo": "El árbol de renderizado del podcast",
+  "nodos": [
+    {
+      "nombre": "App",
+      "nivel": 0
+    },
+    {
+      "nombre": "Cabecera",
+      "nivel": 1
+    },
+    {
+      "nombre": "ListaEpisodios",
+      "nivel": 1
+    },
+    {
+      "nombre": "Episodio",
+      "nivel": 2,
+      "clave": "3",
+      "nota": "«Cómo se mide un terremoto»"
+    },
+    {
+      "nombre": "EtiquetaNuevo",
+      "nivel": 3
+    },
+    {
+      "nombre": "Episodio",
+      "nivel": 2,
+      "clave": "2",
+      "nota": "«La vida secreta de los pulpos»"
+    },
+    {
+      "nombre": "Episodio",
+      "nivel": 2,
+      "clave": "1",
+      "nota": "«Por qué el cielo es azul»"
+    },
+    {
+      "nombre": "Pie",
+      "nivel": 1
+    }
+  ]
+}
 ```
 
 Cada nodo es un componente, y cada rama va de un padre a un hijo. La **raíz** es `App`, el componente que pintas con `createRoot(...).render(<App />)` (lección 3) y el primero que React renderiza. Fíjate en tres cosas:
@@ -75,7 +111,7 @@ Cada nodo es un componente, y cada rama va de un padre a un hijo. La **raíz** e
 - **La consola recorre el árbol en profundidad.** React baja por una rama hasta el final (el `Episodio` del terremoto y su `EtiquetaNuevo`) antes de pasar al siguiente hermano. Por eso `EtiquetaNuevo` sale entre dos episodios y no al final.
 - **En el árbol no hay etiquetas HTML.** `main`, `ul` o `li` son cosa del DOM, que React genera a partir de lo que devuelven tus componentes. El árbol de renderizado solo tiene componentes, y por eso es el mismo concepto en React Native, donde no hay ni un `div`.
 
-Si instalas las React DevTools, su panel «Components» te enseña este mismo árbol de cualquier web hecha con React. Las usarás a fondo en la lección 65.
+Si instalas las React DevTools, su panel «Components» te enseña este mismo árbol de cualquier web hecha con React. Las usarás a fondo en la lección 65. Y en algunos bloques en vivo de esta web tienes un panel parecido debajo de la vista previa, el «Árbol de renders», que lo dibuja mientras usas la app: lo estrenas en la sección siguiente.
 
 ## Raíz, nivel superior y hojas
 
@@ -111,20 +147,47 @@ Las dos categorías se solapan: `Cabecera` está arriba del todo y, a la vez, es
 
 Un árbol de renderizado es la foto de **un** render. Con el renderizado condicional de la lección 10, un padre puede pintar unos hijos u otros según sus datos, así que el árbol de un render no tiene por qué parecerse al del siguiente. En esta versión de la app, el reproductor solo existe mientras escuchas un episodio:
 
-```text
-Antes de pulsar «Escuchar el último episodio»:
-
-App
-└── Cabecera
-
-Mientras escuchas:
-
-App
-├── Cabecera
-└── Reproductor
+```laboratorio
+{
+  "tipo": "arbol-de-componentes",
+  "titulo": "Antes de pulsar «Escuchar el último episodio»",
+  "nodos": [
+    {
+      "nombre": "App",
+      "nivel": 0
+    },
+    {
+      "nombre": "Cabecera",
+      "nivel": 1
+    }
+  ]
+}
 ```
 
-El botón cambia un estado de `App` (lo verás en la lección 16) y `Reproductor` guarda su propia velocidad de reproducción. Pruébalo con la consola a la vista:
+```laboratorio
+{
+  "tipo": "arbol-de-componentes",
+  "titulo": "Mientras escuchas",
+  "nodos": [
+    {
+      "nombre": "App",
+      "nivel": 0
+    },
+    {
+      "nombre": "Cabecera",
+      "nivel": 1
+    },
+    {
+      "nombre": "Reproductor",
+      "nivel": 1,
+      "estado": "montado",
+      "nota": "← entra en el árbol al pulsar el botón"
+    }
+  ]
+}
+```
+
+El botón cambia un estado de `App` (lo verás en la lección 16) y `Reproductor` guarda su propia velocidad de reproducción. Pruébalo con la consola a la vista y, debajo de la vista previa, el panel **«Árbol de renders»**: después de cada clic dibuja el árbol de ese momento, marca en ámbar los componentes que se han vuelto a ejecutar (y por qué), en verde los que acaban de aparecer y tacha los que se van. En la vista previa, un recuadro naranja señala lo que ha cambiado de verdad en la página.
 
 ```laboratorio
 {
@@ -148,15 +211,16 @@ El botón cambia un estado de `App` (lo verás en la lección 16) y `Reproductor
   "archivoInicial": "App.jsx",
   "strictMode": false,
   "mostrarConsola": true,
-  "mostrarJsGenerado": false
+  "mostrarJsGenerado": false,
+  "mostrarArbol": true
 }
 ```
 
-Han pasado tres cosas, y las tres se explican mirando el árbol:
+Han pasado tres cosas, y las tres se ven en el árbol:
 
-1. **Al abrir el reproductor se renderizan `App`, `Cabecera` y `Reproductor`.** El estado `escuchando` es de `App`, y cuando un componente se vuelve a renderizar, React vuelve a ejecutar **toda su rama**, también `Cabecera`, que no recibe ni una prop. `Reproductor`, además, entra en el árbol por primera vez.
-2. **Al cambiar la velocidad solo se renderiza `Reproductor`.** Ese estado es suyo. `App` y `Cabecera` están por encima y no se enteran.
-3. **Al cerrar y volver a abrir, la velocidad vuelve a 1x.** Cerrar el reproductor lo saca del árbol, y su estado se va con él. Al abrirlo otra vez, React crea un `Reproductor` nuevo, desde cero. **El estado de un componente vive en su sitio del árbol**: la lección 26 está dedicada entera a esta regla.
+1. **Al abrir el reproductor se renderizan `App`, `Cabecera` y `Reproductor`.** El estado `escuchando` es de `App`, y cuando un componente se vuelve a renderizar, React vuelve a ejecutar **toda su rama**, también `Cabecera`, que no recibe ni una prop. En el panel, `App` sale como re-render porque «cambió su estado», `Cabecera` porque «se renderizó su padre», y `Reproductor`, en verde, como montado: entra en el árbol por primera vez.
+2. **Al cambiar la velocidad solo se renderiza `Reproductor`.** Ese estado es suyo. `App` y `Cabecera` están por encima y no se enteran: en el panel salen «sin cambios», y el contador de renders de `Reproductor` sube (el `·N` junto a su nombre).
+3. **Al cerrar y volver a abrir, la velocidad vuelve a 1x.** Cerrar el reproductor lo saca del árbol, y su estado se va con él: en el panel aparece tachado, como desmontado. Al abrirlo otra vez, React crea un `Reproductor` nuevo, desde cero, y su contador vuelve a empezar en `·1`. **El estado de un componente vive en su sitio del árbol**: la lección 26 está dedicada entera a esta regla.
 
 Ojo con la diferencia entre quitar y esconder. Si en vez de `{escuchando && <Reproductor ... />}` envuelves el reproductor en un `<div hidden={!escuchando}>`, no sale del árbol: solo deja de verse, y conserva su velocidad. Pruébalo en el editor de arriba.
 
@@ -184,14 +248,44 @@ La regla del punto 1 vale para cualquier componente del árbol: el render empiez
 
 Hay un segundo árbol en tu app, y no lo forman los componentes, sino los **archivos**. Cada archivo es un módulo, y cada `import` es una rama que va del módulo que importa al importado. La raíz es el punto de entrada: en un proyecto de Vite, el `main.jsx` que carga `index.html` (lección 2). Este es el de la app del podcast completa, reproductor incluido:
 
-```text
-main.jsx
-└── App.jsx
-    ├── ListaEpisodios.jsx
-    │   └── Episodio.jsx
-    ├── Reproductor.jsx
-    ├── episodios.js
-    └── estilos.css
+```laboratorio
+{
+  "tipo": "arbol-de-componentes",
+  "titulo": "El árbol de dependencias de módulos del podcast",
+  "nodos": [
+    {
+      "nombre": "main.jsx",
+      "nivel": 0,
+      "etiqueta": "punto de entrada"
+    },
+    {
+      "nombre": "App.jsx",
+      "nivel": 1
+    },
+    {
+      "nombre": "ListaEpisodios.jsx",
+      "nivel": 2
+    },
+    {
+      "nombre": "Episodio.jsx",
+      "nivel": 3
+    },
+    {
+      "nombre": "Reproductor.jsx",
+      "nivel": 2
+    },
+    {
+      "nombre": "episodios.js",
+      "nivel": 2,
+      "etiqueta": "datos"
+    },
+    {
+      "nombre": "estilos.css",
+      "nivel": 2,
+      "etiqueta": "estilos"
+    }
+  ]
+}
 ```
 
 `episodios.js` es el `episodios.jsx` de los bloques de arriba: en un proyecto real, un archivo sin JSX se llama `.js`, pero el editor de esta web solo admite `.jsx` y `.css`. De este árbol cuelgan también los paquetes de npm que importas, como `react` o `react-dom/client`, aunque aquí no estén dibujados. Se parece al árbol de renderizado, pero no es el mismo:
@@ -335,16 +429,46 @@ A partir de aquí, casi todo lo que aprendas de React se puede dibujar sobre el 
 
 El centro cultural de Lavapiés quiere su agenda de la semana en React. `Cabecera`, `Evento` (con su `EtiquetaGratis`) y `Pie` ya están escritos, y `App` tiene los datos. Te toca montar este árbol:
 
-```text
-App
-├── Cabecera
-├── Agenda
-│   ├── Evento  (uno por cada evento)
-│   │   └── EtiquetaGratis  (solo si el evento es gratis)
-│   ├── Evento
-│   └── ...
-└── Pie
+```laboratorio
+{
+  "tipo": "arbol-de-componentes",
+  "titulo": "El árbol de la agenda cultural",
+  "nodos": [
+    {
+      "nombre": "App",
+      "nivel": 0
+    },
+    {
+      "nombre": "Cabecera",
+      "nivel": 1
+    },
+    {
+      "nombre": "Agenda",
+      "nivel": 1
+    },
+    {
+      "nombre": "Evento",
+      "nivel": 2,
+      "nota": "← uno por cada evento"
+    },
+    {
+      "nombre": "EtiquetaGratis",
+      "nivel": 3,
+      "nota": "← solo si el evento es gratis"
+    },
+    {
+      "nombre": "Evento",
+      "nivel": 2
+    },
+    {
+      "nombre": "Pie",
+      "nivel": 1
+    }
+  ]
+}
 ```
+
+
 
 ```laboratorio
 {
