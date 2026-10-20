@@ -254,6 +254,24 @@ export function AdminReferenciaContenidoPage() {
           />
         </Referencia>
 
+        <Referencia nombre="CodigoAnotado (JSX)">
+          <CodigoAnotado
+            tipo="codigo-anotado"
+            lenguaje="jsx"
+            codigo={'export default function Lista({ tareas }) {\n  return (\n    <ul>\n      {tareas.map((tarea) => (\n        <li key={tarea.id}>{tarea.texto}</li>\n      ))}\n    </ul>\n  )\n}'}
+            anotaciones={[
+              {
+                fragmento: 'tareas.map',
+                nota: 'map convierte cada dato en un elemento.',
+              },
+              {
+                fragmento: 'key={tarea.id}',
+                nota: 'La key le dice a React qué fila es cuál entre renders.',
+              },
+            ]}
+          />
+        </Referencia>
+
         <Referencia nombre="ComparadorAntesDespues">
           <ComparadorAntesDespues
             tipo="comparador-antes-despues"

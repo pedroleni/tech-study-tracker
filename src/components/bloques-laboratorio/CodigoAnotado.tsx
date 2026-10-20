@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { DatosCodigoAnotado } from '@/lib/laboratorio/schemas'
 
+const NOMBRE = { html: 'HTML', jsx: 'JSX', tsx: 'TSX' }
+
 export function CodigoAnotado({
   codigo,
   lenguaje,
@@ -57,7 +59,7 @@ export function CodigoAnotado({
         lenguaje={lenguaje}
         numerarLineas
         lineasDestacadas={activa ? [activa.linea] : []}
-        etiqueta="Código HTML anotado"
+        etiqueta={`Código ${NOMBRE[lenguaje]} anotado`}
       />
 
       {anotacionesValidas.length > 0 && (

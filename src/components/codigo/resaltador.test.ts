@@ -97,6 +97,61 @@ describe('tokenizar CSS y JavaScript', () => {
   })
 })
 
+const etiquetas = (codigo: string, lenguaje: Lenguaje = 'jsx') =>
+  tokenizar(codigo, lenguaje).filter((t) => t.tipo === 'etiqueta').map((t) => t.texto)
+
+describe('tokenizar jsx', () => {
+  it.each([
+    'export default function App() {\n  return <div className="a">{x}</div>\n}',
+    'const A = () => <p>Hola</p>',
+    '<Lista render={() => <Item />} />',
+    'return <div>',           // a medio escribir
+    '<p>{"}"}</p>',
+    'cond && <p>Don\'t</p>',
+    '<>\n  <li>a</li>\n</>',
+  ])('conserva el código exacto: %s', (codigo) => {
+    expect(tokenizar(codigo, 'jsx').map((t) => t.texto).join('')).toBe(codigo)
+  })
+
+  it('reconoce etiquetas, atributos, cadenas y llaves', () => {
+    const tokens = tokenizar('return <div className="a">{x}</div>', 'jsx')
+    expect(etiquetas('return <div className="a">{x}</div>')).toEqual(['div', 'div'])
+    expect(tokens).toContainEqual({ tipo: 'atributo', texto: 'className' })
+    expect(tokens).toContainEqual({ tipo: 'cadena', texto: '"a"' })
+  })
+  it('no confunde comparaciones ni genéricos con JSX', () => {
+    expect(etiquetas('if (a < b) {}')).toEqual([])
+    expect(etiquetas("const [t, setT] = useState<string>('')", 'tsx')).toEqual([])
+    expect(etiquetas('f<T>(x)', 'tsx')).toEqual([])
+  })
+  it('en tsx, una flecha genérica no abre JSX, pero un componente sí', () => {
+    expect(etiquetas('const f = <T,>(x: T) => x', 'tsx')).toEqual([])
+    expect(etiquetas('const f = <T extends object>(x: T) => x', 'tsx')).toEqual([])
+    expect(etiquetas('const A = () => <Lista />', 'tsx')).toEqual(['Lista'])
+  })
+  it('abre JSX en posición de expresión', () => {
+    expect(etiquetas('x && <p>a</p>')).toEqual(['p', 'p'])
+    expect(etiquetas('const A = () => <p />')).toEqual(['p'])
+    expect(etiquetas('cond ? <A /> : <B />')).toEqual(['A', 'B'])
+  })
+  it('admite fragmentos, nombres con punto y JSX dentro de atributos', () => {
+    expect(tokenizar('<>\n  <li>a</li>\n</>', 'jsx')).toContainEqual({ tipo: 'puntuacion', texto: '<>' })
+    expect(tokenizar('<>\n  <li>a</li>\n</>', 'jsx')).toContainEqual({ tipo: 'puntuacion', texto: '</>' })
+    expect(etiquetas('<Lista.Item />')).toEqual(['Lista.Item'])
+    expect(etiquetas('<Lista render={() => <Item />} />')).toEqual(['Lista', 'Item'])
+  })
+  it('el texto hijo es texto, aunque tenga apóstrofos', () => {
+    expect(tokenizar("cond && <p>Don't</p>", 'jsx')).toContainEqual({ tipo: 'texto', texto: "Don't" })
+    expect(etiquetas('<p>{"}"}</p>')).toEqual(['p', 'p'])
+  })
+  it('tsx añade las palabras clave de TypeScript; jsx no', () => {
+    const tsx = tokenizar('interface Props { readonly x: number }', 'tsx')
+    expect(tsx).toContainEqual({ tipo: 'palabraClave', texto: 'interface' })
+    expect(tsx).toContainEqual({ tipo: 'palabraClave', texto: 'readonly' })
+    expect(tokenizar('interface X {}', 'jsx')).not.toContainEqual({ tipo: 'palabraClave', texto: 'interface' })
+  })
+})
+
 describe('tokenizar SQL', () => {
   it('separa palabras clave, identificadores, cadenas, números y puntuación', () => {
     const tokens = tokenizar("SELECT nombre, salario FROM empleados WHERE id = 1", 'sql')

@@ -11,7 +11,7 @@
  * código a medio escribir —que es el estado normal dentro de un editor.
  */
 
-export type Lenguaje = 'html' | 'css' | 'js' | 'sql' | 'texto'
+export type Lenguaje = 'html' | 'css' | 'js' | 'jsx' | 'tsx' | 'sql' | 'texto'
 
 export type TipoToken =
   | 'texto'
@@ -62,6 +62,12 @@ const PALABRAS_CLAVE_JS = new Set([
   'finally', 'for', 'from', 'function', 'if', 'import', 'in', 'instanceof', 'let',
   'new', 'null', 'of', 'return', 'super', 'switch', 'this', 'throw', 'true', 'try',
   'typeof', 'undefined', 'var', 'void', 'while', 'with', 'yield',
+])
+
+const PALABRAS_CLAVE_TS = new Set([
+  'interface', 'type', 'enum', 'implements', 'private', 'public', 'protected',
+  'readonly', 'keyof', 'satisfies', 'declare', 'namespace', 'abstract', 'is',
+  'infer', 'unique',
 ])
 
 function empujar(salida: Token[], tipo: TipoToken, texto: string) {
@@ -298,41 +304,205 @@ function finDeCadenaJs(codigo: string, inicio: number) {
   return codigo.length
 }
 
-function tokenizarJs(codigo: string, salida: Token[]) {
-  let i = 0
+type OpcionesJs = {
+  jsx: boolean
+  ts: boolean
+}
+
+function puedeAbrirJsx(ultimo: Token | null, siguiente: string) {
+  if (!/[A-Za-z>]/.test(siguiente)) return false
+  if (!ultimo) return true
+  if (['texto', 'funcion', 'numero', 'cadena'].includes(ultimo.tipo)) return false
+  return ultimo.texto !== ')' && ultimo.texto !== ']'
+}
+
+function tokenizarElementoJsx(
+  codigo: string,
+  inicio: number,
+  salida: Token[],
+  opciones: OpcionesJs,
+): number {
+  let i = inicio
+
+  if (codigo.startsWith('<>', i)) {
+    empujar(salida, 'puntuacion', '<>')
+    i += 2
+  } else {
+    empujar(salida, 'puntuacion', '<')
+    i += 1
+    const nombre = /^[A-Za-z][\w.:-]*/.exec(codigo.slice(i))
+    if (!nombre) return i
+    empujar(salida, 'etiqueta', nombre[0])
+    i += nombre[0].length
+
+    let esperandoValor = false
+    while (i < codigo.length) {
+      const caracter = codigo[i]
+
+      if (codigo.startsWith('/>', i)) {
+        empujar(salida, 'puntuacion', '/>')
+        return i + 2
+      }
+      if (caracter === '>') {
+        empujar(salida, 'puntuacion', '>')
+        i += 1
+        break
+      }
+      if (/\s/.test(caracter)) {
+        const espacios = /^\s+/.exec(codigo.slice(i))![0]
+        empujar(salida, 'texto', espacios)
+        i += espacios.length
+        continue
+      }
+      if (caracter === '=') {
+        empujar(salida, 'puntuacion', '=')
+        i += 1
+        esperandoValor = true
+        continue
+      }
+      if (caracter === '"' || caracter === "'") {
+        const fin = finDeCadenaJs(codigo, i)
+        empujar(salida, 'cadena', codigo.slice(i, fin))
+        i = fin
+        esperandoValor = false
+        continue
+      }
+      if (caracter === '{') {
+        empujar(salida, 'puntuacion', '{')
+        i = tokenizarJsDesde(codigo, i + 1, salida, opciones, true)
+        if (codigo[i] === '}') {
+          empujar(salida, 'puntuacion', '}')
+          i += 1
+        }
+        esperandoValor = false
+        continue
+      }
+
+      const atributo = /^[^\s=/>{'"]+/.exec(codigo.slice(i))
+      if (atributo) {
+        empujar(salida, esperandoValor ? 'cadena' : 'atributo', atributo[0])
+        i += atributo[0].length
+        esperandoValor = false
+        continue
+      }
+
+      empujar(salida, 'texto', caracter)
+      i += 1
+    }
+  }
+
+  while (i < codigo.length) {
+    if (codigo.startsWith('</>', i)) {
+      empujar(salida, 'puntuacion', '</>')
+      return i + 3
+    }
+
+    const cierre = /^<\/([A-Za-z][\w.:-]*)/.exec(codigo.slice(i))
+    if (cierre) {
+      empujar(salida, 'puntuacion', '</')
+      empujar(salida, 'etiqueta', cierre[1])
+      i += cierre[0].length
+      const fin = codigo.indexOf('>', i)
+      if (fin === -1) {
+        empujar(salida, 'texto', codigo.slice(i))
+        return codigo.length
+      }
+      empujar(salida, 'texto', codigo.slice(i, fin))
+      empujar(salida, 'puntuacion', '>')
+      return fin + 1
+    }
+
+    if (codigo[i] === '{') {
+      empujar(salida, 'puntuacion', '{')
+      i = tokenizarJsDesde(codigo, i + 1, salida, opciones, true)
+      if (codigo[i] === '}') {
+        empujar(salida, 'puntuacion', '}')
+        i += 1
+      }
+      continue
+    }
+
+    if (codigo[i] === '<' && /[A-Za-z>]/.test(codigo[i + 1] ?? '')) {
+      i = tokenizarElementoJsx(codigo, i, salida, opciones)
+      continue
+    }
+
+    let fin = i + 1
+    while (fin < codigo.length && codigo[fin] !== '<' && codigo[fin] !== '{') fin += 1
+    empujar(salida, 'texto', codigo.slice(i, fin))
+    i = fin
+  }
+
+  return i
+}
+
+function tokenizarJsDesde(
+  codigo: string,
+  inicio: number,
+  salida: Token[],
+  opciones: OpcionesJs,
+  hastaLlave: boolean,
+): number {
+  let i = inicio
+  let profundidadLlaves = 0
+  let ultimoSignificativo: Token | null = null
+
+  const empujarJs = (tipo: TipoToken, texto: string) => {
+    empujar(salida, tipo, texto)
+    if (texto && tipo !== 'comentario' && !(tipo === 'texto' && /^\s+$/.test(texto))) {
+      ultimoSignificativo = { tipo, texto }
+    }
+  }
 
   while (i < codigo.length) {
     const caracter = codigo[i]
 
+    if (hastaLlave && caracter === '}' && profundidadLlaves === 0) return i
+
     if (codigo.startsWith('//', i)) {
       const salto = codigo.indexOf('\n', i)
       const fin = salto === -1 ? codigo.length : salto
-      empujar(salida, 'comentario', codigo.slice(i, fin))
+      empujarJs('comentario', codigo.slice(i, fin))
       i = fin
       continue
     }
     if (codigo.startsWith('/*', i)) {
       const fin = hastaCierre(codigo, i + 2, '*/')
-      empujar(salida, 'comentario', codigo.slice(i, fin))
+      empujarJs('comentario', codigo.slice(i, fin))
       i = fin
       continue
     }
     if (caracter === '"' || caracter === "'" || caracter === '`') {
       const fin = finDeCadenaJs(codigo, i)
-      empujar(salida, 'cadena', codigo.slice(i, fin))
+      empujarJs('cadena', codigo.slice(i, fin))
       i = fin
       continue
     }
     if (/\s/.test(caracter)) {
       const espacios = /^\s+/.exec(codigo.slice(i))![0]
-      empujar(salida, 'texto', espacios)
+      empujarJs('texto', espacios)
       i += espacios.length
+      continue
+    }
+
+    // En TSX, `<T,>(x) =>` y `<T extends X>(x) =>` son flechas genéricas, no
+    // etiquetas: JSX no admite una coma ni un `extends` suelto en una etiqueta.
+    const esFlechaGenerica =
+      opciones.ts && /^<[A-Za-z_$][\w$]*\s*(?:,|extends\b)/.test(codigo.slice(i, i + 80))
+    if (
+      opciones.jsx &&
+      caracter === '<' &&
+      !esFlechaGenerica &&
+      puedeAbrirJsx(ultimoSignificativo, codigo[i + 1] ?? '')
+    ) {
+      i = tokenizarElementoJsx(codigo, i, salida, opciones)
+      ultimoSignificativo = { tipo: 'puntuacion', texto: '>' }
       continue
     }
 
     const numero = /^(?:0[xX][\da-fA-F]+|\d+\.?\d*(?:[eE][+-]?\d+)?|\.\d+)/.exec(codigo.slice(i))
     if (numero) {
-      empujar(salida, 'numero', numero[0])
+      empujarJs('numero', numero[0])
       i += numero[0].length
       continue
     }
@@ -341,22 +511,31 @@ function tokenizarJs(codigo: string, salida: Token[]) {
     if (identificador) {
       const palabra = identificador[0]
       const siguiente = codigo.slice(i + palabra.length).match(/^\s*\(/)
-      const tipo: TipoToken = PALABRAS_CLAVE_JS.has(palabra)
+      const tipo: TipoToken = PALABRAS_CLAVE_JS.has(palabra) || (opciones.ts && PALABRAS_CLAVE_TS.has(palabra))
         ? 'palabraClave'
         : siguiente
           ? 'funcion'
           : 'texto'
-      empujar(salida, tipo, palabra)
+      empujarJs(tipo, palabra)
       i += palabra.length
       continue
     }
 
+    if (hastaLlave && caracter === '{') profundidadLlaves += 1
+    else if (hastaLlave && caracter === '}') profundidadLlaves -= 1
+
     // Operadores y signos sueltos. Las expresiones regulares literales se
     // tratan como divisiones: distinguirlas exige contexto sintáctico y no
     // aporta nada al contenido que se documenta aquí.
-    empujar(salida, 'puntuacion', caracter)
+    empujarJs('puntuacion', caracter)
     i += 1
   }
+
+  return i
+}
+
+function tokenizarJs(codigo: string, salida: Token[]) {
+  tokenizarJsDesde(codigo, 0, salida, { jsx: false, ts: false }, false)
 }
 
 // ---------------------------------------------------------------- SQL
@@ -458,6 +637,9 @@ export function tokenizar(codigo: string, lenguaje: Lenguaje = 'html'): Token[] 
   if (lenguaje === 'html') tokenizarHtml(codigo, salida)
   else if (lenguaje === 'css') tokenizarCss(codigo, salida)
   else if (lenguaje === 'js') tokenizarJs(codigo, salida)
+  else if (lenguaje === 'jsx' || lenguaje === 'tsx') {
+    tokenizarJsDesde(codigo, 0, salida, { jsx: true, ts: lenguaje === 'tsx' }, false)
+  }
   else if (lenguaje === 'sql') tokenizarSql(codigo, salida)
   else empujar(salida, 'texto', codigo)
 

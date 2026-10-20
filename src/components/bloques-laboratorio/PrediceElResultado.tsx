@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { DatosPrediceElResultado } from '@/lib/laboratorio/schemas'
 
+const NOMBRE = { html: 'HTML', jsx: 'JSX', tsx: 'TSX' }
+
 export function PrediceElResultado({
   codigo,
   lenguaje,
@@ -42,7 +44,7 @@ export function PrediceElResultado({
       <CodigoResaltado
         codigo={codigo}
         lenguaje={lenguaje}
-        etiqueta="Código HTML para predecir"
+        etiqueta={`Código ${NOMBRE[lenguaje]} para predecir`}
       />
 
       <fieldset className="space-y-2">

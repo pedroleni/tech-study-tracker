@@ -2,13 +2,26 @@ import { describe, expect, it } from 'vitest'
 
 import {
   esquemaBloqueLaboratorio,
+  esquemaCodigoAnotado,
   esquemaEditorEnVivo,
   esquemaGitAnotado,
   esquemaGitEnVivo,
   esquemaImagen,
+  esquemaPrediceElResultado,
   esquemaSqlAnotado,
   esquemaSqlEnVivo,
 } from './schemas'
+
+describe('lenguaje jsx/tsx en bloques estáticos', () => {
+  it('codigo-anotado y predice-el-resultado aceptan html, jsx y tsx; html por defecto', () => {
+    const anotado = { tipo: 'codigo-anotado', codigo: '<p />', anotaciones: [{ fragmento: 'p', nota: 'n' }] }
+    expect(esquemaCodigoAnotado.parse(anotado).lenguaje).toBe('html')
+    expect(esquemaCodigoAnotado.parse({ ...anotado, lenguaje: 'jsx' }).lenguaje).toBe('jsx')
+    expect(esquemaCodigoAnotado.safeParse({ ...anotado, lenguaje: 'javascript' }).success).toBe(false)
+    const predice = { tipo: 'predice-el-resultado', codigo: 'x', opciones: ['a', 'b'], correcta: 0, explicacion: 'e' }
+    expect(esquemaPrediceElResultado.parse({ ...predice, lenguaje: 'tsx' }).lenguaje).toBe('tsx')
+  })
+})
 
 describe('esquemaEditorEnVivo', () => {
   it('acepta un bloque que solo trae contenido en ts', () => {

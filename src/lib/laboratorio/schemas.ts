@@ -3,7 +3,7 @@ import { z } from 'zod'
 export const esquemaPrediceElResultado = z
   .object({
     tipo: z.literal('predice-el-resultado'),
-    lenguaje: z.literal('html').default('html'),
+    lenguaje: z.enum(['html', 'jsx', 'tsx']).default('html'),
     codigo: z.string().min(1).max(2000),
     opciones: z.array(z.string().min(1)).min(2).max(5),
     correcta: z.number().int().min(0),
@@ -15,7 +15,7 @@ export const esquemaPrediceElResultado = z
 
 export const esquemaCodigoAnotado = z.object({
   tipo: z.literal('codigo-anotado'),
-  lenguaje: z.literal('html').default('html'),
+  lenguaje: z.enum(['html', 'jsx', 'tsx']).default('html'),
   codigo: z.string().min(1).max(4000),
   anotaciones: z
     .array(
