@@ -10,7 +10,7 @@ export type DocumentoPreparado = { ok: true; srcDoc: string } | { ok: false; err
 // react-anotado.
 export async function prepararDocumento(
   archivos: ArchivoReact[],
-  opciones: { origen: string; strictMode: boolean; conPruebas: boolean },
+  opciones: { origen: string; strictMode: boolean; conPruebas: boolean; conArbol?: boolean },
 ): Promise<DocumentoPreparado> {
   let resultado: Awaited<ReturnType<typeof transformarArchivos>>
   try {
@@ -35,6 +35,7 @@ export async function prepararDocumento(
       archivosCss: resultado.archivosCss,
       strictMode: opciones.strictMode,
       conPruebas: opciones.conPruebas,
+      conArbol: opciones.conArbol,
     }),
   }
 }

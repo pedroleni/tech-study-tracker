@@ -533,6 +533,20 @@ diseño" con "feature real".
 - `ReactAnotado.tsx` — recibe `z.infer<typeof esquemaReactAnotado>`
   (2026-10-20): código JSX con anotaciones y, debajo, el mismo código
   ejecutándose de verdad. Ver [react-en-vivo.md](react-en-vivo.md).
+- `ArbolVisual.tsx` (2026-10-20, fase 2 de React) — dibujo común del
+  árbol de componentes: guías tipo `tree` (├─ └─ │), `key=…`, contador
+  `·N`, insignias de marca/etiqueta y el estado con color **y** texto
+  (montado verde, re-render ámbar, sin cambios gris, desmontado rojo y
+  tachado). Exporta también `LeyendaArbol`.
+- `ArbolDeRenders.tsx` — el panel en vivo que `ReactEnVivo` y
+  `ReactAnotado` muestran con `mostrarArbol`: resumen del commit, motivo
+  de cada re-render en español, destello por commit y detalle de props y
+  estado al pulsar un nodo. Ver [react-en-vivo.md](react-en-vivo.md),
+  «Alcance de la fase 2».
+- `ArbolDeComponentes.tsx` — recibe `z.infer<typeof
+  esquemaArbolDeComponentes>`: el mismo dibujo con nodos escritos por el
+  autor, para diagramas que no salen de ejecutar código. Acento verde
+  azulado, icono `ListTree`.
 - `registro.ts` — `Record<string, ComponentType<any>>` cerrado, una
   entrada por `tipo`.
 - `BloqueLaboratorio.tsx` — el punto de entrada que usa `SafeMarkdown`:

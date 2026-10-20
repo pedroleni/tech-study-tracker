@@ -39,4 +39,25 @@ describe('ReactAnotado', () => {
     })
     expect(screen.queryByRole('log')).toBeNull()
   })
+
+  it('con mostrarArbol pide arbol.js y enseña el panel', async () => {
+    render(
+      <ReactAnotado
+        tipo="react-anotado"
+        codigo={codigo}
+        css=""
+        anotaciones={[{ fragmento: 'tareas.map', nota: 'n' }]}
+        strictMode
+        mostrarConsola={false}
+        mostrarArbol
+      />,
+    )
+
+    expect(screen.getByRole('heading', { name: 'Árbol de renders' })).toBeInTheDocument()
+    await waitFor(() =>
+      expect((screen.getByTitle('Vista previa de React') as HTMLIFrameElement).getAttribute('srcdoc')).toContain(
+        '__resaltados-react-en-vivo',
+      ),
+    )
+  })
 })

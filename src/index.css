@@ -54,6 +54,12 @@ body {
   to { stroke-dashoffset: var(--rueda-final); }
 }
 
+/* Árbol de renders: los nodos que se renderizaron en el último commit. */
+@keyframes arbol-destello {
+  from { background-color: rgb(251 191 36 / 0.45); }
+  to { background-color: transparent; }
+}
+
 @keyframes catalogo-flotar {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-0.25rem); }

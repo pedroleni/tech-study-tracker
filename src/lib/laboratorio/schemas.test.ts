@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  esquemaArbolDeComponentes,
   esquemaBloqueLaboratorio,
   esquemaCodigoAnotado,
   esquemaComprobacionReact,
@@ -58,6 +59,52 @@ describe('esquemaReactAnotado', () => {
   it('acepta el mínimo con sus valores por defecto', () => {
     const datos = esquemaReactAnotado.parse({ tipo: 'react-anotado', codigo: archivoApp.codigo, anotaciones: [{ fragmento: 'App', nota: 'n' }] })
     expect(datos).toMatchObject({ css: '', strictMode: true, mostrarConsola: false })
+  })
+})
+
+describe('árbol de renders en los bloques de React', () => {
+  it('mostrarArbol es false por defecto en react-en-vivo y react-anotado', () => {
+    expect(esquemaReactEnVivo.parse(minimoEnVivo).mostrarArbol).toBe(false)
+    expect(
+      esquemaReactAnotado.parse({ tipo: 'react-anotado', codigo: archivoApp.codigo, anotaciones: [{ fragmento: 'App', nota: 'n' }] })
+        .mostrarArbol,
+    ).toBe(false)
+    expect(esquemaReactEnVivo.parse({ ...minimoEnVivo, mostrarArbol: true }).mostrarArbol).toBe(true)
+  })
+})
+
+describe('esquemaArbolDeComponentes', () => {
+  const nodos = [
+    { nombre: 'App', nivel: 0, etiqueta: 'estado: tareas' },
+    { nombre: 'Lista', nivel: 1, estado: 'renderizado' },
+    { nombre: 'Tarea', nivel: 2, clave: 'a', nota: '← se vuelve a pintar' },
+    { nombre: 'Pie', nivel: 1, estado: 'sin-cambios' },
+  ]
+  const arbol = (cambios: Record<string, unknown> = {}) => ({ tipo: 'arbol-de-componentes', nodos, ...cambios })
+
+  it('acepta un árbol válido', () => {
+    expect(esquemaArbolDeComponentes.parse(arbol({ titulo: 'Dónde vive el estado' })).nodos).toHaveLength(4)
+    expect(esquemaBloqueLaboratorio.parse(arbol()).tipo).toBe('arbol-de-componentes')
+  })
+
+  it('rechaza que el primer nodo no tenga nivel 0', () => {
+    expect(esquemaArbolDeComponentes.safeParse(arbol({ nodos: [{ nombre: 'App', nivel: 1 }] })).success).toBe(false)
+  })
+
+  it('rechaza saltar de nivel 0 a 2', () => {
+    expect(
+      esquemaArbolDeComponentes.safeParse(arbol({ nodos: [{ nombre: 'App', nivel: 0 }, { nombre: 'Tarea', nivel: 2 }] })).success,
+    ).toBe(false)
+  })
+
+  it('rechaza claves desconocidas en un nodo', () => {
+    expect(esquemaArbolDeComponentes.safeParse(arbol({ nodos: [{ nombre: 'App', nivel: 0, color: 'rojo' }] })).success).toBe(false)
+  })
+
+  it('rechaza 41 nodos', () => {
+    expect(
+      esquemaArbolDeComponentes.safeParse(arbol({ nodos: Array.from({ length: 41 }, () => ({ nombre: 'App', nivel: 0 })) })).success,
+    ).toBe(false)
   })
 })
 

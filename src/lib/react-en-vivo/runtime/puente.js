@@ -6,16 +6,25 @@
   const enviar = (datos) => parent.postMessage({ canal: 'react-en-vivo', ...datos }, '*')
   window.__enviarReactEnVivo = enviar
   let commits = 0
-  const avisarCommit = () => {
+  const avisarCommit = (raiz) => {
     commits += 1
     enviar({ tipo: 'commit', numero: commits })
+    // El árbol de renders (fase 2) solo existe si la vista previa lo pidió
+    // (runtime/arbol.js). Un fallo suyo nunca puede romper la app del alumno.
+    if (typeof window.__arbolReactEnVivo === 'function') {
+      try {
+        window.__arbolReactEnVivo(raiz, commits)
+      } catch {
+        // El panel se queda en el commit anterior; la vista previa sigue.
+      }
+    }
   }
   // Si la extensión React DevTools ya inyectó su hook, se encadena en vez de sustituirlo.
   const existente = window.__REACT_DEVTOOLS_GLOBAL_HOOK__
   if (existente && typeof existente.onCommitFiberRoot === 'function') {
     const original = existente.onCommitFiberRoot
     existente.onCommitFiberRoot = function (...args) {
-      avisarCommit()
+      avisarCommit(args[1])
       return original.apply(this, args)
     }
   } else {
@@ -27,7 +36,7 @@
         this.renderers.set(id, renderer)
         return id
       },
-      onCommitFiberRoot: avisarCommit,
+      onCommitFiberRoot: (_renderer, raiz) => avisarCommit(raiz),
       onCommitFiberUnmount() {},
       onPostCommitFiberRoot() {},
       checkDCE() {},

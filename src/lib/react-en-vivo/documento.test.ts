@@ -65,3 +65,24 @@ describe('construirDocumentoReact', () => {
     })
   })
 })
+
+describe('árbol de renders en el documento', () => {
+  // Marca que solo existe en arbol.js (el puente también nombra __arbolReactEnVivo).
+  const MARCA = '__resaltados-react-en-vivo'
+
+  it('conArbol incluye arbol.js entre #root y la configuración', () => {
+    const doc = construirDocumentoReact({ ...base, conArbol: true })
+    const posicion = doc.indexOf(MARCA)
+
+    expect(posicion).toBeGreaterThan(doc.indexOf('<div id="root"></div>'))
+    expect(posicion).toBeLessThan(doc.indexOf('window.__configReactEnVivo ='))
+  })
+
+  it('sin conArbol no lo incluye', () => {
+    expect(construirDocumentoReact(base)).not.toContain(MARCA)
+  })
+
+  it('con conPruebas nunca incluye arbol.js', () => {
+    expect(construirDocumentoReact({ ...base, conPruebas: true, conArbol: true })).not.toContain(MARCA)
+  })
+})

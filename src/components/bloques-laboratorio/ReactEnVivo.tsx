@@ -3,6 +3,7 @@ import { javascript as lenguajeJavascript } from '@codemirror/lang-javascript'
 import { Atom, ListChecks, RotateCcw } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
+import { ArbolDeRenders } from '@/components/bloques-laboratorio/ArbolDeRenders'
 import {
   ComprobadorReact,
   type FinComprobacion,
@@ -16,6 +17,7 @@ import { CodigoResaltado } from '@/components/codigo'
 import { Button } from '@/components/ui/button'
 import type { ArchivoReact, DatosReactEnVivo } from '@/lib/laboratorio/schemas'
 import { ESPERA_RECONSTRUIR_MS } from '@/lib/react-en-vivo/constantes'
+import type { MensajeArbol, MensajeReactEnVivo } from '@/lib/react-en-vivo/mensajes'
 import { prepararDocumento } from '@/lib/react-en-vivo/preparar'
 import { transformarParaMostrar } from '@/lib/react-en-vivo/transformar'
 import { cn } from '@/lib/utils'
@@ -37,11 +39,12 @@ export function ReactEnVivo({
   strictMode,
   mostrarConsola,
   mostrarJsGenerado,
+  mostrarArbol = false,
   comprobaciones,
   // Fuera del esquema de la lección, como en SqlAnotado/GitAnotado: solo
   // para no repetir el nombre de la región en la página de referencia.
   etiquetaSeccion = 'React en vivo',
-}: DatosReactEnVivo & { etiquetaSeccion?: string }) {
+}: Omit<DatosReactEnVivo, 'mostrarArbol'> & { mostrarArbol?: boolean; etiquetaSeccion?: string }) {
   const primeraPestana = archivoInicial ?? 'App.jsx'
   const [archivos, setArchivos] = useState<ArchivoReact[]>(archivosOriginales)
   const [pestana, setPestana] = useState(primeraPestana)
@@ -50,6 +53,16 @@ export function ReactEnVivo({
   const [jsGenerado, setJsGenerado] = useState('')
   const [comprobacion, setComprobacion] = useState<EstadoComprobacion>({ estado: 'inactivo' })
   const { entradas, recibirMensaje, limpiar } = useEntradasConsola()
+  const [arbol, setArbol] = useState<MensajeArbol | null>(null)
+  const documentoMontadoRef = useRef(false)
+  const recibir = useCallback(
+    (mensaje: MensajeReactEnVivo) => {
+      recibirMensaje(mensaje)
+      if (mensaje.tipo === 'montado') documentoMontadoRef.current = true
+      if (mensaje.tipo === 'arbol' && documentoMontadoRef.current) setArbol(mensaje)
+    },
+    [recibirMensaje],
+  )
   const versionRef = useRef(0)
   const primeraVezRef = useRef(true)
   const botonComprobarRef = useRef<HTMLButtonElement>(null)
@@ -68,6 +81,7 @@ export function ReactEnVivo({
         origen: window.location.origin,
         strictMode,
         conPruebas: false,
+        conArbol: mostrarArbol,
       }).then((preparado) => {
         // Una transformación que llega después de otra más nueva se descarta.
         if (version !== versionRef.current) return
@@ -78,6 +92,9 @@ export function ReactEnVivo({
         }
         setErrorSintaxis(null)
         limpiar()
+        // El árbol de la vista previa anterior ya no describe nada.
+        documentoMontadoRef.current = false
+        setArbol(null)
         setSrcDoc(preparado.srcDoc)
       })
       if (mostrarJsGenerado) {
@@ -87,7 +104,7 @@ export function ReactEnVivo({
       }
     }, espera)
     return () => window.clearTimeout(temporizador)
-  }, [archivos, strictMode, mostrarJsGenerado, limpiar])
+  }, [archivos, strictMode, mostrarJsGenerado, mostrarArbol, limpiar])
 
   const terminarComprobacion = useCallback((fin: FinComprobacion) => {
     setComprobacion(fin)
@@ -121,6 +138,8 @@ export function ReactEnVivo({
     setPestana(primeraPestana)
     setComprobacion({ estado: 'inactivo' })
     setReinicios((anteriores) => anteriores + 1)
+    documentoMontadoRef.current = false
+    setArbol(null)
     limpiar()
   }
 
@@ -239,9 +258,11 @@ export function ReactEnVivo({
           {srcDoc === null ? (
             <p className="text-sm text-muted-foreground">Preparando React…</p>
           ) : (
-            <VistaPreviaReact key={reinicios} srcDoc={srcDoc} onMensaje={recibirMensaje} />
+            <VistaPreviaReact key={reinicios} srcDoc={srcDoc} onMensaje={recibir} />
           )}
         </div>
+
+        {mostrarArbol && <ArbolDeRenders arbol={arbol} />}
 
         {mostrarConsola && <ConsolaReact entradas={entradas} onLimpiar={limpiar} />}
       </div>
