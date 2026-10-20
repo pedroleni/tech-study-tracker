@@ -1,10 +1,10 @@
 import { css as lenguajeCss } from '@codemirror/lang-css'
 import { html as lenguajeHtml } from '@codemirror/lang-html'
 import { javascript as lenguajeJavascript } from '@codemirror/lang-javascript'
-import { basicSetup, EditorView } from 'codemirror'
 import { Code2, RotateCcw } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
+import { EditorCodeMirror } from '@/components/bloques-laboratorio/EditorCodeMirror'
 import { Button } from '@/components/ui/button'
 import type { DatosEditorEnVivo } from '@/lib/laboratorio/schemas'
 import {
@@ -27,50 +27,6 @@ const LENGUAJES: Array<{
   { id: 'js', etiqueta: 'JavaScript', extension: lenguajeJavascript() },
   { id: 'ts', etiqueta: 'TypeScript', extension: lenguajeJavascript({ typescript: true }) },
 ]
-
-const estilosTemaAplicacion = {
-  '&': {
-    color: 'var(--foreground)',
-    backgroundColor: 'var(--background)',
-    fontSize: '0.75rem',
-  },
-  '&.cm-focused': {
-    outline: '2px solid var(--ring)',
-    outlineOffset: '-2px',
-  },
-  '.cm-scroller': {
-    overflow: 'auto',
-    maxHeight: '24rem',
-    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
-  },
-  '.cm-content': {
-    minHeight: '6rem',
-    padding: '0.75rem 0',
-    caretColor: 'var(--foreground)',
-    whiteSpace: 'pre',
-  },
-  '.cm-line': {
-    padding: '0 0.75rem',
-  },
-  '.cm-gutters': {
-    color: 'var(--muted-foreground)',
-    backgroundColor: 'var(--muted)',
-    borderRight: '1px solid var(--border)',
-  },
-  '.cm-activeLine, .cm-activeLineGutter': {
-    backgroundColor: 'var(--accent)',
-  },
-  '.cm-selectionBackground, &.cm-focused .cm-selectionBackground, ::selection': {
-    backgroundColor: 'color-mix(in oklab, var(--ring) 35%, transparent)',
-  },
-  '.cm-cursor, .cm-dropCursor': {
-    borderLeftColor: 'var(--foreground)',
-  },
-} as const
-
-function crearTemaAplicacion(modoOscuro: boolean) {
-  return EditorView.theme(estilosTemaAplicacion, { dark: modoOscuro })
-}
 
 function construirDocumento(html: string, css: string, js: string) {
   const javascriptSeguro = js.replace(/<\/script/gi, '<\\/script')
@@ -100,90 +56,6 @@ ${html}
     </script>
   </body>
 </html>`
-}
-
-function EditorCodigo({
-  etiqueta,
-  extension,
-  valor,
-  onChange,
-}: {
-  etiqueta: string
-  extension: ReturnType<typeof lenguajeHtml>
-  valor: string
-  onChange: (valor: string) => void
-}) {
-  const contenedorRef = useRef<HTMLDivElement>(null)
-  const vistaRef = useRef<EditorView | null>(null)
-  const onChangeRef = useRef(onChange)
-  const valorRef = useRef(valor)
-  const [modoOscuro, setModoOscuro] = useState(() =>
-    document.documentElement.classList.contains('dark'),
-  )
-
-  useEffect(() => {
-    onChangeRef.current = onChange
-  }, [onChange])
-
-  useEffect(() => {
-    valorRef.current = valor
-  }, [valor])
-
-  useEffect(() => {
-    const observador = new MutationObserver(() => {
-      setModoOscuro(document.documentElement.classList.contains('dark'))
-    })
-    observador.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['class'],
-    })
-    return () => observador.disconnect()
-  }, [])
-
-  useEffect(() => {
-    if (!contenedorRef.current) return
-
-    const vista = new EditorView({
-      doc: valorRef.current,
-      parent: contenedorRef.current,
-      extensions: [
-        basicSetup,
-        extension,
-        crearTemaAplicacion(modoOscuro),
-        EditorView.contentAttributes.of({
-          'aria-label': etiqueta,
-          'aria-multiline': 'true',
-          spellcheck: 'false',
-        }),
-        EditorView.updateListener.of((actualizacion) => {
-          if (actualizacion.docChanged) {
-            onChangeRef.current(actualizacion.state.doc.toString())
-          }
-        }),
-      ],
-    })
-    vistaRef.current = vista
-
-    return () => {
-      vista.destroy()
-      vistaRef.current = null
-    }
-    // La vista solo se crea de nuevo al cambiar de lenguaje. Los cambios de
-    // texto se sincronizan mediante la transacción del efecto siguiente.
-  }, [etiqueta, extension, modoOscuro])
-
-  useEffect(() => {
-    const vista = vistaRef.current
-    if (!vista || vista.state.doc.toString() === valor) return
-    vista.dispatch({ changes: { from: 0, to: vista.state.doc.length, insert: valor } })
-  }, [valor])
-
-  return (
-    <div
-      ref={contenedorRef}
-      className="min-w-0 max-w-full overflow-hidden rounded-lg border bg-background [&_.cm-editor]:max-w-full [&_.cm-editor]:overflow-hidden"
-    />
-  )
 }
 
 function PanelDiagnosticosTs({
@@ -385,7 +257,7 @@ export function EditorEnVivo({
           )}
 
           {lenguajeActivo && (
-            <EditorCodigo
+            <EditorCodeMirror
               key={lenguajeActivo.id}
               etiqueta={`Editor de código ${lenguajeActivo.etiqueta}`}
               extension={lenguajeActivo.extension}

@@ -15,6 +15,8 @@ import { MapaDeRegiones } from '@/components/bloques-laboratorio/MapaDeRegiones'
 import { Mitos } from '@/components/bloques-laboratorio/Mitos'
 import { NotasClave } from '@/components/bloques-laboratorio/NotasClave'
 import { PrediceElResultado } from '@/components/bloques-laboratorio/PrediceElResultado'
+import { ReactAnotado } from '@/components/bloques-laboratorio/ReactAnotado'
+import { ReactEnVivo } from '@/components/bloques-laboratorio/ReactEnVivo'
 import { Recursos } from '@/components/bloques-laboratorio/Recursos'
 import { Roles } from '@/components/bloques-laboratorio/Roles'
 import { SqlAnotado } from '@/components/bloques-laboratorio/SqlAnotado'
@@ -45,6 +47,8 @@ export const registroBloquesLaboratorio: Record<string, ComponentType<any>> = {
   'sql-en-vivo': SqlEnVivo,
   'git-anotado': GitAnotado,
   'git-en-vivo': GitEnVivo,
+  'react-anotado': ReactAnotado,
+  'react-en-vivo': ReactEnVivo,
   imagen: Imagen,
   video: Video,
 }
