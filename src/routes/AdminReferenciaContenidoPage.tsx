@@ -258,6 +258,7 @@ export function AdminReferenciaContenidoPage() {
           <CodigoAnotado
             tipo="codigo-anotado"
             lenguaje="jsx"
+            etiquetaSeccion="Código anotado — JSX"
             codigo={'export default function Lista({ tareas }) {\n  return (\n    <ul>\n      {tareas.map((tarea) => (\n        <li key={tarea.id}>{tarea.texto}</li>\n      ))}\n    </ul>\n  )\n}'}
             anotaciones={[
               {

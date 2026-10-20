@@ -12,7 +12,8 @@ export function CodigoAnotado({
   codigo,
   lenguaje,
   anotaciones,
-}: DatosCodigoAnotado) {
+  etiquetaSeccion = 'Código anotado',
+}: DatosCodigoAnotado & { etiquetaSeccion?: string }) {
   const idNota = useId()
   const anotacionesValidas = useMemo(
     () =>
@@ -34,7 +35,7 @@ export function CodigoAnotado({
 
   return (
     <section
-      aria-label="Código anotado"
+      aria-label={etiquetaSeccion}
       className="animate-in fade-in-0 slide-in-from-bottom-2 my-6 min-w-0 space-y-4 rounded-xl border bg-card p-4 shadow-sm duration-500 motion-reduce:animate-none sm:p-5"
     >
       <div className="flex items-start gap-3">
