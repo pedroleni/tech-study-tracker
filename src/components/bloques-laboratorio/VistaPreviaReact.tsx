@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import { leerMensajeReactEnVivo, type MensajeReactEnVivo } from '@/lib/react-en-vivo/mensajes'
 import { cn } from '@/lib/utils'
@@ -21,7 +21,11 @@ export function VistaPreviaReact({
     onMensajeRef.current = onMensaje
   }, [onMensaje])
 
-  useEffect(() => {
+  // useLayoutEffect y no useEffect: el oyente queda puesto en el mismo commit
+  // que inserta el iframe, antes de que su código pueda mandar nada. Con
+  // useEffect (después de pintar), un iframe rápido podía adelantarse y su
+  // mensaje perderse.
+  useLayoutEffect(() => {
     const recibir = (evento: MessageEvent) => {
       const mensaje = leerMensajeReactEnVivo(evento, iframeRef.current?.contentWindow)
       if (!mensaje) return

@@ -158,12 +158,17 @@ describe('ReactEnVivo', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Comprobar' }))
     await screen.findByTitle('Comprobaciones')
+    // El temporizador lo programa el efecto del iframe oculto, que puede no
+    // haber corrido aún: primero se vacían los efectos pendientes, luego se
+    // adelanta el reloj, y se comprueba sin esperas (un waitFor dispararía su
+    // propio temporizador falso).
+    await act(async () => {})
     act(() => {
       vi.advanceTimersByTime(15_000)
     })
 
     expect(
-      await screen.findByText('La comprobación tardó demasiado. Revisa si tu código se queda en un bucle.'),
+      screen.getByText('La comprobación tardó demasiado. Revisa si tu código se queda en un bucle.'),
     ).toBeInTheDocument()
   })
 

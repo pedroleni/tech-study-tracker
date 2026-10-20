@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef } from 'react'
 
 import type { ResultadoComprobacion } from '@/components/bloques-laboratorio/ResultadosComprobaciones'
 import type { ComprobacionReact } from '@/lib/laboratorio/schemas'
@@ -31,7 +31,10 @@ export function ComprobadorReact({
     onTerminarRef.current = onTerminar
   }, [onTerminar])
 
-  useEffect(() => {
+  // useLayoutEffect: el oyente tiene que estar puesto antes de que el iframe
+  // pueda avisar de que ha montado; si no, el aviso se pierde y la
+  // comprobación no empieza nunca (ver VistaPreviaReact).
+  useLayoutEffect(() => {
     let terminado = false
     const terminar = (fin: FinComprobacion) => {
       if (terminado) return
