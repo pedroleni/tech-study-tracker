@@ -670,3 +670,14 @@ describe('SafeMarkdown con laboratorios', () => {
     expect(resultados.violations).toEqual([])
   })
 })
+
+describe('SafeMarkdown con bloques de código', () => {
+  it('colorea JSX en los bloques jsx y tsx', () => {
+    const { container } = render(
+      <SafeMarkdown>{'```jsx\nconst saludo = <p className="hola">Hola</p>\n```'}</SafeMarkdown>,
+    )
+    const etiquetas = [...container.querySelectorAll('.sintaxis-etiqueta')].map((nodo) => nodo.textContent)
+    expect(etiquetas).toEqual(['p', 'p'])
+  })
+})
+

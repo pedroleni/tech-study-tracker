@@ -11,9 +11,10 @@ export default tseslint.config(
     // typescript-en-vivo (ver scripts/dev/generar-ts-libs.mjs) para el
     // compilador de TypeScript en vivo del navegador — no son código propio,
     // no tiene sentido aplicarles las reglas de este proyecto. Lo mismo con
-    // public/react-en-vivo: el React minificado que se ejecuta dentro del
-    // iframe de react-en-vivo (ver scripts/react-en-vivo/construir.mjs).
-    ignores: ['dist', 'public/ts-libs', 'public/react-en-vivo'],
+    // public/vendor: código de terceros empaquetado, como el React
+    // minificado que se ejecuta dentro del iframe de react-en-vivo (ver
+    // scripts/react-en-vivo/construir.mjs).
+    ignores: ['dist', 'public/ts-libs', 'public/vendor'],
   },
   {
     extends: [

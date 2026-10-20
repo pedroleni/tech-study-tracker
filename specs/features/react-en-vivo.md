@@ -1,15 +1,17 @@
 # React: nueva tecnología + React real en el navegador (`react-en-vivo`)
 
-**Estado:** 📝 diseño aprobado (temario aprobado el 2026-10-20 +
-validación empírica del mismo día), pendiente de implementar las fases
-0 y 1. Las fases 2-4 quedan descritas a nivel de diseño en el temario y
-se especifican en detalle cuando toquen.
+**Estado:** ✅ fases 0 y 1 implementadas y verificadas el 2026-10-20
+(rama `feat/react-en-vivo`): 476 tests, revisión independiente de todo
+el trabajo y verificación con React 19.3.1 real en Chromium. Pendiente:
+probar a mano en Firefox y Safari (ver "Pendiente" al final). Las fases
+2-4 quedan descritas a nivel de diseño en el temario y se especifican en
+detalle cuando toquen.
 
 **Configuración manual requerida:** ninguna en Supabase (`technologies`
 y `lecciones` no ganan columnas). La tecnología "React" se crea desde el
 admin cuando exista el primer borrador de lección, no antes, para no
 publicar una ficha vacía. `vercel.json` gana una regla de caché para los
-ficheros de `public/react-en-vivo/` (va en el propio repo, no hace falta
+ficheros de `public/vendor/react-en-vivo/` (va en el propio repo, no hace falta
 tocar el panel de Vercel).
 
 ## Por qué existe esta feature
@@ -73,7 +75,7 @@ una lista sin `key` y un error de render provocado:
    cuando la lección tiene un bloque de React. El compilador de
    TypeScript solo se cargará para `lenguaje: 'tsx'` con diagnósticos de
    tipos (módulo 10 del temario, fase posterior).
-2. **React desde `public/react-en-vivo/19.3.1/`**, nunca desde un CDN
+2. **React desde `public/vendor/react-en-vivo/19.3.1/`**, nunca desde un CDN
    (esm.sh, unpkg, jsDelivr): los cortes judiciales de LaLiga bloquean
    IPs de Cloudflare durante los partidos, no se depende de un tercero en
    cada lección y la versión queda fijada. La web sigue en React 19.2.4;
@@ -98,6 +100,17 @@ una lista sin `key` y un error de render provocado:
    `react/jsx-runtime`, `react/jsx-dev-runtime` y los archivos del propio
    bloque. Cualquier otra cosa da un error claro en español.
 8. **Fase 1 solo admite JSX.** TSX llega con el módulo 10.
+9. **`<base href="about:srcdoc">`** en el documento del iframe: sin él,
+   un `srcdoc` hereda la URL de la página y un `<a href="#">` cargaba la
+   propia web dentro de la vista previa (el mismo bug que `EditorEnVivo`
+   ya tenía corregido). Añadido tras la revisión final.
+10. **Compilación previa sin ejecutar.** Sucrase deja pasar lo que solo
+    rechaza el motor al compilar (un `const` repetido, `await` fuera de
+    una función `async`). `transformarArchivos` compila cada módulo con
+    `new Function` en la página, **sin llamarlo nunca**, para dar el
+    mismo "Error de sintaxis en Tarjeta.jsx: …" y conservar la última
+    vista previa válida. Un `EvalError` (una CSP futura sin
+    `'unsafe-eval'`) no es un error del alumno y se deja pasar.
 
 ## Alcance de la fase 0
 
@@ -240,7 +253,7 @@ export const esquemaReactAnotado = z.object({
 Los dos se añaden a la unión discriminada `esquemaBloqueLaboratorio`,
 con sus tipos `DatosReactEnVivo` y `DatosReactAnotado`.
 
-### Runtime (`public/react-en-vivo/19.3.1/`)
+### Runtime (`public/vendor/react-en-vivo/19.3.1/`)
 
 - `react.js`: `react`, `react-dom`, `react-dom/client`,
   `react/jsx-runtime` y `react/jsx-dev-runtime` 19.3.1, build de
@@ -249,6 +262,10 @@ con sus tipos `DatosReactEnVivo` y `DatosReactAnotado`.
 - `pruebas.js`: `@testing-library/dom` 10.4.2 + `@testing-library/user-event`
   14.6.8, IIFE minificado que expone `window.__pruebasEnVivo = { ...dom,
   userEvent }`.
+- Van en `public/vendor/` porque son código de terceros empaquetado: los
+  escáneres de seguridad del repo excluyen `vendor` (como
+  `node_modules`). En `public/react-en-vivo/` el código de React disparaba
+  falsos HIGH (`dangerouslySetInnerHTML`, `innerHTML`, `Math.random`).
 - Los dos conservan los avisos de licencia MIT al final
   (`legalComments: 'eof'`).
 - Los construye `scripts/react-en-vivo/construir.mjs` (esbuild), desde
@@ -256,9 +273,9 @@ con sus tipos `DatosReactEnVivo` y `DatosReactAnotado`.
   versiones exactas. Se ejecuta a mano solo al cambiar de versión de
   React; la salida se commitea, como `public/ts-libs/`.
 - `vercel.json`: cabecera `Cache-Control: public, max-age=31536000,
-  immutable` para `/react-en-vivo/(.*)`. Es seguro porque la versión va
+  immutable` para `/vendor/react-en-vivo/(.*)`. Es seguro porque la versión va
   en la ruta: una versión nueva es una ruta nueva.
-- `eslint.config.js`: `public/react-en-vivo` en `ignores`, como
+- `eslint.config.js`: `public/vendor` en `ignores`, como
   `public/ts-libs`.
 
 ### Motor (`src/lib/react-en-vivo/`)
@@ -291,7 +308,7 @@ con sus tipos `DatosReactEnVivo` y `DatosReactAnotado`.
 - **`documento.ts`**: `construirDocumentoReact({ origen, css, modulos,
   archivosCss, strictMode, conPruebas })` recibe el código ya
   transformado y devuelve el `srcdoc`, en este orden: CSS en un
-  `<style>`, el puente, `<script src="{origen}/react-en-vivo/19.3.1/react.js">`
+  `<style>`, el puente, `<script src="{origen}/vendor/react-en-vivo/19.3.1/react.js">`
   (y `pruebas.js` si `conPruebas`), `<div id="root">`, la configuración
   como JSON (con `<` escapado como `\u003c`, para que el código del
   alumno no pueda cerrar el `<script>`) y el montaje.
@@ -309,6 +326,7 @@ Mensajes iframe → página (`canal: 'react-en-vivo'`):
 | `consola` | `nivel` (`log`/`info`/`warn`/`error`), `texto` (≤ 2000), `commit` | Panel de consola |
 | `error-render` | `texto`, `archivo?`, `linea?` | Recuadro de error en la vista previa |
 | `error` | `texto` | Errores fuera del render (eventos, módulos) |
+| `progreso-comprobaciones` | `resultado: { descripcion, ok, motivo? }` | Uno por comprobación terminada: reinicia el plazo de inactividad y guarda el resultado parcial |
 | `resultado-comprobaciones` | `resultados: { descripcion, ok, motivo? }[]` (≤ 8) | ✅/❌ |
 
 Mensaje página → iframe oculto: `{ canal: 'react-en-vivo', tipo:
@@ -340,9 +358,17 @@ La línea de un error se calcula en el iframe: primer marco de
   ms después de la última tecla, consola si `mostrarConsola`, botón
   "Comprobar" si hay `comprobaciones`. "Comprobar" crea un iframe oculto
   nuevo (fuera de pantalla, `aria-hidden`, `tabindex="-1"`) con el
-  código actual, envía `comprobar` al recibir `montado`, pinta los
-  resultados y elimina el iframe (o muestra "La comprobación tardó
-  demasiado. Revisa si tu código se queda en un bucle." a los 15 s). Un error de sintaxis se muestra bajo el editor
+  código actual, envía `comprobar` solo con el **primer** `montado`,
+  pinta los resultados y elimina el iframe. Un segundo `montado` es que
+  el documento se recargó (casi siempre un formulario sin
+  `e.preventDefault()`): termina con "La vista previa se recargó durante
+  la comprobación…" en vez de entrar en un bucle de recargas. El plazo de
+  15 s es de **inactividad**, no total: cada `progreso-comprobaciones`
+  lo reinicia; si se agota, muestra "La comprobación tardó demasiado.
+  Revisa si tu código se queda en un bucle." junto con las comprobaciones
+  que sí terminaron. El botón usa `aria-disabled` (no `disabled`, que
+  pierde el foco) y devuelve el foco al terminar; "Reiniciar" remonta
+  la vista previa aunque el código no haya cambiado. Un error de sintaxis se muestra bajo el editor
   ("Error de sintaxis en App.jsx, línea 3: ...") y la vista previa se
   queda en el último resultado válido, como hace `EditorEnVivo` con
   TypeScript.
@@ -378,13 +404,45 @@ La línea de un error se calcula en el iframe: primer marco de
 - **Runtime del mismo origen y fijado**, construido desde un lockfile
   con versiones exactas; ningún script de terceros en tiempo de
   ejecución.
-- **`new Function` dentro del iframe:** hoy la web no tiene CSP. Un
-  `srcdoc` hereda la CSP de la página, así que si algún día se añade una
-  sin `'unsafe-eval'`, este bloque dejará de funcionar. Queda anotado
-  para quien añada esa CSP.
+- **`new Function` dentro del iframe y en la página:** hoy la web no
+  tiene CSP. Un `srcdoc` hereda la CSP de la página, así que si algún día
+  se añade una sin `'unsafe-eval'`, la vista previa dejará de funcionar.
+  En la página, `transformarArchivos` usa `new Function` solo para
+  compilar el código del alumno, nunca para ejecutarlo; con esa CSP
+  lanzaría un `EvalError`, que se ignora a propósito. Queda anotado para
+  quien añada esa CSP.
 - **El contenido de los bloques** (archivos, comprobaciones) viene del
   JSON de la lección, validado con Zod y escrito por admins.
 - **Bucle infinito:** riesgo aceptado, igual que en `editor-en-vivo`.
+
+## Notas para quien escriba lecciones
+
+Comportamientos del sandbox que conviene conocer al escribir ejemplos y
+comprobaciones:
+
+- **`alert()`, `confirm()` y `prompt()`** no abren ventanas (el sandbox
+  no admite modales): se ven como un aviso de 3 s arriba de la vista
+  previa y como `alert: …` en la consola. `confirm()` responde siempre
+  "aceptar" y `prompt()` su valor por defecto o `""`. El texto del aviso
+  se puede comprobar con `{ "texto": "…" }`.
+- **Formularios:** un `onSubmit` sin `e.preventDefault()` recarga la
+  vista previa, como una página real. Las comprobaciones lo detectan y
+  lo explican; si el ejercicio no trata de eso, pon el `preventDefault`
+  en el código inicial.
+- **Enlaces:** `#…` se queda en la vista previa; cualquier otra URL
+  acaba bloqueada (`about:blank#blocked`).
+- **`min-height: 100vh`** hace crecer la vista previa hasta su máximo
+  (2400 px): la altura del iframe depende de la de su contenido. Usa
+  alturas fijas en los ejemplos.
+- **El CSS se aplica aunque no se importe**: todos los `.css` del
+  bloque van al documento.
+- **`localStorage`** lanza `SecurityError` dentro del sandbox (origen
+  opaco). Hará falta un almacenamiento en memoria antes del proyecto
+  Wordle (fase 3).
+- **La consola** captura `console.log`, `info`, `warn` y `error`; no
+  `table`, `dir` ni `group`.
+- **Los errores de sintaxis** salen con el mensaje de Sucrase, en
+  inglés ("Unterminated JSX contents").
 
 ## Fuera de alcance de las fases 0 y 1
 
@@ -404,3 +462,17 @@ render con su línea, comprobaciones en el iframe oculto con la vista
 previa intacta, JavaScript generado), más modo oscuro y ancho de móvil.
 Antes de dar una fase por cerrada, `npm run test`, `npm run build` y
 `npm run lint` en local: la CI no los ejecuta.
+
+## Pendiente
+
+- **Firefox y Safari sin probar.** La línea de los errores se calcula
+  con un desfase fijo de 2 líneas medido en Chromium, y un error lanzado
+  desde `react.js` podría llegar como "Script error.". Prueba manual
+  antes de publicar la primera lección.
+- **Mejoras menores aplazadas en la revisión final:**
+  - Un nonce por documento, para que los mensajes rezagados del
+    documento anterior no entren en la consola recién limpiada.
+  - Mejor formato en la consola (eventos, `Map` y elementos salen como
+    `[object Object]` o `{}`).
+  - Que la consola se desplace sola hasta la última entrada.
+  - Un test que demuestre el volcado agrupado de la consola.

@@ -22,6 +22,8 @@ const nombresComponentes = [
   'EditorEnVivo',
   'SqlAnotado',
   'SqlEnVivo',
+  'ReactAnotado',
+  'ReactEnVivo',
   'Acordeon',
   'Pestanas',
   'Pasos',

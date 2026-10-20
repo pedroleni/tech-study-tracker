@@ -7,7 +7,7 @@
 //
 // Solo se ejecuta al cambiar de versión de React:
 //   cd scripts/react-en-vivo && npm ci && npm run construir
-// La salida se commitea en public/react-en-vivo/<versión>/, igual que
+// La salida se commitea en public/vendor/react-en-vivo/<versión>/, igual que
 // public/ts-libs/. La versión va en la ruta para poder servirla con caché
 // inmutable (ver vercel.json): una versión nueva es una ruta nueva.
 //
@@ -20,7 +20,7 @@ import { fileURLToPath } from 'node:url'
 import { gzipSync } from 'node:zlib'
 
 const { version } = JSON.parse(readFileSync(new URL('./node_modules/react/package.json', import.meta.url)))
-const destino = fileURLToPath(new URL(`../../public/react-en-vivo/${version}/`, import.meta.url))
+const destino = fileURLToPath(new URL(`../../public/vendor/react-en-vivo/${version}/`, import.meta.url))
 
 for (const [entrada, salida] of [
   ['entrada-react.js', 'react.js'],

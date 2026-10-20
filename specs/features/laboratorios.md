@@ -525,6 +525,14 @@ diseño" con "feature real".
   ahí en un navegador); `content`, al ser la única capa con contenido
   real, centra su valor en vez de ponerlo en una esquina como las
   otras tres. Acento naranja, icono `Box`.
+- `ReactEnVivo.tsx` — recibe `z.infer<typeof esquemaReactEnVivo>`
+  (2026-10-20): React 19.3.1 real en un iframe aislado, varios archivos,
+  consola agrupada por commit, pestaña de JavaScript generado y
+  ejercicios con comprobaciones. Acento cielo, icono `Atom`. Todo el
+  mecanismo en [react-en-vivo.md](react-en-vivo.md).
+- `ReactAnotado.tsx` — recibe `z.infer<typeof esquemaReactAnotado>`
+  (2026-10-20): código JSX con anotaciones y, debajo, el mismo código
+  ejecutándose de verdad. Ver [react-en-vivo.md](react-en-vivo.md).
 - `registro.ts` — `Record<string, ComponentType<any>>` cerrado, una
   entrada por `tipo`.
 - `BloqueLaboratorio.tsx` — el punto de entrada que usa `SafeMarkdown`:
