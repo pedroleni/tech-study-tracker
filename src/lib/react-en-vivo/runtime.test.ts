@@ -428,6 +428,42 @@ describe('puente del iframe', () => {
     }
   })
 
+  it('el puente pasa la raíz y el número de commit a __arbolReactEnVivo', () => {
+    vi.spyOn(window.parent, 'postMessage').mockImplementation(() => {})
+    const arbol = vi.fn()
+
+    new Function(puente)()
+    Object.assign(window, { __arbolReactEnVivo: arbol })
+    try {
+      ventana.__REACT_DEVTOOLS_GLOBAL_HOOK__?.onCommitFiberRoot?.(1, 'raíz')
+      ventana.__REACT_DEVTOOLS_GLOBAL_HOOK__?.onCommitFiberRoot?.(1, 'raíz 2')
+
+      expect(arbol.mock.calls).toEqual([
+        ['raíz', 1],
+        ['raíz 2', 2],
+      ])
+    } finally {
+      Reflect.deleteProperty(window, '__arbolReactEnVivo')
+    }
+  })
+
+  it('si __arbolReactEnVivo lanza, el mensaje commit se envía igual', () => {
+    const postMessage = vi.spyOn(window.parent, 'postMessage').mockImplementation(() => {})
+
+    new Function(puente)()
+    Object.assign(window, {
+      __arbolReactEnVivo: () => {
+        throw new Error('árbol roto')
+      },
+    })
+    try {
+      expect(() => ventana.__REACT_DEVTOOLS_GLOBAL_HOOK__?.onCommitFiberRoot?.(1, 'raíz')).not.toThrow()
+      expect(postMessage).toHaveBeenCalledWith({ canal: 'react-en-vivo', tipo: 'commit', numero: 1 }, '*')
+    } finally {
+      Reflect.deleteProperty(window, '__arbolReactEnVivo')
+    }
+  })
+
   it('encadena un hook de DevTools que ya existía', () => {
     const original = vi.fn()
     ventana.__REACT_DEVTOOLS_GLOBAL_HOOK__ = { onCommitFiberRoot: original }
