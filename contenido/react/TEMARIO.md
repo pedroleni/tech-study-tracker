@@ -224,9 +224,12 @@ componentes, hace clic y ve cómo responden.
 
 - **Cómo ejecuta.** Mismo iframe aislado que `editor-en-vivo`
   (`srcdoc`, `sandbox="allow-scripts allow-forms"`, altura por
-  `postMessage`). El JSX se transforma con el compilador de TypeScript
-  que la web ya carga bajo demanda para el editor en vivo
-  (`typescript-en-vivo`, opción `jsx`), así que no hace falta Babel.
+  `postMessage`). El JSX se transforma con
+  [Sucrase](https://github.com/alangpierce/sucrase): 46 KB comprimido
+  frente a los 1,6 MB del compilador de TypeScript que ya carga la web
+  (medido en la validación de
+  [specs/features/react-en-vivo.md](../../specs/features/react-en-vivo.md)).
+  TypeScript solo se cargará para los errores de tipos del módulo 10.
 - **Varios archivos.** Pestañas `App.jsx`, `Tarjeta.jsx`,
   `estilos.css`...; los `import './Tarjeta.jsx'` entre ellos se
   resuelven dentro del iframe. Imprescindible para la lección 4 y para

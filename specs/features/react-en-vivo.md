@@ -1,0 +1,406 @@
+# React: nueva tecnología + React real en el navegador (`react-en-vivo`)
+
+**Estado:** 📝 diseño aprobado (temario aprobado el 2026-10-20 +
+validación empírica del mismo día), pendiente de implementar las fases
+0 y 1. Las fases 2-4 quedan descritas a nivel de diseño en el temario y
+se especifican en detalle cuando toquen.
+
+**Configuración manual requerida:** ninguna en Supabase (`technologies`
+y `lecciones` no ganan columnas). La tecnología "React" se crea desde el
+admin cuando exista el primer borrador de lección, no antes, para no
+publicar una ficha vacía. `vercel.json` gana una regla de caché para los
+ficheros de `public/react-en-vivo/` (va en el propio repo, no hace falta
+tocar el panel de Vercel).
+
+## Por qué existe esta feature
+
+El temario de React está aprobado
+([contenido/react/TEMARIO.md](../../contenido/react/TEMARIO.md), 98
+entradas). Igual que SQL ejecuta consultas reales con sql.js y Git
+ejecuta comandos reales con wasm-git, las lecciones de React necesitan
+**React de verdad**: el alumno escribe componentes, hace clic y ve cómo
+responden, con los avisos reales de React y ejercicios que se comprueban
+solos. `editor-en-vivo` no sirve: ejecuta HTML/CSS/JS tal cual, sin
+React ni JSX.
+
+Decisiones de alcance confirmadas por el usuario (aprobación del
+temario completo y "tus recomendaciones", 2026-10-20):
+
+1. Pareja de bloques `react-en-vivo` (practicar) + `react-anotado`
+   (explicar), con el motor real.
+2. Ejercicios con ✅/❌ (comprobaciones), varios archivos por bloque y
+   "ver el JavaScript generado", todo en la fase 1.
+3. React servido desde el propio dominio, nunca desde un CDN.
+4. Construcción por fases; la primera tanda de lecciones (módulos 1-4)
+   empieza cuando las fases 0 y 1 estén verificadas.
+
+## Validación (2026-10-20)
+
+Antes de fijar el diseño se probó todo lo arriesgado en una prueba
+aislada (scratchpad: script Node + Playwright con Chromium real, sin
+mocks), con un ejemplo de dos componentes, un CSS importado, un efecto,
+una lista sin `key` y un error de render provocado:
+
+| Qué se probó | Resultado |
+|---|---|
+| React 19.3.1 (build de desarrollo, empaquetado como IIFE con esbuild) dentro de un iframe `sandbox="allow-scripts allow-forms"` con `srcdoc`, cargado como `<script src>` clásico desde el origen de la web | Funciona desde el origen opaco del iframe, sin CORS. Minificado: **427 KB / 127 KB gzip**. Montaje en ~50 ms con el script ya en caché |
+| Transformar JSX con el compilador de TypeScript que ya carga la web | **8,9 MB / 1,6 MB gzip**: inasumible en cada lección de React |
+| Transformar JSX con [Sucrase](https://github.com/alangpierce/sucrase) 3.35.1 | **201 KB / 46 KB gzip**. Conserva los números de línea del original. **Elegido** |
+| Varios archivos (`import Tarjeta from './Tarjeta'`) y CSS importado (`import './estilos.css'`) | Funciona con un registro de módulos tipo CommonJS dentro del iframe; Sucrase convierte `import` en `require` |
+| `StrictMode` | Visible tal cual: render doble en la consola y efecto montar → limpiar → montar |
+| Avisos de React | Capturados y formateados: *"Each child in a list should have a unique "key" prop. Check the render method of \`App\`..."* |
+| Contar commits | Un `__REACT_DEVTOOLS_GLOBAL_HOOK__` mínimo recibe `onCommitFiberRoot` en cada commit (base de la consola agrupada y del árbol de la fase 2) |
+| Error de render | `createRoot(..., { onUncaughtError })` lo recibe. Evaluando cada módulo con `new Function` + `//# sourceURL=App.jsx`, la pila dice `App.jsx:17:32` para un `throw` en la línea 15: **desfase constante de +2** por el envoltorio de `new Function` |
+| Comprobaciones con Testing Library 10.4.2 + user-event 14.6.8 dentro del iframe | Escriben y pulsan de verdad. Bundle: **244 KB / 56 KB gzip**, solo se carga si el bloque tiene comprobaciones |
+| Trampa 1 de Testing Library | `screen` se ata a `document.body` **al cargar el script**; cargado en `<head>`, el body aún no existe y nada se encuentra. Solución validada: `within(document.body)` en el momento de comprobar |
+| Trampa 2: `getByRole('listitem', { name: 'Comprar pan' })` | No encuentra nada, y es lo correcto: en ARIA una fila de lista no toma su nombre de su contenido. El esquema ofrece `{ rol, texto }` para eso |
+| Comprobar sin estropear la vista previa | Las comprobaciones se ejecutan en un **segundo iframe fuera de pantalla** (renderizado y enfocable, no `display: none`): 110 ms, y lo que el alumno tenía escrito en la vista previa queda intacto |
+| "Ver el JavaScript generado" | Sucrase en modo producción, solo transformación `jsx`: `import {jsx as _jsx} from "react/jsx-runtime"; … _jsx('li', { className: "tarjeta", children: texto})`, que es lo que produce Vite en un build real |
+
+**No validado, con mitigación:**
+
+- **Extensión React DevTools instalada.** Puede inyectar su propio
+  `__REACT_DEVTOOLS_GLOBAL_HOOK__` en el iframe antes que el nuestro. Si
+  ya existe un hook, el puente **encadena** su `onCommitFiberRoot` en vez
+  de sustituirlo.
+- **Bucle infinito en el código del alumno.** Puede congelar la pestaña.
+  Es el mismo riesgo que ya acepta `editor-en-vivo`; no se mitiga en
+  estas fases.
+
+## Decisiones de diseño
+
+1. **Sucrase transforma el JSX**, cargado con `import()` dinámico solo
+   cuando la lección tiene un bloque de React. El compilador de
+   TypeScript solo se cargará para `lenguaje: 'tsx'` con diagnósticos de
+   tipos (módulo 10 del temario, fase posterior).
+2. **React desde `public/react-en-vivo/19.3.1/`**, nunca desde un CDN
+   (esm.sh, unpkg, jsDelivr): los cortes judiciales de LaLiga bloquean
+   IPs de Cloudflare durante los partidos, no se depende de un tercero en
+   cada lección y la versión queda fijada. La web sigue en React 19.2.4;
+   el sandbox lleva su propio React, construido por un paquete aislado
+   (`scripts/react-en-vivo/`, con su `package.json` y su lockfile,
+   versiones exactas) que no toca las dependencias de la web.
+3. **Build de desarrollo minificado**: trae los avisos que enseñan
+   (`key`, reglas de los hooks, `use()` condicional) sin el peso del
+   build sin minificar (822 KB).
+4. **Registro de módulos CommonJS** dentro del iframe (`require`,
+   `module.exports`), sin import maps ni URLs `blob:`. Cada módulo se
+   evalúa con `new Function('require', 'module', 'exports', código)` y su
+   `//# sourceURL` para que las pilas de error nombren el archivo.
+5. **Comprobaciones en un iframe oculto nuevo** cada vez que se pulsa
+   "Comprobar": aislamiento total entre ejercicios (también del estado a
+   nivel de módulo) sin tocar la vista previa.
+6. **Montaje automático:** `App.jsx` debe existir y exportar por defecto
+   un componente; el runtime lo monta con `createRoot`, dentro de
+   `StrictMode` si el bloque lo pide. El `createRoot` manual (lección 3)
+   se enseña con bloques estáticos.
+7. **Solo se puede importar** `react`, `react-dom`, `react-dom/client`,
+   `react/jsx-runtime`, `react/jsx-dev-runtime` y los archivos del propio
+   bloque. Cualquier otra cosa da un error claro en español.
+8. **Fase 1 solo admite JSX.** TSX llega con el módulo 10.
+
+## Alcance de la fase 0
+
+### Resaltador: modos `jsx` y `tsx`
+
+`src/components/codigo/resaltador.ts`: `Lenguaje` pasa a
+`'html' | 'css' | 'js' | 'jsx' | 'tsx' | 'sql' | 'texto'`.
+
+- **`jsx`** = el tokenizador de JavaScript + etiquetas JSX. Dentro de una
+  etiqueta: nombre (`etiqueta`, incluidos `Componente` y `Lista.Item`),
+  atributos (`atributo`), valores entre comillas (`cadena`) o entre
+  llaves (JavaScript completo, que puede contener más JSX). Fragmentos
+  `<>` y `</>`. Entre etiquetas: texto hijo (`texto`) y expresiones
+  `{...}` (JavaScript). Las llaves se emparejan con un contador de
+  profundidad que respeta cadenas y comentarios.
+- **Cuándo `<` abre JSX:** solo en posición de expresión, es decir,
+  cuando el último token significativo (sin contar espacios ni
+  comentarios) no es un identificador, un número, `)` ni `]`, y el
+  carácter siguiente es una letra, `>` o `/`. Así `a < b`,
+  `useState<string>('')` y `f<T>(x)` no se confunden con JSX, mientras
+  `return <div>`, `(<Lista />)`, `x && <p>` o `=> <li>` sí abren JSX.
+- **`tsx`** = `jsx` + palabras clave de TypeScript (`interface`, `type`,
+  `enum`, `implements`, `private`, `public`, `protected`, `readonly`,
+  `keyof`, `satisfies`, `declare`, `namespace`, `abstract`, `is`,
+  `infer`, `unique`).
+- **Invariante de siempre:** concatenar el texto de todos los tokens
+  devuelve exactamente la entrada, también con código a medio escribir
+  (una etiqueta sin cerrar, una llave sin pareja).
+
+### Esquemas
+
+En `src/lib/laboratorio/schemas.ts`, `lenguaje` de `codigo-anotado` y de
+`predice-el-resultado` pasa de `z.literal('html').default('html')` a
+`z.enum(['html', 'jsx', 'tsx']).default('html')`. Los bloques existentes
+(todos sin `lenguaje` o con `"html"`) siguen validando igual.
+`CodigoAnotado` y `PrediceElResultado` ya pasan `lenguaje` a
+`CodigoResaltado`; solo cambia el tipo.
+
+### Catálogo de referencia
+
+`/admin/referencia-contenido` gana un ejemplo de `codigo-anotado` con
+`lenguaje: "jsx"`.
+
+## Alcance de la fase 1
+
+### Esquemas
+
+```ts
+// Roles que admiten las comprobaciones. Lista cerrada: un error de
+// tipeo en el JSON de una lección falla al validar, no al comprobar.
+const ROLES_COMPROBACION = [
+  'button', 'link', 'heading', 'textbox', 'searchbox', 'checkbox', 'radio',
+  'switch', 'combobox', 'listbox', 'option', 'list', 'listitem', 'dialog',
+  'alert', 'status', 'tab', 'tabpanel', 'img', 'navigation', 'main',
+  'region', 'table', 'row', 'cell', 'menu', 'menuitem', 'progressbar',
+  'slider', 'spinbutton',
+] as const
+
+const textoCorto = z.string().min(1).max(120)
+
+// Cómo encontrar un elemento, siempre como lo encontraría una persona:
+// por su texto, por su rol (y nombre accesible o texto), o por la
+// etiqueta de un campo. Objetos estrictos a propósito: sin ellos,
+// { etiqueta, valor } encajaría en la variante { etiqueta } y Zod
+// descartaría `valor` en silencio.
+const esquemaConsultaElemento = z.union([
+  z.strictObject({ texto: textoCorto }),
+  z.strictObject({
+    rol: z.enum(ROLES_COMPROBACION),
+    nombre: textoCorto.optional(),
+    texto: textoCorto.optional(),
+  }),
+  z.strictObject({ etiqueta: textoCorto }),
+])
+
+const esquemaPasoComprobacion = z.union([
+  z.strictObject({ escribir: z.strictObject({ etiqueta: textoCorto, texto: z.string().max(200) }) }),
+  z.strictObject({ pulsar: esquemaConsultaElemento }),
+  // Sintaxis de teclado de user-event: "{Enter}", "{Escape}", "hola{Enter}"
+  z.strictObject({ teclear: z.string().min(1).max(60) }),
+  z.strictObject({ seleccionar: z.strictObject({ etiqueta: textoCorto, opcion: textoCorto }) }),
+])
+
+const esquemaEsperaComprobacion = z.union([
+  esquemaConsultaElemento,
+  // Que algo ya NO esté (p. ej. tras borrar una tarea)
+  z.strictObject({ ausente: esquemaConsultaElemento }),
+  // El valor actual de un campo (p. ej. vacío tras añadir)
+  z.strictObject({ etiqueta: textoCorto, valor: z.string().max(200) }),
+])
+
+const esquemaComprobacionReact = z.object({
+  descripcion: z.string().min(1).max(160),
+  pasos: z.array(esquemaPasoComprobacion).max(10).default([]),
+  espera: esquemaEsperaComprobacion,
+})
+
+const esquemaArchivoReact = z.object({
+  nombre: z.string().regex(/^[A-Za-z][A-Za-z0-9-]*\.(jsx|css)$/),
+  codigo: z.string().max(4000),
+})
+
+export const esquemaReactEnVivo = z
+  .object({
+    tipo: z.literal('react-en-vivo'),
+    titulo: z.string().min(1).max(140).optional(),
+    consigna: z.string().min(1).max(600).optional(),
+    archivos: z.array(esquemaArchivoReact).min(1).max(6),
+    archivoInicial: z.string().optional(),
+    strictMode: z.boolean().default(true),
+    mostrarConsola: z.boolean().default(true),
+    mostrarJsGenerado: z.boolean().default(false),
+    comprobaciones: z.array(esquemaComprobacionReact).min(1).max(8).optional(),
+  })
+  .refine((d) => d.archivos.some((a) => a.nombre === 'App.jsx'), {
+    message: 'react-en-vivo necesita un archivo App.jsx',
+  })
+  .refine((d) => new Set(d.archivos.map((a) => a.nombre)).size === d.archivos.length, {
+    message: 'Los nombres de archivo no pueden repetirse',
+  })
+  .refine((d) => !d.archivoInicial || d.archivos.some((a) => a.nombre === d.archivoInicial), {
+    message: 'archivoInicial debe ser uno de los archivos',
+  })
+
+export const esquemaReactAnotado = z.object({
+  tipo: z.literal('react-anotado'),
+  titulo: z.string().min(1).max(140).optional(),
+  // App.jsx: un único archivo, como sql-anotado tiene una única consulta
+  codigo: z.string().min(1).max(4000),
+  css: z.string().max(4000).default(''),
+  anotaciones: z
+    .array(z.object({ fragmento: z.string().min(1), nota: z.string().min(1).max(500) }))
+    .min(1)
+    .max(8),
+  strictMode: z.boolean().default(true),
+  mostrarConsola: z.boolean().default(false),
+})
+```
+
+Los dos se añaden a la unión discriminada `esquemaBloqueLaboratorio`,
+con sus tipos `DatosReactEnVivo` y `DatosReactAnotado`.
+
+### Runtime (`public/react-en-vivo/19.3.1/`)
+
+- `react.js`: `react`, `react-dom`, `react-dom/client`,
+  `react/jsx-runtime` y `react/jsx-dev-runtime` 19.3.1, build de
+  desarrollo, IIFE minificado que expone `window.__reactEnVivo = { React,
+  ReactDOM, ReactDOMClient, JsxRuntime, JsxDevRuntime }`.
+- `pruebas.js`: `@testing-library/dom` 10.4.2 + `@testing-library/user-event`
+  14.6.8, IIFE minificado que expone `window.__pruebasEnVivo = { ...dom,
+  userEvent }`.
+- Los dos conservan los avisos de licencia MIT al final
+  (`legalComments: 'eof'`).
+- Los construye `scripts/react-en-vivo/construir.mjs` (esbuild), desde
+  `scripts/react-en-vivo/package.json` + `package-lock.json` con
+  versiones exactas. Se ejecuta a mano solo al cambiar de versión de
+  React; la salida se commitea, como `public/ts-libs/`.
+- `vercel.json`: cabecera `Cache-Control: public, max-age=31536000,
+  immutable` para `/react-en-vivo/(.*)`. Es seguro porque la versión va
+  en la ruta: una versión nueva es una ruta nueva.
+- `eslint.config.js`: `public/react-en-vivo` en `ignores`, como
+  `public/ts-libs`.
+
+### Motor (`src/lib/react-en-vivo/`)
+
+- **`transformar.ts`**: carga Sucrase con `import()` y expone
+  `transformarArchivos(archivos)` (cada `.jsx` con las transformaciones
+  `jsx` + `imports`, runtime automático, modo desarrollo y `filePath`
+  para la información de origen; los `.css` se juntan) y
+  `transformarParaMostrar(archivos)` (solo `jsx`, modo producción: el
+  código que enseña la pestaña "JavaScript generado"). Un error de
+  sintaxis se devuelve como `{ ok: false, archivo, linea, mensaje }`,
+  nunca como excepción.
+- **`runtime/puente.js` y `runtime/montaje.js`**: el JavaScript que corre
+  dentro del iframe, en archivos `.js` de verdad que la web importa como
+  texto (`?raw`), no como cadenas dentro de TypeScript: así no hay que
+  escapar nada a mano (en la validación, un `\n` mal escapado dentro de
+  una plantilla rompió el montaje) y los tests los ejecutan en jsdom.
+  - **Puente** (antes de cargar React): hook mínimo de DevTools
+    (encadenado si ya existe uno), captura de `console.log/info/warn/error`
+    con formato de `%s`, `%d`, `%i`, `%o`, `%O` y `%c`, errores globales y
+    aviso de altura con `ResizeObserver`. Todo sale por
+    `parent.postMessage({ canal: 'react-en-vivo', ... }, '*')`.
+  - **Montaje**: lee `window.__configReactEnVivo = { modulos,
+    archivosCss, strictMode }`; registro de módulos, resolución de
+    `./Nombre` a `./Nombre.jsx`, errores claros ("No encuentro el archivo
+    «./Tarjta»", "En este editor solo se puede importar React y tus
+    propios archivos..."), `createRoot` con `onUncaughtError`, y el
+    ejecutor de comprobaciones (solo escucha mensajes cuyo `source` sea
+    `parent`).
+- **`documento.ts`**: `construirDocumentoReact({ origen, css, modulos,
+  archivosCss, strictMode, conPruebas })` recibe el código ya
+  transformado y devuelve el `srcdoc`, en este orden: CSS en un
+  `<style>`, el puente, `<script src="{origen}/react-en-vivo/19.3.1/react.js">`
+  (y `pruebas.js` si `conPruebas`), `<div id="root">`, la configuración
+  como JSON (con `<` escapado como `\u003c`, para que el código del
+  alumno no pueda cerrar el `<script>`) y el montaje.
+- **`mensajes.ts`**: esquema Zod de los mensajes iframe → página (abajo)
+  y la función `leerMensajeReactEnVivo(evento, ventanaEsperada)` que
+  devuelve el mensaje validado o `null`.
+
+Mensajes iframe → página (`canal: 'react-en-vivo'`):
+
+| `tipo` | Campos | Uso |
+|---|---|---|
+| `montado` | `version` | La vista previa está lista |
+| `alto` | `alto` (número) | Altura del iframe, igual que `editor-en-vivo` |
+| `commit` | `numero` | Separadores "— commit N —" en la consola |
+| `consola` | `nivel` (`log`/`info`/`warn`/`error`), `texto` (≤ 2000), `commit` | Panel de consola |
+| `error-render` | `texto`, `archivo?`, `linea?` | Recuadro de error en la vista previa |
+| `error` | `texto` | Errores fuera del render (eventos, módulos) |
+| `resultado-comprobaciones` | `resultados: { descripcion, ok, motivo? }[]` (≤ 8) | ✅/❌ |
+
+Mensaje página → iframe oculto: `{ canal: 'react-en-vivo', tipo:
+'comprobar', comprobaciones }`, con las comprobaciones ya validadas del
+JSON de la lección.
+
+La línea de un error se calcula en el iframe: primer marco de
+`error.stack` con forma `Nombre.jsx:L:C`, menos 2.
+
+### Componentes (`src/components/bloques-laboratorio/`)
+
+- **`VistaPreviaReact.tsx`**: el iframe (`sandbox="allow-scripts
+  allow-forms"`, `title="Vista previa de React"`), la escucha de mensajes
+  con `leerMensajeReactEnVivo`, la altura (mismos límites que
+  `editor-en-vivo`: 160-2400 px) y el recuadro de error de render.
+  Expone por callback los mensajes de consola y de commit.
+- **`ConsolaReact.tsx`**: lista de entradas con su nivel (color + texto,
+  nunca solo color), separadores de commit, botón "Limpiar", máximo 200
+  entradas (descarta las más antiguas), `role="log"`.
+- **`ResultadosComprobaciones.tsx`**: ✅/❌ por comprobación con su
+  descripción y, si falla, el motivo; resumen "3 de 4 comprobaciones
+  superadas"; región `aria-live="polite"`. Mismos colores e iconos
+  (`CircleCheck`/`CircleX`) que `SqlEnVivo`.
+- **`ReactEnVivo.tsx`**: misma cabecera y estructura que `EditorEnVivo`
+  (icono, eyebrow "React en vivo", título, consigna, botón "Reiniciar").
+  Pestañas por archivo (más "JavaScript generado" si
+  `mostrarJsGenerado`), editor CodeMirror (`javascript({ jsx: true })`
+  para `.jsx`, `css()` para `.css`), vista previa que se reconstruye 400
+  ms después de la última tecla, consola si `mostrarConsola`, botón
+  "Comprobar" si hay `comprobaciones`. "Comprobar" crea un iframe oculto
+  nuevo (fuera de pantalla, `aria-hidden`, `tabindex="-1"`) con el
+  código actual, envía `comprobar` al recibir `montado`, pinta los
+  resultados y elimina el iframe (o muestra "La comprobación tardó
+  demasiado. Revisa si tu código se queda en un bucle." a los 15 s). Un error de sintaxis se muestra bajo el editor
+  ("Error de sintaxis en App.jsx, línea 3: ...") y la vista previa se
+  queda en el último resultado válido, como hace `EditorEnVivo` con
+  TypeScript.
+- **`ReactAnotado.tsx`**: el código con `CodigoResaltado` en
+  `lenguaje="jsx"` y las anotaciones, con la misma presentación que
+  `CodigoAnotado`; debajo, la vista previa ejecutando ese código de
+  verdad, y la consola si `mostrarConsola`.
+- **`registro.ts`**: `'react-en-vivo': ReactEnVivo`,
+  `'react-anotado': ReactAnotado`.
+
+### Catálogo de referencia y documentación
+
+- `/admin/referencia-contenido`: un `ReactAnotado` (lista con `key`) y
+  un `ReactEnVivo` con dos archivos, CSS, consola, JavaScript generado y
+  dos comprobaciones.
+- `specs/features/laboratorios.md`: los dos tipos nuevos en la lista de
+  bloques.
+
+## Checkpoints de seguridad
+
+- **El código del alumno nunca toca la web.** Iframe sin
+  `allow-same-origin`: origen opaco, sin acceso a cookies,
+  `localStorage` ni a la sesión de Supabase de la página. Igual que
+  `editor-en-vivo`.
+- **Los mensajes del iframe son entrada no confiable.** El código del
+  alumno corre en el mismo iframe que el puente y puede falsificar
+  cualquier mensaje. La página solo acepta mensajes cuyo `event.source`
+  sea ese iframe y con `canal: 'react-en-vivo'`, los valida con Zod con
+  límites de tamaño, y los pinta como texto (React escapa); nunca
+  `dangerouslySetInnerHTML`. Lo peor que se puede falsificar es un ✅ en
+  el propio navegador: las comprobaciones no guardan nada en el
+  servidor.
+- **Runtime del mismo origen y fijado**, construido desde un lockfile
+  con versiones exactas; ningún script de terceros en tiempo de
+  ejecución.
+- **`new Function` dentro del iframe:** hoy la web no tiene CSP. Un
+  `srcdoc` hereda la CSP de la página, así que si algún día se añade una
+  sin `'unsafe-eval'`, este bloque dejará de funcionar. Queda anotado
+  para quien añada esa CSP.
+- **El contenido de los bloques** (archivos, comprobaciones) viene del
+  JSON de la lección, validado con Zod y escrito por admins.
+- **Bucle infinito:** riesgo aceptado, igual que en `editor-en-vivo`.
+
+## Fuera de alcance de las fases 0 y 1
+
+TSX con diagnósticos de tipos, árbol de renders, registro de efectos,
+API simulada, kit del compilador (fases 2-4 del temario); `createRoot`
+manual desde un `main.jsx`; importar librerías de npm; guardar el código
+del alumno entre visitas.
+
+## Verificación
+
+Codex no puede abrir puertos ni lanzar un navegador en su sandbox: los
+tests unitarios los escribe y pasa Codex; la verificación con React
+real en el navegador la hace Claude después, con Playwright contra el
+servidor de desarrollo, repitiendo los casos de la validación de arriba
+(montaje, varios archivos, CSS, aviso de `key`, `StrictMode`, error de
+render con su línea, comprobaciones en el iframe oculto con la vista
+previa intacta, JavaScript generado), más modo oscuro y ancho de móvil.
+Antes de dar una fase por cerrada, `npm run test`, `npm run build` y
+`npm run lint` en local: la CI no los ejecuta.
