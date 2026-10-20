@@ -1,0 +1,16 @@
+{
+  "name": "react-en-vivo-runtime",
+  "private": true,
+  "type": "module",
+  "description": "Construye el React propio del bloque react-en-vivo (ver construir.mjs). No es parte de la web.",
+  "scripts": {
+    "construir": "node construir.mjs"
+  },
+  "dependencies": {
+    "@testing-library/dom": "10.4.2",
+    "@testing-library/user-event": "14.6.8",
+    "esbuild": "0.28.2",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  }
+}
