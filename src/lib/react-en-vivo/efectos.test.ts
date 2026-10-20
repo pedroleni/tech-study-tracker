@@ -104,6 +104,71 @@ describe('registro de efectos', () => {
     expect([...delGancho(), ...deChat()].every((mensaje) => mensaje.commit === 1)).toBe(true)
   })
 
+  it('respeta el orden real de efectos y limpiezas', async () => {
+    const codigo = `import { useEffect, useState } from 'react'
+function useConexion(sala) {
+  useEffect(() => {
+    return () => {}
+  }, [sala])
+}
+function Chat({ sala }) {
+  useConexion(sala)
+  useEffect(() => {
+    return () => {}
+  }, [sala])
+  return <p>Sala {sala}</p>
+}
+export default function App() {
+  const [sala, setSala] = useState('general')
+  const [ver, setVer] = useState(true)
+  return (
+    <main>
+      <button onClick={() => setSala('viaje')}>Viaje</button>
+      <button onClick={() => setVer(false)}>Ocultar</button>
+      {ver && <Chat sala={sala} />}
+    </main>
+  )
+}`
+    const secuencia = () =>
+      mensajes().map(({ accion, componente, gancho, motivo }) => ({
+        accion,
+        origen: gancho ?? componente,
+        motivo,
+      }))
+
+    await montar(codigo)
+
+    await waitFor(() => expect(mensajes()).toHaveLength(6))
+    expect(secuencia()).toEqual([
+      { accion: 'efecto', origen: 'useConexion', motivo: 'montaje' },
+      { accion: 'efecto', origen: 'Chat', motivo: 'montaje' },
+      { accion: 'limpieza', origen: 'useConexion', motivo: undefined },
+      { accion: 'limpieza', origen: 'Chat', motivo: undefined },
+      { accion: 'efecto', origen: 'useConexion', motivo: 'strict-mode' },
+      { accion: 'efecto', origen: 'Chat', motivo: 'strict-mode' },
+    ])
+
+    enviar.mockClear()
+    fireEvent.click(within(document.body).getByRole('button', { name: 'Viaje' }))
+
+    await waitFor(() => expect(mensajes()).toHaveLength(4))
+    expect(secuencia()).toEqual([
+      { accion: 'limpieza', origen: 'useConexion', motivo: undefined },
+      { accion: 'limpieza', origen: 'Chat', motivo: undefined },
+      { accion: 'efecto', origen: 'useConexion', motivo: 'dependencias' },
+      { accion: 'efecto', origen: 'Chat', motivo: 'dependencias' },
+    ])
+
+    enviar.mockClear()
+    fireEvent.click(within(document.body).getByRole('button', { name: 'Ocultar' }))
+
+    await waitFor(() => expect(mensajes()).toHaveLength(2))
+    expect(secuencia()).toEqual([
+      { accion: 'limpieza', origen: 'useConexion', motivo: 'desmontaje' },
+      { accion: 'limpieza', origen: 'Chat', motivo: 'desmontaje' },
+    ])
+  })
+
   it('al cambiar la sala: limpieza y efecto con la dependencia que cambió', async () => {
     await montar()
     await waitFor(() => expect(delGancho()).toHaveLength(3))

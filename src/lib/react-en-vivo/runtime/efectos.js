@@ -19,6 +19,37 @@
     }
   }
 
+  const cola = []
+  let vaciadoProgramado = false
+
+  const vaciar = () => {
+    vaciadoProgramado = false
+    const tanda = cola.splice(0)
+    try {
+      const efectosPosteriores = new Set()
+      for (let indice = tanda.length - 1; indice >= 0; indice -= 1) {
+        const entrada = tanda[indice]
+        if (entrada.mensaje.accion === 'efecto') efectosPosteriores.add(entrada.estado)
+        else if (!efectosPosteriores.has(entrada.estado)) entrada.mensaje.motivo = 'desmontaje'
+      }
+      for (const entrada of tanda) enviar(entrada.mensaje)
+    } catch {
+      // Un fallo al preparar el registro tampoco alcanza los efectos reales.
+    }
+  }
+
+  const encolar = (estado, mensaje) => {
+    try {
+      cola.push({ estado, mensaje })
+      if (vaciadoProgramado) return
+      vaciadoProgramado = true
+      if (typeof queueMicrotask === 'function') queueMicrotask(vaciar)
+      else Promise.resolve().then(vaciar)
+    } catch {
+      vaciadoProgramado = false
+    }
+  }
+
   const limitar = (valor, maximo) => String(valor).slice(0, maximo)
 
   const valorCorto = (valor) => {
@@ -240,7 +271,7 @@
   const envolverGancho = (React, ganchoReal, clase, modulos) => {
     function ganchoEnvuelto(crear, dependencias) {
       // Incondicional y antes del gancho real: conserva el orden de hooks.
-      const referencia = React.useRef({ inicializado: false, confirmadas: [], pendiente: null })
+      const referencia = React.useRef({ inicializado: false, confirmadas: [], ultimaLimpieza: null })
       const tieneDependencias = Array.isArray(dependencias)
       const actuales = tieneDependencias ? dependencias : []
       const ubicacion = ubicar(new Error().stack, modulos, clase, actuales.length)
@@ -248,18 +279,14 @@
       const ejecutar = () => {
         const estado = referencia.current
         const commit = numeroCommit()
-        const pendiente = estado.pendiente
-        if (pendiente) {
-          estado.pendiente = null
-          pendiente.enviada = true
-          enviar({ tipo: 'efecto', ...pendiente.ubicacion, commit: pendiente.commit, accion: 'limpieza', clase, cambios: [] })
-        }
+        const ultimaLimpieza = estado.ultimaLimpieza
+        estado.ultimaLimpieza = null
 
         let motivo
         let cambios = []
         if (!tieneDependencias) motivo = 'cada-render'
         else if (!estado.inicializado) motivo = 'montaje'
-        else if (pendiente && pendiente.commit === commit && iguales(estado.confirmadas, actuales)) {
+        else if (ultimaLimpieza && ultimaLimpieza.commit === commit && iguales(estado.confirmadas, actuales)) {
           motivo = 'strict-mode'
         } else {
           motivo = 'dependencias'
@@ -278,7 +305,7 @@
         // Solo se confirman en el commit. Nunca se actualizan durante render.
         estado.confirmadas = actuales.slice()
         estado.inicializado = true
-        enviar({
+        encolar(estado, {
           tipo: 'efecto',
           componente: ubicacion.componente,
           ...(ubicacion.gancho ? { gancho: ubicacion.gancho } : {}),
@@ -293,30 +320,18 @@
         const limpiezaReal = crear()
 
         return () => {
-          const limpieza = {
-            commit: numeroCommit(),
-            ubicacion: {
-              componente: ubicacion.componente,
-              ...(ubicacion.gancho ? { gancho: ubicacion.gancho } : {}),
-              archivo: ubicacion.archivo,
-              linea: ubicacion.linea,
-            },
-            enviada: false,
-          }
-          estado.pendiente = limpieza
-          Promise.resolve().then(() => {
-            if (estado.pendiente !== limpieza || limpieza.enviada) return
-            estado.pendiente = null
-            limpieza.enviada = true
-            enviar({
-              tipo: 'efecto',
-              ...limpieza.ubicacion,
-              commit: limpieza.commit,
-              accion: 'limpieza',
-              clase,
-              motivo: 'desmontaje',
-              cambios: [],
-            })
+          const commit = numeroCommit()
+          estado.ultimaLimpieza = { commit }
+          encolar(estado, {
+            tipo: 'efecto',
+            componente: ubicacion.componente,
+            ...(ubicacion.gancho ? { gancho: ubicacion.gancho } : {}),
+            archivo: ubicacion.archivo,
+            linea: ubicacion.linea,
+            commit,
+            accion: 'limpieza',
+            clase,
+            cambios: [],
           })
           if (typeof limpiezaReal === 'function') return limpiezaReal()
         }
