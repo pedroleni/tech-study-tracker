@@ -292,6 +292,87 @@ export const esquemaGitEnVivo = z.object({
   mostrarGrafo: z.boolean().default(false),
 })
 
+// Roles cerrados para detectar errores de escritura en el JSON antes de
+// ejecutar la comprobación en el iframe.
+export const ROLES_COMPROBACION = [
+  'button', 'link', 'heading', 'textbox', 'searchbox', 'checkbox', 'radio',
+  'switch', 'combobox', 'listbox', 'option', 'list', 'listitem', 'dialog',
+  'alert', 'status', 'tab', 'tabpanel', 'img', 'navigation', 'main',
+  'region', 'table', 'row', 'cell', 'menu', 'menuitem', 'progressbar',
+  'slider', 'spinbutton',
+] as const
+
+const textoCorto = z.string().min(1).max(120)
+
+const esquemaConsultaElementoReact = z.union([
+  z.strictObject({ texto: textoCorto }),
+  z.strictObject({
+    rol: z.enum(ROLES_COMPROBACION),
+    nombre: textoCorto.optional(),
+    texto: textoCorto.optional(),
+  }),
+  z.strictObject({ etiqueta: textoCorto }),
+])
+
+const esquemaPasoComprobacionReact = z.union([
+  z.strictObject({ escribir: z.strictObject({ etiqueta: textoCorto, texto: z.string().max(200) }) }),
+  z.strictObject({ pulsar: esquemaConsultaElementoReact }),
+  z.strictObject({ teclear: z.string().min(1).max(60) }),
+  z.strictObject({ seleccionar: z.strictObject({ etiqueta: textoCorto, opcion: textoCorto }) }),
+])
+
+const esquemaEsperaComprobacionReact = z.union([
+  esquemaConsultaElementoReact,
+  z.strictObject({ ausente: esquemaConsultaElementoReact }),
+  z.strictObject({ etiqueta: textoCorto, valor: z.string().max(200) }),
+])
+
+export const esquemaComprobacionReact = z.object({
+  descripcion: z.string().min(1).max(160),
+  pasos: z.array(esquemaPasoComprobacionReact).max(10).default([]),
+  espera: esquemaEsperaComprobacionReact,
+})
+
+const esquemaArchivoReact = z.object({
+  nombre: z.string().regex(/^[A-Za-z][A-Za-z0-9-]*\.(jsx|css)$/),
+  codigo: z.string().max(4000),
+})
+
+export const esquemaReactEnVivo = z
+  .object({
+    tipo: z.literal('react-en-vivo'),
+    titulo: z.string().min(1).max(140).optional(),
+    consigna: z.string().min(1).max(600).optional(),
+    archivos: z.array(esquemaArchivoReact).min(1).max(6),
+    archivoInicial: z.string().optional(),
+    strictMode: z.boolean().default(true),
+    mostrarConsola: z.boolean().default(true),
+    mostrarJsGenerado: z.boolean().default(false),
+    comprobaciones: z.array(esquemaComprobacionReact).min(1).max(8).optional(),
+  })
+  .refine((datos) => datos.archivos.some((archivo) => archivo.nombre === 'App.jsx'), {
+    message: 'react-en-vivo necesita un archivo App.jsx',
+  })
+  .refine((datos) => new Set(datos.archivos.map((archivo) => archivo.nombre)).size === datos.archivos.length, {
+    message: 'Los nombres de archivo no pueden repetirse',
+  })
+  .refine((datos) => !datos.archivoInicial || datos.archivos.some((archivo) => archivo.nombre === datos.archivoInicial), {
+    message: 'archivoInicial debe ser uno de los archivos',
+  })
+
+export const esquemaReactAnotado = z.object({
+  tipo: z.literal('react-anotado'),
+  titulo: z.string().min(1).max(140).optional(),
+  codigo: z.string().min(1).max(4000),
+  css: z.string().max(4000).default(''),
+  anotaciones: z
+    .array(z.object({ fragmento: z.string().min(1), nota: z.string().min(1).max(500) }))
+    .min(1)
+    .max(8),
+  strictMode: z.boolean().default(true),
+  mostrarConsola: z.boolean().default(false),
+})
+
 export const esquemaImagen = z.object({
   tipo: z.literal('imagen'),
   src: z.string().url().startsWith('https://www.techstudytracker.com/img/'),
@@ -331,6 +412,8 @@ export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaSqlEnVivo,
   esquemaGitAnotado,
   esquemaGitEnVivo,
+  esquemaReactEnVivo,
+  esquemaReactAnotado,
   esquemaImagen,
   esquemaVideo,
 ])
@@ -356,6 +439,11 @@ export type DatosSqlAnotado = z.infer<typeof esquemaSqlAnotado>
 export type DatosSqlEnVivo = z.infer<typeof esquemaSqlEnVivo>
 export type DatosGitAnotado = z.infer<typeof esquemaGitAnotado>
 export type DatosGitEnVivo = z.infer<typeof esquemaGitEnVivo>
+export type DatosReactEnVivo = z.infer<typeof esquemaReactEnVivo>
+export type DatosReactAnotado = z.infer<typeof esquemaReactAnotado>
+export type ComprobacionReact = z.infer<typeof esquemaComprobacionReact>
+export type ArchivoReact = z.infer<typeof esquemaArchivoReact>
+export type ConsultaElementoReact = z.infer<typeof esquemaConsultaElementoReact>
 export type DatosImagen = z.infer<typeof esquemaImagen>
 export type DatosVideo = z.infer<typeof esquemaVideo>
 export type DatosBloqueLaboratorio = z.infer<typeof esquemaBloqueLaboratorio>

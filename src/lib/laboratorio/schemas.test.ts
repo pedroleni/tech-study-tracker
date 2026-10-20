@@ -3,14 +3,63 @@ import { describe, expect, it } from 'vitest'
 import {
   esquemaBloqueLaboratorio,
   esquemaCodigoAnotado,
+  esquemaComprobacionReact,
   esquemaEditorEnVivo,
   esquemaGitAnotado,
   esquemaGitEnVivo,
   esquemaImagen,
   esquemaPrediceElResultado,
+  esquemaReactAnotado,
+  esquemaReactEnVivo,
   esquemaSqlAnotado,
   esquemaSqlEnVivo,
 } from './schemas'
+
+const archivoApp = { nombre: 'App.jsx', codigo: 'export default function App() { return <p>Hola</p> }' }
+const minimoEnVivo = { tipo: 'react-en-vivo', archivos: [archivoApp] }
+
+describe('esquemaReactEnVivo', () => {
+  it('acepta el mínimo y aplica los valores por defecto', () => {
+    const datos = esquemaReactEnVivo.parse(minimoEnVivo)
+    expect(datos).toMatchObject({ strictMode: true, mostrarConsola: true, mostrarJsGenerado: false })
+    expect(esquemaBloqueLaboratorio.parse(minimoEnVivo).tipo).toBe('react-en-vivo')
+  })
+
+  it('exige App.jsx, nombres únicos y válidos, y un archivoInicial existente', () => {
+    const fallo = (datos: unknown) => esquemaReactEnVivo.safeParse(datos).success
+    expect(fallo({ ...minimoEnVivo, archivos: [{ nombre: 'Main.jsx', codigo: '' }] })).toBe(false)
+    expect(fallo({ ...minimoEnVivo, archivos: [archivoApp, archivoApp] })).toBe(false)
+    for (const nombre of ['app.tsx', '../App.jsx', 'App.js', 'estilos.scss']) {
+      expect(fallo({ ...minimoEnVivo, archivos: [archivoApp, { nombre, codigo: '' }] })).toBe(false)
+    }
+    expect(fallo({ ...minimoEnVivo, archivoInicial: 'Otro.jsx' })).toBe(false)
+    expect(fallo({ ...minimoEnVivo, archivos: [archivoApp, { nombre: 'estilos.css', codigo: 'p{}' }], archivoInicial: 'estilos.css' })).toBe(true)
+  })
+
+  it('las comprobaciones distinguen cada forma sin perder campos', () => {
+    const espera = (e: unknown) =>
+      esquemaComprobacionReact.safeParse({ descripcion: 'd', espera: e })
+    expect(espera({ etiqueta: 'Nueva tarea', valor: '' }).data?.espera).toEqual({ etiqueta: 'Nueva tarea', valor: '' })
+    expect(espera({ rol: 'listitem', texto: 'Nadar' }).data?.espera).toEqual({ rol: 'listitem', texto: 'Nadar' })
+    expect(espera({ ausente: { texto: 'Leer' } }).success).toBe(true)
+    expect(espera({ rol: 'boton' }).success).toBe(false)
+    expect(espera({ texto: 'x', sobra: 1 }).success).toBe(false)
+    expect(esquemaComprobacionReact.parse({ descripcion: 'd', espera: { texto: 'x' } }).pasos).toEqual([])
+  })
+
+  it('limita las comprobaciones a 8 y los pasos a 10', () => {
+    const c = { descripcion: 'd', espera: { texto: 'x' } }
+    expect(esquemaReactEnVivo.safeParse({ ...minimoEnVivo, comprobaciones: Array(9).fill(c) }).success).toBe(false)
+    expect(esquemaComprobacionReact.safeParse({ ...c, pasos: Array(11).fill({ teclear: '{Enter}' }) }).success).toBe(false)
+  })
+})
+
+describe('esquemaReactAnotado', () => {
+  it('acepta el mínimo con sus valores por defecto', () => {
+    const datos = esquemaReactAnotado.parse({ tipo: 'react-anotado', codigo: archivoApp.codigo, anotaciones: [{ fragmento: 'App', nota: 'n' }] })
+    expect(datos).toMatchObject({ css: '', strictMode: true, mostrarConsola: false })
+  })
+})
 
 describe('lenguaje jsx/tsx en bloques estáticos', () => {
   it('codigo-anotado y predice-el-resultado aceptan html, jsx y tsx; html por defecto', () => {
