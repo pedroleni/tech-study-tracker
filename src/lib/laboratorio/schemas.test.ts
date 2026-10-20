@@ -121,6 +121,20 @@ describe('árbol de renders en los bloques de React', () => {
   })
 })
 
+describe('registro de efectos en los bloques de React', () => {
+  it('mostrarEfectos es false por defecto y acepta true', () => {
+    expect(esquemaReactEnVivo.parse(minimoEnVivo).mostrarEfectos).toBe(false)
+    expect(
+      esquemaReactAnotado.parse({
+        tipo: 'react-anotado',
+        codigo: archivoApp.codigo,
+        anotaciones: [{ fragmento: 'App', nota: 'n' }],
+      }).mostrarEfectos,
+    ).toBe(false)
+    expect(esquemaReactEnVivo.parse({ ...minimoEnVivo, mostrarEfectos: true }).mostrarEfectos).toBe(true)
+  })
+})
+
 describe('esquemaArbolDeComponentes', () => {
   const nodos = [
     { nombre: 'App', nivel: 0, etiqueta: 'estado: tareas' },

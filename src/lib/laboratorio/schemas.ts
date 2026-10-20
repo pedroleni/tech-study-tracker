@@ -376,6 +376,7 @@ export const esquemaReactEnVivo = z
     mostrarJsGenerado: z.boolean().default(false),
     // Árbol de renders (fase 2): qué se renderiza en cada commit y por qué.
     mostrarArbol: z.boolean().default(false),
+    mostrarEfectos: z.boolean().default(false),
     api: esquemaApiReact.optional(),
     red: esquemaRedReact.optional(),
     comprobaciones: z.array(esquemaComprobacionReact).min(1).max(8).optional(),
@@ -402,6 +403,7 @@ export const esquemaReactAnotado = z.object({
   strictMode: z.boolean().default(true),
   mostrarConsola: z.boolean().default(false),
   mostrarArbol: z.boolean().default(false),
+  mostrarEfectos: z.boolean().default(false),
   api: esquemaApiReact.optional(),
   red: esquemaRedReact.optional(),
 })

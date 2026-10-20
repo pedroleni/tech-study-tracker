@@ -31,6 +31,7 @@ const datos: DatosReactEnVivo = {
   mostrarConsola: true,
   mostrarJsGenerado: true,
   mostrarArbol: false,
+  mostrarEfectos: false,
   comprobaciones: [
     { descripcion: 'Saluda', pasos: [], espera: { texto: 'Hola' } },
     { descripcion: 'Guarda', pasos: [{ pulsar: { rol: 'button', nombre: 'Guardar' } }], espera: { texto: 'Guardado' } },
@@ -278,5 +279,80 @@ describe('ReactEnVivo', () => {
 
     expect(screen.queryByRole('button', { name: 'Comprobar' })).toBeNull()
     expect(screen.queryByRole('log')).toBeNull()
+  })
+
+  it('con api muestra Red, pasa api y red al documento y envía los controles al iframe', async () => {
+    await renderizarListo({
+      ...datos,
+      api: { recetas: [{ id: 1, nombre: 'Salmorejo' }] },
+      red: { latencia: 600, desordenar: false },
+    })
+    expect(screen.getByRole('heading', { name: 'Red' })).toBeInTheDocument()
+    expect(vista().getAttribute('srcdoc')).toContain('Salmorejo')
+    expect(vista().getAttribute('srcdoc')).toContain('window.__redReactEnVivo =')
+
+    enviarDesde(vista().contentWindow, { canal: 'react-en-vivo', tipo: 'montado', version: '19.3.1' })
+    const enviar = vi.spyOn(vista().contentWindow!, 'postMessage')
+    fireEvent.change(screen.getByRole('slider', { name: 'Latencia' }), { target: { value: '900' } })
+    expect(enviar).toHaveBeenCalledWith(
+      { canal: 'react-en-vivo', tipo: 'red', latencia: 900, desordenar: false },
+      '*',
+    )
+  })
+
+  it('con mostrarEfectos muestra el registro y pide efectos.js', async () => {
+    await renderizarListo({ ...datos, mostrarEfectos: true })
+    expect(screen.getByRole('heading', { name: 'Efectos' })).toBeInTheDocument()
+    expect(vista().getAttribute('srcdoc')).toContain('window.__efectosReactEnVivo = { envolver }')
+  })
+
+  it('al reconstruir vacía el registro de peticiones y el de efectos', async () => {
+    await renderizarListo({
+      ...datos,
+      api: { recetas: [{ id: 1, nombre: 'Salmorejo' }] },
+      mostrarEfectos: true,
+    })
+    enviarDesde(vista().contentWindow, {
+      canal: 'react-en-vivo',
+      tipo: 'peticion',
+      id: 1,
+      metodo: 'GET',
+      ruta: '/api/recetas',
+      estado: 'ok',
+      codigo: 200,
+      ms: 600,
+    })
+    enviarDesde(vista().contentWindow, {
+      canal: 'react-en-vivo',
+      tipo: 'efecto',
+      commit: 1,
+      componente: 'App',
+      archivo: 'App.jsx',
+      linea: 2,
+      accion: 'efecto',
+      clase: 'useEffect',
+      motivo: 'montaje',
+      cambios: [],
+    })
+    expect(await screen.findByText('GET /api/recetas · 200 · 600 ms')).toBeInTheDocument()
+    expect(screen.getByText('App ▶ efecto · montaje')).toBeInTheDocument()
+
+    fireEvent.change(screen.getByLabelText('Editor de App.jsx'), {
+      target: { value: 'export default function App() { return <p>Nuevo</p> }' },
+    })
+    await waitFor(() => expect(vista().getAttribute('srcdoc')).toContain('Nuevo'), { timeout: 3000 })
+    expect(screen.queryByText('GET /api/recetas · 200 · 600 ms')).toBeNull()
+    expect(screen.queryByText('App ▶ efecto · montaje')).toBeNull()
+  })
+
+  it('el documento de comprobación lleva la red de comprobación a latencia 0', async () => {
+    await renderizarListo({
+      ...datos,
+      api: { recetas: [{ id: 1, nombre: 'Salmorejo' }] },
+      red: undefined,
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Comprobar' }))
+    const oculto = (await screen.findByTitle('Comprobaciones')) as HTMLIFrameElement
+    expect(oculto.getAttribute('srcdoc')).toContain('"red":{"latencia":0,"desordenar":false}')
   })
 })

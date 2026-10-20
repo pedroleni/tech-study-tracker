@@ -10,6 +10,8 @@ import {
 } from '@/components/bloques-laboratorio/ComprobadorReact'
 import { ConsolaReact } from '@/components/bloques-laboratorio/ConsolaReact'
 import { EditorCodeMirror } from '@/components/bloques-laboratorio/EditorCodeMirror'
+import { PanelRed, type AjustesRed } from '@/components/bloques-laboratorio/PanelRed'
+import { RegistroEfectos } from '@/components/bloques-laboratorio/RegistroEfectos'
 import { ResultadosComprobaciones } from '@/components/bloques-laboratorio/ResultadosComprobaciones'
 import { useEntradasConsola } from '@/components/bloques-laboratorio/useEntradasConsola'
 import { VistaPreviaReact } from '@/components/bloques-laboratorio/VistaPreviaReact'
@@ -17,7 +19,12 @@ import { CodigoResaltado } from '@/components/codigo'
 import { Button } from '@/components/ui/button'
 import type { ArchivoReact, DatosReactEnVivo } from '@/lib/laboratorio/schemas'
 import { ESPERA_RECONSTRUIR_MS } from '@/lib/react-en-vivo/constantes'
-import type { MensajeArbol, MensajeReactEnVivo } from '@/lib/react-en-vivo/mensajes'
+import type {
+  MensajeArbol,
+  MensajeEfecto,
+  MensajePeticion,
+  MensajeReactEnVivo,
+} from '@/lib/react-en-vivo/mensajes'
 import { prepararDocumento } from '@/lib/react-en-vivo/preparar'
 import { transformarParaMostrar } from '@/lib/react-en-vivo/transformar'
 import { cn } from '@/lib/utils'
@@ -25,6 +32,13 @@ import { cn } from '@/lib/utils'
 const PESTANA_JS_GENERADO = 'JavaScript generado'
 const extensionJsx = lenguajeJavascript({ jsx: true })
 const extensionCss = lenguajeCss()
+const RED_POR_DEFECTO: AjustesRed = { latencia: 600, desordenar: false }
+
+function incorporarPeticion(actuales: MensajePeticion[], nueva: MensajePeticion) {
+  const posicion = actuales.findIndex((peticion) => peticion.id === nueva.id)
+  if (posicion === -1) return [...actuales, nueva].slice(-20)
+  return actuales.map((peticion, indice) => (indice === posicion ? nueva : peticion))
+}
 
 type EstadoComprobacion =
   | { estado: 'inactivo' }
@@ -40,11 +54,18 @@ export function ReactEnVivo({
   mostrarConsola,
   mostrarJsGenerado,
   mostrarArbol = false,
+  mostrarEfectos = false,
+  api,
+  red,
   comprobaciones,
   // Fuera del esquema de la lección, como en SqlAnotado/GitAnotado: solo
   // para no repetir el nombre de la región en la página de referencia.
   etiquetaSeccion = 'React en vivo',
-}: Omit<DatosReactEnVivo, 'mostrarArbol'> & { mostrarArbol?: boolean; etiquetaSeccion?: string }) {
+}: Omit<DatosReactEnVivo, 'mostrarArbol' | 'mostrarEfectos'> & {
+  mostrarArbol?: boolean
+  mostrarEfectos?: boolean
+  etiquetaSeccion?: string
+}) {
   const primeraPestana = archivoInicial ?? 'App.jsx'
   const [archivos, setArchivos] = useState<ArchivoReact[]>(archivosOriginales)
   const [pestana, setPestana] = useState(primeraPestana)
@@ -54,12 +75,29 @@ export function ReactEnVivo({
   const [comprobacion, setComprobacion] = useState<EstadoComprobacion>({ estado: 'inactivo' })
   const { entradas, recibirMensaje, limpiar } = useEntradasConsola()
   const [arbol, setArbol] = useState<MensajeArbol | null>(null)
+  const [peticiones, setPeticiones] = useState<MensajePeticion[]>([])
+  const [efectos, setEfectos] = useState<MensajeEfecto[]>([])
+  const [falloPendiente, setFalloPendiente] = useState(false)
+  const [fallosSolicitados, setFallosSolicitados] = useState(0)
+  const [redActual, setRedActual] = useState<AjustesRed>(red ?? RED_POR_DEFECTO)
+  const redActualRef = useRef(redActual)
+  const cambiarRed = useCallback((nueva: AjustesRed) => {
+    redActualRef.current = nueva
+    setRedActual(nueva)
+  }, [])
   const documentoMontadoRef = useRef(false)
   const recibir = useCallback(
     (mensaje: MensajeReactEnVivo) => {
       recibirMensaje(mensaje)
       if (mensaje.tipo === 'montado') documentoMontadoRef.current = true
       if (mensaje.tipo === 'arbol' && documentoMontadoRef.current) setArbol(mensaje)
+      if (mensaje.tipo === 'peticion') {
+        setPeticiones((actuales) => incorporarPeticion(actuales, mensaje))
+        if (mensaje.codigo === 500) setFalloPendiente(false)
+      }
+      if (mensaje.tipo === 'efecto') {
+        setEfectos((actuales) => [...actuales, mensaje].slice(-200))
+      }
     },
     [recibirMensaje],
   )
@@ -82,6 +120,9 @@ export function ReactEnVivo({
         strictMode,
         conPruebas: false,
         conArbol: mostrarArbol,
+        conEfectos: mostrarEfectos,
+        api,
+        red: redActualRef.current,
       }).then((preparado) => {
         // Una transformación que llega después de otra más nueva se descarta.
         if (version !== versionRef.current) return
@@ -95,6 +136,9 @@ export function ReactEnVivo({
         // El árbol de la vista previa anterior ya no describe nada.
         documentoMontadoRef.current = false
         setArbol(null)
+        setPeticiones([])
+        setEfectos([])
+        setFalloPendiente(false)
         setSrcDoc(preparado.srcDoc)
       })
       if (mostrarJsGenerado) {
@@ -104,7 +148,7 @@ export function ReactEnVivo({
       }
     }, espera)
     return () => window.clearTimeout(temporizador)
-  }, [archivos, strictMode, mostrarJsGenerado, mostrarArbol, limpiar])
+  }, [api, archivos, strictMode, mostrarJsGenerado, mostrarArbol, mostrarEfectos, limpiar])
 
   const terminarComprobacion = useCallback((fin: FinComprobacion) => {
     setComprobacion(fin)
@@ -124,6 +168,9 @@ export function ReactEnVivo({
       origen: window.location.origin,
       strictMode,
       conPruebas: true,
+      conEfectos: mostrarEfectos,
+      api,
+      red,
     })
     if (!preparado.ok) {
       setErrorSintaxis(preparado.error)
@@ -140,6 +187,10 @@ export function ReactEnVivo({
     setReinicios((anteriores) => anteriores + 1)
     documentoMontadoRef.current = false
     setArbol(null)
+    setPeticiones([])
+    setEfectos([])
+    setFalloPendiente(false)
+    setFallosSolicitados(0)
     limpiar()
   }
 
@@ -258,11 +309,34 @@ export function ReactEnVivo({
           {srcDoc === null ? (
             <p className="text-sm text-muted-foreground">Preparando React…</p>
           ) : (
-            <VistaPreviaReact key={reinicios} srcDoc={srcDoc} onMensaje={recibir} />
+            <VistaPreviaReact
+              key={reinicios}
+              srcDoc={srcDoc}
+              onMensaje={recibir}
+              red={api ? redActual : undefined}
+              fallosSolicitados={fallosSolicitados}
+            />
           )}
         </div>
 
         {mostrarArbol && <ArbolDeRenders arbol={arbol} />}
+
+        {api && (
+          <PanelRed
+            red={redActual}
+            peticiones={peticiones}
+            falloPendiente={falloPendiente}
+            onCambiar={cambiarRed}
+            onFallarSiguiente={() => {
+              setFalloPendiente(true)
+              setFallosSolicitados((cantidad) => cantidad + 1)
+            }}
+          />
+        )}
+
+        {mostrarEfectos && (
+          <RegistroEfectos entradas={efectos} onLimpiar={() => setEfectos([])} />
+        )}
 
         {mostrarConsola && <ConsolaReact entradas={entradas} onLimpiar={limpiar} />}
       </div>

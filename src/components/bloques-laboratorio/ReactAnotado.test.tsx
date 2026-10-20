@@ -60,4 +60,45 @@ describe('ReactAnotado', () => {
       ),
     )
   })
+
+  it('con api muestra Red y pasa api y red al documento', async () => {
+    render(
+      <ReactAnotado
+        tipo="react-anotado"
+        codigo={codigo}
+        css=""
+        anotaciones={[{ fragmento: 'tareas.map', nota: 'n' }]}
+        strictMode
+        mostrarConsola={false}
+        api={{ recetas: [{ id: 1, nombre: 'Pisto' }] }}
+        red={{ latencia: 700, desordenar: true }}
+      />,
+    )
+    expect(screen.getByRole('heading', { name: 'Red' })).toBeInTheDocument()
+    await waitFor(() => {
+      const srcdoc = (screen.getByTitle('Vista previa de React') as HTMLIFrameElement).getAttribute('srcdoc')
+      expect(srcdoc).toContain('Pisto')
+      expect(srcdoc).toContain('"latencia":700')
+    })
+  })
+
+  it('con mostrarEfectos muestra el registro y pide efectos.js', async () => {
+    render(
+      <ReactAnotado
+        tipo="react-anotado"
+        codigo={codigo}
+        css=""
+        anotaciones={[{ fragmento: 'tareas.map', nota: 'n' }]}
+        strictMode
+        mostrarConsola={false}
+        mostrarEfectos
+      />,
+    )
+    expect(screen.getByRole('heading', { name: 'Efectos' })).toBeInTheDocument()
+    await waitFor(() =>
+      expect((screen.getByTitle('Vista previa de React') as HTMLIFrameElement).getAttribute('srcdoc')).toContain(
+        'window.__efectosReactEnVivo = { envolver }',
+      ),
+    )
+  })
 })

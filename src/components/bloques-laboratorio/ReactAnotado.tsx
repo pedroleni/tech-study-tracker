@@ -3,14 +3,29 @@ import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 
 import { ArbolDeRenders } from '@/components/bloques-laboratorio/ArbolDeRenders'
 import { ConsolaReact } from '@/components/bloques-laboratorio/ConsolaReact'
+import { PanelRed, type AjustesRed } from '@/components/bloques-laboratorio/PanelRed'
+import { RegistroEfectos } from '@/components/bloques-laboratorio/RegistroEfectos'
 import { useEntradasConsola } from '@/components/bloques-laboratorio/useEntradasConsola'
 import { VistaPreviaReact } from '@/components/bloques-laboratorio/VistaPreviaReact'
 import { CodigoResaltado } from '@/components/codigo'
 import { Button } from '@/components/ui/button'
 import type { DatosReactAnotado } from '@/lib/laboratorio/schemas'
-import type { MensajeArbol, MensajeReactEnVivo } from '@/lib/react-en-vivo/mensajes'
+import type {
+  MensajeArbol,
+  MensajeEfecto,
+  MensajePeticion,
+  MensajeReactEnVivo,
+} from '@/lib/react-en-vivo/mensajes'
 import { prepararDocumento } from '@/lib/react-en-vivo/preparar'
 import { cn } from '@/lib/utils'
+
+const RED_POR_DEFECTO: AjustesRed = { latencia: 600, desordenar: false }
+
+function incorporarPeticion(actuales: MensajePeticion[], nueva: MensajePeticion) {
+  const posicion = actuales.findIndex((peticion) => peticion.id === nueva.id)
+  if (posicion === -1) return [...actuales, nueva].slice(-20)
+  return actuales.map((peticion, indice) => (indice === posicion ? nueva : peticion))
+}
 
 export function ReactAnotado({
   titulo,
@@ -20,10 +35,17 @@ export function ReactAnotado({
   strictMode,
   mostrarConsola,
   mostrarArbol = false,
+  mostrarEfectos = false,
+  api,
+  red,
   // Fuera del esquema de la lección, como en GitAnotado: solo para no
   // repetir el nombre de la región en la página de referencia.
   etiquetaSeccion = 'React anotado',
-}: Omit<DatosReactAnotado, 'mostrarArbol'> & { mostrarArbol?: boolean; etiquetaSeccion?: string }) {
+}: Omit<DatosReactAnotado, 'mostrarArbol' | 'mostrarEfectos'> & {
+  mostrarArbol?: boolean
+  mostrarEfectos?: boolean
+  etiquetaSeccion?: string
+}) {
   const idNota = useId()
   const anotacionesValidas = useMemo(
     () =>
@@ -40,12 +62,29 @@ export function ReactAnotado({
   const [error, setError] = useState<string | null>(null)
   const { entradas, recibirMensaje, limpiar } = useEntradasConsola()
   const [arbol, setArbol] = useState<MensajeArbol | null>(null)
+  const [peticiones, setPeticiones] = useState<MensajePeticion[]>([])
+  const [efectos, setEfectos] = useState<MensajeEfecto[]>([])
+  const [falloPendiente, setFalloPendiente] = useState(false)
+  const [fallosSolicitados, setFallosSolicitados] = useState(0)
+  const [redActual, setRedActual] = useState<AjustesRed>(red ?? RED_POR_DEFECTO)
+  const redActualRef = useRef(redActual)
+  const cambiarRed = useCallback((nueva: AjustesRed) => {
+    redActualRef.current = nueva
+    setRedActual(nueva)
+  }, [])
   const documentoMontadoRef = useRef(false)
   const recibir = useCallback(
     (mensaje: MensajeReactEnVivo) => {
       recibirMensaje(mensaje)
       if (mensaje.tipo === 'montado') documentoMontadoRef.current = true
       if (mensaje.tipo === 'arbol' && documentoMontadoRef.current) setArbol(mensaje)
+      if (mensaje.tipo === 'peticion') {
+        setPeticiones((actuales) => incorporarPeticion(actuales, mensaje))
+        if (mensaje.codigo === 500) setFalloPendiente(false)
+      }
+      if (mensaje.tipo === 'efecto') {
+        setEfectos((actuales) => [...actuales, mensaje].slice(-200))
+      }
     },
     [recibirMensaje],
   )
@@ -61,18 +100,25 @@ export function ReactAnotado({
       strictMode,
       conPruebas: false,
       conArbol: mostrarArbol,
+      conEfectos: mostrarEfectos,
+      api,
+      red: redActualRef.current,
     }).then((preparado) => {
       if (cancelado) return
-      setArbol(null)
       if (preparado.ok) {
         documentoMontadoRef.current = false
+        setArbol(null)
+        setPeticiones([])
+        setEfectos([])
+        setFalloPendiente(false)
+        limpiar()
         setSrcDoc(preparado.srcDoc)
       } else setError(preparado.error)
     })
     return () => {
       cancelado = true
     }
-  }, [codigo, css, strictMode, mostrarArbol])
+  }, [api, codigo, css, strictMode, mostrarArbol, mostrarEfectos, limpiar])
 
   return (
     <section
@@ -147,10 +193,34 @@ export function ReactAnotado({
         {srcDoc === null && !error && (
           <p className="text-sm text-muted-foreground">Preparando React…</p>
         )}
-        {srcDoc !== null && <VistaPreviaReact srcDoc={srcDoc} onMensaje={recibir} />}
+        {srcDoc !== null && (
+          <VistaPreviaReact
+            srcDoc={srcDoc}
+            onMensaje={recibir}
+            red={api ? redActual : undefined}
+            fallosSolicitados={fallosSolicitados}
+          />
+        )}
       </div>
 
       {mostrarArbol && <ArbolDeRenders arbol={arbol} />}
+
+      {api && (
+        <PanelRed
+          red={redActual}
+          peticiones={peticiones}
+          falloPendiente={falloPendiente}
+          onCambiar={cambiarRed}
+          onFallarSiguiente={() => {
+            setFalloPendiente(true)
+            setFallosSolicitados((cantidad) => cantidad + 1)
+          }}
+        />
+      )}
+
+      {mostrarEfectos && (
+        <RegistroEfectos entradas={efectos} onLimpiar={() => setEfectos([])} />
+      )}
 
       {mostrarConsola && <ConsolaReact entradas={entradas} onLimpiar={limpiar} />}
     </section>

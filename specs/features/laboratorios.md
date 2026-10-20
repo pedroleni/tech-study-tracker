@@ -533,6 +533,17 @@ diseño" con "feature real".
 - `ReactAnotado.tsx` — recibe `z.infer<typeof esquemaReactAnotado>`
   (2026-10-20): código JSX con anotaciones y, debajo, el mismo código
   ejecutándose de verdad. Ver [react-en-vivo.md](react-en-vivo.md).
+- `PanelRed.tsx` (2026-10-21, fase 3 de React) — controles de la API
+  simulada para los bloques que declaran `api`: latencia escrita en
+  milisegundos, respuesta desordenada, fallo de la siguiente petición y
+  registro textual de las 20 últimas peticiones. `ReactEnVivo` y
+  `ReactAnotado` lo montan debajo de la vista previa y envían sus cambios al
+  iframe aislado. Ver [react-en-vivo.md](react-en-vivo.md#alcance-de-la-fase-3-api-simulada-registro-de-efectos-y-almacenamiento).
+- `RegistroEfectos.tsx` (2026-10-21, fase 3 de React) — línea de tiempo de
+  hasta 200 efectos y limpiezas agrupados por commit, con el componente, el
+  hook propio y el motivo escritos en español. Solo aparece con
+  `mostrarEfectos`; no usa `aria-live`, porque puede cambiar varias veces en
+  un mismo commit.
 - `ArbolVisual.tsx` (2026-10-20, fase 2 de React) — dibujo común del
   árbol de componentes: guías tipo `tree` (├─ └─ │), `key=…`, contador
   `·N`, insignias de marca/etiqueta y el estado con color **y** texto
@@ -702,3 +713,8 @@ Cada componente que renderiza HTML en vivo usa
   build`, `lint` y la suite completa (246/246) en verde, escáner de
   seguridad sin hallazgos. Catálogo (`AdminReferenciaContenidoPage.tsx`)
   y su lista de nombres de test actualizados a los 14 tipos.
+- [x] Paneles de React fase 3 (2026-10-21): `PanelRed` y
+  `RegistroEfectos` integrados en `ReactEnVivo` y `ReactAnotado`, con la red
+  de comprobación embebida en su documento aislado. El catálogo incluye una
+  lista de recetas cuyo buscador cancela con `AbortController` y un chat que
+  muestra montaje, cambio de dependencias y limpieza de efectos.
