@@ -3,10 +3,10 @@
 **Estado:** ✅ fases 0 y 1 implementadas, verificadas e integradas en
 `main` el 2026-10-20 (PR #55): 476 tests, revisión independiente de todo
 el trabajo y verificación con React 19.3.1 real en Chromium. Pendiente:
-probar a mano en Firefox y Safari (ver "Pendiente" al final). 🔨 Fase 2
-(árbol de renders y árbol estático) especificada abajo, en construcción.
-Las fases 3-4 quedan descritas a nivel de diseño en el temario y se
-especifican en detalle cuando toquen.
+probar a mano en Firefox y Safari (ver "Pendiente" al final). ✅ Fase 2
+(árbol de renders y árbol estático) en `main` (PR #56). 🔨 Fase 3 (API
+simulada, registro de efectos y almacenamiento) especificada abajo, en
+construcción. La fase 4 queda descrita a nivel de diseño en el temario.
 
 **Configuración manual requerida:** ninguna en Supabase (`technologies`
 y `lecciones` no ganan columnas). La tecnología "React" se crea desde el
@@ -539,6 +539,124 @@ como texto.
 Un test monta un caso conocido con el `react.js` del sandbox y compara
 el árbol completo de varios commits con el esperado. Si una versión
 nueva de React cambia los internos, ese test es el que avisa.
+
+## Alcance de la fase 3: API simulada, registro de efectos y almacenamiento
+
+Diseño aprobado con el temario (componentes 4 y 6). Desbloquea los
+módulos 6–8 (lecciones 38–62), los proyectos 🧪 47, 56, 62 y 71, y la 84.
+
+### Validación (2026-10-20)
+
+| Qué se probó | Resultado |
+|---|---|
+| Envolver `useEffect` en el objeto `react` que ve el código del alumno (jsdom, `react.js` 19.3.1 del sandbox) | Montaje con `StrictMode`: efecto → limpieza → efecto. Cambio de dependencia: limpieza → efecto. Desmontar: limpieza. React sigue ejecutando el efecto real |
+| Quién llama al efecto | Por la pila (`new Error().stack`): primer marco con mayúscula = componente (`Chat`), primer marco `use[A-Z]` = hook propio (`useConexion`), con la línea exacta del `useEffect(` (desfase de 2 de `new Function`) |
+| Comparar dependencias en el render | **Falla con `StrictMode`**: el segundo render ya ve las nuevas. Hay que comparar en el commit, dentro del efecto envuelto |
+| `localStorage` en el iframe aislado (Chromium real) | Lanza `SecurityError`; `window` tiene un descriptor propio y configurable, y se puede sustituir con `Object.defineProperty` |
+| `fetch` sustituido en el iframe (Chromium real) | `new Response(JSON, { status, headers })` funciona (`res.ok`, `res.json()`), y un `AbortSignal` rechaza con `DOMException` de nombre `AbortError` |
+
+### Esquemas
+
+`react-en-vivo` y `react-anotado` ganan:
+
+```ts
+api?: Record<string, Registro[]>   // colecciones: { recetas: [{ id: 1, ... }] }
+                                   // ≤ 8 colecciones, nombres /^[a-z][a-z0-9-]*$/,
+                                   // ≤ 200 registros cada una, cada registro un objeto
+                                   // con id (número o texto), ≤ 20 000 caracteres en
+                                   // JSON en total
+red?: {                            // ajustes iniciales del panel «Red»
+  latencia?: entero 0–3000,        // ms; por defecto 600
+  desordenar?: boolean,            // por defecto false
+}
+mostrarEfectos?: boolean           // por defecto false
+```
+
+Y las comprobaciones ganan un paso `{ red: 'fallar-siguiente' }`, para
+ejercicios que tienen que manejar un error del servidor.
+
+### API simulada (`runtime/red.js`, solo si el bloque trae `api`)
+
+- Sustituye `window.fetch` para las rutas que empiezan por `/api/`; el
+  resto va al `fetch` original. La ruta se interpreta como texto (con
+  `<base href="about:srcdoc">` no se puede resolver como URL).
+- Rutas sobre una copia en memoria de los datos (cada documento empieza
+  con los originales): `GET /api/<col>` con `?q=` (busca sin distinguir
+  mayúsculas ni tildes en los campos de texto) y `?_limite=`, `GET
+  /api/<col>/<id>`, `POST /api/<col>` (cuerpo JSON; asigna `id`: el
+  mayor numérico + 1, o `crypto.randomUUID()` si los ids son texto),
+  `PUT` y `PATCH /api/<col>/<id>`, `DELETE /api/<col>/<id>`. Respuestas
+  `Response` reales con `Content-Type: application/json`; 404 con
+  `{ error }` si no existe la colección o el registro, 400 si el cuerpo
+  no es JSON.
+- **Latencia** con `setTimeout`. **Cancelación real**: si
+  `options.signal` ya está abortada o se aborta durante la espera, la
+  promesa se rechaza con `new DOMException('The operation was aborted.',
+  'AbortError')`.
+- **Fallar la siguiente petición**: la siguiente petición a `/api/`
+  responde 500 con `{ error: 'Error del servidor (simulado)' }`.
+- **Responder desordenado**: retrasos deterministas, sin `Math.random`:
+  las peticiones impares tardan el doble de la latencia y las pares, la
+  mitad. Dos peticiones seguidas llegan siempre al revés.
+- Mensajes iframe → página `peticion`: `{ id, metodo, ruta (≤ 200),
+  estado: 'pendiente' | 'ok' | 'error' | 'cancelada', codigo?, ms? }`, uno
+  al empezar y otro al terminar.
+- Mensajes página → iframe (el iframe solo los acepta si
+  `event.source === parent`): `{ canal, tipo: 'red', latencia,
+  desordenar }` (al recibir `montado` y cada vez que cambian los
+  controles) y `{ canal, tipo: 'fallar-siguiente' }`.
+- En el iframe de las comprobaciones: latencia 0 y sin desorden, salvo
+  que el bloque fije `red.latencia`; el paso `{ red: 'fallar-siguiente' }`
+  activa el fallo desde la propia comprobación.
+
+### Registro de efectos (`runtime/efectos.js`, solo si `mostrarEfectos`)
+
+- El montaje entrega al código del alumno un `react` cuyos `useEffect`,
+  `useLayoutEffect` y `useInsertionEffect` están envueltos; React sigue
+  ejecutando el efecto real. Si `mostrarEfectos` es falso, `react` es el
+  de siempre.
+- El envoltorio usa un `useRef` (incondicional) con las últimas
+  dependencias **confirmadas** y las compara dentro del efecto envuelto
+  (en el commit, nunca en el render). Motivo de cada ejecución:
+  `montaje` (primera vez), `strict-mode` (otra vez con las mismas
+  dependencias justo después de una limpieza, en el mismo commit),
+  `dependencias` (alguna cambió, con `Object.is`) o `cada-render` (sin
+  array de dependencias). Las limpiezas se emiten como `limpieza`; la
+  ejecución que las sigue explica el porqué, o `desmontaje` si el
+  componente desaparece en ese commit.
+- Componente y hook propio por la pila, en formato V8 (`at Nombre
+  (App.jsx:L:C)`) y Firefox/Safari (`Nombre@App.jsx:L:C`).
+- Nombres de las dependencias: del código del módulo en esa línea, el
+  último argumento de la llamada a `useEffect(` si es un array literal,
+  partido por las comas de primer nivel; si no se puede, «dependencia 1,
+  2...».
+- El puente expone el número de commit actual a `efectos.js`.
+- Mensaje `efecto`: `{ commit, componente (≤ 60), gancho? (≤ 60),
+  archivo, linea, accion: 'efecto' | 'limpieza', clase: 'useEffect' |
+  'useLayoutEffect' | 'useInsertionEffect', motivo?, cambios: { nombre
+  (≤ 40), antes (≤ 80), ahora (≤ 80) }[] (≤ 8) }`.
+
+### Almacenamiento en memoria (`puente.js`, siempre)
+
+Si leer `localStorage` o `sessionStorage` lanza, el puente los sustituye
+con `Object.defineProperty` por un almacén en memoria con la misma
+interfaz (`getItem`, `setItem`, `removeItem`, `clear`, `key`, `length`),
+que dura lo que dura el documento.
+
+### Componentes
+
+- **`PanelRed.tsx`** (con `api`): latencia (control deslizante de 0 a 3
+  s, con su valor escrito), «Responder desordenado» (interruptor),
+  «Fallar la siguiente petición» (botón; mientras está pendiente,
+  «La siguiente petición fallará») y el registro de las últimas 20
+  peticiones («GET /api/recetas?q=pa · 200 · 812 ms», «cancelada»,
+  «500»), con el estado escrito y no solo en color.
+- **`RegistroEfectos.tsx`** (con `mostrarEfectos`): línea de tiempo por
+  commit («commit 4 · Chat ⟲ limpieza», «commit 4 · Chat ▶ efecto ·
+  cambió sala: "general" → "viaje"», «commit 1 · Chat ▶ efecto · repetido
+  por StrictMode»), con botón «Limpiar» y como mucho 200 entradas.
+- `VistaPreviaReact` gana la forma de enviar mensajes al iframe (los de
+  `red`) y los reenvía al recibir `montado`.
 
 ## Checkpoints de seguridad
 
