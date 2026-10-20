@@ -64,6 +64,25 @@ describe('construirDocumentoReact', () => {
       strictMode: false,
     })
   })
+
+  it('con api incluye red.js después de la configuración y antes del montaje', () => {
+    const doc = construirDocumentoReact({
+      ...base,
+      api: { recetas: [{ id: 1, nombre: 'Salmorejo' }] },
+      red: { latencia: 600, desordenar: false },
+    })
+
+    expect(doc.indexOf('window.__configReactEnVivo =')).toBeLessThan(
+      doc.indexOf('window.__redReactEnVivo ='),
+    )
+    expect(doc.indexOf('window.__redReactEnVivo =')).toBeLessThan(
+      doc.indexOf('const R = window.__reactEnVivo'),
+    )
+  })
+
+  it('sin api no incluye red.js', () => {
+    expect(construirDocumentoReact(base)).not.toContain('window.__redReactEnVivo =')
+  })
 })
 
 describe('árbol de renders en el documento', () => {

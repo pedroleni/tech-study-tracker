@@ -10,6 +10,7 @@ import type { ArchivoReact, ComprobacionReact } from '@/lib/laboratorio/schemas'
 
 import montaje from './runtime/montaje.js?raw'
 import puente from './runtime/puente.js?raw'
+import red from './runtime/red.js?raw'
 import { transformarArchivos } from './transformar'
 
 type VentanaRuntime = typeof window & {
@@ -17,6 +18,8 @@ type VentanaRuntime = typeof window & {
     modulos: Record<string, string>
     archivosCss: string[]
     strictMode: boolean
+    api?: Record<string, unknown[]>
+    red?: { latencia: number; desordenar: boolean }
   }
   __enviarReactEnVivo?: ReturnType<typeof vi.fn>
   __comprobarReactEnVivo?: (
@@ -24,6 +27,7 @@ type VentanaRuntime = typeof window & {
   ) => Promise<{ descripcion: string; ok: boolean; motivo?: string }[]>
   __pruebasEnVivo?: Record<string, unknown>
   __reactEnVivo?: Record<string, unknown>
+  __redReactEnVivo?: { fallarSiguiente: () => void }
   __REACT_DEVTOOLS_GLOBAL_HOOK__?: {
     supportsFiber?: boolean
     renderers?: Map<number, unknown>
@@ -113,6 +117,7 @@ afterEach(() => {
   delete ventana.__comprobarReactEnVivo
   delete ventana.__pruebasEnVivo
   delete ventana.__reactEnVivo
+  delete ventana.__redReactEnVivo
   delete ventana.__REACT_DEVTOOLS_GLOBAL_HOOK__
   vi.restoreAllMocks()
 })
@@ -357,6 +362,37 @@ describe('runtime que no llegó a cargar', () => {
 })
 
 describe('puente del iframe', () => {
+  it.each(['localStorage', 'sessionStorage'] as const)(
+    'si %s lanza, el puente lo sustituye por un almacén en memoria',
+    (nombre) => {
+      const descriptor = Object.getOwnPropertyDescriptor(window, nombre)
+      vi.spyOn(window.parent, 'postMessage').mockImplementation(() => {})
+      Object.defineProperty(window, nombre, {
+        configurable: true,
+        get() {
+          throw new DOMException('Acceso denegado', 'SecurityError')
+        },
+      })
+      try {
+        new Function(puente)()
+        const almacen = window[nombre]
+
+        almacen.setItem('uno', '1')
+        almacen.setItem('dos', '2')
+        expect(almacen.getItem('uno')).toBe('1')
+        expect(almacen.length).toBe(2)
+        expect(almacen.key(1)).toBe('dos')
+        almacen.removeItem('uno')
+        expect(almacen.getItem('uno')).toBeNull()
+        almacen.clear()
+        expect(almacen.length).toBe(0)
+        expect(almacen.key(0)).toBeNull()
+      } finally {
+        if (descriptor) Object.defineProperty(window, nombre, descriptor)
+      }
+    },
+  )
+
   it('recorta textos de consola a 2000 y formatea %s', () => {
     console.log = vi.fn()
     console.error = vi.fn()
@@ -477,5 +513,59 @@ describe('puente del iframe', () => {
       { canal: 'react-en-vivo', tipo: 'commit', numero: 1 },
       '*',
     )
+  })
+})
+
+describe('comprobaciones con red', () => {
+  it('una comprobación con el paso red: fallar-siguiente hace fallar la siguiente petición', async () => {
+    const originalFetch = window.fetch
+    const transformacion = await transformarArchivos([
+      {
+        nombre: 'App.jsx',
+        codigo: `import { useState } from 'react'
+export default function App() {
+  const [estado, setEstado] = useState('lista')
+  const cargar = async () => {
+    const respuesta = await fetch('/api/recetas')
+    setEstado(respuesta.ok ? 'éxito' : 'error')
+  }
+  return <><button onClick={cargar}>Cargar</button><p>{estado}</p></>
+}`,
+      },
+    ])
+    if (!transformacion.ok) throw new Error(transformacion.mensaje)
+    document.body.replaceChildren(Object.assign(document.createElement('div'), { id: 'root' }))
+    instalarReact()
+    ventana.__enviarReactEnVivo = vi.fn()
+    ventana.__configReactEnVivo = {
+      modulos: transformacion.modulos,
+      archivosCss: transformacion.archivosCss,
+      strictMode: false,
+      api: { recetas: [{ id: 1, nombre: 'Salmorejo' }] },
+      red: { latencia: 0, desordenar: false },
+    }
+    try {
+      new Function(red)()
+      new Function(montaje)()
+      ventana.__pruebasEnVivo = {
+        ...await import('@testing-library/dom'),
+        userEvent: userEventFalso,
+      }
+
+      expect(
+        await ventana.__comprobarReactEnVivo?.([
+          {
+            descripcion: 'Maneja el error',
+            pasos: [
+              { red: 'fallar-siguiente' },
+              { pulsar: { rol: 'button', nombre: 'Cargar' } },
+            ],
+            espera: { texto: 'error' },
+          },
+        ]),
+      ).toEqual([{ descripcion: 'Maneja el error', ok: true }])
+    } finally {
+      window.fetch = originalFetch
+    }
   })
 })

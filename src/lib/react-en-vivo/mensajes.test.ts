@@ -86,6 +86,25 @@ describe('leerMensajeReactEnVivo', () => {
       ),
     ).toBeNull()
   })
+
+  it('acepta un mensaje peticion válido y rechaza una ruta de 201 caracteres', () => {
+    const { iframe, evento } = prepararIframe()
+    const peticion = {
+      canal: 'react-en-vivo',
+      tipo: 'peticion',
+      id: 1,
+      metodo: 'GET',
+      ruta: '/api/recetas?q=pan',
+      estado: 'ok',
+      codigo: 200,
+      ms: 612,
+    }
+
+    expect(leerMensajeReactEnVivo(evento(peticion), iframe.contentWindow)).toEqual(peticion)
+    expect(
+      leerMensajeReactEnVivo(evento({ ...peticion, ruta: `/${'a'.repeat(200)}` }), iframe.contentWindow),
+    ).toBeNull()
+  })
 })
 
 describe('mensaje arbol', () => {

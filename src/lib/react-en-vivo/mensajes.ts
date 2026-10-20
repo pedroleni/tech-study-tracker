@@ -60,6 +60,16 @@ export const esquemaMensajeReactEnVivo = z.discriminatedUnion('tipo', [
     linea: z.number().int().min(1).optional(),
   }),
   z.object({ canal, tipo: z.literal('error'), texto }),
+  z.object({
+    canal,
+    tipo: z.literal('peticion'),
+    id: z.number().int().min(1),
+    metodo: z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']),
+    ruta: z.string().max(200),
+    estado: z.enum(['pendiente', 'ok', 'error', 'cancelada']),
+    codigo: z.number().int().min(100).max(599).optional(),
+    ms: entero.optional(),
+  }),
   // Una por comprobación terminada: el comprobador mide inactividad, no el total.
   z.object({ canal, tipo: z.literal('progreso-comprobaciones'), resultado }),
   z.object({ canal, tipo: z.literal('resultado-comprobaciones'), resultados: z.array(resultado).max(8) }),
@@ -75,6 +85,7 @@ export const esquemaMensajeReactEnVivo = z.discriminatedUnion('tipo', [
 
 export type MensajeReactEnVivo = z.infer<typeof esquemaMensajeReactEnVivo>
 export type MensajeArbol = Extract<MensajeReactEnVivo, { tipo: 'arbol' }>
+export type MensajePeticion = Extract<MensajeReactEnVivo, { tipo: 'peticion' }>
 export type NodoArbolRender = MensajeArbol['nodos'][number]
 export type MotivoRender = NodoArbolRender['motivos'][number]
 

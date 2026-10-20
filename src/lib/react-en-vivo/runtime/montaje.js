@@ -1,7 +1,7 @@
 // Monta el código del alumno dentro del iframe aislado de react-en-vivo:
 // registro de módulos tipo CommonJS, montaje con createRoot y ejecutor de
 // comprobaciones. Lee la configuración que deja la lección en
-// window.__configReactEnVivo = { modulos, archivosCss, strictMode }.
+// window.__configReactEnVivo = { modulos, archivosCss, strictMode, api?, red? }.
 // Se incrusta en el srcdoc como texto (documento.ts lo importa con ?raw).
 // Ver specs/features/react-en-vivo.md.
 ;(() => {
@@ -194,6 +194,10 @@
   }
 
   const ejecutarPaso = async (pantalla, usuario, paso) => {
+    if (paso.red === 'fallar-siguiente') {
+      if (window.__redReactEnVivo) window.__redReactEnVivo.fallarSiguiente()
+      return
+    }
     if (paso.escribir) {
       const campo = campoPorEtiqueta(pantalla, paso.escribir.etiqueta)
       await usuario.clear(campo)

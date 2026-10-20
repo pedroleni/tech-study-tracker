@@ -5,6 +5,48 @@
 ;(() => {
   const enviar = (datos) => parent.postMessage({ canal: 'react-en-vivo', ...datos }, '*')
   window.__enviarReactEnVivo = enviar
+  // Los iframes srcdoc con origen opaco pueden lanzar SecurityError al leer
+  // Web Storage. Para los ejercicios basta un almacén que viva con el documento.
+  const crearAlmacen = () => {
+    const datos = new Map()
+    return {
+      get length() {
+        return datos.size
+      },
+      clear() {
+        datos.clear()
+      },
+      getItem(clave) {
+        const nombre = String(clave)
+        return datos.has(nombre) ? datos.get(nombre) : null
+      },
+      key(indice) {
+        if (!Number.isInteger(indice) || indice < 0 || indice >= datos.size) return null
+        return Array.from(datos.keys())[indice]
+      },
+      removeItem(clave) {
+        datos.delete(String(clave))
+      },
+      setItem(clave, valor) {
+        datos.set(String(clave), String(valor))
+      },
+    }
+  }
+  for (const nombre of ['localStorage', 'sessionStorage']) {
+    try {
+      void window[nombre]
+    } catch {
+      try {
+        Object.defineProperty(window, nombre, {
+          configurable: true,
+          enumerable: true,
+          value: crearAlmacen(),
+        })
+      } catch {
+        // Un navegador que no permita redefinirlo conserva su comportamiento.
+      }
+    }
+  }
   let commits = 0
   const avisarCommit = (raiz) => {
     commits += 1
