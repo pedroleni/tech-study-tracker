@@ -104,6 +104,9 @@ describe('leerMensajeReactEnVivo', () => {
     expect(
       leerMensajeReactEnVivo(evento({ ...peticion, ruta: `/${'a'.repeat(200)}` }), iframe.contentWindow),
     ).toBeNull()
+    expect(leerMensajeReactEnVivo(evento({ ...peticion, metodo: 'HEAD' }), iframe.contentWindow)).not.toBeNull()
+    expect(leerMensajeReactEnVivo(evento({ ...peticion, metodo: 'MAL' }), iframe.contentWindow)).not.toBeNull()
+    expect(leerMensajeReactEnVivo(evento({ ...peticion, metodo: 'demasiadolargo' }), iframe.contentWindow)).toBeNull()
   })
 
   it('acepta un mensaje efecto válido y rechaza 9 cambios', () => {

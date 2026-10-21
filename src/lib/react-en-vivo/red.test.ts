@@ -82,6 +82,19 @@ describe('API simulada de React en vivo', () => {
     expect(await (await fetch('/api/recetas?q=manchégo')).json()).toEqual([recetas[1]])
   })
 
+  it('ignora tildes de vocales sin confundir ñ con n', async () => {
+    ventana.__configReactEnVivo = {
+      api: { palabras: [{ id: 1, nombre: 'año' }, { id: 2, nombre: 'ánimo' }] },
+      red: { latencia: 0, desordenar: false },
+    }
+    new Function(puente)()
+    new Function(red)()
+
+    expect(await (await fetch('/api/palabras?q=ano')).json()).toEqual([])
+    expect(await (await fetch('/api/palabras?q=año')).json()).toEqual([{ id: 1, nombre: 'año' }])
+    expect(await (await fetch('/api/palabras?q=animo')).json()).toEqual([{ id: 2, nombre: 'ánimo' }])
+  })
+
   it('GET /api/recetas/2 y 404 si no existe', async () => {
     instalar()
 
@@ -158,6 +171,25 @@ describe('API simulada de React en vivo', () => {
     expect(orden).toEqual(['segunda', 'primera'])
   })
 
+  it('con desordenar, tres peticiones seguidas llegan siempre en orden inverso', async () => {
+    vi.useFakeTimers()
+    instalar({ latencia: 100, desordenar: true })
+    const orden: number[] = []
+
+    for (const id of [1, 2, 3]) void fetch(`/api/recetas/${id}`).then(() => orden.push(id))
+    await vi.runAllTimersAsync()
+    expect(orden).toEqual([3, 2, 1])
+  })
+
+  it('con desordenar, una petición aislada sigue respondiendo', async () => {
+    vi.useFakeTimers()
+    instalar({ latencia: 100, desordenar: true })
+    const terminada = vi.fn()
+    void fetch('/api/recetas').then(terminada)
+    await vi.runAllTimersAsync()
+    expect(terminada).toHaveBeenCalledOnce()
+  })
+
   it('fallarSiguiente hace que la siguiente responda 500 una sola vez', async () => {
     instalar()
     ventana.__redReactEnVivo?.fallarSiguiente()
@@ -166,6 +198,51 @@ describe('API simulada de React en vivo', () => {
     expect(fallo.status).toBe(500)
     expect(await fallo.json()).toEqual({ error: 'Error del servidor (simulado)' })
     expect((await fetch('/api/recetas')).status).toBe(200)
+  })
+
+  it('conserva el fallo pendiente si la petición que lo reservó se cancela', async () => {
+    vi.useFakeTimers()
+    instalar({ latencia: 100 })
+    ventana.__redReactEnVivo?.fallarSiguiente()
+    const controlador = new AbortController()
+    const cancelada = fetch('/api/recetas', { signal: controlador.signal })
+    controlador.abort()
+    await expect(cancelada).rejects.toMatchObject({ name: 'AbortError' })
+
+    const siguiente = fetch('/api/recetas')
+    await vi.runAllTimersAsync()
+    expect((await siguiente).status).toBe(500)
+  })
+
+  it('rechaza con signal.reason y conserva AbortError cuando no existe', async () => {
+    vi.useFakeTimers()
+    instalar({ latencia: 100 })
+    const conMotivo = new AbortController()
+    const primera = fetch('/api/recetas', { signal: conMotivo.signal })
+    conMotivo.abort('me voy')
+    await expect(primera).rejects.toBe('me voy')
+
+    const sinMotivo = new AbortController()
+    const segunda = fetch('/api/recetas', { signal: sinMotivo.signal })
+    sinMotivo.abort()
+    await expect(segunda).rejects.toMatchObject({ name: 'AbortError' })
+  })
+
+  it('conserva el TimeoutError de AbortSignal.timeout', async () => {
+    instalar({ latencia: 100 })
+    await expect(fetch('/api/recetas', { signal: AbortSignal.timeout(5) })).rejects.toMatchObject({
+      name: 'TimeoutError',
+    })
+  })
+
+  it('GET y HEAD rechazan un body como fetch real', async () => {
+    instalar()
+    await expect(fetch('/api/recetas', { body: '{}' })).rejects.toThrow(
+      new TypeError('Request with GET/HEAD method cannot have body.'),
+    )
+    await expect(fetch('/api/recetas', { method: 'HEAD', body: '{}' })).rejects.toThrow(
+      new TypeError('Request with GET/HEAD method cannot have body.'),
+    )
   })
 
   it('envía peticion al empezar y al terminar', async () => {

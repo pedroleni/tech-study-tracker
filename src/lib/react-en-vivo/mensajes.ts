@@ -79,7 +79,7 @@ export const esquemaMensajeReactEnVivo = z.discriminatedUnion('tipo', [
     canal,
     tipo: z.literal('peticion'),
     id: z.number().int().min(1),
-    metodo: z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']),
+    metodo: z.string().regex(/^[A-Z]{1,10}$/),
     ruta: z.string().max(200),
     estado: z.enum(['pendiente', 'ok', 'error', 'cancelada']),
     codigo: z.number().int().min(100).max(599).optional(),

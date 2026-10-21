@@ -238,7 +238,9 @@
     const argumentos = argumentosDeLlamada(codigo, apertura)
     const ultimo = argumentos.at(-1)
     if (!ultimo || !ultimo.startsWith('[') || !ultimo.endsWith(']')) return reservas
-    const expresiones = dividirNivelSuperior(ultimo.slice(1, -1))
+    const expresiones = dividirNivelSuperior(ultimo.slice(1, -1)).filter(
+      (expresion, indice, todas) => expresion !== '' || indice < todas.length - 1,
+    )
     if (expresiones.length !== cantidad) return reservas
     return expresiones.map((expresion, indice) =>
       /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*$/.test(expresion)
@@ -271,24 +273,34 @@
   const envolverGancho = (React, ganchoReal, clase, modulos) => {
     function ganchoEnvuelto(crear, dependencias) {
       // Incondicional y antes del gancho real: conserva el orden de hooks.
-      const referencia = React.useRef({ inicializado: false, confirmadas: [], ultimaLimpieza: null })
+      const referencia = React.useRef({
+        inicializado: false,
+        confirmadas: [],
+        ultimaLimpieza: null,
+        ultimoEfecto: null,
+      })
       const tieneDependencias = Array.isArray(dependencias)
       const actuales = tieneDependencias ? dependencias : []
       const ubicacion = ubicar(new Error().stack, modulos, clase, actuales.length)
 
       const ejecutar = () => {
         const estado = referencia.current
-        const commit = numeroCommit()
+        // React avisa al hook de DevTools después de insertion/layout, pero
+        // antes de los efectos pasivos. Los dos primeros ya pertenecen al
+        // commit que está a punto de publicarse.
+        const commit = numeroCommit() + (clase === 'useEffect' ? 0 : 1)
         const ultimaLimpieza = estado.ultimaLimpieza
         estado.ultimaLimpieza = null
 
         let motivo
         let cambios = []
-        if (!tieneDependencias) motivo = 'cada-render'
-        else if (!estado.inicializado) motivo = 'montaje'
+        if (!estado.inicializado) motivo = 'montaje'
         else if (ultimaLimpieza && ultimaLimpieza.commit === commit && iguales(estado.confirmadas, actuales)) {
           motivo = 'strict-mode'
-        } else {
+        } else if (estado.ultimoEfecto === commit && iguales(estado.confirmadas, actuales)) {
+          motivo = 'strict-mode'
+        } else if (!tieneDependencias) motivo = 'cada-render'
+        else {
           motivo = 'dependencias'
           cambios = actuales
             .map((valor, indice) => ({
@@ -305,6 +317,7 @@
         // Solo se confirman en el commit. Nunca se actualizan durante render.
         estado.confirmadas = actuales.slice()
         estado.inicializado = true
+        estado.ultimoEfecto = commit
         encolar(estado, {
           tipo: 'efecto',
           componente: ubicacion.componente,
@@ -319,8 +332,9 @@
         })
         const limpiezaReal = crear()
 
+        if (typeof limpiezaReal !== 'function') return limpiezaReal
         return () => {
-          const commit = numeroCommit()
+          const commit = numeroCommit() + (clase === 'useEffect' ? 0 : 1)
           estado.ultimaLimpieza = { commit }
           encolar(estado, {
             tipo: 'efecto',
@@ -333,11 +347,13 @@
             clase,
             cambios: [],
           })
-          if (typeof limpiezaReal === 'function') return limpiezaReal()
+          return limpiezaReal()
         }
       }
 
-      return tieneDependencias ? ganchoReal(ejecutar, dependencias) : ganchoReal(ejecutar)
+      // Un segundo argumento inválido también se pasa tal cual: los avisos y
+      // el comportamiento pertenecen a React, no al registro didáctico.
+      return dependencias === undefined ? ganchoReal(ejecutar) : ganchoReal(ejecutar, dependencias)
     }
     return ganchoEnvuelto
   }

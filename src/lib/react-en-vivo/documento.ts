@@ -17,7 +17,7 @@ export type OpcionesDocumentoReact = {
   conArbol?: boolean
   conEfectos?: boolean
   api?: Record<string, unknown[]>
-  red?: { latencia: number; desordenar: boolean }
+  red?: { latencia?: number; desordenar: boolean }
 }
 
 // Un </script> o </style> dentro del código cerraría la etiqueta antes de tiempo.

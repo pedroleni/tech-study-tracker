@@ -29,6 +29,8 @@ describe('PanelRed', () => {
     )
 
     expect(screen.getByText('600 ms')).toBeInTheDocument()
+    expect(screen.getByRole('slider', { name: 'Latencia' })).toHaveAttribute('step', '50')
+    expect(screen.getByRole('slider', { name: 'Latencia' })).toHaveAttribute('aria-valuetext', '600 ms')
     fireEvent.change(screen.getByRole('slider', { name: 'Latencia' }), { target: { value: '1200' } })
     expect(onCambiar).toHaveBeenCalledWith({ latencia: 1200, desordenar: false })
   })
@@ -61,6 +63,8 @@ describe('PanelRed', () => {
       onFallarSiguiente,
     }
     const { rerender } = render(<PanelRed {...propiedades} />)
+    const estado = screen.getByRole('status')
+    expect(estado).toBeEmptyDOMElement()
 
     fireEvent.click(screen.getByRole('button', { name: 'Fallar la siguiente petición' }))
     expect(onFallarSiguiente).toHaveBeenCalledOnce()
@@ -73,7 +77,8 @@ describe('PanelRed', () => {
         peticiones={[peticion({ id: 1, estado: 'error', codigo: 500, ms: 601 })]}
       />,
     )
-    expect(screen.queryByText('La siguiente petición fallará')).toBeNull()
+    expect(screen.getByRole('status')).toBe(estado)
+    expect(estado).toBeEmptyDOMElement()
   })
 
   it('registra las peticiones con su estado escrito', () => {
@@ -90,7 +95,9 @@ describe('PanelRed', () => {
       />,
     )
 
-    const registro = screen.getByRole('log', { name: 'Peticiones de la API simulada' })
+    const registro = screen.getByLabelText('Peticiones de la API simulada')
+    expect(registro).toHaveAttribute('aria-live', 'off')
+    expect(registro).not.toHaveAttribute('role', 'log')
     expect(within(registro).getByText('GET /api/recetas · 200 · 812 ms')).toBeInTheDocument()
     expect(within(registro).getByText('GET /api/recetas?q=pa · cancelada · 42 ms')).toBeInTheDocument()
   })
@@ -108,7 +115,7 @@ describe('PanelRed', () => {
       />,
     )
 
-    const filas = within(screen.getByRole('log', { name: 'Peticiones de la API simulada' })).getAllByRole('listitem')
+    const filas = within(screen.getByLabelText('Peticiones de la API simulada')).getAllByRole('listitem')
     expect(filas).toHaveLength(20)
     expect(filas[0]).toHaveTextContent('/api/recetas/6')
   })

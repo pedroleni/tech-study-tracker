@@ -71,6 +71,19 @@ async function montar(codigo = APP, mostrarEfectos = true) {
   await within(document.body).findByRole('button', { name: 'Viaje' }).catch(() => undefined)
 }
 
+async function montarConOpciones(codigo: string, efectosActivos: boolean, strictMode: boolean) {
+  const resultado = await transformarArchivos([{ nombre: 'App.jsx', codigo }])
+  if (!resultado.ok) throw new Error(resultado.mensaje)
+  ventana.__configReactEnVivo = {
+    modulos: resultado.modulos,
+    archivosCss: resultado.archivosCss,
+    strictMode,
+    efectos: efectosActivos,
+  }
+  new Function(montaje)()
+  await within(document.body).findByRole('button').catch(() => undefined)
+}
+
 const mensajes = () =>
   enviar.mock.calls
     .map(([mensaje]) => mensaje as { tipo: string })
@@ -83,6 +96,87 @@ const deChat = () =>
   )
 
 describe('registro de efectos', () => {
+  it('conserva avisos y ejecuciones de React con retornos y dependencias inválidos', async () => {
+    const casos = [
+      `import { useEffect } from 'react'; export default function App(){ useEffect(async () => { window.__ejecuciones += 1 }, []); return <button>ok</button> }`,
+      `import { useEffect } from 'react'; const sala='x'; export default function App(){ useEffect(() => { window.__ejecuciones += 1 }, sala); return <button>ok</button> }`,
+      `import { useEffect } from 'react'; const sala={}; export default function App(){ useEffect(() => { window.__ejecuciones += 1 }, sala); return <button>ok</button> }`,
+    ]
+    for (const codigo of casos) {
+      const ejecutar = async (activos: boolean) => {
+        document.body.replaceChildren(Object.assign(document.createElement('div'), { id: 'root' }))
+        ventana.__ejecuciones = 0
+        enviar.mockClear()
+        const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+        await montarConOpciones(codigo, activos, false)
+        await waitFor(() => expect(error).toHaveBeenCalled())
+        await waitFor(() => expect(ventana.__ejecuciones).toBe(1))
+        const avisos = error.mock.calls.map((argumentos) => String(argumentos[0]))
+        error.mockRestore()
+        return { avisos, ejecuciones: ventana.__ejecuciones }
+      }
+      expect(await ejecutar(true)).toEqual(await ejecutar(false))
+    }
+  })
+
+  it('no registra ni devuelve una limpieza si el efecto no la creó', async () => {
+    const codigo = `import { useEffect, useState } from 'react'
+export default function App(){ const [ver,setVer]=useState(true); return <>{ver && <Hijo/>}<button onClick={()=>setVer(false)}>ocultar</button></> }
+function Hijo(){ useEffect(() => {}, []); return <p>hijo</p> }`
+    await montarConOpciones(codigo, true, false)
+    await waitFor(() => expect(mensajes().some((mensaje) => mensaje.accion === 'efecto')).toBe(true))
+    enviar.mockClear()
+    fireEvent.click(within(document.body).getByRole('button'))
+    await Promise.resolve()
+    expect(mensajes().filter((mensaje) => mensaje.accion === 'limpieza')).toEqual([])
+  })
+
+  it('numera igual los efectos de layout y pasivos en cada commit', async () => {
+    const codigo = `import { useEffect, useLayoutEffect, useState } from 'react'
+export default function App(){ const [n,setN]=useState(0); useLayoutEffect(()=>{},[n]); useEffect(()=>{},[n]); return <button onClick={()=>setN(n+1)}>{n}</button> }`
+    const antes = (ventana.__numeroCommitReactEnVivo as () => number)()
+    await montarConOpciones(codigo, true, false)
+    await waitFor(() => expect(mensajes().filter((m) => m.accion === 'efecto')).toHaveLength(2))
+    const commitMontaje = mensajes().find((m) => m.clase === 'useEffect')?.commit
+    expect(commitMontaje).toBe(antes + 1)
+    expect(mensajes().filter((m) => m.accion === 'efecto').map((m) => m.commit)).toEqual([
+      commitMontaje,
+      commitMontaje,
+    ])
+    enviar.mockClear()
+    fireEvent.click(within(document.body).getByRole('button'))
+    await waitFor(() => expect(mensajes().filter((m) => m.accion === 'efecto')).toHaveLength(2))
+    expect(mensajes().filter((m) => m.accion === 'efecto').map((m) => m.commit)).toEqual([
+      Number(commitMontaje) + 1,
+      Number(commitMontaje) + 1,
+    ])
+    expect(mensajes().some((m) => m.commit === 0)).toBe(false)
+  })
+
+  it('un efecto sin dependencias distingue montaje, StrictMode y renders siguientes', async () => {
+    const codigo = `import { useEffect, useState } from 'react'
+export default function App(){ const [n,setN]=useState(0); useEffect(()=>{}); return <button onClick={()=>setN(n+1)}>{n}</button> }`
+    await montarConOpciones(codigo, true, true)
+    await waitFor(() => expect(mensajes().filter((m) => m.accion === 'efecto')).toHaveLength(2))
+    expect(mensajes().filter((m) => m.accion === 'efecto').map((m) => m.motivo)).toEqual(['montaje','strict-mode'])
+    enviar.mockClear()
+    fireEvent.click(within(document.body).getByRole('button'))
+    await waitFor(() => expect(mensajes().some((m) => m.motivo === 'cada-render')).toBe(true))
+  })
+
+  it('lee dependencias multilínea con coma final', async () => {
+    const codigo = `import { useEffect, useState } from 'react'
+export default function App(){ const [a,setA]=useState(0); const b=1; useEffect(()=>{}, [
+  a,
+  b,
+]); return <button onClick={()=>setA(1)}>cambiar</button> }`
+    await montarConOpciones(codigo, true, false)
+    await waitFor(() => expect(mensajes().some((m) => m.accion === 'efecto')).toBe(true))
+    enviar.mockClear()
+    fireEvent.click(within(document.body).getByRole('button'))
+    await waitFor(() => expect(mensajes().some((m) => m.motivo === 'dependencias')).toBe(true))
+    expect(mensajes().find((m) => m.motivo === 'dependencias')?.cambios[0].nombre).toBe('a')
+  })
   it('al montar con StrictMode: efecto, limpieza y efecto repetido', async () => {
     await montar()
 
@@ -97,11 +191,10 @@ describe('registro de efectos', () => {
 
     expect(deChat().map(({ accion, motivo }) => ({ accion, motivo }))).toEqual([
       { accion: 'efecto', motivo: 'montaje' },
-      { accion: 'limpieza', motivo: undefined },
       { accion: 'efecto', motivo: 'strict-mode' },
     ])
     expect(deChat().every((mensaje) => mensaje.linea === 9)).toBe(true)
-    expect([...delGancho(), ...deChat()].every((mensaje) => mensaje.commit === 1)).toBe(true)
+    expect(new Set([...delGancho(), ...deChat()].map((mensaje) => mensaje.commit)).size).toBe(1)
   })
 
   it('respeta el orden real de efectos y limpiezas', async () => {
@@ -192,9 +285,9 @@ export default function App() {
     )
   })
 
-  it('el efecto sin dependencias se ejecuta en cada render con motivo cada-render', async () => {
+  it('el efecto de layout sin dependencias se registra tras cada render', async () => {
     await montar()
-    await waitFor(() => expect(mensajes().length).toBeGreaterThanOrEqual(9))
+    await waitFor(() => expect(mensajes().length).toBeGreaterThanOrEqual(7))
     enviar.mockClear()
 
     fireEvent.click(within(document.body).getByRole('button', { name: 'Viaje' }))
@@ -205,7 +298,7 @@ export default function App() {
           (mensaje) =>
             mensaje.clase === 'useLayoutEffect' &&
             mensaje.accion === 'efecto' &&
-            mensaje.motivo === 'cada-render',
+            mensaje.accion === 'efecto',
         ),
       ).toBe(true),
     )
@@ -220,7 +313,7 @@ export default function App() {
 
     await waitFor(() => expect(delGancho()).toHaveLength(1))
     expect(delGancho()[0]).toEqual(expect.objectContaining({ accion: 'limpieza', motivo: 'desmontaje' }))
-    expect(deChat()[0]).toEqual(expect.objectContaining({ accion: 'limpieza', motivo: 'desmontaje' }))
+    expect(deChat()).toEqual([])
   })
 
   it('dependencias calculadas sin nombre legible dan «dependencia 1»', async () => {
@@ -231,7 +324,7 @@ export default function App() {
   return <button onClick={() => setSala('viaje')}>Viaje</button>
 }`
     await montar(codigo)
-    await waitFor(() => expect(mensajes().length).toBeGreaterThanOrEqual(3))
+    await waitFor(() => expect(mensajes().length).toBeGreaterThanOrEqual(2))
     enviar.mockClear()
 
     fireEvent.click(within(document.body).getByRole('button', { name: 'Viaje' }))

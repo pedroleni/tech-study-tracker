@@ -195,10 +195,30 @@
   // doblarlas las escribe tal cual.
   const escaparTeclas = (texto) => texto.replace(/[{[]/g, '$&$&')
 
-  const campoPorEtiqueta = (pantalla, etiqueta) => {
-    const [campo] = pantalla.queryAllByLabelText(etiqueta)
-    if (!campo) throw new FalloComprobacion('No encuentro ' + describir({ etiqueta }, true) + '.')
-    return campo
+  const esperarElemento = async (buscar, descripcion) => {
+    let elemento
+    await window.__pruebasEnVivo.waitFor(
+      () => {
+        ;[elemento] = buscar()
+        if (!elemento) throw new FalloComprobacion('No encuentro ' + descripcion + '.')
+      },
+      { timeout: ESPERA_MS, onTimeout: (error) => error },
+    )
+    return elemento
+  }
+
+  const campoPorEtiqueta = (pantalla, etiqueta) =>
+    esperarElemento(
+      () => pantalla.queryAllByLabelText(etiqueta),
+      describir({ etiqueta }, true),
+    )
+
+  const limpiarAlmacen = (nombre) => {
+    try {
+      window[nombre].clear()
+    } catch {
+      // Si el navegador no expone el almacén, el aislamiento del iframe basta.
+    }
   }
 
   const ejecutarPaso = async (pantalla, usuario, paso) => {
@@ -207,14 +227,16 @@
       return
     }
     if (paso.escribir) {
-      const campo = campoPorEtiqueta(pantalla, paso.escribir.etiqueta)
+      const campo = await campoPorEtiqueta(pantalla, paso.escribir.etiqueta)
       await usuario.clear(campo)
       if (paso.escribir.texto) await usuario.type(campo, escaparTeclas(paso.escribir.texto))
       return
     }
     if (paso.pulsar) {
-      const [elemento] = buscarTodos(pantalla, paso.pulsar)
-      if (!elemento) throw new FalloComprobacion('No encuentro ' + describir(paso.pulsar, true) + '.')
+      const elemento = await esperarElemento(
+        () => buscarTodos(pantalla, paso.pulsar),
+        describir(paso.pulsar, true),
+      )
       await usuario.click(elemento)
       return
     }
@@ -223,7 +245,7 @@
       return
     }
     if (paso.seleccionar) {
-      const campo = campoPorEtiqueta(pantalla, paso.seleccionar.etiqueta)
+      const campo = await campoPorEtiqueta(pantalla, paso.seleccionar.etiqueta)
       try {
         await usuario.selectOptions(campo, paso.seleccionar.opcion)
       } catch {
@@ -279,10 +301,19 @@
     }
     const resultados = []
     for (const comprobacion of comprobaciones) {
-      // Cada comprobación empieza de cero, también el estado a nivel de módulo.
+      // Cada comprobación empieza de cero: módulos, API y ambos almacenes.
       cache = Object.create(null)
       ultimoError = null
       desmontar()
+      if (window.__redReactEnVivo) window.__redReactEnVivo.reiniciar()
+      limpiarAlmacen('localStorage')
+      limpiarAlmacen('sessionStorage')
+      const pasos = comprobacion.pasos || []
+      let primerPasoNormal = 0
+      while (pasos[primerPasoNormal] && pasos[primerPasoNormal].red === 'fallar-siguiente') {
+        await ejecutarPaso(null, null, pasos[primerPasoNormal])
+        primerPasoNormal += 1
+      }
       try {
         R.ReactDOM.flushSync(montar)
       } catch (error) {
@@ -298,7 +329,7 @@
       const pantalla = P.within(document.body)
       const usuario = P.userEvent.setup({ document })
       try {
-        for (const paso of comprobacion.pasos || []) await ejecutarPaso(pantalla, usuario, paso)
+        for (const paso of pasos.slice(primerPasoNormal)) await ejecutarPaso(pantalla, usuario, paso)
         await P.waitFor(
           () => {
             // Si la app ya reventó no hay nada que esperar: se sale en el

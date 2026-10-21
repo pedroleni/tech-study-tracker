@@ -360,7 +360,7 @@ const esquemaApiReact = z
     }
   })
 const esquemaRedReact = z.object({
-  latencia: z.number().int().min(0).max(3000).default(600),
+  latencia: z.number().int().min(0).max(3000).optional(),
   desordenar: z.boolean().default(false),
 })
 

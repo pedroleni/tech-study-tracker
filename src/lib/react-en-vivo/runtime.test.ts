@@ -27,7 +27,7 @@ type VentanaRuntime = typeof window & {
   ) => Promise<{ descripcion: string; ok: boolean; motivo?: string }[]>
   __pruebasEnVivo?: Record<string, unknown>
   __reactEnVivo?: Record<string, unknown>
-  __redReactEnVivo?: { fallarSiguiente: () => void }
+  __redReactEnVivo?: { fallarSiguiente: () => void; reiniciar: () => void }
   __REACT_DEVTOOLS_GLOBAL_HOOK__?: {
     supportsFiber?: boolean
     renderers?: Map<number, unknown>
@@ -517,6 +517,79 @@ describe('puente del iframe', () => {
 })
 
 describe('comprobaciones con red', () => {
+  it('reinicia API, fallo pendiente y almacenamiento entre comprobaciones', async () => {
+    const originalFetch = window.fetch
+    const transformacion = await transformarArchivos([{ nombre: 'App.jsx', codigo: `import { useEffect, useState } from 'react'
+export default function App(){
+  const [cantidad,setCantidad]=useState(null)
+  const [guardado,setGuardado]=useState(localStorage.getItem('x') ? 'guardado' : 'vacío')
+  const cargar=()=>fetch('/api/recetas').then(r=>r.json()).then(r=>setCantidad(r.length))
+  useEffect(()=>{cargar()},[])
+  const añadir=()=>fetch('/api/recetas',{method:'POST',body:'{"nombre":"Nueva"}'}).then(cargar)
+  const guardar=()=>{localStorage.setItem('x','1');setGuardado('guardado')}
+  return <>{cantidad !== null && <><p>{cantidad} registros</p><button onClick={añadir}>Añadir</button><button onClick={guardar}>Guardar</button><button>No usar red</button></>}<p>{guardado}</p></>
+}` }])
+    if (!transformacion.ok) throw new Error(transformacion.mensaje)
+    document.body.replaceChildren(Object.assign(document.createElement('div'), { id: 'root' }))
+    instalarReact()
+    ventana.__enviarReactEnVivo = vi.fn()
+    ventana.__configReactEnVivo = { modulos: transformacion.modulos, archivosCss: [], strictMode: false, api: { recetas: [{ id: 1 }] }, red: { latencia: 0, desordenar: false } }
+    try {
+      new Function(red)()
+      new Function(montaje)()
+      ventana.__pruebasEnVivo = { ...await import('@testing-library/dom'), userEvent: userEventFalso }
+      expect(await ventana.__comprobarReactEnVivo?.([
+        { descripcion: 'modifica API', pasos: [{ pulsar: { rol: 'button', nombre: 'Añadir' } }], espera: { texto: '2 registros' } },
+        { descripcion: 'API limpia', pasos: [], espera: { texto: '1 registros' } },
+        { descripcion: 'guarda', pasos: [{ pulsar: { rol: 'button', nombre: 'Guardar' } }], espera: { texto: 'guardado' } },
+        { descripcion: 'almacén limpio', pasos: [], espera: { texto: 'vacío' } },
+        { descripcion: 'deja fallo pendiente', pasos: [{ pulsar: { rol: 'button', nombre: 'No usar red' } }, { red: 'fallar-siguiente' }], espera: { texto: '1 registros' } },
+        { descripcion: 'fallo limpio', pasos: [], espera: { texto: '1 registros' } },
+      ])).toEqual([
+        { descripcion: 'modifica API', ok: true },
+        { descripcion: 'API limpia', ok: true },
+        { descripcion: 'guarda', ok: true },
+        { descripcion: 'almacén limpio', ok: true },
+        { descripcion: 'deja fallo pendiente', ok: true },
+        { descripcion: 'fallo limpio', ok: true },
+      ])
+    } finally { window.fetch = originalFetch }
+  })
+
+  it('aplica un fallo inicial antes de montar la app', async () => {
+    const originalFetch = window.fetch
+    const transformacion = await transformarArchivos([{ nombre: 'App.jsx', codigo: `import { useEffect, useState } from 'react'
+export default function App(){ const [estado,setEstado]=useState('cargando'); useEffect(()=>{ fetch('/api/recetas').then(r=>setEstado(r.ok?'éxito':'error')) },[]); return <p>{estado}</p> }` }])
+    if (!transformacion.ok) throw new Error(transformacion.mensaje)
+    document.body.replaceChildren(Object.assign(document.createElement('div'), { id: 'root' }))
+    instalarReact()
+    ventana.__enviarReactEnVivo = vi.fn()
+    ventana.__configReactEnVivo = { modulos: transformacion.modulos, archivosCss: [], strictMode: false, api: { recetas: [{ id: 1 }] }, red: { latencia: 0, desordenar: false } }
+    try {
+      new Function(red)()
+      new Function(montaje)()
+      ventana.__pruebasEnVivo = { ...await import('@testing-library/dom'), userEvent: userEventFalso }
+      expect(await ventana.__comprobarReactEnVivo?.([{ descripcion: 'carga inicial', pasos: [{ red: 'fallar-siguiente' }], espera: { texto: 'error' } }])).toEqual([{ descripcion: 'carga inicial', ok: true }])
+    } finally { window.fetch = originalFetch }
+  })
+
+  it('espera un control que aparece después de cargar la API', async () => {
+    const originalFetch = window.fetch
+    const transformacion = await transformarArchivos([{ nombre: 'App.jsx', codigo: `import { useEffect, useState } from 'react'
+export default function App(){ const [listo,setListo]=useState(false); const [hecho,setHecho]=useState(false); useEffect(()=>{ fetch('/api/recetas').then(()=>setListo(true)) },[]); return <>{listo && <button onClick={()=>setHecho(true)}>Continuar</button>}{hecho && <p>hecho</p>}</> }` }])
+    if (!transformacion.ok) throw new Error(transformacion.mensaje)
+    document.body.replaceChildren(Object.assign(document.createElement('div'), { id: 'root' }))
+    instalarReact()
+    ventana.__enviarReactEnVivo = vi.fn()
+    ventana.__configReactEnVivo = { modulos: transformacion.modulos, archivosCss: [], strictMode: false, api: { recetas: [{ id: 1 }] }, red: { latencia: 300, desordenar: false } }
+    try {
+      new Function(red)()
+      new Function(montaje)()
+      ventana.__pruebasEnVivo = { ...await import('@testing-library/dom'), userEvent: userEventFalso }
+      expect(await ventana.__comprobarReactEnVivo?.([{ descripcion: 'espera botón', pasos: [{ pulsar: { rol: 'button', nombre: 'Continuar' } }], espera: { texto: 'hecho' } }])).toEqual([{ descripcion: 'espera botón', ok: true }])
+    } finally { window.fetch = originalFetch }
+  })
+
   it('una comprobación con el paso red: fallar-siguiente hace fallar la siguiente petición', async () => {
     const originalFetch = window.fetch
     const transformacion = await transformarArchivos([

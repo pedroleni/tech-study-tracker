@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
 import { ReactAnotado } from './ReactAnotado'
@@ -82,6 +82,17 @@ describe('ReactAnotado', () => {
     })
   })
 
+  it('mantiene el aviso de fallo cancelado hasta que llega el 500', async () => {
+    render(<ReactAnotado tipo="react-anotado" codigo={codigo} css="" anotaciones={[{ fragmento: 'tareas.map', nota: 'n' }]} strictMode mostrarConsola={false} api={{ recetas: [{ id: 1 }] }} />)
+    const iframe = (await screen.findByTitle('Vista previa de React')) as HTMLIFrameElement
+    act(() => window.dispatchEvent(new MessageEvent('message', { source: iframe.contentWindow, data: { canal: 'react-en-vivo', tipo: 'montado', version: '19.3.1' } })))
+    fireEvent.click(screen.getByRole('button', { name: 'Fallar la siguiente petición' }))
+    act(() => window.dispatchEvent(new MessageEvent('message', { source: iframe.contentWindow, data: { canal: 'react-en-vivo', tipo: 'peticion', id: 1, metodo: 'GET', ruta: '/api/recetas', estado: 'cancelada' } })))
+    expect(screen.getByRole('status')).toHaveTextContent('La siguiente petición fallará')
+    act(() => window.dispatchEvent(new MessageEvent('message', { source: iframe.contentWindow, data: { canal: 'react-en-vivo', tipo: 'peticion', id: 2, metodo: 'GET', ruta: '/api/recetas', estado: 'error', codigo: 500 } })))
+    expect(screen.getByRole('status')).toBeEmptyDOMElement()
+  })
+
   it('con mostrarEfectos muestra el registro y pide efectos.js', async () => {
     render(
       <ReactAnotado
@@ -100,5 +111,28 @@ describe('ReactAnotado', () => {
         'window.__efectosReactEnVivo = { envolver }',
       ),
     )
+  })
+
+  it('no reconstruye la vista previa si api cambia solo de identidad', async () => {
+    const propiedades = {
+      tipo: 'react-anotado' as const,
+      codigo,
+      css: '',
+      anotaciones: [{ fragmento: 'tareas.map', nota: 'n' }],
+      strictMode: true,
+      mostrarConsola: false,
+      mostrarEfectos: true,
+    }
+    const { rerender } = render(<ReactAnotado {...propiedades} api={{ recetas: [{ id: 1 }] }} />)
+    const iframe = (await screen.findByTitle('Vista previa de React')) as HTMLIFrameElement
+    await waitFor(() => expect(iframe.getAttribute('srcdoc')).toContain('"recetas"'))
+    act(() => {
+      window.dispatchEvent(new MessageEvent('message', { source: iframe.contentWindow, data: { canal: 'react-en-vivo', tipo: 'montado', version: '19.3.1' } }))
+      window.dispatchEvent(new MessageEvent('message', { source: iframe.contentWindow, data: { canal: 'react-en-vivo', tipo: 'efecto', commit: 1, componente: 'App', archivo: 'App.jsx', linea: 1, accion: 'efecto', clase: 'useEffect', motivo: 'montaje', cambios: [] } }))
+    })
+    expect(await screen.findByText('App ▶ efecto · montaje')).toBeInTheDocument()
+    rerender(<ReactAnotado {...propiedades} api={{ recetas: [{ id: 1 }] }} />)
+    await new Promise((resolver) => window.setTimeout(resolver, 60))
+    expect(screen.getByText('App ▶ efecto · montaje')).toBeInTheDocument()
   })
 })

@@ -300,6 +300,17 @@ describe('ReactEnVivo', () => {
     )
   })
 
+  it('mantiene el aviso de fallo tras cancelar y lo quita al consumirse el 500', async () => {
+    await renderizarListo({ ...datos, api: { recetas: [{ id: 1 }] } })
+    enviarDesde(vista().contentWindow, { canal: 'react-en-vivo', tipo: 'montado', version: '19.3.1' })
+    fireEvent.click(screen.getByRole('button', { name: 'Fallar la siguiente petición' }))
+    expect(screen.getByRole('status')).toHaveTextContent('La siguiente petición fallará')
+    enviarDesde(vista().contentWindow, { canal: 'react-en-vivo', tipo: 'peticion', id: 1, metodo: 'GET', ruta: '/api/recetas', estado: 'cancelada' })
+    expect(screen.getByRole('status')).toHaveTextContent('La siguiente petición fallará')
+    enviarDesde(vista().contentWindow, { canal: 'react-en-vivo', tipo: 'peticion', id: 2, metodo: 'GET', ruta: '/api/recetas', estado: 'error', codigo: 500 })
+    expect(screen.getByRole('status')).toBeEmptyDOMElement()
+  })
+
   it('con mostrarEfectos muestra el registro y pide efectos.js', async () => {
     await renderizarListo({ ...datos, mostrarEfectos: true })
     expect(screen.getByRole('heading', { name: 'Efectos' })).toBeInTheDocument()
@@ -312,6 +323,7 @@ describe('ReactEnVivo', () => {
       api: { recetas: [{ id: 1, nombre: 'Salmorejo' }] },
       mostrarEfectos: true,
     })
+    enviarDesde(vista().contentWindow, { canal: 'react-en-vivo', tipo: 'montado', version: '19.3.1' })
     enviarDesde(vista().contentWindow, {
       canal: 'react-en-vivo',
       tipo: 'peticion',
@@ -343,6 +355,32 @@ describe('ReactEnVivo', () => {
     await waitFor(() => expect(vista().getAttribute('srcdoc')).toContain('Nuevo'), { timeout: 3000 })
     expect(screen.queryByText('GET /api/recetas · 200 · 600 ms')).toBeNull()
     expect(screen.queryByText('App ▶ efecto · montaje')).toBeNull()
+  })
+
+  it('ignora peticiones y efectos rezagados hasta que el documento nuevo se monta', async () => {
+    await renderizarListo({ ...datos, api: { recetas: [{ id: 1 }] }, mostrarEfectos: true })
+    enviarDesde(vista().contentWindow, { canal: 'react-en-vivo', tipo: 'peticion', id: 1, metodo: 'GET', ruta: '/api/recetas', estado: 'ok', codigo: 200 })
+    enviarDesde(vista().contentWindow, { canal: 'react-en-vivo', tipo: 'efecto', commit: 1, componente: 'Viejo', archivo: 'App.jsx', linea: 1, accion: 'efecto', clase: 'useEffect', motivo: 'montaje', cambios: [] })
+    await new Promise((resolver) => window.setTimeout(resolver, 60))
+    expect(screen.queryByText(/GET \/api\/recetas/)).toBeNull()
+    expect(screen.queryByText(/Viejo/)).toBeNull()
+
+    enviarDesde(vista().contentWindow, { canal: 'react-en-vivo', tipo: 'montado', version: '19.3.1' })
+    enviarDesde(vista().contentWindow, { canal: 'react-en-vivo', tipo: 'peticion', id: 2, metodo: 'GET', ruta: '/api/recetas', estado: 'ok', codigo: 200 })
+    expect(await screen.findByText('GET /api/recetas · 200')).toBeInTheDocument()
+  })
+
+  it('no reconstruye la vista previa si api cambia solo de identidad', async () => {
+    const api = { recetas: [{ id: 1, nombre: 'Pisto' }] }
+    const { rerender } = render(<ReactEnVivo {...datos} api={api} mostrarEfectos />)
+    await waitFor(() => expect(vista().getAttribute('srcdoc')).toContain('Pisto'))
+    enviarDesde(vista().contentWindow, { canal: 'react-en-vivo', tipo: 'montado', version: '19.3.1' })
+    enviarDesde(vista().contentWindow, { canal: 'react-en-vivo', tipo: 'efecto', commit: 1, componente: 'App', archivo: 'App.jsx', linea: 1, accion: 'efecto', clase: 'useEffect', motivo: 'montaje', cambios: [] })
+    expect(await screen.findByText('App ▶ efecto · montaje')).toBeInTheDocument()
+
+    rerender(<ReactEnVivo {...datos} api={{ recetas: [{ id: 1, nombre: 'Pisto' }] }} mostrarEfectos />)
+    await new Promise((resolver) => window.setTimeout(resolver, 450))
+    expect(screen.getByText('App ▶ efecto · montaje')).toBeInTheDocument()
   })
 
   it('el documento de comprobación lleva la red de comprobación a latencia 0', async () => {

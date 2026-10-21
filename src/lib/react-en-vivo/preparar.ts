@@ -17,7 +17,7 @@ export async function prepararDocumento(
     conArbol?: boolean
     conEfectos?: boolean
     api?: Record<string, unknown[]>
-    red?: { latencia: number; desordenar: boolean }
+    red?: { latencia?: number; desordenar: boolean }
   },
 ): Promise<DocumentoPreparado> {
   let resultado: Awaited<ReturnType<typeof transformarArchivos>>

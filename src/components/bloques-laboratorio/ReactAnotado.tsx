@@ -6,6 +6,7 @@ import { ConsolaReact } from '@/components/bloques-laboratorio/ConsolaReact'
 import { PanelRed, type AjustesRed } from '@/components/bloques-laboratorio/PanelRed'
 import { RegistroEfectos } from '@/components/bloques-laboratorio/RegistroEfectos'
 import { useEntradasConsola } from '@/components/bloques-laboratorio/useEntradasConsola'
+import { useRegistroAgrupado } from '@/components/bloques-laboratorio/useRegistroAgrupado'
 import { VistaPreviaReact } from '@/components/bloques-laboratorio/VistaPreviaReact'
 import { CodigoResaltado } from '@/components/codigo'
 import { Button } from '@/components/ui/button'
@@ -26,6 +27,10 @@ function incorporarPeticion(actuales: MensajePeticion[], nueva: MensajePeticion)
   if (posicion === -1) return [...actuales, nueva].slice(-20)
   return actuales.map((peticion, indice) => (indice === posicion ? nueva : peticion))
 }
+function incorporarPeticiones(actuales: MensajePeticion[], nuevas: MensajePeticion[]) {
+  return nuevas.reduce(incorporarPeticion, actuales)
+}
+const incorporarEfectos = (actuales: MensajeEfecto[], nuevos: MensajeEfecto[]) => [...actuales, ...nuevos]
 
 export function ReactAnotado({
   titulo,
@@ -62,11 +67,16 @@ export function ReactAnotado({
   const [error, setError] = useState<string | null>(null)
   const { entradas, recibirMensaje, limpiar } = useEntradasConsola()
   const [arbol, setArbol] = useState<MensajeArbol | null>(null)
-  const [peticiones, setPeticiones] = useState<MensajePeticion[]>([])
-  const [efectos, setEfectos] = useState<MensajeEfecto[]>([])
+  const { entradas: peticiones, recibir: recibirPeticion, limpiar: limpiarPeticiones } =
+    useRegistroAgrupado(20, incorporarPeticiones)
+  const { entradas: efectos, recibir: recibirEfecto, limpiar: limpiarEfectos } =
+    useRegistroAgrupado(200, incorporarEfectos)
   const [falloPendiente, setFalloPendiente] = useState(false)
   const [fallosSolicitados, setFallosSolicitados] = useState(0)
-  const [redActual, setRedActual] = useState<AjustesRed>(red ?? RED_POR_DEFECTO)
+  const [redActual, setRedActual] = useState<AjustesRed>({
+    latencia: red?.latencia ?? RED_POR_DEFECTO.latencia,
+    desordenar: red?.desordenar ?? RED_POR_DEFECTO.desordenar,
+  })
   const redActualRef = useRef(redActual)
   const cambiarRed = useCallback((nueva: AjustesRed) => {
     redActualRef.current = nueva
@@ -78,15 +88,19 @@ export function ReactAnotado({
       recibirMensaje(mensaje)
       if (mensaje.tipo === 'montado') documentoMontadoRef.current = true
       if (mensaje.tipo === 'arbol' && documentoMontadoRef.current) setArbol(mensaje)
-      if (mensaje.tipo === 'peticion') {
-        setPeticiones((actuales) => incorporarPeticion(actuales, mensaje))
+      if (mensaje.tipo === 'peticion' && documentoMontadoRef.current) {
+        recibirPeticion(mensaje)
         if (mensaje.codigo === 500) setFalloPendiente(false)
       }
-      if (mensaje.tipo === 'efecto') {
-        setEfectos((actuales) => [...actuales, mensaje].slice(-200))
-      }
+      if (mensaje.tipo === 'efecto' && documentoMontadoRef.current) recibirEfecto(mensaje)
     },
-    [recibirMensaje],
+    [recibirEfecto, recibirMensaje, recibirPeticion],
+  )
+
+  const claveApi = JSON.stringify(api)
+  const apiEstable = useMemo<Record<string, unknown[]> | undefined>(
+    () => (claveApi === undefined ? undefined : JSON.parse(claveApi)),
+    [claveApi],
   )
 
   useEffect(() => {
@@ -101,15 +115,15 @@ export function ReactAnotado({
       conPruebas: false,
       conArbol: mostrarArbol,
       conEfectos: mostrarEfectos,
-      api,
+      api: apiEstable,
       red: redActualRef.current,
     }).then((preparado) => {
       if (cancelado) return
       if (preparado.ok) {
         documentoMontadoRef.current = false
         setArbol(null)
-        setPeticiones([])
-        setEfectos([])
+        limpiarPeticiones()
+        limpiarEfectos()
         setFalloPendiente(false)
         limpiar()
         setSrcDoc(preparado.srcDoc)
@@ -118,7 +132,7 @@ export function ReactAnotado({
     return () => {
       cancelado = true
     }
-  }, [api, codigo, css, strictMode, mostrarArbol, mostrarEfectos, limpiar])
+  }, [apiEstable, codigo, css, strictMode, mostrarArbol, mostrarEfectos, limpiar, limpiarEfectos, limpiarPeticiones])
 
   return (
     <section
@@ -219,7 +233,7 @@ export function ReactAnotado({
       )}
 
       {mostrarEfectos && (
-        <RegistroEfectos entradas={efectos} onLimpiar={() => setEfectos([])} />
+        <RegistroEfectos entradas={efectos} onLimpiar={limpiarEfectos} />
       )}
 
       {mostrarConsola && <ConsolaReact entradas={entradas} onLimpiar={limpiar} />}

@@ -1,7 +1,7 @@
 import { css as lenguajeCss } from '@codemirror/lang-css'
 import { javascript as lenguajeJavascript } from '@codemirror/lang-javascript'
 import { Atom, ListChecks, RotateCcw } from 'lucide-react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { ArbolDeRenders } from '@/components/bloques-laboratorio/ArbolDeRenders'
 import {
@@ -14,6 +14,7 @@ import { PanelRed, type AjustesRed } from '@/components/bloques-laboratorio/Pane
 import { RegistroEfectos } from '@/components/bloques-laboratorio/RegistroEfectos'
 import { ResultadosComprobaciones } from '@/components/bloques-laboratorio/ResultadosComprobaciones'
 import { useEntradasConsola } from '@/components/bloques-laboratorio/useEntradasConsola'
+import { useRegistroAgrupado } from '@/components/bloques-laboratorio/useRegistroAgrupado'
 import { VistaPreviaReact } from '@/components/bloques-laboratorio/VistaPreviaReact'
 import { CodigoResaltado } from '@/components/codigo'
 import { Button } from '@/components/ui/button'
@@ -39,6 +40,15 @@ function incorporarPeticion(actuales: MensajePeticion[], nueva: MensajePeticion)
   if (posicion === -1) return [...actuales, nueva].slice(-20)
   return actuales.map((peticion, indice) => (indice === posicion ? nueva : peticion))
 }
+
+function incorporarPeticiones(actuales: MensajePeticion[], nuevas: MensajePeticion[]) {
+  return nuevas.reduce(incorporarPeticion, actuales)
+}
+
+const incorporarEfectos = (actuales: MensajeEfecto[], nuevos: MensajeEfecto[]) => [
+  ...actuales,
+  ...nuevos,
+]
 
 type EstadoComprobacion =
   | { estado: 'inactivo' }
@@ -75,11 +85,16 @@ export function ReactEnVivo({
   const [comprobacion, setComprobacion] = useState<EstadoComprobacion>({ estado: 'inactivo' })
   const { entradas, recibirMensaje, limpiar } = useEntradasConsola()
   const [arbol, setArbol] = useState<MensajeArbol | null>(null)
-  const [peticiones, setPeticiones] = useState<MensajePeticion[]>([])
-  const [efectos, setEfectos] = useState<MensajeEfecto[]>([])
+  const { entradas: peticiones, recibir: recibirPeticion, limpiar: limpiarPeticiones } =
+    useRegistroAgrupado(20, incorporarPeticiones)
+  const { entradas: efectos, recibir: recibirEfecto, limpiar: limpiarEfectos } =
+    useRegistroAgrupado(200, incorporarEfectos)
   const [falloPendiente, setFalloPendiente] = useState(false)
   const [fallosSolicitados, setFallosSolicitados] = useState(0)
-  const [redActual, setRedActual] = useState<AjustesRed>(red ?? RED_POR_DEFECTO)
+  const [redActual, setRedActual] = useState<AjustesRed>({
+    latencia: red?.latencia ?? RED_POR_DEFECTO.latencia,
+    desordenar: red?.desordenar ?? RED_POR_DEFECTO.desordenar,
+  })
   const redActualRef = useRef(redActual)
   const cambiarRed = useCallback((nueva: AjustesRed) => {
     redActualRef.current = nueva
@@ -91,15 +106,13 @@ export function ReactEnVivo({
       recibirMensaje(mensaje)
       if (mensaje.tipo === 'montado') documentoMontadoRef.current = true
       if (mensaje.tipo === 'arbol' && documentoMontadoRef.current) setArbol(mensaje)
-      if (mensaje.tipo === 'peticion') {
-        setPeticiones((actuales) => incorporarPeticion(actuales, mensaje))
+      if (mensaje.tipo === 'peticion' && documentoMontadoRef.current) {
+        recibirPeticion(mensaje)
         if (mensaje.codigo === 500) setFalloPendiente(false)
       }
-      if (mensaje.tipo === 'efecto') {
-        setEfectos((actuales) => [...actuales, mensaje].slice(-200))
-      }
+      if (mensaje.tipo === 'efecto' && documentoMontadoRef.current) recibirEfecto(mensaje)
     },
-    [recibirMensaje],
+    [recibirEfecto, recibirMensaje, recibirPeticion],
   )
   const versionRef = useRef(0)
   const primeraVezRef = useRef(true)
@@ -107,6 +120,12 @@ export function ReactEnVivo({
   // Cambia en cada "Reiniciar": remonta la vista previa aunque el código no
   // haya cambiado, para que la app vuelva a arrancar de cero.
   const [reinicios, setReinicios] = useState(0)
+
+  const claveApi = JSON.stringify(api)
+  const apiEstable = useMemo<Record<string, unknown[]> | undefined>(
+    () => (claveApi === undefined ? undefined : JSON.parse(claveApi)),
+    [claveApi],
+  )
 
   useEffect(() => {
     // La primera vista previa sale sin esperar; después, 400 ms tras la última tecla.
@@ -121,7 +140,7 @@ export function ReactEnVivo({
         conPruebas: false,
         conArbol: mostrarArbol,
         conEfectos: mostrarEfectos,
-        api,
+        api: apiEstable,
         red: redActualRef.current,
       }).then((preparado) => {
         // Una transformación que llega después de otra más nueva se descarta.
@@ -136,8 +155,8 @@ export function ReactEnVivo({
         // El árbol de la vista previa anterior ya no describe nada.
         documentoMontadoRef.current = false
         setArbol(null)
-        setPeticiones([])
-        setEfectos([])
+        limpiarPeticiones()
+        limpiarEfectos()
         setFalloPendiente(false)
         setSrcDoc(preparado.srcDoc)
       })
@@ -148,7 +167,7 @@ export function ReactEnVivo({
       }
     }, espera)
     return () => window.clearTimeout(temporizador)
-  }, [api, archivos, strictMode, mostrarJsGenerado, mostrarArbol, mostrarEfectos, limpiar])
+  }, [apiEstable, archivos, strictMode, mostrarJsGenerado, mostrarArbol, mostrarEfectos, limpiar, limpiarEfectos, limpiarPeticiones])
 
   const terminarComprobacion = useCallback((fin: FinComprobacion) => {
     setComprobacion(fin)
@@ -187,8 +206,8 @@ export function ReactEnVivo({
     setReinicios((anteriores) => anteriores + 1)
     documentoMontadoRef.current = false
     setArbol(null)
-    setPeticiones([])
-    setEfectos([])
+    limpiarPeticiones()
+    limpiarEfectos()
     setFalloPendiente(false)
     setFallosSolicitados(0)
     limpiar()
@@ -335,7 +354,7 @@ export function ReactEnVivo({
         )}
 
         {mostrarEfectos && (
-          <RegistroEfectos entradas={efectos} onLimpiar={() => setEfectos([])} />
+          <RegistroEfectos entradas={efectos} onLimpiar={limpiarEfectos} />
         )}
 
         {mostrarConsola && <ConsolaReact entradas={entradas} onLimpiar={limpiar} />}

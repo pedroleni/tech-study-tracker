@@ -596,8 +596,10 @@ ejercicios que tienen que manejar un error del servidor.
 - **Fallar la siguiente petición**: la siguiente petición a `/api/`
   responde 500 con `{ error: 'Error del servidor (simulado)' }`.
 - **Responder desordenado**: retrasos deterministas, sin `Math.random`:
-  las peticiones impares tardan el doble de la latencia y las pares, la
-  mitad. Dos peticiones seguidas llegan siempre al revés.
+  cada petición nueva responde a la mitad de la latencia y alarga una
+  latencia completa las que siguen pendientes, reprogramando sus
+  temporizadores. Así, dos o más peticiones seguidas llegan siempre en
+  orden inverso. Con latencia 0 no hay desorden observable.
 - Mensajes iframe → página `peticion`: `{ id, metodo, ruta (≤ 200),
   estado: 'pendiente' | 'ok' | 'error' | 'cancelada', codigo?, ms? }`, uno
   al empezar y otro al terminar.
@@ -739,6 +741,9 @@ Antes de dar una fase por cerrada, `npm run test`, `npm run build` y
 
 ## Pendiente
 
+- **Fase 3:** nombres de dependencias con `?.` y `??` (se analiza el
+  código transformado), y `fetch` con objetos `Request`/`URL` (no se
+  pueden construir con ruta relativa dentro del `srcdoc`).
 - **Firefox y Safari sin probar.** La línea de los errores se calcula
   con un desfase fijo de 2 líneas medido en Chromium, y un error lanzado
   desde `react.js` podría llegar como "Script error.". Prueba manual

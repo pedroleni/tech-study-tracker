@@ -22,12 +22,14 @@
     const error = (mensaje, estado) => responderJson({ error: mensaje }, estado)
     const tiene = (objeto, clave) => Object.prototype.hasOwnProperty.call(objeto, clave)
     const copiar = (valor) => JSON.parse(JSON.stringify(valor))
-    const datos = copiar(configuracion.api)
+    const datosOriginales = copiar(configuracion.api)
+    let datos = copiar(datosOriginales)
     const fetchOriginal = window.fetch
     let latencia = 600
     let desordenar = false
     let debeFallar = false
     let numeroPeticion = 0
+    const pendientes = new Map()
 
     const configurar = (opciones) => {
       if (!opciones || !Number.isInteger(opciones.latencia)) return
@@ -41,12 +43,22 @@
     const fallarSiguiente = () => {
       debeFallar = true
     }
-    window.__redReactEnVivo = { configurar, fallarSiguiente }
+    const reiniciar = () => {
+      datos = copiar(datosOriginales)
+      debeFallar = false
+      numeroPeticion = 0
+    }
+    const falloPendiente = () => debeFallar
+    window.__redReactEnVivo = { configurar, fallarSiguiente, falloPendiente, reiniciar }
 
     const normalizar = (valor) =>
       String(valor)
+        .replace(/ñ/g, '\ue000')
+        .replace(/Ñ/g, '\ue001')
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
+        .replace(/\ue000/g, 'ñ')
+        .replace(/\ue001/g, 'Ñ')
         .toLocaleLowerCase('es')
 
     const leerCuerpo = async (entrada, opciones) => {
@@ -176,10 +188,15 @@
       const inicio = performance.now()
       const falloForzado = debeFallar
       debeFallar = false
+      if ((metodo === 'GET' || metodo === 'HEAD') && opciones && opciones.body != null) {
+        if (falloForzado) debeFallar = true
+        return Promise.reject(new TypeError('Request with GET/HEAD method cannot have body.'))
+      }
       enviar({ tipo: 'peticion', id, metodo, ruta: rutaMensaje, estado: 'pendiente' })
 
-      const multiplicador = desordenar ? (id % 2 === 1 ? 2 : 0.5) : 1
-      const espera = latencia * multiplicador
+      // Con latencia 0 todos vencen en el mismo turno y no se promete
+      // desorden: no hay tiempo observable que repartir.
+      const espera = desordenar && latencia > 0 ? latencia / 2 : latencia
       const senal = opciones && opciones.signal
 
       return new Promise((resolver, rechazar) => {
@@ -187,6 +204,7 @@
         let terminada = false
         const limpiar = () => {
           if (temporizador !== undefined) clearTimeout(temporizador)
+          pendientes.delete(id)
           if (senal) senal.removeEventListener('abort', cancelar)
         }
         const duracion = () => Math.max(0, Math.round(performance.now() - inicio))
@@ -194,8 +212,13 @@
           if (terminada) return
           terminada = true
           limpiar()
+          if (falloForzado) debeFallar = true
           enviar({ tipo: 'peticion', id, metodo, ruta: rutaMensaje, estado: 'cancelada', ms: duracion() })
-          rechazar(new DOMException('The operation was aborted.', 'AbortError'))
+          rechazar(
+            senal && 'reason' in senal && senal.reason !== undefined
+              ? senal.reason
+              : new DOMException('The operation was aborted.', 'AbortError'),
+          )
         }
 
         if (senal && senal.aborted) {
@@ -203,7 +226,7 @@
           return
         }
         if (senal) senal.addEventListener('abort', cancelar, { once: true })
-        temporizador = setTimeout(async () => {
+        const completar = async () => {
           if (terminada) return
           terminada = true
           limpiar()
@@ -224,7 +247,18 @@
             ms: duracion(),
           })
           resolver(respuesta)
-        }, espera)
+        }
+        const programar = (demora) => {
+          temporizador = setTimeout(completar, demora)
+          pendientes.set(id, { reprogramar: programar, temporizador, demora })
+        }
+        if (desordenar && latencia > 0) {
+          for (const pendiente of pendientes.values()) {
+            clearTimeout(pendiente.temporizador)
+            pendiente.reprogramar(pendiente.demora + latencia)
+          }
+        }
+        programar(espera)
       })
     }
 

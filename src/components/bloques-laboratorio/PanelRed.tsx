@@ -60,9 +60,10 @@ export function PanelRed({
               type="range"
               min={0}
               max={3000}
-              step={100}
+              step={50}
               value={red.latencia}
               aria-label="Latencia"
+              aria-valuetext={`${red.latencia} ms`}
               onChange={(evento) => onCambiar({ ...red, latencia: Number(evento.currentTarget.value) })}
               className="min-h-6 w-full cursor-pointer accent-sky-600"
             />
@@ -98,15 +99,13 @@ export function PanelRed({
             <ServerCrash aria-hidden="true" />
             Fallar la siguiente petición
           </Button>
-          {falloPendiente && (
-            <p role="status" className="font-medium text-amber-700 dark:text-amber-300">
-              La siguiente petición fallará
-            </p>
-          )}
+          <p role="status" className="font-medium text-amber-700 dark:text-amber-300">
+            {falloPendiente ? 'La siguiente petición fallará' : ''}
+          </p>
         </div>
 
         <div
-          role="log"
+          aria-live="off"
           aria-label="Peticiones de la API simulada"
           className="max-h-64 overflow-auto rounded-md border bg-background p-2 font-mono"
         >

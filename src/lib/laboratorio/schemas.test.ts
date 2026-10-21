@@ -73,9 +73,8 @@ describe('esquemaReactEnVivo', () => {
     ).toBe(false)
   })
 
-  it('red aplica latencia 600 y desordenar false por defecto y rechaza 3001', () => {
+  it('red conserva latencia opcional, aplica desordenar false y rechaza 3001', () => {
     expect(esquemaReactEnVivo.parse({ ...minimoEnVivo, red: {} }).red).toEqual({
-      latencia: 600,
       desordenar: false,
     })
     expect(esquemaReactEnVivo.safeParse({ ...minimoEnVivo, red: { latencia: 3001 } }).success).toBe(false)
@@ -106,7 +105,7 @@ describe('esquemaReactAnotado', () => {
       api: { recetas: [{ id: 'a', nombre: 'Gazpacho' }] },
       red: {},
     })
-    expect(datos.red).toEqual({ latencia: 600, desordenar: false })
+    expect(datos.red).toEqual({ desordenar: false })
   })
 })
 
