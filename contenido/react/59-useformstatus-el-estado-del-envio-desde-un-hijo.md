@@ -295,6 +295,8 @@ En esta versión de la reserva, el componente que está dentro del formulario no
 
 Reserva con un nombre: los campos se ponen grises, el aviso repite lo que has pedido y, al terminar, todo se reactiva y los campos vuelven a su valor inicial (lección 57). Lo comprobamos también con el `fieldset`: el reset funciona aunque los campos hayan estado desactivados.
 
+Un efecto secundario que conviene conocer: al desactivarse el `fieldset`, el botón que acabas de pulsar pierde el foco y el foco se va a `<body>` (comprobado en Chromium y en WebKit), y al reactivarse no vuelve solo. Quien navega con teclado tiene que empezar desde arriba. En el proyecto de la lección 62 verás este problema y cómo resolverlo.
+
 Los otros dos valores se usan menos. **`method`** es `"get"` o `"post"` según el atributo `method` del formulario: con una función en `action` no se pone, así que vale `"get"` (lo comprobamos; si le pones `method="post"`, vale `"post"`, pero React avisa como viste en la lección 57). **`action`** es la función que se está ejecutando, y tiene un uso muy concreto: distinguir botones.
 
 ## Varios botones en un formulario: `action` dice cuál
