@@ -1,15 +1,12 @@
 import { fireEvent, waitFor, within } from '@testing-library/dom'
-import * as React from 'react'
-import * as ReactDOM from 'react-dom'
-import * as ReactDOMClient from 'react-dom/client'
-import * as JsxDevRuntime from 'react/jsx-dev-runtime'
-import * as JsxRuntime from 'react/jsx-runtime'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { readFileSync } from 'node:fs'
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 
 import type { ArchivoReact, ComprobacionReact } from '@/lib/laboratorio/schemas'
 
 import montaje from './runtime/montaje.js?raw'
 import puente from './runtime/puente.js?raw'
+import red from './runtime/red.js?raw'
 import { transformarArchivos } from './transformar'
 
 type VentanaRuntime = typeof window & {
@@ -17,13 +14,22 @@ type VentanaRuntime = typeof window & {
     modulos: Record<string, string>
     archivosCss: string[]
     strictMode: boolean
+    api?: Record<string, unknown[]>
+    red?: { latencia: number; desordenar: boolean }
   }
   __enviarReactEnVivo?: ReturnType<typeof vi.fn>
   __comprobarReactEnVivo?: (
     comprobaciones: ComprobacionReact[],
   ) => Promise<{ descripcion: string; ok: boolean; motivo?: string }[]>
   __pruebasEnVivo?: Record<string, unknown>
-  __reactEnVivo?: Record<string, unknown>
+  __peticionAbandonadaReactEnVivo?: Promise<Response>
+  __reactEnVivo?: Record<string, unknown> & { React: { version: string } }
+  __redReactEnVivo?: {
+    fallarMontaje: () => void
+    fallarSiguiente: () => void
+    terminarMontaje: () => void
+    reiniciar: () => void
+  }
   __REACT_DEVTOOLS_GLOBAL_HOOK__?: {
     supportsFiber?: boolean
     renderers?: Map<number, unknown>
@@ -42,6 +48,14 @@ const consolaOriginal = {
   warn: console.warn,
   error: console.error,
 }
+let reactDelSandbox: NonNullable<VentanaRuntime['__reactEnVivo']>
+
+beforeAll(() => {
+  // Las comprobaciones se prueban con el mismo React 19.3.1 que carga el iframe real.
+  new Function(readFileSync('public/vendor/react-en-vivo/19.3.1/react.js', 'utf8'))()
+  if (!ventana.__reactEnVivo) throw new Error('El bundle de React del sandbox no se cargó')
+  reactDelSandbox = ventana.__reactEnVivo
+})
 
 const userEventFalso = {
   setup: () => ({
@@ -66,13 +80,7 @@ const userEventFalso = {
 }
 
 function instalarReact() {
-  ventana.__reactEnVivo = {
-    React,
-    ReactDOM,
-    ReactDOMClient,
-    JsxRuntime,
-    JsxDevRuntime,
-  }
+  ventana.__reactEnVivo = reactDelSandbox
 }
 
 async function ejecutarMontaje(archivos: ArchivoReact[], strictMode = false) {
@@ -92,7 +100,7 @@ async function ejecutarMontaje(archivos: ArchivoReact[], strictMode = false) {
 
   await waitFor(() => {
     expect(enviar).toHaveBeenCalledWith(
-      expect.objectContaining({ tipo: 'montado', version: React.version }),
+      expect.objectContaining({ tipo: 'montado', version: reactDelSandbox.React.version }),
     )
   })
   return enviar
@@ -112,7 +120,9 @@ afterEach(() => {
   delete ventana.__enviarReactEnVivo
   delete ventana.__comprobarReactEnVivo
   delete ventana.__pruebasEnVivo
+  delete ventana.__peticionAbandonadaReactEnVivo
   delete ventana.__reactEnVivo
+  delete ventana.__redReactEnVivo
   delete ventana.__REACT_DEVTOOLS_GLOBAL_HOOK__
   vi.restoreAllMocks()
 })
@@ -133,7 +143,7 @@ describe('runtime de montaje', () => {
 
     expect(await within(document.body).findByText('Desde Tarjeta')).toBeInTheDocument()
     expect(mensajesDe(enviar)).toContainEqual(
-      expect.objectContaining({ tipo: 'montado', version: React.version }),
+      expect.objectContaining({ tipo: 'montado', version: reactDelSandbox.React.version }),
     )
   })
 
@@ -357,6 +367,37 @@ describe('runtime que no llegó a cargar', () => {
 })
 
 describe('puente del iframe', () => {
+  it.each(['localStorage', 'sessionStorage'] as const)(
+    'si %s lanza, el puente lo sustituye por un almacén en memoria',
+    (nombre) => {
+      const descriptor = Object.getOwnPropertyDescriptor(window, nombre)
+      vi.spyOn(window.parent, 'postMessage').mockImplementation(() => {})
+      Object.defineProperty(window, nombre, {
+        configurable: true,
+        get() {
+          throw new DOMException('Acceso denegado', 'SecurityError')
+        },
+      })
+      try {
+        new Function(puente)()
+        const almacen = window[nombre]
+
+        almacen.setItem('uno', '1')
+        almacen.setItem('dos', '2')
+        expect(almacen.getItem('uno')).toBe('1')
+        expect(almacen.length).toBe(2)
+        expect(almacen.key(1)).toBe('dos')
+        almacen.removeItem('uno')
+        expect(almacen.getItem('uno')).toBeNull()
+        almacen.clear()
+        expect(almacen.length).toBe(0)
+        expect(almacen.key(0)).toBeNull()
+      } finally {
+        if (descriptor) Object.defineProperty(window, nombre, descriptor)
+      }
+    },
+  )
+
   it('recorta textos de consola a 2000 y formatea %s', () => {
     console.log = vi.fn()
     console.error = vi.fn()
@@ -477,5 +518,501 @@ describe('puente del iframe', () => {
       { canal: 'react-en-vivo', tipo: 'commit', numero: 1 },
       '*',
     )
+  })
+})
+
+const APP_CARGA_CON_BANDERA = `import { useEffect, useState } from 'react'
+export default function App() {
+  const [estado, setEstado] = useState('cargando')
+  const [recetas, setRecetas] = useState([])
+  const cargar = async (ignorar = () => false) => {
+    setEstado('cargando')
+    try {
+      const respuesta = await fetch('/api/recetas')
+      if (!respuesta.ok) throw new Error('Error del servidor')
+      const siguientes = await respuesta.json()
+      if (!ignorar()) {
+        setRecetas(siguientes)
+        setEstado('cargadas')
+      }
+    } catch (error) {
+      if (error?.name !== 'AbortError' && !ignorar()) setEstado('error')
+    }
+  }
+  useEffect(() => {
+    let ignorar = false
+    cargar(() => ignorar)
+    return () => { ignorar = true }
+  }, [])
+  return <><p>{estado === 'error' ? 'No se pudieron cargar' : estado}</p>{estado === 'error' && <button onClick={() => cargar()}>Reintentar</button>}<ul>{recetas.map((receta) => <li key={receta.id}>{receta.nombre}</li>)}</ul></>
+}`
+
+const APP_CARGA_CON_ABORT = `import { useEffect, useState } from 'react'
+export default function App() {
+  const [estado, setEstado] = useState('cargando')
+  const [recetas, setRecetas] = useState([])
+  const cargar = async (signal) => {
+    setEstado('cargando')
+    try {
+      const respuesta = await fetch('/api/recetas', signal ? { signal } : undefined)
+      if (!respuesta.ok) throw new Error('Error del servidor')
+      setRecetas(await respuesta.json())
+      setEstado('cargadas')
+    } catch (error) {
+      if (error?.name !== 'AbortError') setEstado('error')
+    }
+  }
+  useEffect(() => {
+    const controlador = new AbortController()
+    cargar(controlador.signal)
+    return () => { controlador.abort() }
+  }, [])
+  return <><p>{estado === 'error' ? 'No se pudieron cargar' : estado}</p>{estado === 'error' && <button onClick={() => cargar()}>Reintentar</button>}<ul>{recetas.map((receta) => <li key={receta.id}>{receta.nombre}</li>)}</ul></>
+}`
+
+const APP_FORMULARIO_SIN_CARGA_INICIAL = `import { useState } from 'react'
+export default function App() {
+  const [nombre, setNombre] = useState('')
+  const [estado, setEstado] = useState('listo')
+  const enviar = async (evento) => {
+    evento.preventDefault()
+    const respuesta = await fetch('/api/recetas', {
+      method: 'POST',
+      body: JSON.stringify({ nombre }),
+    })
+    setEstado(respuesta.ok ? 'guardada' : 'No se pudo guardar')
+  }
+  return <form onSubmit={enviar}><label>Nombre<input value={nombre} onChange={(evento) => setNombre(evento.target.value)} /></label><button>Enviar</button><p>{estado}</p></form>
+}`
+
+const APP_BUSQUEDA_CON_TRANSICION = `import { startTransition, useState, useTransition } from 'react'
+export default function App() {
+  const [q, setQ] = useState('')
+  const [objetos, setObjetos] = useState([])
+  const [isPending, iniciarTransicion] = useTransition()
+  const buscar = () => {
+    iniciarTransicion(async () => {
+      const respuesta = await fetch('/api/objetos?q=' + q)
+      const datos = await respuesta.json()
+      startTransition(() => setObjetos(datos))
+    })
+  }
+  return <><label>Búsqueda<input value={q} onChange={(evento) => setQ(evento.target.value)} /></label><button onClick={buscar}>Buscar</button>{isPending && <p>Buscando…</p>}<ul>{objetos.map((objeto) => <li key={objeto.id}>{objeto.nombre}</li>)}</ul></>
+}`
+
+const APP_PETICION_SIN_CATCH = `import { useState } from 'react'
+export default function App() {
+  const [estado, setEstado] = useState('lista')
+  const cargar = () => {
+    window.__peticionAbandonadaReactEnVivo = fetch('/api/objetos')
+    setEstado('enviada')
+  }
+  return <><button onClick={cargar}>Cargar</button><p>{estado}</p></>
+}`
+
+async function comprobarCargaConRed(
+  codigo: string,
+  strictMode: boolean,
+  comprobaciones: ComprobacionReact[],
+) {
+  const originalFetch = window.fetch
+  const transformacion = await transformarArchivos([{ nombre: 'App.jsx', codigo }])
+  if (!transformacion.ok) throw new Error(transformacion.mensaje)
+  document.body.replaceChildren(Object.assign(document.createElement('div'), { id: 'root' }))
+  instalarReact()
+  ventana.__enviarReactEnVivo = vi.fn()
+  ventana.__configReactEnVivo = {
+    modulos: transformacion.modulos,
+    archivosCss: transformacion.archivosCss,
+    strictMode,
+    api: { recetas: [{ id: 1, nombre: 'Salmorejo' }] },
+    red: { latencia: 0, desordenar: false },
+  }
+  try {
+    new Function(red)()
+    new Function(montaje)()
+    ventana.__pruebasEnVivo = {
+      ...await import('@testing-library/dom'),
+      userEvent: userEventFalso,
+    }
+    return await ventana.__comprobarReactEnVivo?.(comprobaciones)
+  } finally {
+    window.fetch = originalFetch
+  }
+}
+
+describe('comprobaciones con red', () => {
+  it('una acción async abandonada no engancha la transición de la comprobación siguiente', async () => {
+    const originalFetch = window.fetch
+    const transformacion = await transformarArchivos([
+      { nombre: 'App.jsx', codigo: APP_BUSQUEDA_CON_TRANSICION },
+    ])
+    if (!transformacion.ok) throw new Error(transformacion.mensaje)
+    document.body.replaceChildren(Object.assign(document.createElement('div'), { id: 'root' }))
+    instalarReact()
+    ventana.__enviarReactEnVivo = vi.fn()
+    ventana.__configReactEnVivo = {
+      modulos: transformacion.modulos,
+      archivosCss: [],
+      strictMode: false,
+      api: { objetos: [{ id: 1, nombre: 'Salmorejo' }] },
+      red: { latencia: 600, desordenar: false },
+    }
+    try {
+      new Function(red)()
+      new Function(montaje)()
+      ventana.__pruebasEnVivo = {
+        ...await import('@testing-library/dom'),
+        userEvent: userEventFalso,
+      }
+
+      expect(
+        await ventana.__comprobarReactEnVivo?.([
+          {
+            descripcion: 'muestra el estado pendiente',
+            pasos: [
+              { escribir: { etiqueta: 'Búsqueda', texto: 'sal' } },
+              { pulsar: { rol: 'button', nombre: 'Buscar' } },
+            ],
+            espera: { texto: 'Buscando…' },
+          },
+          {
+            descripcion: 'muestra el resultado en la comprobación siguiente',
+            pasos: [
+              { escribir: { etiqueta: 'Búsqueda', texto: 'sal' } },
+              { pulsar: { rol: 'button', nombre: 'Buscar' } },
+            ],
+            espera: { rol: 'listitem', texto: 'Salmorejo' },
+          },
+        ]),
+      ).toEqual([
+        { descripcion: 'muestra el estado pendiente', ok: true },
+        { descripcion: 'muestra el resultado en la comprobación siguiente', ok: true },
+      ])
+    } finally {
+      window.fetch = originalFetch
+    }
+  })
+
+  it('el puente no publica como error el rechazo de un fetch abandonado sin catch', async () => {
+    const originalFetch = window.fetch
+    const postMessage = vi.spyOn(window.parent, 'postMessage').mockImplementation(() => {})
+    const transformacion = await transformarArchivos([
+      { nombre: 'App.jsx', codigo: APP_PETICION_SIN_CATCH },
+    ])
+    if (!transformacion.ok) throw new Error(transformacion.mensaje)
+    document.body.replaceChildren(Object.assign(document.createElement('div'), { id: 'root' }))
+    new Function(puente)()
+    instalarReact()
+    ventana.__configReactEnVivo = {
+      modulos: transformacion.modulos,
+      archivosCss: [],
+      strictMode: false,
+      api: { objetos: [{ id: 1, nombre: 'Cuaderno' }] },
+      red: { latencia: 600, desordenar: false },
+    }
+    try {
+      new Function(red)()
+      new Function(montaje)()
+      ventana.__pruebasEnVivo = {
+        ...await import('@testing-library/dom'),
+        userEvent: userEventFalso,
+      }
+
+      expect(
+        await ventana.__comprobarReactEnVivo?.([
+          {
+            descripcion: 'deja una petición pendiente',
+            pasos: [{ pulsar: { rol: 'button', nombre: 'Cargar' } }],
+            espera: { texto: 'enviada' },
+          },
+        ]),
+      ).toEqual([{ descripcion: 'deja una petición pendiente', ok: true }])
+      const peticion = ventana.__peticionAbandonadaReactEnVivo
+      if (!peticion) throw new Error('La app no dejó la petición esperada')
+      // Vitest trata el rechazo de Node como error de la suite antes de que jsdom
+      // emita unhandledrejection. El arnés lo consume y reproduce el mismo evento;
+      // la app del alumno sigue sin instalar ningún catch.
+      const rechazo = peticion.catch((motivo) => motivo)
+
+      await ventana.__comprobarReactEnVivo?.([
+        { descripcion: 'reinicia la app', pasos: [], espera: { texto: 'lista' } },
+      ])
+      const motivo = await rechazo
+      const evento = new Event('unhandledrejection', { cancelable: true })
+      Object.defineProperty(evento, 'reason', { value: motivo })
+      postMessage.mockClear()
+
+      window.dispatchEvent(evento)
+
+      expect(evento.defaultPrevented).toBe(true)
+      expect(
+        postMessage.mock.calls
+          .map(([mensaje]) => mensaje)
+          .filter(
+            (mensaje) =>
+              mensaje !== null &&
+              typeof mensaje === 'object' &&
+              'tipo' in mensaje &&
+              mensaje.tipo === 'error',
+          ),
+      ).toEqual([])
+    } finally {
+      window.fetch = originalFetch
+    }
+  })
+
+  it('en StrictMode muestra el fallo inicial con la solución de bandera ignorar', async () => {
+    expect(
+      await comprobarCargaConRed(APP_CARGA_CON_BANDERA, true, [
+        {
+          descripcion: 'muestra el error inicial',
+          pasos: [{ red: 'fallar-siguiente' }],
+          espera: { texto: 'No se pudieron cargar' },
+        },
+      ]),
+    ).toEqual([{ descripcion: 'muestra el error inicial', ok: true }])
+  })
+
+  it('en StrictMode muestra el fallo inicial con AbortController', async () => {
+    expect(
+      await comprobarCargaConRed(APP_CARGA_CON_ABORT, true, [
+        {
+          descripcion: 'muestra el error inicial',
+          pasos: [{ red: 'fallar-siguiente' }],
+          espera: { texto: 'No se pudieron cargar' },
+        },
+      ]),
+    ).toEqual([{ descripcion: 'muestra el error inicial', ok: true }])
+  })
+
+  it.each([
+    ['bandera ignorar', APP_CARGA_CON_BANDERA],
+    ['AbortController', APP_CARGA_CON_ABORT],
+  ])('tras el fallo inicial con %s, Reintentar carga las recetas', async (_nombre, codigo) => {
+    expect(
+      await comprobarCargaConRed(codigo, true, [
+        {
+          descripcion: 'reintenta sin otro fallo pendiente',
+          pasos: [
+            { red: 'fallar-siguiente' },
+            { pulsar: { rol: 'button', nombre: 'Reintentar' } },
+          ],
+          espera: { rol: 'listitem', texto: 'Salmorejo' },
+        },
+      ]),
+    ).toEqual([{ descripcion: 'reintenta sin otro fallo pendiente', ok: true }])
+  })
+
+  it('sin StrictMode falla la única carga inicial y permite reintentar', async () => {
+    expect(
+      await comprobarCargaConRed(APP_CARGA_CON_BANDERA, false, [
+        {
+          descripcion: 'muestra el error inicial',
+          pasos: [{ red: 'fallar-siguiente' }],
+          espera: { texto: 'No se pudieron cargar' },
+        },
+        {
+          descripcion: 'reintenta sin otro fallo pendiente',
+          pasos: [
+            { red: 'fallar-siguiente' },
+            { pulsar: { rol: 'button', nombre: 'Reintentar' } },
+          ],
+          espera: { rol: 'listitem', texto: 'Salmorejo' },
+        },
+      ]),
+    ).toEqual([
+      { descripcion: 'muestra el error inicial', ok: true },
+      { descripcion: 'reintenta sin otro fallo pendiente', ok: true },
+    ])
+  })
+
+  it('reinicia API, fallo pendiente y almacenamiento entre comprobaciones', async () => {
+    const originalFetch = window.fetch
+    const transformacion = await transformarArchivos([{ nombre: 'App.jsx', codigo: `import { useEffect, useState } from 'react'
+export default function App(){
+  const [cantidad,setCantidad]=useState(null)
+  const [guardado,setGuardado]=useState(localStorage.getItem('x') ? 'guardado' : 'vacío')
+  const cargar=()=>fetch('/api/recetas').then(r=>r.json()).then(r=>setCantidad(r.length)).catch(()=>{})
+  useEffect(()=>{cargar()},[])
+  const añadir=()=>fetch('/api/recetas',{method:'POST',body:'{"nombre":"Nueva"}'}).then(cargar).catch(()=>{})
+  const guardar=()=>{localStorage.setItem('x','1');setGuardado('guardado')}
+  return <>{cantidad !== null && <><p>{cantidad} registros</p><button onClick={añadir}>Añadir</button><button onClick={guardar}>Guardar</button><button>No usar red</button></>}<p>{guardado}</p></>
+}` }])
+    if (!transformacion.ok) throw new Error(transformacion.mensaje)
+    document.body.replaceChildren(Object.assign(document.createElement('div'), { id: 'root' }))
+    instalarReact()
+    ventana.__enviarReactEnVivo = vi.fn()
+    ventana.__configReactEnVivo = { modulos: transformacion.modulos, archivosCss: [], strictMode: false, api: { recetas: [{ id: 1 }] }, red: { latencia: 0, desordenar: false } }
+    try {
+      new Function(red)()
+      new Function(montaje)()
+      ventana.__pruebasEnVivo = { ...await import('@testing-library/dom'), userEvent: userEventFalso }
+      expect(await ventana.__comprobarReactEnVivo?.([
+        { descripcion: 'modifica API', pasos: [{ pulsar: { rol: 'button', nombre: 'Añadir' } }], espera: { texto: '2 registros' } },
+        { descripcion: 'API limpia', pasos: [], espera: { texto: '1 registros' } },
+        { descripcion: 'guarda', pasos: [{ pulsar: { rol: 'button', nombre: 'Guardar' } }], espera: { texto: 'guardado' } },
+        { descripcion: 'almacén limpio', pasos: [], espera: { texto: 'vacío' } },
+        { descripcion: 'deja fallo pendiente', pasos: [{ pulsar: { rol: 'button', nombre: 'No usar red' } }, { red: 'fallar-siguiente' }], espera: { texto: '1 registros' } },
+        { descripcion: 'fallo limpio', pasos: [], espera: { texto: '1 registros' } },
+      ])).toEqual([
+        { descripcion: 'modifica API', ok: true },
+        { descripcion: 'API limpia', ok: true },
+        { descripcion: 'guarda', ok: true },
+        { descripcion: 'almacén limpio', ok: true },
+        { descripcion: 'deja fallo pendiente', ok: true },
+        { descripcion: 'fallo limpio', ok: true },
+      ])
+    } finally { window.fetch = originalFetch }
+  })
+
+  it('una petición pendiente de la comprobación anterior no modifica la API reiniciada', async () => {
+    const originalFetch = window.fetch
+    const transformacion = await transformarArchivos([{ nombre: 'App.jsx', codigo: `import { useEffect, useState } from 'react'
+export default function App() {
+  const [cantidad, setCantidad] = useState(null)
+  const [estado, setEstado] = useState('lista')
+  useEffect(() => {
+    fetch('/api/recetas').then((respuesta) => respuesta.json()).then((datos) => setCantidad(datos.length)).catch(() => {})
+  }, [])
+  const añadir = () => {
+    setEstado('enviada')
+    fetch('/api/recetas', { method: 'POST', body: '{"nombre":"Nueva"}' }).catch(() => {})
+  }
+  return <><button onClick={añadir}>Añadir</button><p>{estado}</p>{cantidad !== null && <p>{cantidad} registros</p>}</>
+}` }])
+    if (!transformacion.ok) throw new Error(transformacion.mensaje)
+    document.body.replaceChildren(Object.assign(document.createElement('div'), { id: 'root' }))
+    instalarReact()
+    ventana.__enviarReactEnVivo = vi.fn()
+    ventana.__configReactEnVivo = {
+      modulos: transformacion.modulos,
+      archivosCss: transformacion.archivosCss,
+      strictMode: false,
+      api: { recetas: [{ id: 1 }] },
+      red: { latencia: 200, desordenar: false },
+    }
+    try {
+      new Function(red)()
+      new Function(montaje)()
+      ventana.__pruebasEnVivo = { ...await import('@testing-library/dom'), userEvent: userEventFalso }
+
+      expect(await ventana.__comprobarReactEnVivo?.([
+        {
+          descripcion: 'deja un POST pendiente',
+          pasos: [{ pulsar: { rol: 'button', nombre: 'Añadir' } }],
+          espera: { texto: 'enviada' },
+        },
+        { descripcion: 've solo los datos originales', pasos: [], espera: { texto: '1 registros' } },
+      ])).toEqual([
+        { descripcion: 'deja un POST pendiente', ok: true },
+        { descripcion: 've solo los datos originales', ok: true },
+      ])
+    } finally {
+      window.fetch = originalFetch
+    }
+  })
+
+  it('conserva el fallo inicial para el primer envío si el montaje no usa la API', async () => {
+    expect(
+      await comprobarCargaConRed(APP_FORMULARIO_SIN_CARGA_INICIAL, false, [
+        {
+          descripcion: 'muestra el error al enviar',
+          pasos: [
+            { red: 'fallar-siguiente' },
+            { escribir: { etiqueta: 'Nombre', texto: 'Gazpacho' } },
+            { pulsar: { rol: 'button', nombre: 'Enviar' } },
+          ],
+          espera: { texto: 'No se pudo guardar' },
+        },
+      ]),
+    ).toEqual([{ descripcion: 'muestra el error al enviar', ok: true }])
+  })
+
+  it('aplica un fallo inicial antes de montar la app', async () => {
+    const originalFetch = window.fetch
+    const transformacion = await transformarArchivos([{ nombre: 'App.jsx', codigo: `import { useEffect, useState } from 'react'
+export default function App(){ const [estado,setEstado]=useState('cargando'); useEffect(()=>{ fetch('/api/recetas').then(r=>setEstado(r.ok?'éxito':'error')) },[]); return <p>{estado}</p> }` }])
+    if (!transformacion.ok) throw new Error(transformacion.mensaje)
+    document.body.replaceChildren(Object.assign(document.createElement('div'), { id: 'root' }))
+    instalarReact()
+    ventana.__enviarReactEnVivo = vi.fn()
+    ventana.__configReactEnVivo = { modulos: transformacion.modulos, archivosCss: [], strictMode: false, api: { recetas: [{ id: 1 }] }, red: { latencia: 0, desordenar: false } }
+    try {
+      new Function(red)()
+      new Function(montaje)()
+      ventana.__pruebasEnVivo = { ...await import('@testing-library/dom'), userEvent: userEventFalso }
+      expect(await ventana.__comprobarReactEnVivo?.([{ descripcion: 'carga inicial', pasos: [{ red: 'fallar-siguiente' }], espera: { texto: 'error' } }])).toEqual([{ descripcion: 'carga inicial', ok: true }])
+    } finally { window.fetch = originalFetch }
+  })
+
+  it('espera un control que aparece después de cargar la API', async () => {
+    const originalFetch = window.fetch
+    const transformacion = await transformarArchivos([{ nombre: 'App.jsx', codigo: `import { useEffect, useState } from 'react'
+export default function App(){ const [listo,setListo]=useState(false); const [hecho,setHecho]=useState(false); useEffect(()=>{ fetch('/api/recetas').then(()=>setListo(true)) },[]); return <>{listo && <button onClick={()=>setHecho(true)}>Continuar</button>}{hecho && <p>hecho</p>}</> }` }])
+    if (!transformacion.ok) throw new Error(transformacion.mensaje)
+    document.body.replaceChildren(Object.assign(document.createElement('div'), { id: 'root' }))
+    instalarReact()
+    ventana.__enviarReactEnVivo = vi.fn()
+    ventana.__configReactEnVivo = { modulos: transformacion.modulos, archivosCss: [], strictMode: false, api: { recetas: [{ id: 1 }] }, red: { latencia: 300, desordenar: false } }
+    try {
+      new Function(red)()
+      new Function(montaje)()
+      ventana.__pruebasEnVivo = { ...await import('@testing-library/dom'), userEvent: userEventFalso }
+      expect(await ventana.__comprobarReactEnVivo?.([{ descripcion: 'espera botón', pasos: [{ pulsar: { rol: 'button', nombre: 'Continuar' } }], espera: { texto: 'hecho' } }])).toEqual([{ descripcion: 'espera botón', ok: true }])
+    } finally { window.fetch = originalFetch }
+  })
+
+  it('una comprobación con el paso red: fallar-siguiente hace fallar la siguiente petición', async () => {
+    const originalFetch = window.fetch
+    const transformacion = await transformarArchivos([
+      {
+        nombre: 'App.jsx',
+        codigo: `import { useState } from 'react'
+export default function App() {
+  const [estado, setEstado] = useState('lista')
+  const cargar = async () => {
+    const respuesta = await fetch('/api/recetas')
+    setEstado(respuesta.ok ? 'éxito' : 'error')
+  }
+  return <><button onClick={() => setEstado('preparada')}>Preparar</button><button onClick={cargar}>Cargar</button><p>{estado}</p></>
+}`,
+      },
+    ])
+    if (!transformacion.ok) throw new Error(transformacion.mensaje)
+    document.body.replaceChildren(Object.assign(document.createElement('div'), { id: 'root' }))
+    instalarReact()
+    ventana.__enviarReactEnVivo = vi.fn()
+    ventana.__configReactEnVivo = {
+      modulos: transformacion.modulos,
+      archivosCss: transformacion.archivosCss,
+      strictMode: false,
+      api: { recetas: [{ id: 1, nombre: 'Salmorejo' }] },
+      red: { latencia: 0, desordenar: false },
+    }
+    try {
+      new Function(red)()
+      new Function(montaje)()
+      ventana.__pruebasEnVivo = {
+        ...await import('@testing-library/dom'),
+        userEvent: userEventFalso,
+      }
+
+      expect(
+        await ventana.__comprobarReactEnVivo?.([
+          {
+            descripcion: 'Maneja el error',
+            pasos: [
+              { pulsar: { rol: 'button', nombre: 'Preparar' } },
+              { red: 'fallar-siguiente' },
+              { pulsar: { rol: 'button', nombre: 'Cargar' } },
+            ],
+            espera: { texto: 'error' },
+          },
+        ]),
+      ).toEqual([{ descripcion: 'Maneja el error', ok: true }])
+    } finally {
+      window.fetch = originalFetch
+    }
   })
 })

@@ -41,6 +41,23 @@ describe('construirDocumentoReact', () => {
     )
   })
 
+  it('desactiva View Transitions antes de cargar React en las comprobaciones', () => {
+    const doc = construirDocumentoReact({ ...base, conPruebas: true })
+
+    expect(doc).toContain('delete Document.prototype.startViewTransition')
+    expect(doc).toContain('delete document.startViewTransition')
+    expect(doc.indexOf('delete Document.prototype.startViewTransition')).toBeLessThan(
+      doc.indexOf('/react.js'),
+    )
+  })
+
+  it('mantiene View Transitions en la vista previa normal', () => {
+    const doc = construirDocumentoReact(base)
+
+    expect(doc).not.toContain('delete Document.prototype.startViewTransition')
+    expect(doc).not.toContain('delete document.startViewTransition')
+  })
+
   it('el código del alumno no puede cerrar el script ni el style', () => {
     const doc = construirDocumentoReact({
       ...base,
@@ -63,6 +80,42 @@ describe('construirDocumentoReact', () => {
       archivosCss: ['./estilos.css'],
       strictMode: false,
     })
+  })
+
+  it('con api incluye red.js después de la configuración y antes del montaje', () => {
+    const doc = construirDocumentoReact({
+      ...base,
+      api: { recetas: [{ id: 1, nombre: 'Salmorejo' }] },
+      red: { latencia: 600, desordenar: false },
+    })
+
+    expect(doc.indexOf('window.__configReactEnVivo =')).toBeLessThan(
+      doc.indexOf('window.__redReactEnVivo ='),
+    )
+    expect(doc.indexOf('window.__redReactEnVivo =')).toBeLessThan(
+      doc.indexOf('const R = window.__reactEnVivo'),
+    )
+  })
+
+  it('sin api no incluye red.js', () => {
+    expect(construirDocumentoReact(base)).not.toContain('window.__redReactEnVivo =')
+  })
+
+  it('conEfectos incluye efectos.js después de la configuración y antes del montaje', () => {
+    const doc = construirDocumentoReact({ ...base, conEfectos: true })
+    const json = /window\.__configReactEnVivo = (.*?)<\/script>/s.exec(doc)?.[1]
+
+    expect(JSON.parse(json ?? 'null')).toEqual(expect.objectContaining({ efectos: true }))
+    expect(doc.indexOf('window.__configReactEnVivo =')).toBeLessThan(
+      doc.indexOf('window.__efectosReactEnVivo = { envolver }'),
+    )
+    expect(doc.indexOf('window.__efectosReactEnVivo = { envolver }')).toBeLessThan(
+      doc.indexOf('const R = window.__reactEnVivo'),
+    )
+  })
+
+  it('sin conEfectos no incluye efectos.js', () => {
+    expect(construirDocumentoReact(base)).not.toContain('window.__efectosReactEnVivo = { envolver }')
   })
 })
 

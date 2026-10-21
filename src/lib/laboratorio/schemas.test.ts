@@ -53,12 +53,59 @@ describe('esquemaReactEnVivo', () => {
     expect(esquemaReactEnVivo.safeParse({ ...minimoEnVivo, comprobaciones: Array(9).fill(c) }).success).toBe(false)
     expect(esquemaComprobacionReact.safeParse({ ...c, pasos: Array(11).fill({ teclear: '{Enter}' }) }).success).toBe(false)
   })
+
+  it('api acepta colecciones válidas y rechaza nombres, tamaños y registros sin id inválidos', () => {
+    const api = { recetas: [{ id: 1, nombre: 'Salmorejo' }] }
+    expect(esquemaReactEnVivo.parse({ ...minimoEnVivo, api }).api).toEqual(api)
+    expect(esquemaReactEnVivo.safeParse({ ...minimoEnVivo, api: { 'Recetas mal': [] } }).success).toBe(false)
+    expect(
+      esquemaReactEnVivo.safeParse({
+        ...minimoEnVivo,
+        api: Object.fromEntries(Array.from({ length: 9 }, (_, indice) => [`c${indice}`, []])),
+      }).success,
+    ).toBe(false)
+    expect(
+      esquemaReactEnVivo.safeParse({ ...minimoEnVivo, api: { recetas: Array(201).fill({ id: 1 }) } }).success,
+    ).toBe(false)
+    expect(esquemaReactEnVivo.safeParse({ ...minimoEnVivo, api: { recetas: [{ nombre: 'Sin id' }] } }).success).toBe(false)
+    expect(
+      esquemaReactEnVivo.safeParse({ ...minimoEnVivo, api: { recetas: [{ id: 1, texto: 'x'.repeat(20_001) }] } }).success,
+    ).toBe(false)
+  })
+
+  it('red conserva latencia opcional, aplica desordenar false y rechaza 3001', () => {
+    expect(esquemaReactEnVivo.parse({ ...minimoEnVivo, red: {} }).red).toEqual({
+      desordenar: false,
+    })
+    expect(esquemaReactEnVivo.safeParse({ ...minimoEnVivo, red: { latencia: 3001 } }).success).toBe(false)
+  })
+
+  it('el paso red de una comprobación solo admite fallar-siguiente', () => {
+    const base = { descripcion: 'd', espera: { texto: 'error' } }
+    expect(
+      esquemaComprobacionReact.parse({ ...base, pasos: [{ red: 'fallar-siguiente' }] }).pasos,
+    ).toEqual([{ red: 'fallar-siguiente' }])
+    expect(
+      esquemaComprobacionReact.safeParse({ ...base, pasos: [{ red: 'fallar-siempre' }] }).success,
+    ).toBe(false)
+  })
 })
 
 describe('esquemaReactAnotado', () => {
   it('acepta el mínimo con sus valores por defecto', () => {
     const datos = esquemaReactAnotado.parse({ tipo: 'react-anotado', codigo: archivoApp.codigo, anotaciones: [{ fragmento: 'App', nota: 'n' }] })
     expect(datos).toMatchObject({ css: '', strictMode: true, mostrarConsola: false })
+  })
+
+  it('acepta api y red con los mismos límites', () => {
+    const datos = esquemaReactAnotado.parse({
+      tipo: 'react-anotado',
+      codigo: archivoApp.codigo,
+      anotaciones: [{ fragmento: 'App', nota: 'n' }],
+      api: { recetas: [{ id: 'a', nombre: 'Gazpacho' }] },
+      red: {},
+    })
+    expect(datos.red).toEqual({ desordenar: false })
   })
 })
 
@@ -70,6 +117,20 @@ describe('árbol de renders en los bloques de React', () => {
         .mostrarArbol,
     ).toBe(false)
     expect(esquemaReactEnVivo.parse({ ...minimoEnVivo, mostrarArbol: true }).mostrarArbol).toBe(true)
+  })
+})
+
+describe('registro de efectos en los bloques de React', () => {
+  it('mostrarEfectos es false por defecto y acepta true', () => {
+    expect(esquemaReactEnVivo.parse(minimoEnVivo).mostrarEfectos).toBe(false)
+    expect(
+      esquemaReactAnotado.parse({
+        tipo: 'react-anotado',
+        codigo: archivoApp.codigo,
+        anotaciones: [{ fragmento: 'App', nota: 'n' }],
+      }).mostrarEfectos,
+    ).toBe(false)
+    expect(esquemaReactEnVivo.parse({ ...minimoEnVivo, mostrarEfectos: true }).mostrarEfectos).toBe(true)
   })
 })
 

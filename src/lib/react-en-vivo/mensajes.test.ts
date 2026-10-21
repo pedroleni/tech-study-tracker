@@ -86,6 +86,60 @@ describe('leerMensajeReactEnVivo', () => {
       ),
     ).toBeNull()
   })
+
+  it('acepta un mensaje peticion válido y rechaza una ruta de 201 caracteres', () => {
+    const { iframe, evento } = prepararIframe()
+    const peticion = {
+      canal: 'react-en-vivo',
+      tipo: 'peticion',
+      id: 1,
+      metodo: 'GET',
+      ruta: '/api/recetas?q=pan',
+      estado: 'ok',
+      codigo: 200,
+      ms: 612,
+    }
+
+    expect(leerMensajeReactEnVivo(evento(peticion), iframe.contentWindow)).toEqual(peticion)
+    expect(
+      leerMensajeReactEnVivo(evento({ ...peticion, ruta: `/${'a'.repeat(200)}` }), iframe.contentWindow),
+    ).toBeNull()
+    expect(leerMensajeReactEnVivo(evento({ ...peticion, metodo: 'HEAD' }), iframe.contentWindow)).not.toBeNull()
+    expect(leerMensajeReactEnVivo(evento({ ...peticion, metodo: 'MAL' }), iframe.contentWindow)).not.toBeNull()
+    expect(leerMensajeReactEnVivo(evento({ ...peticion, metodo: 'demasiadolargo' }), iframe.contentWindow)).toBeNull()
+  })
+
+  it('acepta un mensaje efecto válido y rechaza 9 cambios', () => {
+    const { iframe, evento } = prepararIframe()
+    const efecto = {
+      canal: 'react-en-vivo',
+      tipo: 'efecto',
+      commit: 4,
+      componente: 'Chat',
+      gancho: 'useConexion',
+      archivo: 'App.jsx',
+      linea: 3,
+      accion: 'efecto',
+      clase: 'useEffect',
+      motivo: 'dependencias',
+      cambios: [{ nombre: 'sala', antes: '"general"', ahora: '"viaje"' }],
+    }
+
+    expect(leerMensajeReactEnVivo(evento(efecto), iframe.contentWindow)).toEqual(efecto)
+    expect(
+      leerMensajeReactEnVivo(
+        evento({
+          ...efecto,
+          cambios: Array.from({ length: 9 }, (_, indice) => ({
+            nombre: `dependencia ${indice + 1}`,
+            antes: '0',
+            ahora: '1',
+          })),
+        }),
+        iframe.contentWindow,
+      ),
+    ).toBeNull()
+  })
 })
 
 describe('mensaje arbol', () => {

@@ -5,7 +5,50 @@
 ;(() => {
   const enviar = (datos) => parent.postMessage({ canal: 'react-en-vivo', ...datos }, '*')
   window.__enviarReactEnVivo = enviar
+  // Los iframes srcdoc con origen opaco pueden lanzar SecurityError al leer
+  // Web Storage. Para los ejercicios basta un almacén que viva con el documento.
+  const crearAlmacen = () => {
+    const datos = new Map()
+    return {
+      get length() {
+        return datos.size
+      },
+      clear() {
+        datos.clear()
+      },
+      getItem(clave) {
+        const nombre = String(clave)
+        return datos.has(nombre) ? datos.get(nombre) : null
+      },
+      key(indice) {
+        if (!Number.isInteger(indice) || indice < 0 || indice >= datos.size) return null
+        return Array.from(datos.keys())[indice]
+      },
+      removeItem(clave) {
+        datos.delete(String(clave))
+      },
+      setItem(clave, valor) {
+        datos.set(String(clave), String(valor))
+      },
+    }
+  }
+  for (const nombre of ['localStorage', 'sessionStorage']) {
+    try {
+      void window[nombre]
+    } catch {
+      try {
+        Object.defineProperty(window, nombre, {
+          configurable: true,
+          enumerable: true,
+          value: crearAlmacen(),
+        })
+      } catch {
+        // Un navegador que no permita redefinirlo conserva su comportamiento.
+      }
+    }
+  }
   let commits = 0
+  window.__numeroCommitReactEnVivo = () => commits
   const avisarCommit = (raiz) => {
     commits += 1
     enviar({ tipo: 'commit', numero: commits })
@@ -109,6 +152,13 @@
     enviar({ tipo: 'error', texto: String(evento.message).slice(0, 2000) }),
   )
   window.addEventListener('unhandledrejection', (evento) => {
+    if (evento.reason && evento.reason.__abandonadaReactEnVivo === true) {
+      // La promesa tiene que rechazarse: una acción async que no termina deja
+      // enganchadas las transiciones de React. Pero pertenece a una app ya
+      // desmontada de otra comprobación y no es un error que deba ver el alumno.
+      evento.preventDefault()
+      return
+    }
     const razon = evento.reason instanceof Error ? evento.reason.message : String(evento.reason)
     enviar({ tipo: 'error', texto: razon.slice(0, 2000) })
   })
