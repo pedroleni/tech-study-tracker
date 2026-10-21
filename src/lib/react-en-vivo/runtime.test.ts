@@ -22,6 +22,7 @@ type VentanaRuntime = typeof window & {
     comprobaciones: ComprobacionReact[],
   ) => Promise<{ descripcion: string; ok: boolean; motivo?: string }[]>
   __pruebasEnVivo?: Record<string, unknown>
+  __peticionAbandonadaReactEnVivo?: Promise<Response>
   __reactEnVivo?: Record<string, unknown> & { React: { version: string } }
   __redReactEnVivo?: {
     fallarMontaje: () => void
@@ -119,6 +120,7 @@ afterEach(() => {
   delete ventana.__enviarReactEnVivo
   delete ventana.__comprobarReactEnVivo
   delete ventana.__pruebasEnVivo
+  delete ventana.__peticionAbandonadaReactEnVivo
   delete ventana.__reactEnVivo
   delete ventana.__redReactEnVivo
   delete ventana.__REACT_DEVTOOLS_GLOBAL_HOOK__
@@ -583,6 +585,31 @@ export default function App() {
   return <form onSubmit={enviar}><label>Nombre<input value={nombre} onChange={(evento) => setNombre(evento.target.value)} /></label><button>Enviar</button><p>{estado}</p></form>
 }`
 
+const APP_BUSQUEDA_CON_TRANSICION = `import { startTransition, useState, useTransition } from 'react'
+export default function App() {
+  const [q, setQ] = useState('')
+  const [objetos, setObjetos] = useState([])
+  const [isPending, iniciarTransicion] = useTransition()
+  const buscar = () => {
+    iniciarTransicion(async () => {
+      const respuesta = await fetch('/api/objetos?q=' + q)
+      const datos = await respuesta.json()
+      startTransition(() => setObjetos(datos))
+    })
+  }
+  return <><label>Búsqueda<input value={q} onChange={(evento) => setQ(evento.target.value)} /></label><button onClick={buscar}>Buscar</button>{isPending && <p>Buscando…</p>}<ul>{objetos.map((objeto) => <li key={objeto.id}>{objeto.nombre}</li>)}</ul></>
+}`
+
+const APP_PETICION_SIN_CATCH = `import { useState } from 'react'
+export default function App() {
+  const [estado, setEstado] = useState('lista')
+  const cargar = () => {
+    window.__peticionAbandonadaReactEnVivo = fetch('/api/objetos')
+    setEstado('enviada')
+  }
+  return <><button onClick={cargar}>Cargar</button><p>{estado}</p></>
+}`
+
 async function comprobarCargaConRed(
   codigo: string,
   strictMode: boolean,
@@ -615,6 +642,126 @@ async function comprobarCargaConRed(
 }
 
 describe('comprobaciones con red', () => {
+  it('una acción async abandonada no engancha la transición de la comprobación siguiente', async () => {
+    const originalFetch = window.fetch
+    const transformacion = await transformarArchivos([
+      { nombre: 'App.jsx', codigo: APP_BUSQUEDA_CON_TRANSICION },
+    ])
+    if (!transformacion.ok) throw new Error(transformacion.mensaje)
+    document.body.replaceChildren(Object.assign(document.createElement('div'), { id: 'root' }))
+    instalarReact()
+    ventana.__enviarReactEnVivo = vi.fn()
+    ventana.__configReactEnVivo = {
+      modulos: transformacion.modulos,
+      archivosCss: [],
+      strictMode: false,
+      api: { objetos: [{ id: 1, nombre: 'Salmorejo' }] },
+      red: { latencia: 600, desordenar: false },
+    }
+    try {
+      new Function(red)()
+      new Function(montaje)()
+      ventana.__pruebasEnVivo = {
+        ...await import('@testing-library/dom'),
+        userEvent: userEventFalso,
+      }
+
+      expect(
+        await ventana.__comprobarReactEnVivo?.([
+          {
+            descripcion: 'muestra el estado pendiente',
+            pasos: [
+              { escribir: { etiqueta: 'Búsqueda', texto: 'sal' } },
+              { pulsar: { rol: 'button', nombre: 'Buscar' } },
+            ],
+            espera: { texto: 'Buscando…' },
+          },
+          {
+            descripcion: 'muestra el resultado en la comprobación siguiente',
+            pasos: [
+              { escribir: { etiqueta: 'Búsqueda', texto: 'sal' } },
+              { pulsar: { rol: 'button', nombre: 'Buscar' } },
+            ],
+            espera: { rol: 'listitem', texto: 'Salmorejo' },
+          },
+        ]),
+      ).toEqual([
+        { descripcion: 'muestra el estado pendiente', ok: true },
+        { descripcion: 'muestra el resultado en la comprobación siguiente', ok: true },
+      ])
+    } finally {
+      window.fetch = originalFetch
+    }
+  })
+
+  it('el puente no publica como error el rechazo de un fetch abandonado sin catch', async () => {
+    const originalFetch = window.fetch
+    const postMessage = vi.spyOn(window.parent, 'postMessage').mockImplementation(() => {})
+    const transformacion = await transformarArchivos([
+      { nombre: 'App.jsx', codigo: APP_PETICION_SIN_CATCH },
+    ])
+    if (!transformacion.ok) throw new Error(transformacion.mensaje)
+    document.body.replaceChildren(Object.assign(document.createElement('div'), { id: 'root' }))
+    new Function(puente)()
+    instalarReact()
+    ventana.__configReactEnVivo = {
+      modulos: transformacion.modulos,
+      archivosCss: [],
+      strictMode: false,
+      api: { objetos: [{ id: 1, nombre: 'Cuaderno' }] },
+      red: { latencia: 600, desordenar: false },
+    }
+    try {
+      new Function(red)()
+      new Function(montaje)()
+      ventana.__pruebasEnVivo = {
+        ...await import('@testing-library/dom'),
+        userEvent: userEventFalso,
+      }
+
+      expect(
+        await ventana.__comprobarReactEnVivo?.([
+          {
+            descripcion: 'deja una petición pendiente',
+            pasos: [{ pulsar: { rol: 'button', nombre: 'Cargar' } }],
+            espera: { texto: 'enviada' },
+          },
+        ]),
+      ).toEqual([{ descripcion: 'deja una petición pendiente', ok: true }])
+      const peticion = ventana.__peticionAbandonadaReactEnVivo
+      if (!peticion) throw new Error('La app no dejó la petición esperada')
+      // Vitest trata el rechazo de Node como error de la suite antes de que jsdom
+      // emita unhandledrejection. El arnés lo consume y reproduce el mismo evento;
+      // la app del alumno sigue sin instalar ningún catch.
+      const rechazo = peticion.catch((motivo) => motivo)
+
+      await ventana.__comprobarReactEnVivo?.([
+        { descripcion: 'reinicia la app', pasos: [], espera: { texto: 'lista' } },
+      ])
+      const motivo = await rechazo
+      const evento = new Event('unhandledrejection', { cancelable: true })
+      Object.defineProperty(evento, 'reason', { value: motivo })
+      postMessage.mockClear()
+
+      window.dispatchEvent(evento)
+
+      expect(evento.defaultPrevented).toBe(true)
+      expect(
+        postMessage.mock.calls
+          .map(([mensaje]) => mensaje)
+          .filter(
+            (mensaje) =>
+              mensaje !== null &&
+              typeof mensaje === 'object' &&
+              'tipo' in mensaje &&
+              mensaje.tipo === 'error',
+          ),
+      ).toEqual([])
+    } finally {
+      window.fetch = originalFetch
+    }
+  })
+
   it('en StrictMode muestra el fallo inicial con la solución de bandera ignorar', async () => {
     expect(
       await comprobarCargaConRed(APP_CARGA_CON_BANDERA, true, [
@@ -686,9 +833,9 @@ describe('comprobaciones con red', () => {
 export default function App(){
   const [cantidad,setCantidad]=useState(null)
   const [guardado,setGuardado]=useState(localStorage.getItem('x') ? 'guardado' : 'vacío')
-  const cargar=()=>fetch('/api/recetas').then(r=>r.json()).then(r=>setCantidad(r.length))
+  const cargar=()=>fetch('/api/recetas').then(r=>r.json()).then(r=>setCantidad(r.length)).catch(()=>{})
   useEffect(()=>{cargar()},[])
-  const añadir=()=>fetch('/api/recetas',{method:'POST',body:'{"nombre":"Nueva"}'}).then(cargar)
+  const añadir=()=>fetch('/api/recetas',{method:'POST',body:'{"nombre":"Nueva"}'}).then(cargar).catch(()=>{})
   const guardar=()=>{localStorage.setItem('x','1');setGuardado('guardado')}
   return <>{cantidad !== null && <><p>{cantidad} registros</p><button onClick={añadir}>Añadir</button><button onClick={guardar}>Guardar</button><button>No usar red</button></>}<p>{guardado}</p></>
 }` }])
@@ -726,11 +873,11 @@ export default function App() {
   const [cantidad, setCantidad] = useState(null)
   const [estado, setEstado] = useState('lista')
   useEffect(() => {
-    fetch('/api/recetas').then((respuesta) => respuesta.json()).then((datos) => setCantidad(datos.length))
+    fetch('/api/recetas').then((respuesta) => respuesta.json()).then((datos) => setCantidad(datos.length)).catch(() => {})
   }, [])
   const añadir = () => {
     setEstado('enviada')
-    fetch('/api/recetas', { method: 'POST', body: '{"nombre":"Nueva"}' })
+    fetch('/api/recetas', { method: 'POST', body: '{"nombre":"Nueva"}' }).catch(() => {})
   }
   return <><button onClick={añadir}>Añadir</button><p>{estado}</p>{cantidad !== null && <p>{cantidad} registros</p>}</>
 }` }])

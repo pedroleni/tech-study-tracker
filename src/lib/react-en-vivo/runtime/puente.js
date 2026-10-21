@@ -152,6 +152,13 @@
     enviar({ tipo: 'error', texto: String(evento.message).slice(0, 2000) }),
   )
   window.addEventListener('unhandledrejection', (evento) => {
+    if (evento.reason && evento.reason.__abandonadaReactEnVivo === true) {
+      // La promesa tiene que rechazarse: una acción async que no termina deja
+      // enganchadas las transiciones de React. Pero pertenece a una app ya
+      // desmontada de otra comprobación y no es un error que deba ver el alumno.
+      evento.preventDefault()
+      return
+    }
     const razon = evento.reason instanceof Error ? evento.reason.message : String(evento.reason)
     enviar({ tipo: 'error', texto: razon.slice(0, 2000) })
   })

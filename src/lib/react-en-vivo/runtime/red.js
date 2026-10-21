@@ -20,6 +20,11 @@
         headers: { 'Content-Type': 'application/json; charset=utf-8' },
       })
     const error = (mensaje, estado) => responderJson({ error: mensaje }, estado)
+    const crearErrorAbandono = () => {
+      const errorAbandono = new DOMException('The operation was aborted.', 'AbortError')
+      Object.defineProperty(errorAbandono, '__abandonadaReactEnVivo', { value: true })
+      return errorAbandono
+    }
     const tiene = (objeto, clave) => Object.prototype.hasOwnProperty.call(objeto, clave)
     const copiar = (valor) => JSON.parse(JSON.stringify(valor))
     const datosOriginales = copiar(configuracion.api)
@@ -239,11 +244,14 @@
           if (senal) senal.removeEventListener('abort', cancelar)
         }
         const duracion = () => Math.max(0, Math.round(performance.now() - inicio))
-        const sigueVigente = () => generacionPeticion === generacion
+        const sigueVigente = () => !terminada && generacionPeticion === generacion
         const abandonar = () => {
           if (terminada) return
           terminada = true
           limpiar()
+          // Una acción async de React que espera una promesa eterna deja enganchadas
+          // también las transiciones posteriores, aunque su app ya se haya desmontado.
+          rechazar(crearErrorAbandono())
         }
         const cancelar = () => {
           if (terminada) return
@@ -266,9 +274,11 @@
         }
         if (senal) senal.addEventListener('abort', cancelar, { once: true })
         const completar = async () => {
-          if (terminada || !sigueVigente()) return
-          terminada = true
-          limpiar()
+          if (terminada) return
+          if (!sigueVigente()) {
+            abandonar()
+            return
+          }
           let respuesta
           try {
             respuesta = await ejecutar(
@@ -282,7 +292,15 @@
           } catch {
             respuesta = error('Error del servidor (simulado)', 500)
           }
-          if (!sigueVigente() || !respuesta) return
+          // reiniciar() puede ejecutarse mientras leerCuerpo() está esperando. En
+          // ese caso abandonar() ya rechazó la promesa y no se registra ningún final.
+          if (terminada) return
+          if (!sigueVigente() || !respuesta) {
+            abandonar()
+            return
+          }
+          terminada = true
+          limpiar()
           const estado = respuesta.ok ? 'ok' : 'error'
           enviar({
             tipo: 'peticion',
