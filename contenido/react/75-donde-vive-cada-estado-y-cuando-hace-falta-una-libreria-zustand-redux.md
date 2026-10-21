@@ -302,7 +302,7 @@ Ahora cada clic mueve solo a quien le afecta:
 
 - **«Avanzar 15 s»**: solo `BarraProgreso`. El panel lo explica con «cambió otro de sus ganchos»: el render no viene de un `useState`, sino de `useSyncExternalStore`, que el panel no sabe nombrar. Todo lo demás, sin cambios.
 - **«Velocidad 1×»**: solo `Controles`, que es el único que selecciona `velocidad`.
-- **«2. El farero»**: `Cabecera` y `ListaCapitulos`, que seleccionan el capítulo, y, si habías avanzado, `BarraProgreso`, porque el segundo vuelve a 0. Las filas de la lista también, porque su padre les crea funciones nuevas (eso lo arregla `memo`, en la lección 67).
+- **«2. El farero»**: `Cabecera` y `ListaCapitulos`, que seleccionan el capítulo, y, si habías avanzado, `BarraProgreso`, porque el segundo vuelve a 0. Las filas de la lista también, porque su padre les crea funciones nuevas en cada render (evitarlo pide `memo` y, además, que esas funciones no cambien: lección 67).
 
 > **Con un almacén externo, React no renderiza a «todos los lectores del estado», sino a cada componente cuya parte seleccionada ha cambiado.**
 
