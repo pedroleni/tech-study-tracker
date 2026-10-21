@@ -1,13 +1,13 @@
 // Monta el código del alumno dentro del iframe aislado de react-en-vivo:
 // registro de módulos tipo CommonJS, montaje con createRoot y ejecutor de
 // comprobaciones. Lee la configuración que deja la lección en
-// window.__configReactEnVivo = { modulos, archivosCss, strictMode }.
+// window.__configReactEnVivo = { modulos, archivosCss, strictMode, api?, red?, efectos? }.
 // Se incrusta en el srcdoc como texto (documento.ts lo importa con ?raw).
 // Ver specs/features/react-en-vivo.md.
 ;(() => {
   const R = window.__reactEnVivo
   const enviar = window.__enviarReactEnVivo
-  const { modulos, archivosCss, strictMode } = window.__configReactEnVivo
+  const { modulos, archivosCss, strictMode, efectos } = window.__configReactEnVivo
 
   // Si react.js no llegó (red caída, versión retirada), se dice, y las
   // comprobaciones contestan en vez de dejar al comprobador esperando.
@@ -29,8 +29,16 @@
   // new Function añade dos líneas antes del código de cada módulo.
   const DESFASE_LINEAS = 2
   const ESPERA_MS = 1500
+  let reactDelAlumno = R.React
+  if (efectos && window.__efectosReactEnVivo) {
+    try {
+      reactDelAlumno = window.__efectosReactEnVivo.envolver(R.React, modulos)
+    } catch {
+      // El registro es una ayuda visual; la app conserva el React original.
+    }
+  }
   const EXTERNOS = {
-    react: R.React,
+    react: reactDelAlumno,
     'react-dom': R.ReactDOM,
     'react-dom/client': R.ReactDOMClient,
     'react/jsx-runtime': R.JsxRuntime,
@@ -187,34 +195,203 @@
   // doblarlas las escribe tal cual.
   const escaparTeclas = (texto) => texto.replace(/[{[]/g, '$&$&')
 
-  const campoPorEtiqueta = (pantalla, etiqueta) => {
-    const [campo] = pantalla.queryAllByLabelText(etiqueta)
-    if (!campo) throw new FalloComprobacion('No encuentro ' + describir({ etiqueta }, true) + '.')
-    return campo
+  const esperarElemento = async (buscar, descripcion) => {
+    let elemento
+    await window.__pruebasEnVivo.waitFor(
+      () => {
+        ;[elemento] = buscar()
+        if (!elemento) throw new FalloComprobacion('No encuentro ' + descripcion + '.')
+      },
+      { timeout: ESPERA_MS, onTimeout: (error) => error },
+    )
+    return elemento
+  }
+
+  const campoPorEtiqueta = (pantalla, etiqueta) =>
+    esperarElemento(
+      () => pantalla.queryAllByLabelText(etiqueta),
+      describir({ etiqueta }, true),
+    )
+
+  const limpiarAlmacen = (nombre) => {
+    try {
+      window[nombre].clear()
+    } catch {
+      // Si el navegador no expone el almacén, el aislamiento del iframe basta.
+    }
+  }
+
+  // El fallback conserva un foco lógico para que React reciba las mismas
+  // transiciones aunque WebKit no cambie document.activeElement.
+  let campoActivo = null
+
+  const cambiarFocoSimulado = (elemento) => {
+    if (campoActivo === elemento) return
+    const anterior = campoActivo
+    if (anterior) {
+      anterior.dispatchEvent(new FocusEvent('blur', { bubbles: false, relatedTarget: elemento }))
+      anterior.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: elemento }))
+    }
+    campoActivo = elemento
+    elemento.dispatchEvent(new FocusEvent('focus', { bubbles: false, relatedTarget: anterior }))
+    elemento.dispatchEvent(new FocusEvent('focusin', { bubbles: true, relatedTarget: anterior }))
+  }
+
+  const intentarFocoReal = (elemento) => {
+    elemento.focus()
+    if (document.activeElement !== elemento) return false
+    campoActivo = elemento
+    return true
+  }
+
+  const descriptorDeValor = (campo) =>
+    Object.getOwnPropertyDescriptor(
+      campo instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype,
+      'value',
+    )
+
+  const establecerValorNativo = (campo, valor) => {
+    descriptorDeValor(campo).set.call(campo, valor)
+  }
+
+  const emitirInput = (campo, inputType, data) => {
+    campo.dispatchEvent(new InputEvent('input', { bubbles: true, inputType, data }))
+  }
+
+  const admiteCaracter = (campo, caracter) =>
+    campo.maxLength < 0 || (campo.value + caracter).length <= campo.maxLength
+
+  const escribirCaracterSinFoco = (campo, caracter) => {
+    const opcionesTecla = { key: caracter, bubbles: true, cancelable: true }
+    const permitido = campo.dispatchEvent(new KeyboardEvent('keydown', opcionesTecla))
+    if (permitido && admiteCaracter(campo, caracter)) {
+      establecerValorNativo(campo, campo.value + caracter)
+      emitirInput(campo, 'insertText', caracter)
+    }
+    campo.dispatchEvent(new KeyboardEvent('keyup', opcionesTecla))
+  }
+
+  const escribirSinFoco = (campo, texto) => {
+    cambiarFocoSimulado(campo)
+    establecerValorNativo(campo, '')
+    emitirInput(campo, 'deleteContentBackward', null)
+    for (const caracter of texto) escribirCaracterSinFoco(campo, caracter)
+  }
+
+  const TECLAS_ESPECIALES = new Set([
+    'Enter',
+    'Escape',
+    'Tab',
+    'Backspace',
+    'ArrowUp',
+    'ArrowDown',
+    'ArrowLeft',
+    'ArrowRight',
+    'Delete',
+    'Space',
+  ])
+
+  const separarTeclas = (texto) => {
+    const teclas = []
+    for (let indice = 0; indice < texto.length; indice += 1) {
+      if (texto[indice] === '{') {
+        const cierre = texto.indexOf('}', indice + 1)
+        const nombre = cierre === -1 ? '' : texto.slice(indice + 1, cierre)
+        if (TECLAS_ESPECIALES.has(nombre)) {
+          teclas.push(nombre === 'Space' ? ' ' : nombre)
+          indice = cierre
+          continue
+        }
+      }
+      teclas.push(texto[indice])
+    }
+    return teclas
+  }
+
+  const teclearSinFoco = (texto) => {
+    for (const tecla of separarTeclas(texto)) {
+      const opciones = { key: tecla, bubbles: true, cancelable: true }
+      const permitido = campoActivo.dispatchEvent(new KeyboardEvent('keydown', opciones))
+      if (permitido) {
+        if (tecla === 'Enter' && campoActivo instanceof HTMLInputElement && campoActivo.form) {
+          campoActivo.form.requestSubmit()
+        } else if (
+          (tecla === 'Enter' || tecla === ' ') &&
+          campoActivo instanceof HTMLButtonElement
+        ) {
+          campoActivo.click()
+        } else if (tecla === 'Backspace' && campoActivo instanceof HTMLInputElement) {
+          establecerValorNativo(campoActivo, campoActivo.value.slice(0, -1))
+          emitirInput(campoActivo, 'deleteContentBackward', null)
+        } else if (
+          tecla.length === 1 &&
+          (campoActivo instanceof HTMLInputElement || campoActivo instanceof HTMLTextAreaElement) &&
+          admiteCaracter(campoActivo, tecla)
+        ) {
+          establecerValorNativo(campoActivo, campoActivo.value + tecla)
+          emitirInput(campoActivo, 'insertText', tecla)
+        }
+      }
+      campoActivo.dispatchEvent(new KeyboardEvent('keyup', opciones))
+    }
+  }
+
+  const seleccionarSinFoco = (campo, opcion) => {
+    const elegida = Array.from(campo.options).find(
+      (candidata) => candidata.value === opcion || candidata.textContent === opcion,
+    )
+    if (!elegida) return false
+    cambiarFocoSimulado(campo)
+    elegida.selected = true
+    campo.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertReplacementText' }))
+    campo.dispatchEvent(new Event('change', { bubbles: true }))
+    return true
   }
 
   const ejecutarPaso = async (pantalla, usuario, paso) => {
+    if (paso.red === 'fallar-siguiente') {
+      if (window.__redReactEnVivo) window.__redReactEnVivo.fallarSiguiente()
+      return
+    }
     if (paso.escribir) {
-      const campo = campoPorEtiqueta(pantalla, paso.escribir.etiqueta)
-      await usuario.clear(campo)
-      if (paso.escribir.texto) await usuario.type(campo, escaparTeclas(paso.escribir.texto))
+      const campo = await campoPorEtiqueta(pantalla, paso.escribir.etiqueta)
+      // WebKit solo permite enfocar un iframe de otro origen durante un
+      // instante tras el gesto del usuario. Pasado ese plazo, focus() se
+      // ignora en silencio aunque el iframe siga teniendo el foco.
+      if (intentarFocoReal(campo)) {
+        await usuario.clear(campo)
+        if (paso.escribir.texto) await usuario.type(campo, escaparTeclas(paso.escribir.texto))
+      } else {
+        escribirSinFoco(campo, paso.escribir.texto)
+      }
       return
     }
     if (paso.pulsar) {
-      const [elemento] = buscarTodos(pantalla, paso.pulsar)
-      if (!elemento) throw new FalloComprobacion('No encuentro ' + describir(paso.pulsar, true) + '.')
+      const elemento = await esperarElemento(
+        () => buscarTodos(pantalla, paso.pulsar),
+        describir(paso.pulsar, true),
+      )
       await usuario.click(elemento)
+      if (document.activeElement === elemento) campoActivo = elemento
+      else cambiarFocoSimulado(elemento)
       return
     }
     if (paso.teclear !== undefined) {
-      await usuario.keyboard(paso.teclear)
+      if (!campoActivo || intentarFocoReal(campoActivo)) {
+        await usuario.keyboard(paso.teclear)
+      } else {
+        teclearSinFoco(paso.teclear)
+      }
       return
     }
     if (paso.seleccionar) {
-      const campo = campoPorEtiqueta(pantalla, paso.seleccionar.etiqueta)
+      const campo = await campoPorEtiqueta(pantalla, paso.seleccionar.etiqueta)
       try {
+        // selectOptions no necesita el foco real; si la app controlada deja
+        // otra opción, es comportamiento de la app y no se fuerza de nuevo.
         await usuario.selectOptions(campo, paso.seleccionar.opcion)
       } catch {
+        if (seleccionarSinFoco(campo, paso.seleccionar.opcion)) return
         throw new FalloComprobacion(
           'No encuentro la opción «' +
             paso.seleccionar.opcion +
@@ -267,14 +444,31 @@
     }
     const resultados = []
     for (const comprobacion of comprobaciones) {
-      // Cada comprobación empieza de cero, también el estado a nivel de módulo.
+      // Cada comprobación empieza de cero: módulos, API y ambos almacenes.
       cache = Object.create(null)
       ultimoError = null
+      campoActivo = null
       desmontar()
+      if (window.__redReactEnVivo) window.__redReactEnVivo.reiniciar()
+      limpiarAlmacen('localStorage')
+      limpiarAlmacen('sessionStorage')
+      const pasos = comprobacion.pasos || []
+      let primerPasoNormal = 0
+      while (pasos[primerPasoNormal] && pasos[primerPasoNormal].red === 'fallar-siguiente') {
+        primerPasoNormal += 1
+      }
+      const falloDuranteMontaje = primerPasoNormal > 0 && window.__redReactEnVivo
+      if (falloDuranteMontaje) window.__redReactEnVivo.fallarMontaje()
       try {
         R.ReactDOM.flushSync(montar)
       } catch (error) {
         ultimoError = ubicar(error)
+      } finally {
+        // Comprobado con el react.js 19.3.1 real en jsdom: flushSync ejecuta
+        // aquí los efectos pasivos y su repetición de StrictMode antes de volver.
+        // Por eso ambas peticiones pertenecen al montaje, pero los pasos que
+        // vienen después (por ejemplo «Reintentar») ya quedan fuera.
+        if (falloDuranteMontaje) window.__redReactEnVivo.terminarMontaje()
       }
       if (ultimoError) {
         resultados.push(fallo(comprobacion, 'La app no llegó a mostrarse: ' + ultimoError.texto))
@@ -286,7 +480,7 @@
       const pantalla = P.within(document.body)
       const usuario = P.userEvent.setup({ document })
       try {
-        for (const paso of comprobacion.pasos || []) await ejecutarPaso(pantalla, usuario, paso)
+        for (const paso of pasos.slice(primerPasoNormal)) await ejecutarPaso(pantalla, usuario, paso)
         await P.waitFor(
           () => {
             // Si la app ya reventó no hay nada que esperar: se sale en el

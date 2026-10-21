@@ -319,6 +319,7 @@ const esquemaPasoComprobacionReact = z.union([
   z.strictObject({ pulsar: esquemaConsultaElementoReact }),
   z.strictObject({ teclear: z.string().min(1).max(60) }),
   z.strictObject({ seleccionar: z.strictObject({ etiqueta: textoCorto, opcion: textoCorto }) }),
+  z.strictObject({ red: z.literal('fallar-siguiente') }),
 ])
 
 const esquemaEsperaComprobacionReact = z.union([
@@ -338,6 +339,31 @@ const esquemaArchivoReact = z.object({
   codigo: z.string().max(4000),
 })
 
+const esquemaRegistroApiReact = z
+  .object({ id: z.union([z.number(), z.string()]) })
+  .passthrough()
+const esquemaApiReact = z
+  .record(
+    z.string().regex(/^[a-z][a-z0-9-]*$/),
+    z.array(esquemaRegistroApiReact).max(200),
+  )
+  .superRefine((api, contexto) => {
+    if (Object.keys(api).length > 8) {
+      contexto.addIssue({ code: 'custom', message: 'api admite como máximo 8 colecciones' })
+    }
+    try {
+      if (JSON.stringify(api).length > 20_000) {
+        contexto.addIssue({ code: 'custom', message: 'api admite como máximo 20 000 caracteres en JSON' })
+      }
+    } catch {
+      contexto.addIssue({ code: 'custom', message: 'api debe poder representarse como JSON' })
+    }
+  })
+const esquemaRedReact = z.object({
+  latencia: z.number().int().min(0).max(3000).optional(),
+  desordenar: z.boolean().default(false),
+})
+
 export const esquemaReactEnVivo = z
   .object({
     tipo: z.literal('react-en-vivo'),
@@ -350,6 +376,9 @@ export const esquemaReactEnVivo = z
     mostrarJsGenerado: z.boolean().default(false),
     // Árbol de renders (fase 2): qué se renderiza en cada commit y por qué.
     mostrarArbol: z.boolean().default(false),
+    mostrarEfectos: z.boolean().default(false),
+    api: esquemaApiReact.optional(),
+    red: esquemaRedReact.optional(),
     comprobaciones: z.array(esquemaComprobacionReact).min(1).max(8).optional(),
   })
   .refine((datos) => datos.archivos.some((archivo) => archivo.nombre === 'App.jsx'), {
@@ -374,6 +403,9 @@ export const esquemaReactAnotado = z.object({
   strictMode: z.boolean().default(true),
   mostrarConsola: z.boolean().default(false),
   mostrarArbol: z.boolean().default(false),
+  mostrarEfectos: z.boolean().default(false),
+  api: esquemaApiReact.optional(),
+  red: esquemaRedReact.optional(),
 })
 
 // Árbol de componentes estático: el mismo dibujo que el árbol de renders,

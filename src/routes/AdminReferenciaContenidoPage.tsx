@@ -702,6 +702,53 @@ export function AdminReferenciaContenidoPage() {
           />
         </Referencia>
 
+        <Referencia nombre="PanelRed">
+          <ReactEnVivo
+            tipo="react-en-vivo"
+            titulo="API simulada: recetas"
+            consigna="Escribe deprisa en el buscador para ver cómo cada búsqueda cancela la petición anterior. Prueba también la latencia, el orden y el siguiente fallo."
+            archivos={[
+              {
+                nombre: 'App.jsx',
+                codigo:
+                  "import { useEffect, useState } from 'react'\n\nexport default function App() {\n  const [busqueda, setBusqueda] = useState('')\n  const [recetas, setRecetas] = useState([])\n  const [error, setError] = useState('')\n\n  useEffect(() => {\n    const control = new AbortController()\n    setError('')\n    fetch('/api/recetas?q=' + encodeURIComponent(busqueda), { signal: control.signal })\n      .then((respuesta) => {\n        if (!respuesta.ok) throw new Error('No se pudieron cargar las recetas')\n        return respuesta.json()\n      })\n      .then(setRecetas)\n      .catch((fallo) => {\n        if (fallo.name !== 'AbortError') setError(fallo.message)\n      })\n    return () => control.abort()\n  }, [busqueda])\n\n  return (\n    <main>\n      <label>\n        Buscar recetas\n        <input value={busqueda} onChange={(evento) => setBusqueda(evento.target.value)} />\n      </label>\n      {error && <p role=\"alert\">{error}</p>}\n      <ul>{recetas.map((receta) => <li key={receta.id}>{receta.nombre}</li>)}</ul>\n    </main>\n  )\n}",
+              },
+            ]}
+            strictMode
+            mostrarConsola={false}
+            mostrarJsGenerado={false}
+            api={{
+              recetas: [
+                { id: 1, nombre: 'Salmorejo', tiempo: 20 },
+                { id: 2, nombre: 'Pisto manchego', tiempo: 45 },
+                { id: 3, nombre: 'Tortilla de patatas', tiempo: 35 },
+              ],
+            }}
+            red={{ latencia: 600, desordenar: false }}
+            etiquetaSeccion="React en vivo — panel de red"
+          />
+        </Referencia>
+
+        <Referencia nombre="RegistroEfectos">
+          <ReactEnVivo
+            tipo="react-en-vivo"
+            titulo="Línea de tiempo de efectos"
+            consigna="Cambia de sala y oculta el chat para ver el montaje, las dependencias y las limpiezas, incluida la repetición de StrictMode."
+            archivos={[
+              {
+                nombre: 'App.jsx',
+                codigo:
+                  "import { useEffect, useState } from 'react'\n\nfunction useConexion(sala) {\n  useEffect(() => {\n    return () => {}\n  }, [sala])\n}\n\nfunction Chat({ sala }) {\n  useConexion(sala)\n  useEffect(() => {\n    document.title = sala\n  }, [sala])\n  return <p>Sala {sala}</p>\n}\n\nexport default function App() {\n  const [sala, setSala] = useState('general')\n  const [ver, setVer] = useState(true)\n  return (\n    <main>\n      <button onClick={() => setSala('viaje')}>Viaje</button>\n      <button onClick={() => setVer(false)}>Ocultar</button>\n      {ver && <Chat sala={sala} />}\n    </main>\n  )\n}",
+              },
+            ]}
+            strictMode
+            mostrarConsola={false}
+            mostrarJsGenerado={false}
+            mostrarEfectos
+            etiquetaSeccion="React en vivo — registro de efectos"
+          />
+        </Referencia>
+
         <Referencia nombre="ArbolDeRenders">
           <ReactEnVivo
             tipo="react-en-vivo"

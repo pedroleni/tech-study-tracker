@@ -48,6 +48,25 @@ describe('VistaPreviaReact', () => {
     expect(onMensaje).toHaveBeenCalledWith(commit)
   })
 
+  it('envía la red al iframe al cambiar y la reenvía cuando queda montado', () => {
+    const { rerender } = render(
+      <VistaPreviaReact srcDoc="<p>a</p>" red={{ latencia: 600, desordenar: false }} />,
+    )
+    const enviar = vi.spyOn(iframe().contentWindow!, 'postMessage')
+
+    enviarDesde(iframe().contentWindow, { canal: 'react-en-vivo', tipo: 'montado', version: '19.3.1' })
+    expect(enviar).toHaveBeenLastCalledWith(
+      { canal: 'react-en-vivo', tipo: 'red', latencia: 600, desordenar: false },
+      '*',
+    )
+
+    rerender(<VistaPreviaReact srcDoc="<p>a</p>" red={{ latencia: 1200, desordenar: true }} />)
+    expect(enviar).toHaveBeenLastCalledWith(
+      { canal: 'react-en-vivo', tipo: 'red', latencia: 1200, desordenar: true },
+      '*',
+    )
+  })
+
   it('aísla el código del alumno', () => {
     render(<VistaPreviaReact srcDoc="<p>a</p>" />)
     expect(iframe()).toHaveAttribute('sandbox', 'allow-scripts allow-forms')
