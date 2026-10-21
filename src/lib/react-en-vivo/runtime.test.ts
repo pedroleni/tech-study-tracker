@@ -1,10 +1,6 @@
 import { fireEvent, waitFor, within } from '@testing-library/dom'
-import * as React from 'react'
-import * as ReactDOM from 'react-dom'
-import * as ReactDOMClient from 'react-dom/client'
-import * as JsxDevRuntime from 'react/jsx-dev-runtime'
-import * as JsxRuntime from 'react/jsx-runtime'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { readFileSync } from 'node:fs'
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 
 import type { ArchivoReact, ComprobacionReact } from '@/lib/laboratorio/schemas'
 
@@ -28,8 +24,13 @@ type VentanaRuntime = typeof window & {
     comprobaciones: ComprobacionReact[],
   ) => Promise<{ descripcion: string; ok: boolean; motivo?: string }[]>
   __pruebasEnVivo?: Record<string, unknown>
-  __reactEnVivo?: Record<string, unknown>
-  __redReactEnVivo?: { fallarSiguiente: () => void; reiniciar: () => void }
+  __reactEnVivo?: Record<string, unknown> & { React: { version: string } }
+  __redReactEnVivo?: {
+    fallarMontaje: () => void
+    fallarSiguiente: () => void
+    terminarMontaje: () => void
+    reiniciar: () => void
+  }
   __REACT_DEVTOOLS_GLOBAL_HOOK__?: {
     supportsFiber?: boolean
     renderers?: Map<number, unknown>
@@ -48,6 +49,14 @@ const consolaOriginal = {
   warn: console.warn,
   error: console.error,
 }
+let reactDelSandbox: NonNullable<VentanaRuntime['__reactEnVivo']>
+
+beforeAll(() => {
+  // Las comprobaciones se prueban con el mismo React 19.3.1 que carga el iframe real.
+  new Function(readFileSync('public/vendor/react-en-vivo/19.3.1/react.js', 'utf8'))()
+  if (!ventana.__reactEnVivo) throw new Error('El bundle de React del sandbox no se cargó')
+  reactDelSandbox = ventana.__reactEnVivo
+})
 
 const userEventFalso = {
   setup: () => ({
@@ -72,13 +81,7 @@ const userEventFalso = {
 }
 
 function instalarReact() {
-  ventana.__reactEnVivo = {
-    React,
-    ReactDOM,
-    ReactDOMClient,
-    JsxRuntime,
-    JsxDevRuntime,
-  }
+  ventana.__reactEnVivo = reactDelSandbox
 }
 
 async function ejecutarMontaje(
@@ -162,7 +165,7 @@ describe('runtime de montaje', () => {
 
     expect(await within(document.body).findByText('Desde Tarjeta')).toBeInTheDocument()
     expect(mensajesDe(enviar)).toContainEqual(
-      expect.objectContaining({ tipo: 'montado', version: React.version }),
+      expect.objectContaining({ tipo: 'montado', version: reactDelSandbox.React.version }),
     )
   })
 
@@ -756,7 +759,152 @@ describe('puente del iframe', () => {
   })
 })
 
+const APP_CARGA_CON_BANDERA = `import { useEffect, useState } from 'react'
+export default function App() {
+  const [estado, setEstado] = useState('cargando')
+  const [recetas, setRecetas] = useState([])
+  const cargar = async (ignorar = () => false) => {
+    setEstado('cargando')
+    try {
+      const respuesta = await fetch('/api/recetas')
+      if (!respuesta.ok) throw new Error('Error del servidor')
+      const siguientes = await respuesta.json()
+      if (!ignorar()) {
+        setRecetas(siguientes)
+        setEstado('cargadas')
+      }
+    } catch (error) {
+      if (error?.name !== 'AbortError' && !ignorar()) setEstado('error')
+    }
+  }
+  useEffect(() => {
+    let ignorar = false
+    cargar(() => ignorar)
+    return () => { ignorar = true }
+  }, [])
+  return <><p>{estado === 'error' ? 'No se pudieron cargar' : estado}</p>{estado === 'error' && <button onClick={() => cargar()}>Reintentar</button>}<ul>{recetas.map((receta) => <li key={receta.id}>{receta.nombre}</li>)}</ul></>
+}`
+
+const APP_CARGA_CON_ABORT = `import { useEffect, useState } from 'react'
+export default function App() {
+  const [estado, setEstado] = useState('cargando')
+  const [recetas, setRecetas] = useState([])
+  const cargar = async (signal) => {
+    setEstado('cargando')
+    try {
+      const respuesta = await fetch('/api/recetas', signal ? { signal } : undefined)
+      if (!respuesta.ok) throw new Error('Error del servidor')
+      setRecetas(await respuesta.json())
+      setEstado('cargadas')
+    } catch (error) {
+      if (error?.name !== 'AbortError') setEstado('error')
+    }
+  }
+  useEffect(() => {
+    const controlador = new AbortController()
+    cargar(controlador.signal)
+    return () => { controlador.abort() }
+  }, [])
+  return <><p>{estado === 'error' ? 'No se pudieron cargar' : estado}</p>{estado === 'error' && <button onClick={() => cargar()}>Reintentar</button>}<ul>{recetas.map((receta) => <li key={receta.id}>{receta.nombre}</li>)}</ul></>
+}`
+
+async function comprobarCargaConRed(
+  codigo: string,
+  strictMode: boolean,
+  comprobaciones: ComprobacionReact[],
+) {
+  const originalFetch = window.fetch
+  const transformacion = await transformarArchivos([{ nombre: 'App.jsx', codigo }])
+  if (!transformacion.ok) throw new Error(transformacion.mensaje)
+  document.body.replaceChildren(Object.assign(document.createElement('div'), { id: 'root' }))
+  instalarReact()
+  ventana.__enviarReactEnVivo = vi.fn()
+  ventana.__configReactEnVivo = {
+    modulos: transformacion.modulos,
+    archivosCss: transformacion.archivosCss,
+    strictMode,
+    api: { recetas: [{ id: 1, nombre: 'Salmorejo' }] },
+    red: { latencia: 0, desordenar: false },
+  }
+  try {
+    new Function(red)()
+    new Function(montaje)()
+    ventana.__pruebasEnVivo = {
+      ...await import('@testing-library/dom'),
+      userEvent: userEventFalso,
+    }
+    return await ventana.__comprobarReactEnVivo?.(comprobaciones)
+  } finally {
+    window.fetch = originalFetch
+  }
+}
+
 describe('comprobaciones con red', () => {
+  it('en StrictMode muestra el fallo inicial con la solución de bandera ignorar', async () => {
+    expect(
+      await comprobarCargaConRed(APP_CARGA_CON_BANDERA, true, [
+        {
+          descripcion: 'muestra el error inicial',
+          pasos: [{ red: 'fallar-siguiente' }],
+          espera: { texto: 'No se pudieron cargar' },
+        },
+      ]),
+    ).toEqual([{ descripcion: 'muestra el error inicial', ok: true }])
+  })
+
+  it('en StrictMode muestra el fallo inicial con AbortController', async () => {
+    expect(
+      await comprobarCargaConRed(APP_CARGA_CON_ABORT, true, [
+        {
+          descripcion: 'muestra el error inicial',
+          pasos: [{ red: 'fallar-siguiente' }],
+          espera: { texto: 'No se pudieron cargar' },
+        },
+      ]),
+    ).toEqual([{ descripcion: 'muestra el error inicial', ok: true }])
+  })
+
+  it.each([
+    ['bandera ignorar', APP_CARGA_CON_BANDERA],
+    ['AbortController', APP_CARGA_CON_ABORT],
+  ])('tras el fallo inicial con %s, Reintentar carga las recetas', async (_nombre, codigo) => {
+    expect(
+      await comprobarCargaConRed(codigo, true, [
+        {
+          descripcion: 'reintenta sin otro fallo pendiente',
+          pasos: [
+            { red: 'fallar-siguiente' },
+            { pulsar: { rol: 'button', nombre: 'Reintentar' } },
+          ],
+          espera: { rol: 'listitem', texto: 'Salmorejo' },
+        },
+      ]),
+    ).toEqual([{ descripcion: 'reintenta sin otro fallo pendiente', ok: true }])
+  })
+
+  it('sin StrictMode falla la única carga inicial y permite reintentar', async () => {
+    expect(
+      await comprobarCargaConRed(APP_CARGA_CON_BANDERA, false, [
+        {
+          descripcion: 'muestra el error inicial',
+          pasos: [{ red: 'fallar-siguiente' }],
+          espera: { texto: 'No se pudieron cargar' },
+        },
+        {
+          descripcion: 'reintenta sin otro fallo pendiente',
+          pasos: [
+            { red: 'fallar-siguiente' },
+            { pulsar: { rol: 'button', nombre: 'Reintentar' } },
+          ],
+          espera: { rol: 'listitem', texto: 'Salmorejo' },
+        },
+      ]),
+    ).toEqual([
+      { descripcion: 'muestra el error inicial', ok: true },
+      { descripcion: 'reintenta sin otro fallo pendiente', ok: true },
+    ])
+  })
+
   it('reinicia API, fallo pendiente y almacenamiento entre comprobaciones', async () => {
     const originalFetch = window.fetch
     const transformacion = await transformarArchivos([{ nombre: 'App.jsx', codigo: `import { useEffect, useState } from 'react'
@@ -842,7 +990,7 @@ export default function App() {
     const respuesta = await fetch('/api/recetas')
     setEstado(respuesta.ok ? 'éxito' : 'error')
   }
-  return <><button onClick={cargar}>Cargar</button><p>{estado}</p></>
+  return <><button onClick={() => setEstado('preparada')}>Preparar</button><button onClick={cargar}>Cargar</button><p>{estado}</p></>
 }`,
       },
     ])
@@ -870,6 +1018,7 @@ export default function App() {
           {
             descripcion: 'Maneja el error',
             pasos: [
+              { pulsar: { rol: 'button', nombre: 'Preparar' } },
               { red: 'fallar-siguiente' },
               { pulsar: { rol: 'button', nombre: 'Cargar' } },
             ],

@@ -343,6 +343,25 @@ export default function App() {
     )
   })
 
+  it.each([true, false])(
+    'un efecto sin dependencias con limpieza dice «cada render» al repetirse (StrictMode %s)',
+    async (strictMode) => {
+      const codigo = `import { useEffect, useState } from 'react'
+export default function App(){ const [n,setN]=useState(0); useEffect(()=>{ return ()=>{} }); return <button onClick={()=>setN(n+1)}>{n}</button> }`
+      await montarConOpciones(codigo, true, strictMode)
+      const efectosAlMontar = strictMode ? ['montaje', 'strict-mode'] : ['montaje']
+      await waitFor(() =>
+        expect(mensajes().filter((m) => m.accion === 'efecto').map((m) => m.motivo)).toEqual(
+          efectosAlMontar,
+        ),
+      )
+      enviar.mockClear()
+      fireEvent.click(within(document.body).getByRole('button'))
+      await waitFor(() => expect(mensajes().filter((m) => m.accion === 'efecto')).toHaveLength(1))
+      expect(mensajes().filter((m) => m.accion === 'efecto')[0].motivo).toBe('cada-render')
+    },
+  )
+
   it('el efecto de layout sin dependencias se registra tras cada render', async () => {
     await montar()
     await waitFor(() => expect(mensajes().length).toBeGreaterThanOrEqual(7))

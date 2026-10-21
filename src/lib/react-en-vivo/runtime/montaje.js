@@ -455,13 +455,20 @@
       const pasos = comprobacion.pasos || []
       let primerPasoNormal = 0
       while (pasos[primerPasoNormal] && pasos[primerPasoNormal].red === 'fallar-siguiente') {
-        await ejecutarPaso(null, null, pasos[primerPasoNormal])
         primerPasoNormal += 1
       }
+      const falloDuranteMontaje = primerPasoNormal > 0 && window.__redReactEnVivo
+      if (falloDuranteMontaje) window.__redReactEnVivo.fallarMontaje()
       try {
         R.ReactDOM.flushSync(montar)
       } catch (error) {
         ultimoError = ubicar(error)
+      } finally {
+        // Comprobado con el react.js 19.3.1 real en jsdom: flushSync ejecuta
+        // aquí los efectos pasivos y su repetición de StrictMode antes de volver.
+        // Por eso ambas peticiones pertenecen al montaje, pero los pasos que
+        // vienen después (por ejemplo «Reintentar») ya quedan fuera.
+        if (falloDuranteMontaje) window.__redReactEnVivo.terminarMontaje()
       }
       if (ultimoError) {
         resultados.push(fallo(comprobacion, 'La app no llegó a mostrarse: ' + ultimoError.texto))

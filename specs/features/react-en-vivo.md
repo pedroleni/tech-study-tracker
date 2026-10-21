@@ -595,6 +595,9 @@ ejercicios que tienen que manejar un error del servidor.
   'AbortError')`.
 - **Fallar la siguiente petición**: la siguiente petición a `/api/`
   responde 500 con `{ error: 'Error del servidor (simulado)' }`.
+  Si una comprobación empieza con este paso, fallan todas las peticiones
+  iniciadas durante el montaje (incluida la repetición de `StrictMode`) y el
+  modo termina antes de ejecutar los pasos siguientes, sin dejar fallos pendientes.
 - **Responder desordenado**: retrasos deterministas, sin `Math.random`:
   cada petición nueva responde a la mitad de la latencia y alarga una
   latencia completa las que siguen pendientes, reprogramando sus
