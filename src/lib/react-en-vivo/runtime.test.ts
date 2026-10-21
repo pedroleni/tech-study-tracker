@@ -460,6 +460,152 @@ export default function App() {
     expect(resultados).toEqual([{ descripcion: 'Selecciona TypeScript', ok: true }])
   })
 
+  it('respeta el foco real que la app mueve a un campo tras pulsar', async () => {
+    await ejecutarMontajeConBundlesReales([
+      {
+        nombre: 'App.jsx',
+        codigo: `import { useRef, useState } from 'react'
+export default function App() {
+  const [nombre, setNombre] = useState('')
+  const nombreRef = useRef(null)
+  return <form onSubmit={(e) => {
+    e.preventDefault()
+    if (!nombre) nombreRef.current.focus()
+  }}>
+    <label>Nombre <input ref={nombreRef} value={nombre} onChange={(e) => setNombre(e.target.value)} /></label>
+    <button type="submit">Enviar</button>
+  </form>
+}`,
+      },
+    ])
+
+    const resultados = await ventana.__comprobarReactEnVivo!([
+      {
+        descripcion: 'Escribe donde la app coloca el foco',
+        pasos: [
+          { pulsar: { rol: 'button', nombre: 'Enviar' } },
+          { teclear: 'Lucía' },
+        ],
+        espera: { etiqueta: 'Nombre', valor: 'Lucía' },
+      },
+    ])
+
+    expect(resultados).toEqual([
+      { descripcion: 'Escribe donde la app coloca el foco', ok: true },
+    ])
+  })
+
+  it('respeta el foco real devuelto al botón que abre un diálogo', async () => {
+    await ejecutarMontajeConBundlesReales([
+      {
+        nombre: 'App.jsx',
+        codigo: `import { useRef, useState } from 'react'
+export default function App() {
+  const [abierto, setAbierto] = useState(false)
+  const reservarRef = useRef(null)
+  const cerrar = () => {
+    setAbierto(false)
+    reservarRef.current.focus()
+  }
+  return <>
+    <button ref={reservarRef} onClick={() => setAbierto(true)}>Reservar</button>
+    {abierto && <div role="dialog" aria-labelledby="titulo-reserva">
+      <h2 id="titulo-reserva">Confirmar reserva</h2>
+      <button onClick={cerrar}>Cancelar</button>
+    </div>}
+  </>
+}`,
+      },
+    ])
+
+    const resultados = await ventana.__comprobarReactEnVivo!([
+      {
+        descripcion: 'Vuelve a abrir el diálogo con Enter',
+        pasos: [
+          { pulsar: { rol: 'button', nombre: 'Reservar' } },
+          { pulsar: { rol: 'button', nombre: 'Cancelar' } },
+          { teclear: '{Enter}' },
+        ],
+        espera: { rol: 'heading', nombre: 'Confirmar reserva' },
+      },
+    ])
+
+    expect(resultados).toEqual([
+      { descripcion: 'Vuelve a abrir el diálogo con Enter', ok: true },
+    ])
+  })
+
+  it('respeta el foco real que la app mueve al siguiente botón de una lista', async () => {
+    await ejecutarMontajeConBundlesReales([
+      {
+        nombre: 'App.jsx',
+        codigo: `import { useRef, useState } from 'react'
+export default function App() {
+  const [personas, setPersonas] = useState(['Lucía', 'Bruno'])
+  const quitarBrunoRef = useRef(null)
+  const quitar = (nombre) => {
+    setPersonas((actuales) => actuales.filter((persona) => persona !== nombre))
+    if (nombre === 'Lucía') quitarBrunoRef.current.focus()
+  }
+  return <ul>{personas.map((persona) => <li key={persona}>
+    {persona}
+    <button ref={persona === 'Bruno' ? quitarBrunoRef : null} onClick={() => quitar(persona)}>
+      Quitar a {persona}
+    </button>
+  </li>)}</ul>
+}`,
+      },
+    ])
+
+    const resultados = await ventana.__comprobarReactEnVivo!([
+      {
+        descripcion: 'Quita dos filas con ratón y teclado',
+        pasos: [
+          { pulsar: { rol: 'button', nombre: 'Quitar a Lucía' } },
+          { teclear: '{Enter}' },
+        ],
+        espera: { ausente: { rol: 'button', nombre: 'Quitar a Bruno' } },
+      },
+    ])
+
+    expect(resultados).toEqual([
+      { descripcion: 'Quita dos filas con ratón y teclado', ok: true },
+    ])
+  })
+
+  it('activa el foco simulado al pulsar si WebKit rechaza el foco desde el principio', async () => {
+    await ejecutarMontajeConBundlesReales([
+      {
+        nombre: 'App.jsx',
+        codigo: `import { useState } from 'react'
+export default function App() {
+  const [pulsaciones, setPulsaciones] = useState(0)
+  return <>
+    <button onClick={() => setPulsaciones((actuales) => actuales + 1)}>Sumar</button>
+    <p>Pulsaciones: {pulsaciones}</p>
+  </>
+}`,
+      },
+    ])
+
+    const resultados = await conFocoBloqueado(() =>
+      ventana.__comprobarReactEnVivo!([
+        {
+          descripcion: 'Pulsa dos veces sin foco real',
+          pasos: [
+            { pulsar: { rol: 'button', nombre: 'Sumar' } },
+            { teclear: '{Enter}' },
+          ],
+          espera: { texto: 'Pulsaciones: 2' },
+        },
+      ]),
+    )
+
+    expect(resultados).toEqual([
+      { descripcion: 'Pulsa dos veces sin foco real', ok: true },
+    ])
+  })
+
   it('pulsa botones y no conserva el campo anterior como activo', async () => {
     await ejecutarMontajeConBundlesReales([
       {

@@ -221,9 +221,11 @@
     }
   }
 
-  // El fallback conserva un foco lógico para que React reciba las mismas
-  // transiciones aunque WebKit no cambie document.activeElement.
+  // El fallback conserva un foco lógico solo después de comprobar que WebKit
+  // ha rechazado focus(). En Chromium, la app manda sobre el foco real y no
+  // debemos devolverlo al último control pulsado.
   let campoActivo = null
+  let focoSimulado = false
 
   const cambiarFocoSimulado = (elemento) => {
     if (campoActivo === elemento) return
@@ -362,6 +364,7 @@
         await usuario.clear(campo)
         if (paso.escribir.texto) await usuario.type(campo, escaparTeclas(paso.escribir.texto))
       } else {
+        focoSimulado = true
         escribirSinFoco(campo, paso.escribir.texto)
       }
       return
@@ -372,11 +375,26 @@
         describir(paso.pulsar, true),
       )
       await usuario.click(elemento)
-      if (document.activeElement === elemento) campoActivo = elemento
-      else cambiarFocoSimulado(elemento)
+      if (focoSimulado) {
+        if (document.activeElement === elemento) campoActivo = elemento
+        else cambiarFocoSimulado(elemento)
+      } else if (
+        elemento.matches('button, a[href], input, select, textarea, [tabindex]') &&
+        (document.activeElement === document.body || document.activeElement === null)
+      ) {
+        // WebKit puede rechazar focus() dentro de un iframe de otro origen si
+        // no queda un gesto reciente. Si la app enfocó otro elemento, como sí
+        // ocurre en Chromium, activeElement no es body y se respeta su decisión.
+        focoSimulado = true
+        cambiarFocoSimulado(elemento)
+      }
       return
     }
     if (paso.teclear !== undefined) {
+      if (!focoSimulado) {
+        await usuario.keyboard(paso.teclear)
+        return
+      }
       if (!campoActivo || intentarFocoReal(campoActivo)) {
         await usuario.keyboard(paso.teclear)
       } else {
@@ -386,6 +404,17 @@
     }
     if (paso.seleccionar) {
       const campo = await campoPorEtiqueta(pantalla, paso.seleccionar.etiqueta)
+      if (!intentarFocoReal(campo)) {
+        focoSimulado = true
+        if (seleccionarSinFoco(campo, paso.seleccionar.opcion)) return
+        throw new FalloComprobacion(
+          'No encuentro la opción «' +
+            paso.seleccionar.opcion +
+            '» en el campo «' +
+            paso.seleccionar.etiqueta +
+            '».',
+        )
+      }
       try {
         // selectOptions no necesita el foco real; si la app controlada deja
         // otra opción, es comportamiento de la app y no se fuerza de nuevo.
@@ -448,6 +477,7 @@
       cache = Object.create(null)
       ultimoError = null
       campoActivo = null
+      focoSimulado = false
       desmontar()
       if (window.__redReactEnVivo) window.__redReactEnVivo.reiniciar()
       limpiarAlmacen('localStorage')
