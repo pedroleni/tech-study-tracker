@@ -257,9 +257,11 @@ En el navegador, al pulsar un botón que llamaba a otra server function (`avisar
 
 ```text
 POST /_serverFn/492baec349a097cf4afa52dbe0e04807c02ee63426b92f603a69ccc26a3a501c   200
-cuerpo:    {"t":{"t":10,"i":0,"p":{"k":["data"],"v":[{"t":1,"s":"ana@correo.es"}]},"o":0},"f":127,"m":[]}
-respuesta: {"t":10,"i":0,"p":{"k":["result"],"v":[{"t":10,"i":1,"p":{"k":["ok"],"v":[{"t":1,"s":"Te avisaremos en ana@correo.es."}]},"o":0}]},"o":0}
+cuerpo:    JSON serializado con el formato de TanStack Start; dentro va  data → "ana@correo.es"
+respuesta: JSON con el mismo formato; dentro va  result → ok → "Te avisaremos en ana@correo.es."
 ```
+
+(Lo resumimos: el JSON real anida cada valor con claves cortas de tipo y posición, y es largo de leer. Ábrelo tú en la pestaña Red para verlo entero.)
 
 Otra sintaxis y otro formato de mensaje, pero **la misma estructura que viste en la lección 89**: un `POST` a una dirección de tu servidor, con los argumentos en el cuerpo y el identificador de la función en la URL. Su documentación lo dice con sus palabras: las server functions son «endpoints RPC del mismo origen» de tu aplicación, y trae un middleware contra peticiones de otros orígenes que se instala solo si no defines el tuyo.
 
