@@ -124,7 +124,7 @@ De las dos funciones, React exige poco, pero lo exige siempre:
 - **`subscribe(avisar)`** conecta `avisar` con el almacén y **devuelve la función que la desconecta**. No le importa qué cambió: avisar solo significa «vuelve a mirar».
 - **`getSnapshot()`** devuelve el valor actual y **no cambia nada**. React la llama varias veces en cada render y cada vez que el almacén avisa, así que tiene que ser barata, y devolver lo mismo mientras nada haya cambiado (lo verás romperse más abajo).
 
-Falta la segunda pega del efecto, la ventana sin vigilar. Aquí, otro componente llama al siguiente paciente con un `useLayoutEffect`, que se ejecuta después de pintar pero **antes** que los efectos normales (lección 45). Es decir, justo en el hueco entre el render de las pantallas y el momento en que el `useEffect` se suscribe:
+Falta la segunda pega del efecto, la ventana sin vigilar. Aquí, otro componente llama al siguiente paciente con un `useLayoutEffect`, que se ejecuta nada más aplicar los cambios al DOM, antes de pintar y **antes** que los efectos normales (lección 45). Es decir, justo en el hueco entre el render de las pantallas y el momento en que el `useEffect` se suscribe:
 
 ```laboratorio
 {
@@ -139,7 +139,7 @@ Falta la segunda pega del efecto, la ventana sin vigilar. Aquí, otro componente
     },
     {
       "fragmento": "useLayoutEffect(() => {\n    llamarSiguiente()\n  }, [])",
-      "nota": "Cambia el sistema después de pintar y antes de los useEffect. En una app real puede ser cualquier código que no controlas: un temporizador, un mensaje del servidor, otra librería."
+      "nota": "Cambia el sistema antes de pintar y antes de los useEffect. En una app real puede ser cualquier código que no controlas: un temporizador, un mensaje del servidor, otra librería."
     },
     {
       "fragmento": "const turno = useSyncExternalStore(suscribirse, leerTurno)",
