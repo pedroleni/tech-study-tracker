@@ -4,6 +4,8 @@ import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 
 import type { ArchivoReact, ComprobacionReact } from '@/lib/laboratorio/schemas'
 
+import pruebasReales from '../../../public/vendor/react-en-vivo/19.3.1/pruebas.js?raw'
+import reactReal from '../../../public/vendor/react-en-vivo/19.3.1/react.js?raw'
 import montaje from './runtime/montaje.js?raw'
 import puente from './runtime/puente.js?raw'
 import red from './runtime/red.js?raw'
@@ -83,13 +85,20 @@ function instalarReact() {
   ventana.__reactEnVivo = reactDelSandbox
 }
 
-async function ejecutarMontaje(archivos: ArchivoReact[], strictMode = false) {
+async function ejecutarMontaje(
+  archivos: ArchivoReact[],
+  strictMode = false,
+  instalarRuntime = instalarReact,
+) {
   const transformacion = await transformarArchivos(archivos)
   if (!transformacion.ok) throw new Error(transformacion.mensaje)
 
   document.body.replaceChildren(Object.assign(document.createElement('div'), { id: 'root' }))
   const enviar = vi.fn()
-  instalarReact()
+  instalarRuntime()
+  const versionEsperada = (
+    ventana.__reactEnVivo as { React: { version: string } }
+  ).React.version
   ventana.__enviarReactEnVivo = enviar
   ventana.__configReactEnVivo = {
     modulos: transformacion.modulos,
@@ -100,10 +109,25 @@ async function ejecutarMontaje(archivos: ArchivoReact[], strictMode = false) {
 
   await waitFor(() => {
     expect(enviar).toHaveBeenCalledWith(
-      expect.objectContaining({ tipo: 'montado', version: reactDelSandbox.React.version }),
+      expect.objectContaining({ tipo: 'montado', version: versionEsperada }),
     )
   })
   return enviar
+}
+
+async function ejecutarMontajeConBundlesReales(archivos: ArchivoReact[]) {
+  new Function(reactReal)()
+  new Function(pruebasReales)()
+  return ejecutarMontaje(archivos, false, () => {})
+}
+
+async function conFocoBloqueado<T>(accion: () => Promise<T>) {
+  const focus = vi.spyOn(HTMLElement.prototype, 'focus').mockImplementation(() => {})
+  try {
+    return await accion()
+  } finally {
+    focus.mockRestore()
+  }
 }
 
 function mensajesDe(enviar: ReturnType<typeof vi.fn>) {
@@ -261,6 +285,222 @@ export default function App() {
         ok: false,
         motivo: 'Después de los pasos, todavía aparece el texto «Leer».',
       },
+    ])
+  })
+
+  it('escribe en inputs controlados aunque WebKit bloquee el foco real', async () => {
+    await ejecutarMontajeConBundlesReales([
+      {
+        nombre: 'App.jsx',
+        codigo: `import { useState } from 'react'
+export default function App() {
+  const [nombre, setNombre] = useState('')
+  const [mayusculas, setMayusculas] = useState('')
+  return <>
+    <label>Nombre <input value={nombre} onChange={(e) => setNombre(e.target.value)} /></label>
+    <label>Mayúsculas <input value={mayusculas} onChange={(e) => setMayusculas(e.target.value.toUpperCase())} /></label>
+  </>
+}`,
+      },
+    ])
+
+    const resultados = await conFocoBloqueado(() =>
+      ventana.__comprobarReactEnVivo!([
+        {
+          descripcion: 'Escribe el nombre',
+          pasos: [{ escribir: { etiqueta: 'Nombre', texto: 'Ana' } }],
+          espera: { etiqueta: 'Nombre', valor: 'Ana' },
+        },
+        {
+          descripcion: 'Respeta la transformación de la app',
+          pasos: [{ escribir: { etiqueta: 'Mayúsculas', texto: 'ana' } }],
+          espera: { etiqueta: 'Mayúsculas', valor: 'ANA' },
+        },
+      ]),
+    )
+
+    expect(resultados).toEqual([
+      { descripcion: 'Escribe el nombre', ok: true },
+      { descripcion: 'Respeta la transformación de la app', ok: true },
+    ])
+  })
+
+  it('envía un formulario con Enter aunque WebKit bloquee el foco real', async () => {
+    await ejecutarMontajeConBundlesReales([
+      {
+        nombre: 'App.jsx',
+        codigo: `import { useState } from 'react'
+export default function App() {
+  const [nombre, setNombre] = useState('')
+  const [enviado, setEnviado] = useState('')
+  return <form onSubmit={(e) => { e.preventDefault(); setEnviado(nombre) }}>
+    <label>Nombre <input value={nombre} onChange={(e) => setNombre(e.target.value)} /></label>
+    <button type="submit">Enviar</button>
+    {enviado && <p>Enviado: {enviado}</p>}
+  </form>
+}`,
+      },
+    ])
+
+    const resultados = await conFocoBloqueado(() =>
+      ventana.__comprobarReactEnVivo!([
+        {
+          descripcion: 'Envía con Enter',
+          pasos: [
+            { escribir: { etiqueta: 'Nombre', texto: 'Ana' } },
+            { teclear: '{Enter}' },
+          ],
+          espera: { texto: 'Enviado: Ana' },
+        },
+      ]),
+    )
+
+    expect(resultados).toEqual([{ descripcion: 'Envía con Enter', ok: true }])
+  })
+
+  it('dispara onBlur al cambiar de campo con el foco real bloqueado', async () => {
+    await ejecutarMontajeConBundlesReales([
+      {
+        nombre: 'App.jsx',
+        codigo: `import { useState } from 'react'
+export default function App() {
+  const [nombre, setNombre] = useState('')
+  const [correo, setCorreo] = useState('')
+  const [error, setError] = useState('')
+  return <>
+    <label>Nombre <input value={nombre} onChange={(e) => setNombre(e.target.value)} onBlur={() => setError(nombre ? '' : 'El nombre es obligatorio')} /></label>
+    <label>Correo <input value={correo} onChange={(e) => setCorreo(e.target.value)} /></label>
+    {error && <p>{error}</p>}
+  </>
+}`,
+      },
+    ])
+
+    const resultados = await conFocoBloqueado(() =>
+      ventana.__comprobarReactEnVivo!([
+        {
+          descripcion: 'Valida al salir de Nombre',
+          pasos: [
+            { escribir: { etiqueta: 'Nombre', texto: '' } },
+            { escribir: { etiqueta: 'Correo', texto: 'ana@example.com' } },
+          ],
+          espera: { texto: 'El nombre es obligatorio' },
+        },
+      ]),
+    )
+
+    expect(resultados).toEqual([{ descripcion: 'Valida al salir de Nombre', ok: true }])
+  })
+
+  it('respeta maxLength y los keydown cancelados con el foco real bloqueado', async () => {
+    await ejecutarMontajeConBundlesReales([
+      {
+        nombre: 'App.jsx',
+        codigo: `import { useState } from 'react'
+export default function App() {
+  const [corto, setCorto] = useState('')
+  const [sinDigitos, setSinDigitos] = useState('')
+  return <>
+    <label>Corto <input maxLength={3} value={corto} onChange={(e) => setCorto(e.target.value)} /></label>
+    <label>Sin dígitos <input value={sinDigitos} onKeyDown={(e) => { if (/\\d/.test(e.key)) e.preventDefault() }} onChange={(e) => setSinDigitos(e.target.value)} /></label>
+  </>
+}`,
+      },
+    ])
+
+    const resultados = await conFocoBloqueado(() =>
+      ventana.__comprobarReactEnVivo!([
+        {
+          descripcion: 'Limita la longitud',
+          pasos: [{ escribir: { etiqueta: 'Corto', texto: 'Anabel' } }],
+          espera: { etiqueta: 'Corto', valor: 'Ana' },
+        },
+        {
+          descripcion: 'No escribe teclas canceladas',
+          pasos: [{ escribir: { etiqueta: 'Sin dígitos', texto: 'a1b' } }],
+          espera: { etiqueta: 'Sin dígitos', valor: 'ab' },
+        },
+      ]),
+    )
+
+    expect(resultados).toEqual([
+      { descripcion: 'Limita la longitud', ok: true },
+      { descripcion: 'No escribe teclas canceladas', ok: true },
+    ])
+  })
+
+  it('selecciona una opción controlada con el foco real bloqueado', async () => {
+    await ejecutarMontajeConBundlesReales([
+      {
+        nombre: 'App.jsx',
+        codigo: `import { useState } from 'react'
+export default function App() {
+  const [tecnologia, setTecnologia] = useState('react')
+  return <>
+    <label>Tecnología <select value={tecnologia} onChange={(e) => setTecnologia(e.target.value)}>
+      <option value="react">React</option>
+      <option value="typescript">TypeScript</option>
+    </select></label>
+    <p>Elegida: {tecnologia}</p>
+  </>
+}`,
+      },
+    ])
+
+    const resultados = await conFocoBloqueado(() =>
+      ventana.__comprobarReactEnVivo!([
+        {
+          descripcion: 'Selecciona TypeScript',
+          pasos: [{ seleccionar: { etiqueta: 'Tecnología', opcion: 'typescript' } }],
+          espera: { texto: 'Elegida: typescript' },
+        },
+      ]),
+    )
+
+    expect(resultados).toEqual([{ descripcion: 'Selecciona TypeScript', ok: true }])
+  })
+
+  it('pulsa botones y no conserva el campo anterior como activo', async () => {
+    await ejecutarMontajeConBundlesReales([
+      {
+        nombre: 'App.jsx',
+        codigo: `import { useState } from 'react'
+export default function App() {
+  const [nombre, setNombre] = useState('')
+  const [pulsado, setPulsado] = useState(false)
+  const [enviado, setEnviado] = useState(false)
+  return <form onSubmit={(e) => { e.preventDefault(); setEnviado(true) }}>
+    <label>Nombre <input value={nombre} onChange={(e) => setNombre(e.target.value)} /></label>
+    <button type="button" onClick={() => setPulsado(true)}>Vista previa</button>
+    {pulsado && <p>Botón pulsado</p>}
+    {enviado && <p>Formulario enviado</p>}
+  </form>
+}`,
+      },
+    ])
+
+    const resultados = await conFocoBloqueado(() =>
+      ventana.__comprobarReactEnVivo!([
+        {
+          descripcion: 'Pulsa el botón',
+          pasos: [{ pulsar: { rol: 'button', nombre: 'Vista previa' } }],
+          espera: { texto: 'Botón pulsado' },
+        },
+        {
+          descripcion: 'Enter ya no actúa sobre el campo anterior',
+          pasos: [
+            { escribir: { etiqueta: 'Nombre', texto: 'Ana' } },
+            { pulsar: { rol: 'button', nombre: 'Vista previa' } },
+            { teclear: '{Enter}' },
+          ],
+          espera: { ausente: { texto: 'Formulario enviado' } },
+        },
+      ]),
+    )
+
+    expect(resultados).toEqual([
+      { descripcion: 'Pulsa el botón', ok: true },
+      { descripcion: 'Enter ya no actúa sobre el campo anterior', ok: true },
     ])
   })
 

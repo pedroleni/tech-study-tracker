@@ -221,6 +221,133 @@
     }
   }
 
+  // El fallback conserva un foco lógico para que React reciba las mismas
+  // transiciones aunque WebKit no cambie document.activeElement.
+  let campoActivo = null
+
+  const cambiarFocoSimulado = (elemento) => {
+    if (campoActivo === elemento) return
+    const anterior = campoActivo
+    if (anterior) {
+      anterior.dispatchEvent(new FocusEvent('blur', { bubbles: false, relatedTarget: elemento }))
+      anterior.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: elemento }))
+    }
+    campoActivo = elemento
+    elemento.dispatchEvent(new FocusEvent('focus', { bubbles: false, relatedTarget: anterior }))
+    elemento.dispatchEvent(new FocusEvent('focusin', { bubbles: true, relatedTarget: anterior }))
+  }
+
+  const intentarFocoReal = (elemento) => {
+    elemento.focus()
+    if (document.activeElement !== elemento) return false
+    campoActivo = elemento
+    return true
+  }
+
+  const descriptorDeValor = (campo) =>
+    Object.getOwnPropertyDescriptor(
+      campo instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype,
+      'value',
+    )
+
+  const establecerValorNativo = (campo, valor) => {
+    descriptorDeValor(campo).set.call(campo, valor)
+  }
+
+  const emitirInput = (campo, inputType, data) => {
+    campo.dispatchEvent(new InputEvent('input', { bubbles: true, inputType, data }))
+  }
+
+  const admiteCaracter = (campo, caracter) =>
+    campo.maxLength < 0 || (campo.value + caracter).length <= campo.maxLength
+
+  const escribirCaracterSinFoco = (campo, caracter) => {
+    const opcionesTecla = { key: caracter, bubbles: true, cancelable: true }
+    const permitido = campo.dispatchEvent(new KeyboardEvent('keydown', opcionesTecla))
+    if (permitido && admiteCaracter(campo, caracter)) {
+      establecerValorNativo(campo, campo.value + caracter)
+      emitirInput(campo, 'insertText', caracter)
+    }
+    campo.dispatchEvent(new KeyboardEvent('keyup', opcionesTecla))
+  }
+
+  const escribirSinFoco = (campo, texto) => {
+    cambiarFocoSimulado(campo)
+    establecerValorNativo(campo, '')
+    emitirInput(campo, 'deleteContentBackward', null)
+    for (const caracter of texto) escribirCaracterSinFoco(campo, caracter)
+  }
+
+  const TECLAS_ESPECIALES = new Set([
+    'Enter',
+    'Escape',
+    'Tab',
+    'Backspace',
+    'ArrowUp',
+    'ArrowDown',
+    'ArrowLeft',
+    'ArrowRight',
+    'Delete',
+    'Space',
+  ])
+
+  const separarTeclas = (texto) => {
+    const teclas = []
+    for (let indice = 0; indice < texto.length; indice += 1) {
+      if (texto[indice] === '{') {
+        const cierre = texto.indexOf('}', indice + 1)
+        const nombre = cierre === -1 ? '' : texto.slice(indice + 1, cierre)
+        if (TECLAS_ESPECIALES.has(nombre)) {
+          teclas.push(nombre === 'Space' ? ' ' : nombre)
+          indice = cierre
+          continue
+        }
+      }
+      teclas.push(texto[indice])
+    }
+    return teclas
+  }
+
+  const teclearSinFoco = (texto) => {
+    for (const tecla of separarTeclas(texto)) {
+      const opciones = { key: tecla, bubbles: true, cancelable: true }
+      const permitido = campoActivo.dispatchEvent(new KeyboardEvent('keydown', opciones))
+      if (permitido) {
+        if (tecla === 'Enter' && campoActivo instanceof HTMLInputElement && campoActivo.form) {
+          campoActivo.form.requestSubmit()
+        } else if (
+          (tecla === 'Enter' || tecla === ' ') &&
+          campoActivo instanceof HTMLButtonElement
+        ) {
+          campoActivo.click()
+        } else if (tecla === 'Backspace' && campoActivo instanceof HTMLInputElement) {
+          establecerValorNativo(campoActivo, campoActivo.value.slice(0, -1))
+          emitirInput(campoActivo, 'deleteContentBackward', null)
+        } else if (
+          tecla.length === 1 &&
+          (campoActivo instanceof HTMLInputElement || campoActivo instanceof HTMLTextAreaElement) &&
+          admiteCaracter(campoActivo, tecla)
+        ) {
+          establecerValorNativo(campoActivo, campoActivo.value + tecla)
+          emitirInput(campoActivo, 'insertText', tecla)
+        }
+      }
+      campoActivo.dispatchEvent(new KeyboardEvent('keyup', opciones))
+    }
+  }
+
+  const seleccionarSinFoco = (campo, opcion) => {
+    const elegida = Array.from(campo.options).find(
+      (candidata) => candidata.value === opcion || candidata.textContent === opcion,
+    )
+    if (!elegida) return false
+    cambiarFocoSimulado(campo)
+    elegida.selected = true
+    campo.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertReplacementText' }))
+    campo.dispatchEvent(new Event('change', { bubbles: true }))
+    return true
+  }
+
   const ejecutarPaso = async (pantalla, usuario, paso) => {
     if (paso.red === 'fallar-siguiente') {
       if (window.__redReactEnVivo) window.__redReactEnVivo.fallarSiguiente()
@@ -228,8 +355,15 @@
     }
     if (paso.escribir) {
       const campo = await campoPorEtiqueta(pantalla, paso.escribir.etiqueta)
-      await usuario.clear(campo)
-      if (paso.escribir.texto) await usuario.type(campo, escaparTeclas(paso.escribir.texto))
+      // WebKit solo permite enfocar un iframe de otro origen durante un
+      // instante tras el gesto del usuario. Pasado ese plazo, focus() se
+      // ignora en silencio aunque el iframe siga teniendo el foco.
+      if (intentarFocoReal(campo)) {
+        await usuario.clear(campo)
+        if (paso.escribir.texto) await usuario.type(campo, escaparTeclas(paso.escribir.texto))
+      } else {
+        escribirSinFoco(campo, paso.escribir.texto)
+      }
       return
     }
     if (paso.pulsar) {
@@ -238,17 +372,26 @@
         describir(paso.pulsar, true),
       )
       await usuario.click(elemento)
+      if (document.activeElement === elemento) campoActivo = elemento
+      else cambiarFocoSimulado(elemento)
       return
     }
     if (paso.teclear !== undefined) {
-      await usuario.keyboard(paso.teclear)
+      if (!campoActivo || intentarFocoReal(campoActivo)) {
+        await usuario.keyboard(paso.teclear)
+      } else {
+        teclearSinFoco(paso.teclear)
+      }
       return
     }
     if (paso.seleccionar) {
       const campo = await campoPorEtiqueta(pantalla, paso.seleccionar.etiqueta)
       try {
+        // selectOptions no necesita el foco real; si la app controlada deja
+        // otra opción, es comportamiento de la app y no se fuerza de nuevo.
         await usuario.selectOptions(campo, paso.seleccionar.opcion)
       } catch {
+        if (seleccionarSinFoco(campo, paso.seleccionar.opcion)) return
         throw new FalloComprobacion(
           'No encuentro la opción «' +
             paso.seleccionar.opcion +
@@ -304,6 +447,7 @@
       // Cada comprobación empieza de cero: módulos, API y ambos almacenes.
       cache = Object.create(null)
       ultimoError = null
+      campoActivo = null
       desmontar()
       if (window.__redReactEnVivo) window.__redReactEnVivo.reiniciar()
       limpiarAlmacen('localStorage')
