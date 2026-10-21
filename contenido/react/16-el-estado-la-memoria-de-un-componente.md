@@ -485,7 +485,7 @@ Prueba los dos arreglos en el bloque de arriba, pero antes, predice:
 }
 ```
 
-El inicializador es el sitio para cualquier valor inicial que cueste calcular: construir un array grande, transformar unos datos o leer algo guardado, como el progreso del repaso en `localStorage` en tu proyecto (en los bloques de esta web, la vista previa no tiene acceso a `localStorage`).
+El inicializador es el sitio para cualquier valor inicial que cueste calcular: construir un array grande, transformar unos datos o leer algo guardado, como el progreso del repaso en `localStorage` en tu proyecto (en los bloques de esta web, la vista previa tiene un `localStorage` que funciona pero se vacía al recargarla; en tu proyecto, sí persiste).
 
 El mismo razonamiento explica otra cosa: **el valor inicial no es una forma de cambiar el estado**. Si escribes `useState(props.tarjetaInicial)` y luego el padre te pasa otra, el estado no se entera, porque React ya no mira ese argumento. Lo verás con calma en las lecciones 24 y 26.
 
