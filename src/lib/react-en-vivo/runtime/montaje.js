@@ -221,9 +221,13 @@
     }
   }
 
-  // El fallback conserva un foco lógico para que React reciba las mismas
-  // transiciones aunque WebKit no cambie document.activeElement.
+  // El fallback conserva un foco lógico solo después de comprobar que WebKit
+  // ha rechazado focus(). En Chromium, la app manda sobre el foco real y no
+  // debemos devolverlo al último control pulsado.
   let campoActivo = null
+  let focoSimulado = false
+  let cambiosFocoSimulado = 0
+  let ejecutorEnfocando = false
 
   const cambiarFocoSimulado = (elemento) => {
     if (campoActivo === elemento) return
@@ -233,15 +237,46 @@
       anterior.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: elemento }))
     }
     campoActivo = elemento
+    cambiosFocoSimulado += 1
     elemento.dispatchEvent(new FocusEvent('focus', { bubbles: false, relatedTarget: anterior }))
     elemento.dispatchEvent(new FocusEvent('focusin', { bubbles: true, relatedTarget: anterior }))
   }
 
   const intentarFocoReal = (elemento) => {
-    elemento.focus()
+    ejecutorEnfocando = true
+    try {
+      elemento.focus()
+    } finally {
+      ejecutorEnfocando = false
+    }
     if (document.activeElement !== elemento) return false
     campoActivo = elemento
     return true
+  }
+
+  const esEnfocable = (elemento) =>
+    elemento.isConnected &&
+    !elemento.closest('[hidden], [inert]') &&
+    !elemento.matches(':disabled, input[type="hidden"]') &&
+    elemento.matches(
+      'button, a[href], input, select, textarea, [tabindex], [contenteditable]:not([contenteditable="false"])',
+    )
+
+  const envolverFocoDuranteComprobacion = () => {
+    const focoOriginal = HTMLElement.prototype.focus
+    HTMLElement.prototype.focus = function (...argumentos) {
+      focoOriginal.apply(this, argumentos)
+      if (
+        ejecutorEnfocando ||
+        document.activeElement === this ||
+        !esEnfocable(this)
+      ) return
+      focoSimulado = true
+      cambiarFocoSimulado(this)
+    }
+    return () => {
+      HTMLElement.prototype.focus = focoOriginal
+    }
   }
 
   const descriptorDeValor = (campo) =>
@@ -362,6 +397,7 @@
         await usuario.clear(campo)
         if (paso.escribir.texto) await usuario.type(campo, escaparTeclas(paso.escribir.texto))
       } else {
+        focoSimulado = true
         escribirSinFoco(campo, paso.escribir.texto)
       }
       return
@@ -371,12 +407,28 @@
         () => buscarTodos(pantalla, paso.pulsar),
         describir(paso.pulsar, true),
       )
+      const cambiosAntesDePulsar = cambiosFocoSimulado
       await usuario.click(elemento)
-      if (document.activeElement === elemento) campoActivo = elemento
-      else cambiarFocoSimulado(elemento)
+      if (focoSimulado) {
+        if (document.activeElement === elemento) campoActivo = elemento
+        else if (cambiosFocoSimulado === cambiosAntesDePulsar) cambiarFocoSimulado(elemento)
+      } else if (
+        elemento.matches('button, a[href], input, select, textarea, [tabindex]') &&
+        (document.activeElement === document.body || document.activeElement === null)
+      ) {
+        // WebKit puede rechazar focus() dentro de un iframe de otro origen si
+        // no queda un gesto reciente. Si la app enfocó otro elemento, como sí
+        // ocurre en Chromium, activeElement no es body y se respeta su decisión.
+        focoSimulado = true
+        cambiarFocoSimulado(elemento)
+      }
       return
     }
     if (paso.teclear !== undefined) {
+      if (!focoSimulado) {
+        await usuario.keyboard(paso.teclear)
+        return
+      }
       if (!campoActivo || intentarFocoReal(campoActivo)) {
         await usuario.keyboard(paso.teclear)
       } else {
@@ -386,6 +438,17 @@
     }
     if (paso.seleccionar) {
       const campo = await campoPorEtiqueta(pantalla, paso.seleccionar.etiqueta)
+      if (!intentarFocoReal(campo)) {
+        focoSimulado = true
+        if (seleccionarSinFoco(campo, paso.seleccionar.opcion)) return
+        throw new FalloComprobacion(
+          'No encuentro la opción «' +
+            paso.seleccionar.opcion +
+            '» en el campo «' +
+            paso.seleccionar.etiqueta +
+            '».',
+        )
+      }
       try {
         // selectOptions no necesita el foco real; si la app controlada deja
         // otra opción, es comportamiento de la app y no se fuerza de nuevo.
@@ -435,7 +498,7 @@
     motivo: motivo.slice(0, 300),
   })
 
-  window.__comprobarReactEnVivo = async (comprobaciones) => {
+  const comprobar = async (comprobaciones) => {
     const P = window.__pruebasEnVivo
     if (!P) {
       const motivo =
@@ -447,8 +510,10 @@
       // Cada comprobación empieza de cero: módulos, API y ambos almacenes.
       cache = Object.create(null)
       ultimoError = null
-      campoActivo = null
       desmontar()
+      campoActivo = null
+      focoSimulado = false
+      cambiosFocoSimulado = 0
       if (window.__redReactEnVivo) window.__redReactEnVivo.reiniciar()
       limpiarAlmacen('localStorage')
       limpiarAlmacen('sessionStorage')
@@ -509,6 +574,15 @@
       enviar({ tipo: 'progreso-comprobaciones', resultado: resultados[resultados.length - 1] })
     }
     return resultados
+  }
+
+  window.__comprobarReactEnVivo = async (comprobaciones) => {
+    const restaurarFoco = envolverFocoDuranteComprobacion()
+    try {
+      return await comprobar(comprobaciones)
+    } finally {
+      restaurarFoco()
+    }
   }
 
   window.addEventListener('message', async (evento) => {
