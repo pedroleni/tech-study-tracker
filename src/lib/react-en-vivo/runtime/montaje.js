@@ -226,6 +226,8 @@
   // debemos devolverlo al último control pulsado.
   let campoActivo = null
   let focoSimulado = false
+  let cambiosFocoSimulado = 0
+  let ejecutorEnfocando = false
 
   const cambiarFocoSimulado = (elemento) => {
     if (campoActivo === elemento) return
@@ -235,15 +237,46 @@
       anterior.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: elemento }))
     }
     campoActivo = elemento
+    cambiosFocoSimulado += 1
     elemento.dispatchEvent(new FocusEvent('focus', { bubbles: false, relatedTarget: anterior }))
     elemento.dispatchEvent(new FocusEvent('focusin', { bubbles: true, relatedTarget: anterior }))
   }
 
   const intentarFocoReal = (elemento) => {
-    elemento.focus()
+    ejecutorEnfocando = true
+    try {
+      elemento.focus()
+    } finally {
+      ejecutorEnfocando = false
+    }
     if (document.activeElement !== elemento) return false
     campoActivo = elemento
     return true
+  }
+
+  const esEnfocable = (elemento) =>
+    elemento.isConnected &&
+    !elemento.closest('[hidden], [inert]') &&
+    !elemento.matches(':disabled, input[type="hidden"]') &&
+    elemento.matches(
+      'button, a[href], input, select, textarea, [tabindex], [contenteditable]:not([contenteditable="false"])',
+    )
+
+  const envolverFocoDuranteComprobacion = () => {
+    const focoOriginal = HTMLElement.prototype.focus
+    HTMLElement.prototype.focus = function (...argumentos) {
+      focoOriginal.apply(this, argumentos)
+      if (
+        ejecutorEnfocando ||
+        document.activeElement === this ||
+        !esEnfocable(this)
+      ) return
+      focoSimulado = true
+      cambiarFocoSimulado(this)
+    }
+    return () => {
+      HTMLElement.prototype.focus = focoOriginal
+    }
   }
 
   const descriptorDeValor = (campo) =>
@@ -374,10 +407,11 @@
         () => buscarTodos(pantalla, paso.pulsar),
         describir(paso.pulsar, true),
       )
+      const cambiosAntesDePulsar = cambiosFocoSimulado
       await usuario.click(elemento)
       if (focoSimulado) {
         if (document.activeElement === elemento) campoActivo = elemento
-        else cambiarFocoSimulado(elemento)
+        else if (cambiosFocoSimulado === cambiosAntesDePulsar) cambiarFocoSimulado(elemento)
       } else if (
         elemento.matches('button, a[href], input, select, textarea, [tabindex]') &&
         (document.activeElement === document.body || document.activeElement === null)
@@ -464,7 +498,7 @@
     motivo: motivo.slice(0, 300),
   })
 
-  window.__comprobarReactEnVivo = async (comprobaciones) => {
+  const comprobar = async (comprobaciones) => {
     const P = window.__pruebasEnVivo
     if (!P) {
       const motivo =
@@ -476,9 +510,10 @@
       // Cada comprobación empieza de cero: módulos, API y ambos almacenes.
       cache = Object.create(null)
       ultimoError = null
+      desmontar()
       campoActivo = null
       focoSimulado = false
-      desmontar()
+      cambiosFocoSimulado = 0
       if (window.__redReactEnVivo) window.__redReactEnVivo.reiniciar()
       limpiarAlmacen('localStorage')
       limpiarAlmacen('sessionStorage')
@@ -539,6 +574,15 @@
       enviar({ tipo: 'progreso-comprobaciones', resultado: resultados[resultados.length - 1] })
     }
     return resultados
+  }
+
+  window.__comprobarReactEnVivo = async (comprobaciones) => {
+    const restaurarFoco = envolverFocoDuranteComprobacion()
+    try {
+      return await comprobar(comprobaciones)
+    } finally {
+      restaurarFoco()
+    }
   }
 
   window.addEventListener('message', async (evento) => {

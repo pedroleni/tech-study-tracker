@@ -460,6 +460,173 @@ export default function App() {
     expect(resultados).toEqual([{ descripcion: 'Selecciona TypeScript', ok: true }])
   })
 
+  it('respeta el foco simulado que la app mueve al único campo con error', async () => {
+    const resultados = await conFocoBloqueado(async () => {
+      await ejecutarMontajeConBundlesReales([
+        {
+          nombre: 'App.jsx',
+          codigo: `import { useRef, useState } from 'react'
+export default function App() {
+  const [nombre, setNombre] = useState('')
+  const [correo, setCorreo] = useState('')
+  const [telefono, setTelefono] = useState('')
+  const telefonoRef = useRef(null)
+  return <form onSubmit={(e) => {
+    e.preventDefault()
+    if (nombre && correo && !telefono) telefonoRef.current.focus()
+  }}>
+    <label>Nombre <input value={nombre} onChange={(e) => setNombre(e.target.value)} /></label>
+    <label>Correo <input value={correo} onChange={(e) => setCorreo(e.target.value)} /></label>
+    <label>Teléfono <input ref={telefonoRef} value={telefono} onChange={(e) => setTelefono(e.target.value)} /></label>
+    <button type="submit">Enviar</button>
+  </form>
+}`,
+        },
+      ])
+
+      return ventana.__comprobarReactEnVivo!([
+        {
+          descripcion: 'Escribe en el único campo con error',
+          pasos: [
+            { escribir: { etiqueta: 'Nombre', texto: 'Lucía' } },
+            { escribir: { etiqueta: 'Correo', texto: 'lucia@example.com' } },
+            { pulsar: { rol: 'button', nombre: 'Enviar' } },
+            { teclear: '600123456' },
+          ],
+          espera: { etiqueta: 'Teléfono', valor: '600123456' },
+        },
+      ])
+    })
+
+    expect(resultados).toEqual([
+      { descripcion: 'Escribe en el único campo con error', ok: true },
+    ])
+  })
+
+  it('respeta el foco simulado que un efecto mueve al campo de un diálogo', async () => {
+    const resultados = await conFocoBloqueado(async () => {
+      await ejecutarMontajeConBundlesReales([
+        {
+          nombre: 'App.jsx',
+          codigo: `import { useEffect, useRef, useState } from 'react'
+export default function App() {
+  const [abierto, setAbierto] = useState(false)
+  const [nombre, setNombre] = useState('')
+  const nombreRef = useRef(null)
+  useEffect(() => {
+    if (abierto) nombreRef.current.focus()
+  }, [abierto])
+  return <>
+    <button onClick={() => setAbierto(true)}>Reservar</button>
+    {abierto && <div role="dialog" aria-label="Reserva">
+      <label>Nombre <input ref={nombreRef} value={nombre} onChange={(e) => setNombre(e.target.value)} /></label>
+    </div>}
+  </>
+}`,
+        },
+      ])
+
+      return ventana.__comprobarReactEnVivo!([
+        {
+          descripcion: 'Escribe en el campo enfocado al abrir',
+          pasos: [
+            { pulsar: { rol: 'button', nombre: 'Reservar' } },
+            { teclear: 'Lucía' },
+          ],
+          espera: { etiqueta: 'Nombre', valor: 'Lucía' },
+        },
+      ])
+    })
+
+    expect(resultados).toEqual([
+      { descripcion: 'Escribe en el campo enfocado al abrir', ok: true },
+    ])
+  })
+
+  it('no duplica los eventos de foco cuando el navegador acepta focus()', async () => {
+    await ejecutarMontajeConBundlesReales([
+      {
+        nombre: 'App.jsx',
+        codigo: `import { useRef } from 'react'
+export default function App() {
+  const nombreRef = useRef(null)
+  return <>
+    <button onClick={() => nombreRef.current.focus()}>Editar nombre</button>
+    <label>Nombre <input ref={nombreRef} /></label>
+  </>
+}`,
+      },
+    ])
+
+    let eventosFocusIn = 0
+    const contarFocusIn = () => {
+      eventosFocusIn += 1
+    }
+    document.addEventListener('focusin', contarFocusIn)
+    const pruebas = ventana.__pruebasEnVivo as {
+      userEvent: { setup: (opciones: { document: Document }) => { click: (elemento: Element) => Promise<void> } }
+    }
+    await pruebas.userEvent.setup({ document }).click(
+      await within(document.body).findByRole('button', { name: 'Editar nombre' }),
+    )
+    const eventosSinEnvoltorio = eventosFocusIn
+
+    ;(document.activeElement as HTMLElement).blur()
+    eventosFocusIn = 0
+    const resultados = await ventana.__comprobarReactEnVivo!([
+      {
+        descripcion: 'La app mueve el foco real una sola vez',
+        pasos: [{ pulsar: { rol: 'button', nombre: 'Editar nombre' } }],
+        espera: { etiqueta: 'Nombre' },
+      },
+    ])
+    const eventosConEnvoltorio = eventosFocusIn
+    document.removeEventListener('focusin', contarFocusIn)
+
+    expect(resultados).toEqual([
+      { descripcion: 'La app mueve el foco real una sola vez', ok: true },
+    ])
+    expect(eventosSinEnvoltorio).toBeGreaterThan(0)
+    expect(eventosConEnvoltorio).toBe(eventosSinEnvoltorio)
+  })
+
+  it('restaura HTMLElement.prototype.focus al terminar y aunque la comprobación lance', async () => {
+    await ejecutarMontajeConBundlesReales([
+      {
+        nombre: 'App.jsx',
+        codigo: 'export default function App() { return <p>Lista</p> }',
+      },
+    ])
+    const focusOriginal = HTMLElement.prototype.focus
+
+    await expect(
+      ventana.__comprobarReactEnVivo!([
+        { descripcion: 'Termina con normalidad', pasos: [], espera: { texto: 'Lista' } },
+      ]),
+    ).resolves.toEqual([{ descripcion: 'Termina con normalidad', ok: true }])
+    expect(HTMLElement.prototype.focus).toBe(focusOriginal)
+
+    let focusDuranteLaComprobacion: typeof HTMLElement.prototype.focus | undefined
+    ventana.__pruebasEnVivo = {
+      ...ventana.__pruebasEnVivo,
+      userEvent: {
+        setup: () => {
+          focusDuranteLaComprobacion = HTMLElement.prototype.focus
+          throw new Error('Fallo preparado en user-event')
+        },
+      },
+    }
+
+    await expect(
+      ventana.__comprobarReactEnVivo!([
+        { descripcion: 'Falla al preparar el usuario', pasos: [], espera: { texto: 'Lista' } },
+      ]),
+    ).rejects.toThrow('Fallo preparado en user-event')
+
+    expect(focusDuranteLaComprobacion).not.toBe(focusOriginal)
+    expect(HTMLElement.prototype.focus).toBe(focusOriginal)
+  })
+
   it('respeta el foco real que la app mueve a un campo tras pulsar', async () => {
     await ejecutarMontajeConBundlesReales([
       {
