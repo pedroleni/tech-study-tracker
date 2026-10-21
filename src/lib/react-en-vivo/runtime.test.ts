@@ -568,6 +568,21 @@ export default function App() {
   return <><p>{estado === 'error' ? 'No se pudieron cargar' : estado}</p>{estado === 'error' && <button onClick={() => cargar()}>Reintentar</button>}<ul>{recetas.map((receta) => <li key={receta.id}>{receta.nombre}</li>)}</ul></>
 }`
 
+const APP_FORMULARIO_SIN_CARGA_INICIAL = `import { useState } from 'react'
+export default function App() {
+  const [nombre, setNombre] = useState('')
+  const [estado, setEstado] = useState('listo')
+  const enviar = async (evento) => {
+    evento.preventDefault()
+    const respuesta = await fetch('/api/recetas', {
+      method: 'POST',
+      body: JSON.stringify({ nombre }),
+    })
+    setEstado(respuesta.ok ? 'guardada' : 'No se pudo guardar')
+  }
+  return <form onSubmit={enviar}><label>Nombre<input value={nombre} onChange={(evento) => setNombre(evento.target.value)} /></label><button>Enviar</button><p>{estado}</p></form>
+}`
+
 async function comprobarCargaConRed(
   codigo: string,
   strictMode: boolean,
@@ -702,6 +717,69 @@ export default function App(){
         { descripcion: 'fallo limpio', ok: true },
       ])
     } finally { window.fetch = originalFetch }
+  })
+
+  it('una petición pendiente de la comprobación anterior no modifica la API reiniciada', async () => {
+    const originalFetch = window.fetch
+    const transformacion = await transformarArchivos([{ nombre: 'App.jsx', codigo: `import { useEffect, useState } from 'react'
+export default function App() {
+  const [cantidad, setCantidad] = useState(null)
+  const [estado, setEstado] = useState('lista')
+  useEffect(() => {
+    fetch('/api/recetas').then((respuesta) => respuesta.json()).then((datos) => setCantidad(datos.length))
+  }, [])
+  const añadir = () => {
+    setEstado('enviada')
+    fetch('/api/recetas', { method: 'POST', body: '{"nombre":"Nueva"}' })
+  }
+  return <><button onClick={añadir}>Añadir</button><p>{estado}</p>{cantidad !== null && <p>{cantidad} registros</p>}</>
+}` }])
+    if (!transformacion.ok) throw new Error(transformacion.mensaje)
+    document.body.replaceChildren(Object.assign(document.createElement('div'), { id: 'root' }))
+    instalarReact()
+    ventana.__enviarReactEnVivo = vi.fn()
+    ventana.__configReactEnVivo = {
+      modulos: transformacion.modulos,
+      archivosCss: transformacion.archivosCss,
+      strictMode: false,
+      api: { recetas: [{ id: 1 }] },
+      red: { latencia: 200, desordenar: false },
+    }
+    try {
+      new Function(red)()
+      new Function(montaje)()
+      ventana.__pruebasEnVivo = { ...await import('@testing-library/dom'), userEvent: userEventFalso }
+
+      expect(await ventana.__comprobarReactEnVivo?.([
+        {
+          descripcion: 'deja un POST pendiente',
+          pasos: [{ pulsar: { rol: 'button', nombre: 'Añadir' } }],
+          espera: { texto: 'enviada' },
+        },
+        { descripcion: 've solo los datos originales', pasos: [], espera: { texto: '1 registros' } },
+      ])).toEqual([
+        { descripcion: 'deja un POST pendiente', ok: true },
+        { descripcion: 've solo los datos originales', ok: true },
+      ])
+    } finally {
+      window.fetch = originalFetch
+    }
+  })
+
+  it('conserva el fallo inicial para el primer envío si el montaje no usa la API', async () => {
+    expect(
+      await comprobarCargaConRed(APP_FORMULARIO_SIN_CARGA_INICIAL, false, [
+        {
+          descripcion: 'muestra el error al enviar',
+          pasos: [
+            { red: 'fallar-siguiente' },
+            { escribir: { etiqueta: 'Nombre', texto: 'Gazpacho' } },
+            { pulsar: { rol: 'button', nombre: 'Enviar' } },
+          ],
+          espera: { texto: 'No se pudo guardar' },
+        },
+      ]),
+    ).toEqual([{ descripcion: 'muestra el error al enviar', ok: true }])
   })
 
   it('aplica un fallo inicial antes de montar la app', async () => {

@@ -257,6 +257,25 @@ describe('API simulada de React en vivo', () => {
     expect((await fetch('/api/recetas')).status).toBe(200)
   })
 
+  it('reiniciar abandona las peticiones pendientes sin tocar los datos nuevos ni registrar su final', async () => {
+    vi.useFakeTimers()
+    instalar({ latencia: 200 })
+    void fetch('/api/recetas', {
+      method: 'POST',
+      body: JSON.stringify({ nombre: 'Gazpacho', tiempo: 10 }),
+    })
+
+    ventana.__redReactEnVivo?.reiniciar()
+    postMessage.mockClear()
+    await vi.advanceTimersByTimeAsync(200)
+
+    expect(vi.getTimerCount()).toBe(0)
+    expect(mensajesPeticion()).toEqual([])
+    const siguiente = fetch('/api/recetas')
+    await vi.advanceTimersByTimeAsync(200)
+    expect(await (await siguiente).json()).toEqual(recetas)
+  })
+
   it('rechaza con signal.reason y conserva AbortError cuando no existe', async () => {
     vi.useFakeTimers()
     instalar({ latencia: 100 })
