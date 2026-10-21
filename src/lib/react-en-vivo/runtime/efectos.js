@@ -286,8 +286,6 @@
       const referencia = React.useRef({
         inicializado: false,
         confirmadas: [],
-        ultimaLimpieza: null,
-        ultimoEfecto: null,
       })
       const tieneDependencias = Array.isArray(dependencias)
       const actuales = tieneDependencias ? dependencias : []
@@ -306,18 +304,15 @@
           ? primeraEjecucion.commit
           : numeroCommit() + (clase === 'useEffect' ? 0 : 1)
         if (!primeraEjecucion) primeraEjecucion = { commit }
-        const ultimaLimpieza = estado.ultimaLimpieza
-        estado.ultimaLimpieza = null
 
         let motivo
         let cambios = []
+        // StrictMode se reconoce solo por la repetición de la misma función.
+        // Comparar dependencias no sirve: sin array, las listas vacías siempre
+        // coinciden y cada render parecería una repetición de StrictMode.
         if (repeticionStrictMode) motivo = 'strict-mode'
         else if (!estado.inicializado) motivo = 'montaje'
-        else if (ultimaLimpieza && ultimaLimpieza.commit === commit && iguales(estado.confirmadas, actuales)) {
-          motivo = 'strict-mode'
-        } else if (estado.ultimoEfecto === commit && iguales(estado.confirmadas, actuales)) {
-          motivo = 'strict-mode'
-        } else if (!tieneDependencias) motivo = 'cada-render'
+        else if (!tieneDependencias) motivo = 'cada-render'
         else {
           motivo = 'dependencias'
           cambios = actuales
@@ -335,7 +330,6 @@
         // Solo se confirman en el commit. Nunca se actualizan durante render.
         estado.confirmadas = actuales.slice()
         estado.inicializado = true
-        estado.ultimoEfecto = commit
         encolar(estado, {
           tipo: 'efecto',
           componente: ubicacion.componente,
@@ -353,7 +347,6 @@
         if (typeof limpiezaReal !== 'function') return limpiezaReal
         return () => {
           const commit = numeroCommit() + (clase === 'useEffect' ? 0 : 1)
-          estado.ultimaLimpieza = { commit }
           encolar(estado, {
             tipo: 'efecto',
             componente: ubicacion.componente,
