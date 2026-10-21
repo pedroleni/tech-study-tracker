@@ -921,7 +921,7 @@ Es decir: «el contexto solo se puede leer mientras React renderiza». Lee el va
 {
   "tipo": "react-en-vivo",
   "titulo": "El escaparate del obrador",
-  "consigna": "Tres arreglos. En datos.jsx, haz que leer guarde la promesa de cada ruta en un Map y devuelva siempre la misma. En App.jsx, envuelve <Escaparate> en un <Suspense> con el fallback «Sacando la hornada…» (con className=\"cargando\") y, por fuera, en <LimiteDeError>, de modo que los botones de categoría queden fuera de los dos. Prueba el fallo con «Fallar la siguiente petición» y otra categoría.",
+  "consigna": "Ahora la vista previa sale en blanco: sin <Suspense>, la carga lo esconde todo (lección 48). Tres arreglos. En datos.jsx, haz que leer guarde la promesa de cada ruta en un Map y devuelva siempre la misma. En App.jsx, envuelve <Escaparate> en un <Suspense> con el fallback «Sacando la hornada…» (con className=\"cargando\") y, por fuera, en <LimiteDeError>, de modo que los botones de categoría queden fuera de los dos. Prueba el fallo con «Fallar la siguiente petición» y otra categoría.",
   "archivos": [
     {
       "nombre": "datos.jsx",
