@@ -703,6 +703,7 @@ si estuviera en pantalla; se resolverá con el módulo 7.
 Comportamientos del sandbox que conviene conocer al escribir ejemplos y
 comprobaciones:
 
+- En las comprobaciones no hay View Transitions: el cambio se aplica sin animar.
 - **`alert()`, `confirm()` y `prompt()`** no abren ventanas (el sandbox
   no admite modales): se ven como un aviso de 3 s arriba de la vista
   previa y como `alert: …` en la consola. `confirm()` responde siempre
