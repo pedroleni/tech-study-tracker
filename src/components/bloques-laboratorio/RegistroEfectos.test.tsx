@@ -49,6 +49,23 @@ describe('RegistroEfectos', () => {
     expect(within(registro).getByText('Chat · useConexion ▶ efecto · montaje')).toBeInTheDocument()
   })
 
+  it('nombra la clase de efecto cuando no es useEffect', () => {
+    render(
+      <RegistroEfectos
+        entradas={[
+          efecto({ componente: 'Tooltip', clase: 'useLayoutEffect' }),
+          efecto({ componente: 'Tooltip', clase: 'useLayoutEffect', accion: 'limpieza', motivo: undefined }),
+          efecto({ componente: 'Estilos', clase: 'useInsertionEffect' }),
+        ]}
+        onLimpiar={() => {}}
+      />,
+    )
+
+    expect(screen.getByText('Tooltip ▶ efecto (useLayoutEffect) · montaje')).toBeInTheDocument()
+    expect(screen.getByText('Tooltip ⟲ limpieza (useLayoutEffect)')).toBeInTheDocument()
+    expect(screen.getByText('Estilos ▶ efecto (useInsertionEffect) · montaje')).toBeInTheDocument()
+  })
+
   it('Limpiar vacía el registro', () => {
     const onLimpiar = vi.fn()
     render(<RegistroEfectos entradas={[efecto({})]} onLimpiar={onLimpiar} />)

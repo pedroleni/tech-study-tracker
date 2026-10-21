@@ -34,7 +34,10 @@ function textoEfecto(entrada: MensajeEfecto) {
     ? `${entrada.componente} · ${entrada.gancho}`
     : entrada.componente
   const accion = entrada.accion === 'efecto' ? '▶ efecto' : '⟲ limpieza'
-  return `${origen} ${accion}${detalleEfecto(entrada)}`
+  // useEffect es lo normal; las otras dos clases se nombran para que se vea
+  // que se ejecutan antes, en la misma fase del commit.
+  const clase = entrada.clase === 'useEffect' ? '' : ` (${entrada.clase})`
+  return `${origen} ${accion}${clase}${detalleEfecto(entrada)}`
 }
 
 export function RegistroEfectos({
