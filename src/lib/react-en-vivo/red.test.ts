@@ -5,7 +5,10 @@ import red from './runtime/red.js?raw'
 
 type ControlRed = {
   configurar: (opciones: { latencia: number; desordenar: boolean }) => void
+  fallarMontaje: () => void
   fallarSiguiente: () => void
+  terminarMontaje: () => void
+  reiniciar: () => void
 }
 
 type VentanaRed = typeof window & {
@@ -212,6 +215,46 @@ describe('API simulada de React en vivo', () => {
     const siguiente = fetch('/api/recetas')
     await vi.runAllTimersAsync()
     expect((await siguiente).status).toBe(500)
+  })
+
+  it('en modo de fallo de montaje hace fallar todas las peticiones hasta terminarlo', async () => {
+    instalar()
+    ventana.__redReactEnVivo?.fallarMontaje()
+
+    const respuestas = await Promise.all([
+      fetch('/api/recetas'),
+      fetch('/api/recetas/1'),
+      fetch('/api/recetas/2'),
+    ])
+
+    expect(respuestas.map((respuesta) => respuesta.status)).toEqual([500, 500, 500])
+    expect(await respuestas[0].json()).toEqual({ error: 'Error del servidor (simulado)' })
+    ventana.__redReactEnVivo?.terminarMontaje()
+    expect((await fetch('/api/recetas')).status).toBe(200)
+  })
+
+  it('cancelar durante el fallo de montaje no deja un fallo normal pendiente', async () => {
+    vi.useFakeTimers()
+    instalar({ latencia: 100 })
+    ventana.__redReactEnVivo?.fallarMontaje()
+    const controlador = new AbortController()
+    const cancelada = fetch('/api/recetas', { signal: controlador.signal })
+
+    controlador.abort()
+    await expect(cancelada).rejects.toMatchObject({ name: 'AbortError' })
+    ventana.__redReactEnVivo?.terminarMontaje()
+
+    const siguiente = fetch('/api/recetas')
+    await vi.runAllTimersAsync()
+    expect((await siguiente).status).toBe(200)
+  })
+
+  it('reiniciar desactiva el modo de fallo de montaje', async () => {
+    instalar()
+    ventana.__redReactEnVivo?.fallarMontaje()
+    ventana.__redReactEnVivo?.reiniciar()
+
+    expect((await fetch('/api/recetas')).status).toBe(200)
   })
 
   it('rechaza con signal.reason y conserva AbortError cuando no existe', async () => {

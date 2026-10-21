@@ -28,6 +28,7 @@
     let latencia = 600
     let desordenar = false
     let debeFallar = false
+    let debeFallarMontaje = false
     let numeroPeticion = 0
     const pendientes = new Map()
 
@@ -43,13 +44,29 @@
     const fallarSiguiente = () => {
       debeFallar = true
     }
+    const fallarMontaje = () => {
+      debeFallar = false
+      debeFallarMontaje = true
+    }
+    const terminarMontaje = () => {
+      debeFallar = false
+      debeFallarMontaje = false
+    }
     const reiniciar = () => {
       datos = copiar(datosOriginales)
       debeFallar = false
+      debeFallarMontaje = false
       numeroPeticion = 0
     }
     const falloPendiente = () => debeFallar
-    window.__redReactEnVivo = { configurar, fallarSiguiente, falloPendiente, reiniciar }
+    window.__redReactEnVivo = {
+      configurar,
+      fallarMontaje,
+      fallarSiguiente,
+      terminarMontaje,
+      falloPendiente,
+      reiniciar,
+    }
 
     const normalizar = (valor) =>
       String(valor)
@@ -186,10 +203,11 @@
       ).toUpperCase()
       const rutaMensaje = ruta.slice(0, 200)
       const inicio = performance.now()
-      const falloForzado = debeFallar
-      debeFallar = false
+      const falloRearmable = !debeFallarMontaje && debeFallar
+      const falloForzado = debeFallarMontaje || falloRearmable
+      if (falloRearmable) debeFallar = false
       if ((metodo === 'GET' || metodo === 'HEAD') && opciones && opciones.body != null) {
-        if (falloForzado) debeFallar = true
+        if (falloRearmable) debeFallar = true
         return Promise.reject(new TypeError('Request with GET/HEAD method cannot have body.'))
       }
       enviar({ tipo: 'peticion', id, metodo, ruta: rutaMensaje, estado: 'pendiente' })
@@ -212,7 +230,9 @@
           if (terminada) return
           terminada = true
           limpiar()
-          if (falloForzado) debeFallar = true
+          // Solo el fallo unitario se devuelve a la cola. En modo de montaje
+          // las demás peticiones ya fallan por estar dentro de la misma ventana.
+          if (falloRearmable) debeFallar = true
           enviar({ tipo: 'peticion', id, metodo, ruta: rutaMensaje, estado: 'cancelada', ms: duracion() })
           rechazar(
             senal && 'reason' in senal && senal.reason !== undefined
