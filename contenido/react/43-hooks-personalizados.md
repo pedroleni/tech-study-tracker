@@ -317,6 +317,8 @@ Fíjate en lo que ha ganado el componente:
 - **Nadie puede añadir dependencias de más** al efecto, porque el efecto ya no está en el componente. Las recetas de la lección 42 se aplican una vez, dentro del Hook.
 - **`null` significa «todavía no»**: con `url` a `null`, el Hook no pide nada. Sirve para datos que dependen de algo que aún no se sabe, como una ficha antes de elegirla. Lo usarás en el ejercicio.
 
+Este `useDatos` tiene un descuido sutil: al cambiar de `url`, mientras llega la respuesta nueva, sigue devolviendo los datos de la `url` anterior (con latencia alta se ve un momento la zona vieja bajo el botón nuevo). En la lección 84 lo descubrirás con un test y lo arreglarás guardando la `url` junto a los datos.
+
 Esta versión tiene un límite: mientras llega la respuesta nueva, sigue devolviendo los datos anteriores. Con la latencia a 2 s lo verás: al pulsar «Norte», los aparcamientos del centro siguen en pantalla un par de segundos. A veces es justo lo que quieres, y otras no; uno de los retos del final lo cambia.
 
 Y una idea para más adelante: como los componentes solo ven `useDatos(url)`, puedes cambiar cómo se piden los datos sin tocarlos. En el módulo 7 verás otras formas de pedirlos (la lección 52 las compara), y en la 78, TanStack Query, cuyo `useQuery` es, precisamente, un Hook personalizado muy completo.

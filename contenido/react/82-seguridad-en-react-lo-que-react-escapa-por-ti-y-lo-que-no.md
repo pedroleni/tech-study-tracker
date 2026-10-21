@@ -333,7 +333,7 @@ En los frameworks con Server Components (módulo 13), una función marcada con `
 }
 ```
 
-Y una lección de humildad: en diciembre de 2025, el equipo de React publicó una vulnerabilidad crítica (CVE-2025-55182, con la nota máxima de gravedad, 10 sobre 10) en la forma en que React decodificaba las peticiones a las Server Functions. Permitía ejecutar código en el servidor sin iniciar sesión, aunque tu código validara todo, y afectaba a las versiones 19.0, 19.1.0, 19.1.1 y 19.2.0 de los paquetes de Server Components. Se corrigió en 19.0.1, 19.1.2 y 19.2.1. **Actualizar las dependencias también es seguridad.** La lección 89 cuenta el caso entero.
+Y una lección de humildad: en diciembre de 2025, el equipo de React publicó una vulnerabilidad crítica (CVE-2025-55182, con la nota máxima de gravedad, 10 sobre 10) en la forma en que React decodificaba las peticiones a las Server Functions. Permitía ejecutar código en el servidor sin iniciar sesión, aunque tu código validara todo, y afectaba a las versiones 19.0, 19.1.0, 19.1.1 y 19.2.0 de los paquetes de Server Components. Se corrigió en 19.0.1, 19.1.2 y 19.2.1, aunque esas correcciones se quedaron cortas y hubo avisos posteriores: las versiones que React da hoy por seguras son 19.0.4, 19.1.5 y 19.2.4. **Actualizar las dependencias también es seguridad.** La lección 89 cuenta el caso entero.
 
 ## Cuándo lo usarías de verdad
 

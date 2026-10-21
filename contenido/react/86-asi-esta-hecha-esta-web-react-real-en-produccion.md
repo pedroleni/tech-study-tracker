@@ -535,7 +535,7 @@ El lint es el de las lecciones 44 y 70: `eslint-plugin-react-hooks` (7.1.1, con 
   "anotaciones": [
     {
       "fragmento": "vi.mock('@/lib/hooks/useProfile'",
-      "nota": "Se sustituye el hook por una versión de mentira, para controlar si el usuario es administrador sin tocar Supabase. Es la técnica de las lecciones 83 y 84."
+      "nota": "Se sustituye el hook por una versión de mentira, para controlar si el usuario es administrador sin tocar Supabase. Es vi.mock de Vitest: las lecciones 83 y 84 prefieren simular la red con MSW, pero la idea es la misma: el test controla lo que hay fuera del componente."
     },
     {
       "fragmento": "<MemoryRouter initialEntries={['/admin']}>",
