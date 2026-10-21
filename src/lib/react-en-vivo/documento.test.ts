@@ -41,6 +41,23 @@ describe('construirDocumentoReact', () => {
     )
   })
 
+  it('desactiva View Transitions antes de cargar React en las comprobaciones', () => {
+    const doc = construirDocumentoReact({ ...base, conPruebas: true })
+
+    expect(doc).toContain('delete Document.prototype.startViewTransition')
+    expect(doc).toContain('delete document.startViewTransition')
+    expect(doc.indexOf('delete Document.prototype.startViewTransition')).toBeLessThan(
+      doc.indexOf('/react.js'),
+    )
+  })
+
+  it('mantiene View Transitions en la vista previa normal', () => {
+    const doc = construirDocumentoReact(base)
+
+    expect(doc).not.toContain('delete Document.prototype.startViewTransition')
+    expect(doc).not.toContain('delete document.startViewTransition')
+  })
+
   it('el código del alumno no puede cerrar el script ni el style', () => {
     const doc = construirDocumentoReact({
       ...base,

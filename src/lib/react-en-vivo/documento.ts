@@ -56,6 +56,15 @@ export function construirDocumentoReact({
     ...(conEfectos ? { efectos: true } : {}),
     ...(api ? { api, red: redDelDocumento } : {}),
   }).replace(/</g, '\\u003c')
+  const sinViewTransitions = conPruebas
+    ? `
+    <script>try {
+      // Chromium no pinta el iframe fuera de pantalla y no captura la primera imagen.
+      // Las comprobaciones miran el estado final, no la animación.
+      delete Document.prototype.startViewTransition
+      delete document.startViewTransition
+    } catch {}</script>`
+    : ''
   const pruebas = conPruebas ? `\n    <script src="${runtime}/pruebas.js"></script>` : ''
   // Después de #root (observa sus cambios) y antes del montaje (ve el primer commit).
   const arbol = conArbol && !conPruebas ? `\n    <script>${escaparScript(CODIGO_ARBOL)}</script>` : ''
@@ -71,7 +80,7 @@ export function construirDocumentoReact({
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>${escaparEstilo(css)}</style>
-    <script>${escaparScript(CODIGO_PUENTE)}</script>
+    <script>${escaparScript(CODIGO_PUENTE)}</script>${sinViewTransitions}
     <script src="${runtime}/react.js"></script>${pruebas}
   </head>
   <body>

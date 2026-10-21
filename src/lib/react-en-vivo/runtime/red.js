@@ -20,6 +20,11 @@
         headers: { 'Content-Type': 'application/json; charset=utf-8' },
       })
     const error = (mensaje, estado) => responderJson({ error: mensaje }, estado)
+    const crearErrorAbandono = () => {
+      const errorAbandono = new DOMException('The operation was aborted.', 'AbortError')
+      Object.defineProperty(errorAbandono, '__abandonadaReactEnVivo', { value: true })
+      return errorAbandono
+    }
     const tiene = (objeto, clave) => Object.prototype.hasOwnProperty.call(objeto, clave)
     const copiar = (valor) => JSON.parse(JSON.stringify(valor))
     const datosOriginales = copiar(configuracion.api)
@@ -29,7 +34,9 @@
     let desordenar = false
     let debeFallar = false
     let debeFallarMontaje = false
+    let huboPeticionDuranteMontaje = false
     let numeroPeticion = 0
+    let generacion = 0
     const pendientes = new Map()
 
     const configurar = (opciones) => {
@@ -47,15 +54,21 @@
     const fallarMontaje = () => {
       debeFallar = false
       debeFallarMontaje = true
+      huboPeticionDuranteMontaje = false
     }
     const terminarMontaje = () => {
-      debeFallar = false
+      debeFallar = !huboPeticionDuranteMontaje
       debeFallarMontaje = false
+      huboPeticionDuranteMontaje = false
     }
     const reiniciar = () => {
+      generacion += 1
+      for (const pendiente of pendientes.values()) pendiente.abandonar()
+      pendientes.clear()
       datos = copiar(datosOriginales)
       debeFallar = false
       debeFallarMontaje = false
+      huboPeticionDuranteMontaje = false
       numeroPeticion = 0
     }
     const falloPendiente = () => debeFallar
@@ -93,7 +106,8 @@
 
     const buscarColeccion = (nombre) => (tiene(datos, nombre) ? datos[nombre] : null)
 
-    const ejecutar = async (ruta, metodo, entrada, opciones, falloForzado) => {
+    const ejecutar = async (ruta, metodo, entrada, opciones, falloForzado, sigueVigente) => {
+      if (!sigueVigente()) return null
       if (falloForzado) return error('Error del servidor (simulado)', 500)
 
       const separador = ruta.indexOf('?')
@@ -146,6 +160,7 @@
         } catch {
           return error('El cuerpo debe ser JSON válido', 400)
         }
+        if (!sigueVigente()) return null
         const idsDeTexto = coleccion.some((registro) => typeof registro.id === 'string')
         const nuevoId = idsDeTexto
           ? window.crypto.randomUUID()
@@ -168,6 +183,7 @@
         } catch {
           return error('El cuerpo debe ser JSON válido', 400)
         }
+        if (!sigueVigente()) return null
         const idExistente = coleccion[indice].id
         const siguiente =
           metodo === 'PUT'
@@ -194,6 +210,7 @@
             : String(entrada)
       if (!ruta.startsWith('/api/')) return fetchOriginal.apply(this, arguments)
 
+      if (debeFallarMontaje) huboPeticionDuranteMontaje = true
       numeroPeticion += 1
       const id = numeroPeticion
       const metodo = String(
@@ -203,6 +220,7 @@
       ).toUpperCase()
       const rutaMensaje = ruta.slice(0, 200)
       const inicio = performance.now()
+      const generacionPeticion = generacion
       const falloRearmable = !debeFallarMontaje && debeFallar
       const falloForzado = debeFallarMontaje || falloRearmable
       if (falloRearmable) debeFallar = false
@@ -226,6 +244,15 @@
           if (senal) senal.removeEventListener('abort', cancelar)
         }
         const duracion = () => Math.max(0, Math.round(performance.now() - inicio))
+        const sigueVigente = () => !terminada && generacionPeticion === generacion
+        const abandonar = () => {
+          if (terminada) return
+          terminada = true
+          limpiar()
+          // Una acción async de React que espera una promesa eterna deja enganchadas
+          // también las transiciones posteriores, aunque su app ya se haya desmontado.
+          rechazar(crearErrorAbandono())
+        }
         const cancelar = () => {
           if (terminada) return
           terminada = true
@@ -248,14 +275,32 @@
         if (senal) senal.addEventListener('abort', cancelar, { once: true })
         const completar = async () => {
           if (terminada) return
-          terminada = true
-          limpiar()
+          if (!sigueVigente()) {
+            abandonar()
+            return
+          }
           let respuesta
           try {
-            respuesta = await ejecutar(ruta, metodo, entrada, opciones || {}, falloForzado)
+            respuesta = await ejecutar(
+              ruta,
+              metodo,
+              entrada,
+              opciones || {},
+              falloForzado,
+              sigueVigente,
+            )
           } catch {
             respuesta = error('Error del servidor (simulado)', 500)
           }
+          // reiniciar() puede ejecutarse mientras leerCuerpo() está esperando. En
+          // ese caso abandonar() ya rechazó la promesa y no se registra ningún final.
+          if (terminada) return
+          if (!sigueVigente() || !respuesta) {
+            abandonar()
+            return
+          }
+          terminada = true
+          limpiar()
           const estado = respuesta.ok ? 'ok' : 'error'
           enviar({
             tipo: 'peticion',
@@ -270,7 +315,7 @@
         }
         const programar = (demora) => {
           temporizador = setTimeout(completar, demora)
-          pendientes.set(id, { reprogramar: programar, temporizador, demora })
+          pendientes.set(id, { reprogramar: programar, temporizador, demora, abandonar })
         }
         if (desordenar && latencia > 0) {
           for (const pendiente of pendientes.values()) {

@@ -257,6 +257,67 @@ describe('API simulada de React en vivo', () => {
     expect((await fetch('/api/recetas')).status).toBe(200)
   })
 
+  it('reiniciar rechaza las peticiones abandonadas sin tocar los datos nuevos ni registrar su final', async () => {
+    vi.useFakeTimers()
+    instalar({ latencia: 200 })
+    const rechazada = vi.fn()
+    const peticion = fetch('/api/recetas', {
+      method: 'POST',
+      body: JSON.stringify({ nombre: 'Gazpacho', tiempo: 10 }),
+    })
+    void peticion.catch(rechazada)
+
+    ventana.__redReactEnVivo?.reiniciar()
+    await Promise.resolve()
+
+    expect(rechazada).toHaveBeenCalledOnce()
+    const motivo = rechazada.mock.calls[0][0]
+    expect(motivo).toMatchObject({
+      name: 'AbortError',
+      message: 'The operation was aborted.',
+      __abandonadaReactEnVivo: true,
+    })
+    expect(Object.getOwnPropertyDescriptor(motivo, '__abandonadaReactEnVivo')?.enumerable).toBe(
+      false,
+    )
+
+    postMessage.mockClear()
+    await vi.advanceTimersByTimeAsync(200)
+
+    expect(vi.getTimerCount()).toBe(0)
+    expect(mensajesPeticion()).toEqual([])
+    const siguiente = fetch('/api/recetas')
+    await vi.advanceTimersByTimeAsync(200)
+    expect(await (await siguiente).json()).toEqual(recetas)
+  })
+
+  it('reiniciar rechaza también una petición que ya entró en completar', async () => {
+    vi.useFakeTimers()
+    instalar({ latencia: 25 })
+    const rechazada = vi.fn()
+    const peticion = fetch('/api/recetas', {
+      method: 'POST',
+      body: JSON.stringify({ nombre: 'Gazpacho', tiempo: 10 }),
+    })
+    void peticion.catch(rechazada)
+
+    // La versión síncrona ejecuta el temporizador, pero no las continuaciones
+    // de las promesas internas de leerCuerpo() y ejecutar().
+    vi.advanceTimersByTime(25)
+    ventana.__redReactEnVivo?.reiniciar()
+    await Promise.resolve()
+
+    expect(rechazada).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'AbortError', __abandonadaReactEnVivo: true }),
+    )
+    postMessage.mockClear()
+    await vi.runAllTimersAsync()
+    expect(mensajesPeticion()).toEqual([])
+    const siguiente = fetch('/api/recetas')
+    await vi.advanceTimersByTimeAsync(25)
+    expect(await (await siguiente).json()).toEqual(recetas)
+  })
+
   it('rechaza con signal.reason y conserva AbortError cuando no existe', async () => {
     vi.useFakeTimers()
     instalar({ latencia: 100 })

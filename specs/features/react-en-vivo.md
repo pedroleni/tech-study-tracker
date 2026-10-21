@@ -592,12 +592,16 @@ ejercicios que tienen que manejar un error del servidor.
 - **Latencia** con `setTimeout`. **Cancelación real**: si
   `options.signal` ya está abortada o se aborta durante la espera, la
   promesa se rechaza con `new DOMException('The operation was aborted.',
-  'AbortError')`.
+  'AbortError')`. `reiniciar()` abandona además todas las peticiones en vuelo
+  de la generación anterior, sin tocar los datos reiniciados, registrar su
+  final ni resolver o rechazar sus promesas.
 - **Fallar la siguiente petición**: la siguiente petición a `/api/`
   responde 500 con `{ error: 'Error del servidor (simulado)' }`.
   Si una comprobación empieza con este paso, fallan todas las peticiones
   iniciadas durante el montaje (incluida la repetición de `StrictMode`) y el
-  modo termina antes de ejecutar los pasos siguientes, sin dejar fallos pendientes.
+  modo termina antes de ejecutar los pasos siguientes; si el montaje no lanzó
+  ninguna petición, el fallo queda pendiente para la primera petición posterior,
+  y si lanzó al menos una no queda ningún fallo pendiente.
 - **Responder desordenado**: retrasos deterministas, sin `Math.random`:
   cada petición nueva responde a la mitad de la latencia y alarga una
   latencia completa las que siguen pendientes, reprogramando sus
@@ -699,6 +703,7 @@ si estuviera en pantalla; se resolverá con el módulo 7.
 Comportamientos del sandbox que conviene conocer al escribir ejemplos y
 comprobaciones:
 
+- En las comprobaciones no hay View Transitions: el cambio se aplica sin animar.
 - **`alert()`, `confirm()` y `prompt()`** no abren ventanas (el sandbox
   no admite modales): se ven como un aviso de 3 s arriba de la vista
   previa y como `alert: …` en la consola. `confirm()` responde siempre
