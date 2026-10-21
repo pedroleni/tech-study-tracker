@@ -26,11 +26,21 @@
     vaciadoProgramado = false
     const tanda = cola.splice(0)
     try {
-      const efectosPosteriores = new Set()
+      const efectosPosteriores = new Map()
       for (let indice = tanda.length - 1; indice >= 0; indice -= 1) {
         const entrada = tanda[indice]
-        if (entrada.mensaje.accion === 'efecto') efectosPosteriores.add(entrada.estado)
-        else if (!efectosPosteriores.has(entrada.estado)) entrada.mensaje.motivo = 'desmontaje'
+        if (entrada.mensaje.accion === 'efecto') {
+          efectosPosteriores.set(entrada.estado, entrada.mensaje)
+        } else {
+          const efectoPosterior = efectosPosteriores.get(entrada.estado)
+          if (!efectoPosterior) entrada.mensaje.motivo = 'desmontaje'
+          // DevTools avisa del commit entre la fase de layout y la doble
+          // invocación de StrictMode. Si ambas caen en esta tanda, la limpieza
+          // pertenece al mismo commit que la repetición, no al siguiente.
+          else if (efectoPosterior.motivo === 'strict-mode') {
+            entrada.mensaje.commit = efectoPosterior.commit
+          }
+        }
       }
       for (const entrada of tanda) enviar(entrada.mensaje)
     } catch {
@@ -282,19 +292,27 @@
       const tieneDependencias = Array.isArray(dependencias)
       const actuales = tieneDependencias ? dependencias : []
       const ubicacion = ubicar(new Error().stack, modulos, clase, actuales.length)
+      let primeraEjecucion = null
 
       const ejecutar = () => {
         const estado = referencia.current
+        const repeticionStrictMode = primeraEjecucion !== null
         // React avisa al hook de DevTools después de insertion/layout, pero
-        // antes de los efectos pasivos. Los dos primeros ya pertenecen al
-        // commit que está a punto de publicarse.
-        const commit = numeroCommit() + (clase === 'useEffect' ? 0 : 1)
+        // antes de los efectos pasivos. Por eso la primera ejecución de layout
+        // suma uno. StrictMode la repite después de ese aviso usando la misma
+        // función `ejecutar`: en esa segunda llamada se conserva el primer
+        // commit, porque volver a sumar uno la desplazaría al commit siguiente.
+        const commit = repeticionStrictMode
+          ? primeraEjecucion.commit
+          : numeroCommit() + (clase === 'useEffect' ? 0 : 1)
+        if (!primeraEjecucion) primeraEjecucion = { commit }
         const ultimaLimpieza = estado.ultimaLimpieza
         estado.ultimaLimpieza = null
 
         let motivo
         let cambios = []
-        if (!estado.inicializado) motivo = 'montaje'
+        if (repeticionStrictMode) motivo = 'strict-mode'
+        else if (!estado.inicializado) motivo = 'montaje'
         else if (ultimaLimpieza && ultimaLimpieza.commit === commit && iguales(estado.confirmadas, actuales)) {
           motivo = 'strict-mode'
         } else if (estado.ultimoEfecto === commit && iguales(estado.confirmadas, actuales)) {

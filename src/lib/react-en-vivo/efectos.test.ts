@@ -153,6 +153,64 @@ export default function App(){ const [n,setN]=useState(0); useLayoutEffect(()=>{
     expect(mensajes().some((m) => m.commit === 0)).toBe(false)
   })
 
+  it('mantiene en el commit de montaje la repetición de useLayoutEffect por StrictMode', async () => {
+    const codigo = `import { useLayoutEffect, useState } from 'react'
+export default function App(){ const [sala]=useState('general'); useLayoutEffect(()=>{},[sala]); return <button>ok</button> }`
+    const antes = (ventana.__numeroCommitReactEnVivo as () => number)()
+
+    await montarConOpciones(codigo, true, true)
+
+    await waitFor(() => expect(mensajes()).toHaveLength(2))
+    expect(mensajes().map(({ accion, commit, motivo }) => ({ accion, commit, motivo }))).toEqual([
+      { accion: 'efecto', commit: antes + 1, motivo: 'montaje' },
+      { accion: 'efecto', commit: antes + 1, motivo: 'strict-mode' },
+    ])
+  })
+
+  it('alinea la limpieza de useLayoutEffect de StrictMode y conserva los cambios posteriores', async () => {
+    const codigo = `import { useLayoutEffect, useState } from 'react'
+export default function App(){ const [sala,setSala]=useState('general'); useLayoutEffect(()=>()=>{},[sala]); return <button onClick={()=>setSala('viaje')}>{sala}</button> }`
+    const antes = (ventana.__numeroCommitReactEnVivo as () => number)()
+
+    await montarConOpciones(codigo, true, true)
+
+    await waitFor(() => expect(mensajes()).toHaveLength(3))
+    expect(mensajes().map(({ accion, commit, motivo }) => ({ accion, commit, motivo }))).toEqual([
+      { accion: 'efecto', commit: antes + 1, motivo: 'montaje' },
+      { accion: 'limpieza', commit: antes + 1, motivo: undefined },
+      { accion: 'efecto', commit: antes + 1, motivo: 'strict-mode' },
+    ])
+
+    enviar.mockClear()
+    fireEvent.click(within(document.body).getByRole('button'))
+
+    await waitFor(() => expect(mensajes()).toHaveLength(2))
+    expect(mensajes().map(({ accion, commit, motivo, cambios }) => ({ accion, commit, motivo, cambios }))).toEqual([
+      { accion: 'limpieza', commit: antes + 2, motivo: undefined, cambios: [] },
+      {
+        accion: 'efecto',
+        commit: antes + 2,
+        motivo: 'dependencias',
+        cambios: [{ nombre: 'sala', antes: '"general"', ahora: '"viaje"' }],
+      },
+    ])
+  })
+
+  it('mantiene en el montaje un useLayoutEffect de StrictMode que actualiza estado', async () => {
+    const codigo = `import { useLayoutEffect, useState } from 'react'
+export default function App(){ const [alto,setAlto]=useState(0); useLayoutEffect(()=>{ setAlto(42) },[]); return <button>{alto}</button> }`
+    const antes = (ventana.__numeroCommitReactEnVivo as () => number)()
+
+    await montarConOpciones(codigo, true, true)
+
+    await waitFor(() => expect(within(document.body).getByRole('button').textContent).toBe('42'))
+    await waitFor(() => expect(mensajes()).toHaveLength(2))
+    expect(mensajes().map(({ accion, commit, motivo }) => ({ accion, commit, motivo }))).toEqual([
+      { accion: 'efecto', commit: antes + 1, motivo: 'montaje' },
+      { accion: 'efecto', commit: antes + 1, motivo: 'strict-mode' },
+    ])
+  })
+
   it('un efecto sin dependencias distingue montaje, StrictMode y renders siguientes', async () => {
     const codigo = `import { useEffect, useState } from 'react'
 export default function App(){ const [n,setN]=useState(0); useEffect(()=>{}); return <button onClick={()=>setN(n+1)}>{n}</button> }`
@@ -314,6 +372,35 @@ export default function App() {
     await waitFor(() => expect(delGancho()).toHaveLength(1))
     expect(delGancho()[0]).toEqual(expect.objectContaining({ accion: 'limpieza', motivo: 'desmontaje' }))
     expect(deChat()).toEqual([])
+  })
+
+  it('al desmontar desde un padre sin efectos alinea las limpiezas layout y pasiva', async () => {
+    const codigo = `import { useEffect, useLayoutEffect, useState } from 'react'
+function Hijo(){ useLayoutEffect(()=>()=>{},[]); useEffect(()=>()=>{},[]); return <p>hijo</p> }
+export default function App(){ const [ver,setVer]=useState(true); return <>{ver && <Hijo/>}<button onClick={()=>setVer(false)}>ocultar</button></> }`
+
+    await montarConOpciones(codigo, true, false)
+    await waitFor(() => expect(mensajes().filter((mensaje) => mensaje.accion === 'efecto')).toHaveLength(2))
+    const commitMontaje = mensajes().find((mensaje) => mensaje.accion === 'efecto')?.commit
+    enviar.mockClear()
+
+    fireEvent.click(within(document.body).getByRole('button'))
+
+    await waitFor(() => expect(mensajes()).toHaveLength(2))
+    expect(mensajes().map(({ accion, clase, commit, motivo }) => ({ accion, clase, commit, motivo }))).toEqual([
+      {
+        accion: 'limpieza',
+        clase: 'useLayoutEffect',
+        commit: Number(commitMontaje) + 1,
+        motivo: 'desmontaje',
+      },
+      {
+        accion: 'limpieza',
+        clase: 'useEffect',
+        commit: Number(commitMontaje) + 1,
+        motivo: 'desmontaje',
+      },
+    ])
   })
 
   it('dependencias calculadas sin nombre legible dan «dependencia 1»', async () => {
