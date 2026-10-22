@@ -25,6 +25,7 @@ const nombresComponentes = [
   'ReactAnotado',
   'ReactEnVivo',
   'ReactEnVivoTsx',
+  'ReactEnVivoLint',
   'PanelRed',
   'RegistroEfectos',
   'Acordeon',
@@ -106,6 +107,17 @@ describe('AdminReferenciaContenidoPage', () => {
     // estado de error antes de la aserción de accesibilidad, en vez de
     // dejar una actualización de estado pendiente fuera de act().
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('fetch no disponible en test')))
+    vi.stubGlobal(
+      'Worker',
+      class WorkerFalso {
+        onmessage: ((evento: MessageEvent<unknown>) => void) | null = null
+        onerror: ((evento: ErrorEvent) => void) | null = null
+
+        postMessage() {
+          return undefined
+        }
+      },
+    )
     const { container } = render(<AdminReferenciaContenidoPage />)
     await act(async () => {
       await Promise.resolve()

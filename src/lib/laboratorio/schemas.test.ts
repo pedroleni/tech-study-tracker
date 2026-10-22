@@ -26,9 +26,21 @@ describe('esquemaReactEnVivo', () => {
       strictMode: true,
       mostrarConsola: true,
       mostrarJsGenerado: false,
+      mostrarLint: false,
+      exigirLintLimpio: false,
       exigirTiposCorrectos: false,
     })
     expect(esquemaBloqueLaboratorio.parse(minimoEnVivo).tipo).toBe('react-en-vivo')
+  })
+
+  it('admite activar el panel y exigir que el linter no marque nada', () => {
+    expect(
+      esquemaReactEnVivo.parse({
+        ...minimoEnVivo,
+        mostrarLint: true,
+        exigirLintLimpio: true,
+      }),
+    ).toMatchObject({ mostrarLint: true, exigirLintLimpio: true })
   })
 
   it('admite jsx, tsx, ts y css, con nombres seguros', () => {

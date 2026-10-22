@@ -14,6 +14,7 @@ import {
   PanelDiagnosticosTs,
   type DiagnosticoPanelTs,
 } from '@/components/bloques-laboratorio/PanelDiagnosticosTs'
+import { PanelLint } from '@/components/bloques-laboratorio/PanelLint'
 import { PanelRed, type AjustesRed } from '@/components/bloques-laboratorio/PanelRed'
 import { RegistroEfectos } from '@/components/bloques-laboratorio/RegistroEfectos'
 import {
@@ -35,6 +36,11 @@ import type {
 } from '@/lib/react-en-vivo/mensajes'
 import { prepararDocumento } from '@/lib/react-en-vivo/preparar'
 import { transformarParaMostrar } from '@/lib/react-en-vivo/transformar'
+import {
+  clienteReactKitCompartido,
+  type ClienteReactKit,
+  type DiagnosticoLint,
+} from '@/lib/react-kit/cliente'
 import { cn } from '@/lib/utils'
 
 const PESTANA_JS_GENERADO = 'JavaScript generado'
@@ -69,6 +75,30 @@ type ResultadoTipos = {
   diagnosticos: DiagnosticoPanelTs[]
 }
 
+type ResultadoLintBloque = {
+  revision: number
+  estado: 'listo' | 'error'
+  diagnosticos: DiagnosticoLint[]
+  error?: string
+}
+
+function recortarMotivo(texto: string, maximo = 240) {
+  if (texto.length <= maximo) return texto
+  return `${texto.slice(0, maximo - 1).trimEnd()}…`
+}
+
+function motivoDiagnosticoLint(diagnostico: DiagnosticoLint) {
+  return recortarMotivo(
+    [
+      `${diagnostico.archivo}:${diagnostico.linea}:${diagnostico.columna}`,
+      diagnostico.regla,
+      diagnostico.mensaje,
+    ]
+      .filter((parte) => parte !== null)
+      .join(' · '),
+  )
+}
+
 export function ReactEnVivo({
   titulo = 'Escribe React y mira cómo responde.',
   consigna,
@@ -79,17 +109,30 @@ export function ReactEnVivo({
   mostrarJsGenerado,
   mostrarArbol = false,
   mostrarEfectos = false,
+  mostrarLint = false,
+  exigirLintLimpio = false,
   exigirTiposCorrectos = false,
   api,
   red,
   comprobaciones,
+  clienteReactKit = clienteReactKitCompartido,
   // Fuera del esquema de la lección, como en SqlAnotado/GitAnotado: solo
   // para no repetir el nombre de la región en la página de referencia.
   etiquetaSeccion = 'React en vivo',
-}: Omit<DatosReactEnVivo, 'mostrarArbol' | 'mostrarEfectos' | 'exigirTiposCorrectos'> & {
+}: Omit<
+  DatosReactEnVivo,
+  | 'mostrarArbol'
+  | 'mostrarEfectos'
+  | 'mostrarLint'
+  | 'exigirLintLimpio'
+  | 'exigirTiposCorrectos'
+> & {
   mostrarArbol?: boolean
   mostrarEfectos?: boolean
+  mostrarLint?: boolean
+  exigirLintLimpio?: boolean
   exigirTiposCorrectos?: boolean
+  clienteReactKit?: ClienteReactKit
   etiquetaSeccion?: string
 }) {
   const primeraPestana =
@@ -117,6 +160,19 @@ export function ReactEnVivo({
   const diagnosticosTipos =
     resultadoTipos.revision === revisionTipos ? resultadoTipos.diagnosticos : []
   const versionTiposRef = useRef(0)
+  const usaLint = mostrarLint || exigirLintLimpio
+  const [revisionLint, setRevisionLint] = useState(0)
+  const [resultadoLint, setResultadoLint] = useState<ResultadoLintBloque>({
+    revision: -1,
+    estado: 'listo',
+    diagnosticos: [],
+  })
+  const lintPendiente = usaLint && resultadoLint.revision !== revisionLint
+  const estadoPanelLint = resultadoLint.revision === -1 ? 'cargando' : resultadoLint.estado
+  const diagnosticosLintActuales =
+    resultadoLint.revision === revisionLint ? resultadoLint.diagnosticos : []
+  const versionLintRef = useRef(0)
+  const sesionLint = useMemo(() => clienteReactKit.crearSesionLint(), [clienteReactKit])
   const resultadosTiposRef = useRef<ResultadoComprobacion[]>([])
   const { entradas, recibirMensaje, limpiar } = useEntradasConsola()
   const [arbol, setArbol] = useState<MensajeArbol | null>(null)
@@ -226,6 +282,37 @@ export function ReactEnVivo({
     }
   }, [archivos, revisionTipos, usaTypeScript])
 
+  useEffect(() => {
+    if (!usaLint) return
+    const version = ++versionLintRef.current
+    const temporizador = window.setTimeout(() => {
+      const archivosLint = archivos.filter((archivo) => /\.(jsx|tsx)$/.test(archivo.nombre))
+      void sesionLint.analizar(archivosLint).then((resultado) => {
+        if (!resultado || version !== versionLintRef.current) return
+        if (resultado.ok) {
+          setResultadoLint({
+            revision: revisionLint,
+            estado: 'listo',
+            diagnosticos: resultado.diagnosticos,
+          })
+          return
+        }
+        setResultadoLint({
+          revision: revisionLint,
+          estado: 'error',
+          diagnosticos: [],
+          error: resultado.error,
+        })
+      })
+    }, ESPERA_RECONSTRUIR_MS)
+    return () => {
+      window.clearTimeout(temporizador)
+      if (version === versionLintRef.current) versionLintRef.current += 1
+    }
+  }, [archivos, revisionLint, sesionLint, usaLint])
+
+  useEffect(() => () => sesionLint.descartar(), [sesionLint])
+
   const terminarComprobacion = useCallback((fin: FinComprobacion) => {
     setComprobacion({
       ...fin,
@@ -242,26 +329,39 @@ export function ReactEnVivo({
 
   async function comprobar() {
     if (
-      (!comprobaciones && !exigirTiposCorrectos) ||
+      (!comprobaciones && !exigirTiposCorrectos && !exigirLintLimpio) ||
       comprobacion.estado === 'comprobando' ||
-      (exigirTiposCorrectos && estadoTipos === 'cargando')
+      (exigirTiposCorrectos && estadoTipos === 'cargando') ||
+      (exigirLintLimpio && lintPendiente)
     ) return
     const primerErrorTipos = diagnosticosTipos.find(
       (diagnostico) => diagnostico.severidad === 'error',
     )
-    resultadosTiposRef.current = exigirTiposCorrectos
-      ? [
-          {
-            descripcion: 'El código no tiene errores de tipos',
-            ok: !primerErrorTipos,
-            ...(primerErrorTipos
-              ? {
-                  motivo: `${primerErrorTipos.archivo}:${primerErrorTipos.linea}:${primerErrorTipos.columna} · ${primerErrorTipos.mensaje}`,
-                }
-              : {}),
-          },
-        ]
-      : []
+    const resultadosRequisitos: ResultadoComprobacion[] = []
+    if (exigirTiposCorrectos) {
+      resultadosRequisitos.push({
+        descripcion: 'El código no tiene errores de tipos',
+        ok: !primerErrorTipos,
+        ...(primerErrorTipos
+          ? {
+              motivo: `${primerErrorTipos.archivo}:${primerErrorTipos.linea}:${primerErrorTipos.columna} · ${primerErrorTipos.mensaje}`,
+            }
+          : {}),
+      })
+    }
+    if (exigirLintLimpio) {
+      const primerDiagnosticoLint = diagnosticosLintActuales[0]
+      resultadosRequisitos.push({
+        descripcion: 'El linter no marca nada',
+        ok: resultadoLint.estado === 'listo' && !primerDiagnosticoLint,
+        ...(resultadoLint.estado === 'error'
+          ? { motivo: resultadoLint.error ?? 'No se pudo cargar el linter' }
+          : primerDiagnosticoLint
+            ? { motivo: motivoDiagnosticoLint(primerDiagnosticoLint) }
+            : {}),
+      })
+    }
+    resultadosTiposRef.current = resultadosRequisitos
     setComprobacion({ estado: 'comprobando', srcDoc: null })
     const preparado = await prepararDocumento(archivos, {
       origen: window.location.origin,
@@ -281,6 +381,7 @@ export function ReactEnVivo({
 
   function reiniciar() {
     if (usaTypeScript) setRevisionTipos((revision) => revision + 1)
+    if (usaLint) setRevisionLint((revision) => revision + 1)
     setArchivos(archivosOriginales)
     setPestana(primeraPestana)
     setComprobacion({ estado: 'inactivo' })
@@ -319,7 +420,7 @@ export function ReactEnVivo({
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          {(comprobaciones || exigirTiposCorrectos) && (
+          {(comprobaciones || exigirTiposCorrectos || exigirLintLimpio) && (
             <Button
               ref={botonComprobarRef}
               type="button"
@@ -329,7 +430,8 @@ export function ReactEnVivo({
               // del teclado y lo manda a <body>.
               aria-disabled={
                 comprobacion.estado === 'comprobando' ||
-                (exigirTiposCorrectos && estadoTipos === 'cargando')
+                (exigirTiposCorrectos && estadoTipos === 'cargando') ||
+                (exigirLintLimpio && lintPendiente)
               }
               className="aria-disabled:cursor-wait aria-disabled:opacity-60"
             >
@@ -385,6 +487,7 @@ export function ReactEnVivo({
               valor={archivoActivo.codigo}
               onChange={(codigo) => {
                 if (usaTypeScript) setRevisionTipos((revision) => revision + 1)
+                if (usaLint) setRevisionLint((revision) => revision + 1)
                 setArchivos((actuales) =>
                   actuales.map((archivo) =>
                     archivo.nombre === archivoActivo.nombre ? { ...archivo, codigo } : archivo,
@@ -418,6 +521,14 @@ export function ReactEnVivo({
                 agruparPorArchivo
               />
             </section>
+          )}
+
+          {mostrarLint && (
+            <PanelLint
+              estado={estadoPanelLint}
+              diagnosticos={resultadoLint.diagnosticos}
+              error={resultadoLint.error}
+            />
           )}
         </div>
 
@@ -467,7 +578,7 @@ export function ReactEnVivo({
 
       {comprobacion.estado === 'comprobando' &&
         comprobacion.srcDoc &&
-        (comprobaciones || exigirTiposCorrectos) && (
+        (comprobaciones || exigirTiposCorrectos || exigirLintLimpio) && (
         <ComprobadorReact
           srcDoc={comprobacion.srcDoc}
           comprobaciones={comprobaciones ?? []}

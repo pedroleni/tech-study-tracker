@@ -535,9 +535,16 @@ diseño" con "feature real".
   `.tsx`, muestra siempre «Errores de tipos» con los diagnósticos agrupados
   por archivo, sin impedir que se ejecute la vista previa. El campo opcional
   `exigirTiposCorrectos` (por defecto `false`) añade al principio de
-  «Comprobar» el resultado «El código no tiene errores de tipos». El catálogo
-  `AdminReferenciaContenidoPage` incluye un ejemplo `ReactEnVivoTsx` con
-  `App.tsx` y `Tarjeta.tsx`. `react-anotado` no gana estos campos.
+  «Comprobar» el resultado «El código no tiene errores de tipos».
+  `mostrarLint` (por defecto `false`) añade bajo el editor el panel «Linter»,
+  que analiza los `.jsx`/`.tsx` 400 ms después de la última edición y agrupa
+  por archivo los avisos de `eslint-plugin-react-hooks`.
+  `exigirLintLimpio` (por defecto `false`) añade a «Comprobar», después del
+  requisito de tipos y antes de las comprobaciones del bloque, «El linter no
+  marca nada»; un diagnóstico o un fallo de carga lo dejan como no superado.
+  El catálogo `AdminReferenciaContenidoPage` incluye `ReactEnVivoTsx` con
+  `App.tsx`/`Tarjeta.tsx` y `ReactEnVivoLint` con dos infracciones de hooks.
+  `react-anotado` no gana estos campos.
 - `ReactAnotado.tsx` — recibe `z.infer<typeof esquemaReactAnotado>`
   (2026-10-20): código JSX con anotaciones y, debajo, el mismo código
   ejecutándose de verdad. Ver [react-en-vivo.md](react-en-vivo.md).

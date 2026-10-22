@@ -377,6 +377,8 @@ export const esquemaReactEnVivo = z
     // Árbol de renders (fase 2): qué se renderiza en cada commit y por qué.
     mostrarArbol: z.boolean().default(false),
     mostrarEfectos: z.boolean().default(false),
+    mostrarLint: z.boolean().default(false),
+    exigirLintLimpio: z.boolean().default(false),
     exigirTiposCorrectos: z.boolean().default(false),
     api: esquemaApiReact.optional(),
     red: esquemaRedReact.optional(),

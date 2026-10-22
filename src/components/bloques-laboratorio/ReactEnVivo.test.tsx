@@ -3,6 +3,11 @@ import { axe } from 'vitest-axe'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { DatosReactEnVivo } from '@/lib/laboratorio/schemas'
+import {
+  crearClienteReactKit,
+  type FabricaWorkerReactKit,
+  type WorkerReactKit,
+} from '@/lib/react-kit/cliente'
 
 import { ReactEnVivo } from './ReactEnVivo'
 
@@ -39,11 +44,37 @@ const datos: DatosReactEnVivo = {
   mostrarJsGenerado: true,
   mostrarArbol: false,
   mostrarEfectos: false,
+  mostrarLint: false,
+  exigirLintLimpio: false,
   exigirTiposCorrectos: false,
   comprobaciones: [
     { descripcion: 'Saluda', pasos: [], espera: { texto: 'Hola' } },
     { descripcion: 'Guarda', pasos: [{ pulsar: { rol: 'button', nombre: 'Guardar' } }], espera: { texto: 'Guardado' } },
   ],
+}
+
+class WorkerLintFalso implements WorkerReactKit {
+  onmessage: ((evento: MessageEvent<unknown>) => void) | null = null
+  onerror: ((evento: ErrorEvent) => void) | null = null
+  readonly mensajes: Array<{ id: number; tipo: string; archivos: DatosReactEnVivo['archivos'] }> = []
+
+  postMessage(mensaje: unknown) {
+    this.mensajes.push(mensaje as (typeof this.mensajes)[number])
+  }
+
+  responder(datos: unknown) {
+    this.onmessage?.(new MessageEvent('message', { data: datos }))
+  }
+}
+
+function prepararWorkerLint() {
+  const workers: WorkerLintFalso[] = []
+  const crearWorker: FabricaWorkerReactKit = () => {
+    const worker = new WorkerLintFalso()
+    workers.push(worker)
+    return worker
+  }
+  return { clienteReactKit: crearClienteReactKit({ crearWorker }), workers }
 }
 
 const vista = () => screen.getByTitle('Vista previa de React') as HTMLIFrameElement
@@ -84,6 +115,170 @@ afterEach(() => {
 })
 
 describe('ReactEnVivo', () => {
+  it('carga el linter a los 400 ms, solo envía JSX/TSX y agrupa sus diagnósticos', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    const { clienteReactKit, workers } = prepararWorkerLint()
+    render(<ReactEnVivo {...datos} mostrarLint clienteReactKit={clienteReactKit} />)
+
+    expect(screen.getByText('Cargando el linter…')).toBeInTheDocument()
+    act(() => vi.advanceTimersByTime(399))
+    expect(workers).toHaveLength(0)
+    act(() => vi.advanceTimersByTime(1))
+    expect(workers).toHaveLength(1)
+    expect(workers[0].mensajes[0].archivos).toEqual([{ nombre: 'App.jsx', codigo: app }])
+
+    act(() => {
+      workers[0].responder({
+        id: 1,
+        ok: true,
+        diagnosticos: [
+          {
+            archivo: 'App.jsx',
+            linea: 2,
+            columna: 3,
+            regla: 'react-hooks/rules-of-hooks',
+            mensaje: 'React Hook is called conditionally.\n\nHooks must run in the same order.',
+            severidad: 'error',
+          },
+        ],
+      })
+    })
+
+    expect(await screen.findByRole('heading', { name: 'App.jsx' })).toBeInTheDocument()
+    expect(screen.getByText('2:3')).toBeInTheDocument()
+    expect(screen.getByText('react-hooks/rules-of-hooks')).toBeInTheDocument()
+    expect(screen.getByText('React Hook is called conditionally.')).toBeVisible()
+    expect(screen.getByText('Hooks must run in the same order.')).not.toBeVisible()
+  })
+
+  it('recalcula tras la última edición y no pinta una respuesta vieja', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    const { clienteReactKit, workers } = prepararWorkerLint()
+    render(<ReactEnVivo {...datos} mostrarLint clienteReactKit={clienteReactKit} />)
+    act(() => vi.advanceTimersByTime(400))
+    expect(workers[0].mensajes).toHaveLength(1)
+
+    fireEvent.change(screen.getByLabelText('Editor de App.jsx'), {
+      target: { value: 'export default function App() { return <p>Nuevo</p> }' },
+    })
+    act(() => vi.advanceTimersByTime(399))
+    expect(workers[0].mensajes).toHaveLength(1)
+    act(() => vi.advanceTimersByTime(1))
+    expect(workers[0].mensajes).toHaveLength(2)
+
+    act(() => {
+      workers[0].responder({
+        id: 1,
+        ok: true,
+        diagnosticos: [{ archivo: 'App.jsx', linea: 1, columna: 1, regla: null, mensaje: 'Viejo', severidad: 'error' }],
+      })
+      workers[0].responder({ id: 2, ok: true, diagnosticos: [] })
+    })
+
+    expect(await screen.findByText('El linter no marca nada')).toBeInTheDocument()
+    expect(screen.queryByText('Viejo')).toBeNull()
+  })
+
+  it('exigirLintLimpio falla con el primer diagnóstico y va después de tipos', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    diagnosticarTiposReact.mockResolvedValue([
+      { archivo: 'App.tsx', linea: 3, columna: 10, mensaje: 'Tipo incorrecto', severidad: 'error' },
+    ])
+    const { clienteReactKit, workers } = prepararWorkerLint()
+    render(
+      <ReactEnVivo
+        {...datosTsx}
+        mostrarLint
+        exigirTiposCorrectos
+        exigirLintLimpio
+        clienteReactKit={clienteReactKit}
+      />,
+    )
+    act(() => vi.advanceTimersByTime(400))
+    act(() => {
+      workers[0].responder({
+        id: 1,
+        ok: true,
+        diagnosticos: [
+          {
+            archivo: 'App.tsx',
+            linea: 7,
+            columna: 12,
+            regla: 'react-hooks/set-state-in-effect',
+            mensaje: `Calling setState synchronously within an effect ${'x'.repeat(300)}`,
+            severidad: 'error',
+          },
+        ],
+      })
+    })
+    await screen.findByText('Tipo incorrecto')
+    await screen.findByText(/Calling setState synchronously/)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Comprobar' }))
+    const oculto = (await screen.findByTitle('Comprobaciones')) as HTMLIFrameElement
+    enviarDesde(oculto.contentWindow, { canal: 'react-en-vivo', tipo: 'montado', version: '19.3.1' })
+    enviarDesde(oculto.contentWindow, {
+      canal: 'react-en-vivo',
+      tipo: 'resultado-comprobaciones',
+      resultados: [{ descripcion: 'Saluda', ok: true }],
+    })
+
+    const filas = within(await screen.findByRole('status')).getAllByRole('listitem')
+    expect(filas[0]).toHaveTextContent('El código no tiene errores de tipos')
+    expect(filas[1]).toHaveTextContent('El linter no marca nada')
+    expect(filas[1]).toHaveTextContent('App.tsx:7:12 · react-hooks/set-state-in-effect · Calling setState')
+    expect(filas[1].textContent!.length).toBeLessThan(300)
+    expect(filas[2]).toHaveTextContent('Saluda')
+  })
+
+  it('exigirLintLimpio supera un resultado vacío y falla si el worker no carga', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    const vacio = prepararWorkerLint()
+    const { unmount } = render(
+      <ReactEnVivo
+        {...datos}
+        comprobaciones={undefined}
+        exigirLintLimpio
+        clienteReactKit={vacio.clienteReactKit}
+      />,
+    )
+    act(() => vi.advanceTimersByTime(400))
+    await act(async () => {
+      vacio.workers[0].responder({ id: 1, ok: true, diagnosticos: [] })
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Comprobar' }))
+    let oculto = (await screen.findByTitle('Comprobaciones')) as HTMLIFrameElement
+    enviarDesde(oculto.contentWindow, {
+      canal: 'react-en-vivo',
+      tipo: 'resultado-comprobaciones',
+      resultados: [],
+    })
+    expect(await screen.findByText('1 de 1 comprobaciones superadas')).toBeInTheDocument()
+    unmount()
+
+    const fallo = prepararWorkerLint()
+    render(
+      <ReactEnVivo
+        {...datos}
+        comprobaciones={undefined}
+        exigirLintLimpio
+        clienteReactKit={fallo.clienteReactKit}
+      />,
+    )
+    act(() => vi.advanceTimersByTime(400))
+    await act(async () => {
+      fallo.workers[0].responder({ id: 1, ok: false, error: 'El linter se rompió' })
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Comprobar' }))
+    oculto = (await screen.findByTitle('Comprobaciones')) as HTMLIFrameElement
+    enviarDesde(oculto.contentWindow, {
+      canal: 'react-en-vivo',
+      tipo: 'resultado-comprobaciones',
+      resultados: [],
+    })
+    expect(await screen.findByText('El linter se rompió')).toBeInTheDocument()
+  })
+
   it('abre App.tsx, muestra sus errores agrupados y genera JavaScript sin tipos', async () => {
     diagnosticarTiposReact.mockResolvedValue([
       { archivo: 'App.tsx', linea: 3, columna: 10, mensaje: 'Error en App', severidad: 'error' },

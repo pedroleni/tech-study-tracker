@@ -734,6 +734,34 @@ export function AdminReferenciaContenidoPage() {
           />
         </Referencia>
 
+        <Referencia nombre="ReactEnVivoLint">
+          <ReactEnVivo
+            tipo="react-en-vivo"
+            titulo="Un efecto que el linter rechaza"
+            consigna="Corrige la actualización síncrona de estado y declara la dependencia que falta; después pulsa «Comprobar»."
+            archivos={[
+              {
+                nombre: 'App.jsx',
+                codigo:
+                  "import { useEffect, useState } from 'react'\n\nfunction Saludo({ nombre }) {\n  const [mensaje, setMensaje] = useState('')\n\n  useEffect(() => {\n    setMensaje('Hola ' + nombre)\n  }, [])\n\n  return <p>{mensaje}</p>\n}\n\nexport default function App() {\n  return <Saludo nombre=\"Ada\" />\n}",
+              },
+            ]}
+            strictMode
+            mostrarConsola={false}
+            mostrarJsGenerado={false}
+            mostrarLint
+            exigirLintLimpio
+            comprobaciones={[
+              {
+                descripcion: 'Muestra el saludo',
+                pasos: [],
+                espera: { texto: 'Hola Ada' },
+              },
+            ]}
+            etiquetaSeccion="React en vivo — linter"
+          />
+        </Referencia>
+
         <Referencia nombre="PanelRed">
           <ReactEnVivo
             tipo="react-en-vivo"
