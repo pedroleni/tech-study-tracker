@@ -19,6 +19,8 @@ export type PropiedadesCodigoResaltado = {
   alturaMaxima?: string
   /** Clases extra para el contenedor. */
   className?: string
+  /** Permite integrarlo dentro de una región ya nombrada sin anidar landmarks. */
+  esRegion?: boolean
 }
 
 export function CodigoResaltado({
@@ -29,6 +31,7 @@ export function CodigoResaltado({
   etiqueta = 'Bloque de código',
   alturaMaxima,
   className,
+  esRegion = true,
 }: PropiedadesCodigoResaltado) {
   const lineas = useMemo(() => tokenizarLineas(codigo, lenguaje), [codigo, lenguaje])
   const destacadas = useMemo(() => new Set(lineasDestacadas ?? []), [lineasDestacadas])
@@ -46,9 +49,8 @@ export function CodigoResaltado({
         con el teclado, y un `pre` con `aria-label` no vale (rol genérico).
       */}
       <pre
-        role="region"
-        aria-label={etiqueta}
-        /* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- es justo lo contrario: sin tabIndex, axe marca «scrollable-region-focusable» y el bloque queda inalcanzable con el teclado */
+        role={esRegion ? 'region' : undefined}
+        aria-label={esRegion ? etiqueta : undefined}
         tabIndex={0}
         style={alturaMaxima ? { maxHeight: alturaMaxima } : undefined}
         className="m-0 overflow-auto p-3 font-mono text-xs leading-relaxed whitespace-pre focus-visible:-outline-offset-2 focus-visible:outline-2 focus-visible:outline-ring"

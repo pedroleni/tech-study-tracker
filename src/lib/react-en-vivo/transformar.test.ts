@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
+import codigoCompilado from '@/lib/react-kit/__fixtures__/compilador-app.compilado.jsx?raw'
+
 import { transformarArchivos, transformarParaMostrar } from './transformar'
 
 describe('transformarArchivos', () => {
@@ -37,6 +39,49 @@ describe('transformarArchivos', () => {
       mensaje: 'Unterminated JSX contents',
     })
   })
+
+  it('quita tipos de .tsx y .ts, transforma JSX y conserva los imports CommonJS', async () => {
+    const resultado = await transformarArchivos([
+      {
+        nombre: 'App.tsx',
+        codigo: `import { limite } from './datos'
+interface Props { titulo: string }
+export default function App({ titulo }: Props) { return <p>{titulo}: {limite}</p> }`,
+      },
+      { nombre: 'datos.ts', codigo: 'export const limite: number = 3' },
+    ])
+
+    expect(resultado.ok).toBe(true)
+    if (!resultado.ok) return
+    expect(resultado.modulos['./App.tsx']).toMatch(/require\(['"]\.\/datos['"]\)/)
+    expect(resultado.modulos['./App.tsx']).toContain('require("react/jsx-dev-runtime")')
+    expect(resultado.modulos['./App.tsx']).not.toContain('interface Props')
+    expect(resultado.modulos['./App.tsx']).not.toContain(': Props')
+    expect(resultado.modulos['./datos.ts']).toContain('const limite = 3')
+    expect(resultado.modulos['./datos.ts']).not.toContain(': number')
+  })
+
+  it('acepta aserciones angulares de TypeScript en .ts sin interpretarlas como JSX', async () => {
+    const resultado = await transformarArchivos([
+      { nombre: 'datos.ts', codigo: 'const n = <number>(5 as unknown)\nexport default n' },
+    ])
+
+    expect(resultado.ok).toBe(true)
+    if (!resultado.ok) return
+    expect(resultado.modulos['./datos.ts']).toMatch(/const n = \(5\s*\)/)
+    expect(resultado.modulos['./datos.ts']).not.toContain('<number>')
+  })
+
+  it('admite la salida de React Compiler y conserva el import de su runtime', async () => {
+    const resultado = await transformarArchivos([
+      { nombre: 'App.jsx', codigo: codigoCompilado },
+    ])
+
+    expect(resultado.ok).toBe(true)
+    if (!resultado.ok) return
+    expect(resultado.modulos['./App.jsx']).toContain("require('react/compiler-runtime')")
+    expect(resultado.modulos['./App.jsx']).toContain('_compilerruntime.c.call(void 0, 9)')
+  })
 })
 
 describe('transformarParaMostrar', () => {
@@ -51,6 +96,22 @@ describe('transformarParaMostrar', () => {
     expect(texto).toContain('// Tarjeta.jsx')
     expect(texto).toContain('import {jsx as _jsx} from "react/jsx-runtime"')
     expect(texto).toContain("_jsx('li'")
+  })
+
+  it('incluye .tsx y .ts en el JavaScript generado sin anotaciones de tipos', async () => {
+    const texto = await transformarParaMostrar([
+      {
+        nombre: 'App.tsx',
+        codigo: 'const titulo: string = "TSX"\nexport default function App() { return <h1>{titulo}</h1> }',
+      },
+      { nombre: 'datos.ts', codigo: 'export const cantidad: number = 2' },
+    ])
+
+    expect(texto).toContain('// App.tsx')
+    expect(texto).toContain('// datos.ts')
+    expect(texto).toContain('import {jsx as _jsx} from "react/jsx-runtime"')
+    expect(texto).not.toContain(': string')
+    expect(texto).not.toContain(': number')
   })
 })
 

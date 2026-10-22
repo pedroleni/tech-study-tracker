@@ -1,7 +1,7 @@
 import { css as lenguajeCss } from '@codemirror/lang-css'
 import { javascript as lenguajeJavascript } from '@codemirror/lang-javascript'
 import { Atom, ListChecks, RotateCcw } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 
 import { ArbolDeRenders } from '@/components/bloques-laboratorio/ArbolDeRenders'
 import {
@@ -10,9 +10,17 @@ import {
 } from '@/components/bloques-laboratorio/ComprobadorReact'
 import { ConsolaReact } from '@/components/bloques-laboratorio/ConsolaReact'
 import { EditorCodeMirror } from '@/components/bloques-laboratorio/EditorCodeMirror'
+import {
+  PanelDiagnosticosTs,
+  type DiagnosticoPanelTs,
+} from '@/components/bloques-laboratorio/PanelDiagnosticosTs'
+import { PanelLint } from '@/components/bloques-laboratorio/PanelLint'
 import { PanelRed, type AjustesRed } from '@/components/bloques-laboratorio/PanelRed'
 import { RegistroEfectos } from '@/components/bloques-laboratorio/RegistroEfectos'
-import { ResultadosComprobaciones } from '@/components/bloques-laboratorio/ResultadosComprobaciones'
+import {
+  ResultadosComprobaciones,
+  type ResultadoComprobacion,
+} from '@/components/bloques-laboratorio/ResultadosComprobaciones'
 import { useEntradasConsola } from '@/components/bloques-laboratorio/useEntradasConsola'
 import { useRegistroAgrupado } from '@/components/bloques-laboratorio/useRegistroAgrupado'
 import { VistaPreviaReact } from '@/components/bloques-laboratorio/VistaPreviaReact'
@@ -20,6 +28,10 @@ import { CodigoResaltado } from '@/components/codigo'
 import { Button } from '@/components/ui/button'
 import type { ArchivoReact, DatosReactEnVivo } from '@/lib/laboratorio/schemas'
 import { ESPERA_RECONSTRUIR_MS } from '@/lib/react-en-vivo/constantes'
+import {
+  compilarArchivosReact,
+  type AvisoCompiladorReact,
+} from '@/lib/react-en-vivo/compilar'
 import type {
   MensajeArbol,
   MensajeEfecto,
@@ -28,12 +40,19 @@ import type {
 } from '@/lib/react-en-vivo/mensajes'
 import { prepararDocumento } from '@/lib/react-en-vivo/preparar'
 import { transformarParaMostrar } from '@/lib/react-en-vivo/transformar'
+import {
+  clienteReactKitCompartido,
+  type ClienteReactKit,
+  type DiagnosticoLint,
+} from '@/lib/react-kit/cliente'
 import { cn } from '@/lib/utils'
 
 const PESTANA_JS_GENERADO = 'JavaScript generado'
 const extensionJsx = lenguajeJavascript({ jsx: true })
+const extensionTsx = lenguajeJavascript({ jsx: true, typescript: true })
 const extensionCss = lenguajeCss()
 const RED_POR_DEFECTO: AjustesRed = { latencia: 600, desordenar: false }
+const COMPROBACIONES_VACIAS: NonNullable<DatosReactEnVivo['comprobaciones']> = []
 
 function incorporarPeticion(actuales: MensajePeticion[], nueva: MensajePeticion) {
   const posicion = actuales.findIndex((peticion) => peticion.id === nueva.id)
@@ -55,6 +74,40 @@ type EstadoComprobacion =
   | { estado: 'comprobando'; srcDoc: string | null }
   | FinComprobacion
 
+type ResultadoTipos = {
+  revision: number
+  estado: 'listo' | 'error'
+  diagnosticos: DiagnosticoPanelTs[]
+  error?: string
+}
+
+type ResultadoLintBloque = {
+  revision: number
+  estado: 'listo' | 'error'
+  diagnosticos: DiagnosticoLint[]
+  error?: string
+}
+
+function recortarMotivo(texto: string, maximo = 240) {
+  if (texto.length <= maximo) return texto
+  return `${texto.slice(0, maximo - 1).trimEnd()}…`
+}
+
+function motivoDiagnosticoLint(diagnostico: DiagnosticoLint) {
+  const ubicacion = diagnostico.columna > 0
+    ? `${diagnostico.archivo}:${diagnostico.linea}:${diagnostico.columna}`
+    : `${diagnostico.archivo}:${diagnostico.linea}`
+  return recortarMotivo(
+    [
+      ubicacion,
+      diagnostico.regla,
+      diagnostico.mensaje,
+    ]
+      .filter((parte) => parte !== null)
+      .join(' · '),
+  )
+}
+
 export function ReactEnVivo({
   titulo = 'Escribe React y mira cómo responde.',
   consigna,
@@ -65,24 +118,83 @@ export function ReactEnVivo({
   mostrarJsGenerado,
   mostrarArbol = false,
   mostrarEfectos = false,
+  mostrarLint = false,
+  compilador = false,
+  exigirLintLimpio = false,
+  exigirTiposCorrectos = false,
   api,
   red,
   comprobaciones,
+  clienteReactKit = clienteReactKitCompartido,
   // Fuera del esquema de la lección, como en SqlAnotado/GitAnotado: solo
   // para no repetir el nombre de la región en la página de referencia.
   etiquetaSeccion = 'React en vivo',
-}: Omit<DatosReactEnVivo, 'mostrarArbol' | 'mostrarEfectos'> & {
+}: Omit<
+  DatosReactEnVivo,
+  | 'mostrarArbol'
+  | 'mostrarEfectos'
+  | 'mostrarLint'
+  | 'compilador'
+  | 'exigirLintLimpio'
+  | 'exigirTiposCorrectos'
+> & {
   mostrarArbol?: boolean
   mostrarEfectos?: boolean
+  mostrarLint?: boolean
+  compilador?: boolean
+  exigirLintLimpio?: boolean
+  exigirTiposCorrectos?: boolean
+  clienteReactKit?: ClienteReactKit
   etiquetaSeccion?: string
 }) {
-  const primeraPestana = archivoInicial ?? 'App.jsx'
+  const primeraPestana =
+    archivoInicial ??
+    (archivosOriginales.some((archivo) => archivo.nombre === 'App.tsx') ? 'App.tsx' : 'App.jsx')
   const [archivos, setArchivos] = useState<ArchivoReact[]>(archivosOriginales)
   const [pestana, setPestana] = useState(primeraPestana)
   const [srcDoc, setSrcDoc] = useState<string | null>(null)
   const [errorSintaxis, setErrorSintaxis] = useState<string | null>(null)
   const [jsGenerado, setJsGenerado] = useState('')
+  const [avisosCompilador, setAvisosCompilador] = useState<AvisoCompiladorReact[]>([])
   const [comprobacion, setComprobacion] = useState<EstadoComprobacion>({ estado: 'inactivo' })
+  const usaTypeScript = archivosOriginales.some(
+    (archivo) => archivo.nombre.endsWith('.ts') || archivo.nombre.endsWith('.tsx'),
+  )
+  const [revisionTipos, setRevisionTipos] = useState(0)
+  const [resultadoTipos, setResultadoTipos] = useState<ResultadoTipos>({
+    revision: -1,
+    estado: 'listo',
+    diagnosticos: [],
+  })
+  const tiposPendientes = usaTypeScript && resultadoTipos.revision !== revisionTipos
+  const estadoPanelTipos = resultadoTipos.revision === -1 ? 'cargando' : resultadoTipos.estado
+  const diagnosticosTipos = resultadoTipos.diagnosticos
+  const versionTiposRef = useRef(0)
+  const sesionTiposRef = useRef<Promise<ReturnType<
+    typeof import('@/lib/react-en-vivo/tipos')['crearSesionTiposReact']
+  >> | null>(null)
+  const usaLint = mostrarLint || exigirLintLimpio
+  const [revisionLint, setRevisionLint] = useState(0)
+  const [resultadoLint, setResultadoLint] = useState<ResultadoLintBloque>({
+    revision: -1,
+    estado: 'listo',
+    diagnosticos: [],
+  })
+  const lintPendiente = usaLint && resultadoLint.revision !== revisionLint
+  const estadoPanelLint = resultadoLint.revision === -1 ? 'cargando' : resultadoLint.estado
+  const diagnosticosLintActuales =
+    resultadoLint.revision === revisionLint ? resultadoLint.diagnosticos : []
+  const versionLintRef = useRef(0)
+  const sesionLint = useMemo(() => clienteReactKit.crearSesionLint(), [clienteReactKit])
+  const sesionCompiladorVista = useMemo(
+    () => clienteReactKit.crearSesionCompilador(),
+    [clienteReactKit],
+  )
+  const sesionCompiladorComprobacion = useMemo(
+    () => clienteReactKit.crearSesionCompilador(),
+    [clienteReactKit],
+  )
+  const resultadosTiposRef = useRef<ResultadoComprobacion[]>([])
   const { entradas, recibirMensaje, limpiar } = useEntradasConsola()
   const [arbol, setArbol] = useState<MensajeArbol | null>(null)
   const { entradas: peticiones, recibir: recibirPeticion, limpiar: limpiarPeticiones } =
@@ -117,6 +229,7 @@ export function ReactEnVivo({
   const versionRef = useRef(0)
   const primeraVezRef = useRef(true)
   const botonComprobarRef = useRef<HTMLButtonElement>(null)
+  const idErroresTipos = useId()
   // Cambia en cada "Reiniciar": remonta la vista previa aunque el código no
   // haya cambiado, para que la app vuelva a arrancar de cero.
   const [reinicios, setReinicios] = useState(0)
@@ -131,25 +244,44 @@ export function ReactEnVivo({
     // La primera vista previa sale sin esperar; después, 400 ms tras la última tecla.
     const espera = primeraVezRef.current ? 0 : ESPERA_RECONSTRUIR_MS
     primeraVezRef.current = false
+    const version = ++versionRef.current
+    if (compilador) sesionCompiladorVista.descartar()
     const temporizador = window.setTimeout(() => {
-      versionRef.current += 1
-      const version = versionRef.current
-      void prepararDocumento(archivos, {
-        origen: window.location.origin,
-        strictMode,
-        conPruebas: false,
-        conArbol: mostrarArbol,
-        conEfectos: mostrarEfectos,
-        api: apiEstable,
-        red: redActualRef.current,
-      }).then((preparado) => {
-        // Una transformación que llega después de otra más nueva se descarta.
+      void (async () => {
+        const resultadoCompilador = compilador
+          ? await compilarArchivosReact(archivos, sesionCompiladorVista)
+          : { archivos, avisos: [] }
+        if (!resultadoCompilador || version !== versionRef.current) return
+
+        const [preparado, textoGenerado] = await Promise.all([
+          prepararDocumento(resultadoCompilador.archivos, {
+            origen: window.location.origin,
+            strictMode,
+            conPruebas: false,
+            conArbol: mostrarArbol,
+            conEfectos: mostrarEfectos,
+            api: apiEstable,
+            red: redActualRef.current,
+          }),
+          mostrarJsGenerado
+            ? transformarParaMostrar(resultadoCompilador.archivos)
+            : Promise.resolve(null),
+        ])
+        // Una compilación o transformación que llega después de otra más
+        // nueva se descarta en bloque: vista, avisos y JS siempre coinciden.
         if (version !== versionRef.current) return
+        if (textoGenerado !== null) setJsGenerado(textoGenerado)
         if (!preparado.ok) {
+          setAvisosCompilador(
+            preparado.archivo
+              ? resultadoCompilador.avisos.filter((aviso) => aviso.archivo !== preparado.archivo)
+              : resultadoCompilador.avisos,
+          )
           // La vista previa se queda en el último resultado válido.
           setErrorSintaxis(preparado.error)
           return
         }
+        setAvisosCompilador(resultadoCompilador.avisos)
         setErrorSintaxis(null)
         limpiar()
         // El árbol de la vista previa anterior ya no describe nada.
@@ -159,18 +291,104 @@ export function ReactEnVivo({
         limpiarEfectos()
         setFalloPendiente(false)
         setSrcDoc(preparado.srcDoc)
-      })
-      if (mostrarJsGenerado) {
-        void transformarParaMostrar(archivos).then((texto) => {
-          if (version === versionRef.current) setJsGenerado(texto)
-        })
-      }
+      })()
     }, espera)
-    return () => window.clearTimeout(temporizador)
-  }, [apiEstable, archivos, strictMode, mostrarJsGenerado, mostrarArbol, mostrarEfectos, limpiar, limpiarEfectos, limpiarPeticiones])
+    return () => {
+      window.clearTimeout(temporizador)
+      if (version === versionRef.current) versionRef.current += 1
+      if (compilador) sesionCompiladorVista.descartar()
+    }
+  }, [apiEstable, archivos, compilador, sesionCompiladorVista, strictMode, mostrarJsGenerado, mostrarArbol, mostrarEfectos, limpiar, limpiarEfectos, limpiarPeticiones])
+
+  useEffect(() => {
+    if (!usaTypeScript) return
+    const version = ++versionTiposRef.current
+    const temporizador = window.setTimeout(() => {
+      void (async () => {
+        let sesionTipos
+        try {
+          sesionTiposRef.current ??= import('@/lib/react-en-vivo/tipos').then(
+            ({ crearSesionTiposReact }) => crearSesionTiposReact(),
+          )
+          sesionTipos = await sesionTiposRef.current
+        } catch {
+          if (version === versionTiposRef.current) {
+            setResultadoTipos((actual) => ({
+              revision: revisionTipos,
+              estado: 'error',
+              diagnosticos: actual.diagnosticos,
+              error: 'No se pudo cargar TypeScript',
+            }))
+          }
+          return
+        }
+
+        try {
+          const diagnosticos = await sesionTipos.diagnosticar(archivos)
+          if (version !== versionTiposRef.current) return
+          setResultadoTipos({ revision: revisionTipos, estado: 'listo', diagnosticos })
+        } catch (error) {
+          if (version === versionTiposRef.current) {
+            const detalle = error instanceof Error ? error.message : String(error)
+            setResultadoTipos((actual) => ({
+              revision: revisionTipos,
+              estado: 'error',
+              diagnosticos: actual.diagnosticos,
+              error: detalle,
+            }))
+          }
+        }
+      })()
+    }, ESPERA_RECONSTRUIR_MS)
+    return () => {
+      window.clearTimeout(temporizador)
+      if (version === versionTiposRef.current) versionTiposRef.current += 1
+    }
+  }, [archivos, revisionTipos, usaTypeScript])
+
+  useEffect(() => {
+    if (!usaLint) return
+    const version = ++versionLintRef.current
+    const temporizador = window.setTimeout(() => {
+      const archivosLint = archivos.filter((archivo) => /\.(jsx|tsx)$/.test(archivo.nombre))
+      void sesionLint.analizar(archivosLint).then((resultado) => {
+        if (!resultado || version !== versionLintRef.current) return
+        if (resultado.ok) {
+          setResultadoLint({
+            revision: revisionLint,
+            estado: 'listo',
+            diagnosticos: resultado.diagnosticos,
+          })
+          return
+        }
+        setResultadoLint({
+          revision: revisionLint,
+          estado: 'error',
+          diagnosticos: [],
+          error: resultado.error,
+        })
+      })
+    }, ESPERA_RECONSTRUIR_MS)
+    return () => {
+      window.clearTimeout(temporizador)
+      if (version === versionLintRef.current) versionLintRef.current += 1
+    }
+  }, [archivos, revisionLint, sesionLint, usaLint])
+
+  useEffect(
+    () => () => {
+      sesionLint.descartar()
+      sesionCompiladorVista.descartar()
+      sesionCompiladorComprobacion.descartar()
+    },
+    [sesionCompiladorComprobacion, sesionCompiladorVista, sesionLint],
+  )
 
   const terminarComprobacion = useCallback((fin: FinComprobacion) => {
-    setComprobacion(fin)
+    setComprobacion({
+      ...fin,
+      resultados: [...resultadosTiposRef.current, ...fin.resultados],
+    })
     // user-event escribe dentro del iframe oculto y se lleva el foco; al
     // quitarlo, el foco caería en <body>. Vuelve al botón, salvo que la
     // persona ya lo haya llevado a otro sitio.
@@ -181,9 +399,59 @@ export function ReactEnVivo({
   }, [])
 
   async function comprobar() {
-    if (!comprobaciones || comprobacion.estado === 'comprobando') return
+    if (
+      (!comprobaciones && !exigirTiposCorrectos && !exigirLintLimpio) ||
+      comprobacion.estado === 'comprobando' ||
+      (exigirTiposCorrectos && tiposPendientes) ||
+      (exigirLintLimpio && lintPendiente)
+    ) return
+    const primerErrorTipos = diagnosticosTipos.find(
+      (diagnostico) => diagnostico.severidad === 'error',
+    )
+    const resultadosRequisitos: ResultadoComprobacion[] = []
+    if (exigirTiposCorrectos) {
+      const tiposListos = resultadoTipos.estado === 'listo'
+      resultadosRequisitos.push({
+        descripcion: 'El código no tiene errores de tipos',
+        ok: tiposListos && !primerErrorTipos,
+        ...(resultadoTipos.estado === 'error'
+          ? {
+              motivo: `No se pudieron comprobar los tipos: ${resultadoTipos.error ?? 'falló el análisis'}`,
+            }
+          : primerErrorTipos
+          ? {
+              motivo: `${primerErrorTipos.archivo}:${primerErrorTipos.linea}:${primerErrorTipos.columna} · ${primerErrorTipos.mensaje}`,
+            }
+          : {}),
+      })
+    }
+    if (exigirLintLimpio) {
+      const primerDiagnosticoLint = diagnosticosLintActuales[0]
+      resultadosRequisitos.push({
+        descripcion: 'El linter no marca nada',
+        ok: resultadoLint.estado === 'listo' && !primerDiagnosticoLint,
+        ...(resultadoLint.estado === 'error'
+          ? { motivo: resultadoLint.error ?? 'No se pudo cargar el linter' }
+          : primerDiagnosticoLint
+            ? { motivo: motivoDiagnosticoLint(primerDiagnosticoLint) }
+            : {}),
+      })
+    }
+    resultadosTiposRef.current = resultadosRequisitos
+    if (!comprobaciones || comprobaciones.length === 0) {
+      terminarComprobacion({ estado: 'listo', resultados: [] })
+      return
+    }
     setComprobacion({ estado: 'comprobando', srcDoc: null })
-    const preparado = await prepararDocumento(archivos, {
+    const resultadoCompilador = compilador
+      ? await compilarArchivosReact(archivos, sesionCompiladorComprobacion)
+      : { archivos, avisos: [] }
+    if (!resultadoCompilador) {
+      setComprobacion({ estado: 'inactivo' })
+      return
+    }
+    setAvisosCompilador(resultadoCompilador.avisos)
+    const preparado = await prepararDocumento(resultadoCompilador.archivos, {
       origen: window.location.origin,
       strictMode,
       conPruebas: true,
@@ -200,9 +468,13 @@ export function ReactEnVivo({
   }
 
   function reiniciar() {
+    if (usaTypeScript) setRevisionTipos((revision) => revision + 1)
+    if (usaLint) setRevisionLint((revision) => revision + 1)
     setArchivos(archivosOriginales)
     setPestana(primeraPestana)
     setComprobacion({ estado: 'inactivo' })
+    setAvisosCompilador([])
+    resultadosTiposRef.current = []
     setReinicios((anteriores) => anteriores + 1)
     documentoMontadoRef.current = false
     setArbol(null)
@@ -237,7 +509,7 @@ export function ReactEnVivo({
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          {comprobaciones && (
+          {(comprobaciones || exigirTiposCorrectos || exigirLintLimpio) && (
             <Button
               ref={botonComprobarRef}
               type="button"
@@ -245,11 +517,19 @@ export function ReactEnVivo({
               onClick={() => void comprobar()}
               // aria-disabled y no disabled: un botón desactivado pierde el foco
               // del teclado y lo manda a <body>.
-              aria-disabled={comprobacion.estado === 'comprobando'}
+              aria-disabled={
+                comprobacion.estado === 'comprobando' ||
+                (exigirTiposCorrectos && tiposPendientes) ||
+                (exigirLintLimpio && lintPendiente)
+              }
               className="aria-disabled:cursor-wait aria-disabled:opacity-60"
             >
               <ListChecks aria-hidden="true" />
-              Comprobar
+              {exigirTiposCorrectos && tiposPendientes
+                ? 'Esperando a los tipos…'
+                : exigirLintLimpio && lintPendiente
+                  ? 'Esperando al linter…'
+                  : 'Comprobar'}
             </Button>
           )}
           <Button type="button" variant="outline" size="sm" onClick={reiniciar}>
@@ -290,22 +570,34 @@ export function ReactEnVivo({
             <EditorCodeMirror
               key={archivoActivo.nombre}
               etiqueta={`Editor de ${archivoActivo.nombre}`}
-              extension={archivoActivo.nombre.endsWith('.css') ? extensionCss : extensionJsx}
+              extension={
+                archivoActivo.nombre.endsWith('.css')
+                  ? extensionCss
+                  : /\.(ts|tsx)$/.test(archivoActivo.nombre)
+                    ? extensionTsx
+                    : extensionJsx
+              }
               valor={archivoActivo.codigo}
-              onChange={(codigo) =>
+              onChange={(codigo) => {
+                if (usaTypeScript) setRevisionTipos((revision) => revision + 1)
+                if (usaLint) setRevisionLint((revision) => revision + 1)
                 setArchivos((actuales) =>
                   actuales.map((archivo) =>
                     archivo.nombre === archivoActivo.nombre ? { ...archivo, codigo } : archivo,
                   ),
                 )
-              }
+              }}
             />
           ) : (
             <CodigoResaltado
               codigo={jsGenerado || '// Preparando el JavaScript…'}
               lenguaje="js"
               numerarLineas
-              etiqueta="JavaScript generado por Sucrase"
+              etiqueta={
+                compilador
+                  ? 'JavaScript generado por React Compiler y Sucrase'
+                  : 'JavaScript generado por Sucrase'
+              }
             />
           )}
 
@@ -313,6 +605,32 @@ export function ReactEnVivo({
             <p className="rounded-lg bg-red-50 p-3 font-mono text-sm break-words text-red-700 dark:bg-red-950/30 dark:text-red-400">
               {errorSintaxis}
             </p>
+          )}
+
+          {usaTypeScript && (
+            <section aria-labelledby={idErroresTipos} className="space-y-2">
+              <h4 id={idErroresTipos} className="text-sm font-semibold">
+                Errores de tipos
+              </h4>
+              <PanelDiagnosticosTs
+                estado={estadoPanelTipos}
+                diagnosticos={diagnosticosTipos}
+                error={
+                  resultadoTipos.estado === 'error'
+                    ? `No se pudieron analizar los tipos: ${resultadoTipos.error ?? 'error desconocido'}`
+                    : undefined
+                }
+                agruparPorArchivo
+              />
+            </section>
+          )}
+
+          {mostrarLint && (
+            <PanelLint
+              estado={estadoPanelLint}
+              diagnosticos={resultadoLint.diagnosticos}
+              error={resultadoLint.error}
+            />
           )}
         </div>
 
@@ -325,6 +643,15 @@ export function ReactEnVivo({
 
         <div className="min-w-0 space-y-2">
           <h4 className="text-sm font-semibold">Vista previa</h4>
+          {avisosCompilador.length > 0 && (
+            <ul className="space-y-1 rounded-lg bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
+              {avisosCompilador.map((aviso) => (
+                <li key={aviso.archivo}>
+                  {aviso.archivo} no se pudo compilar: {aviso.error.split(/\r?\n/, 1)[0]}
+                </li>
+              ))}
+            </ul>
+          )}
           {srcDoc === null ? (
             <p className="text-sm text-muted-foreground">Preparando React…</p>
           ) : (
@@ -334,6 +661,7 @@ export function ReactEnVivo({
               onMensaje={recibir}
               red={api ? redActual : undefined}
               fallosSolicitados={fallosSolicitados}
+              codigoCompilado={compilador}
             />
           )}
         </div>
@@ -360,10 +688,12 @@ export function ReactEnVivo({
         {mostrarConsola && <ConsolaReact entradas={entradas} onLimpiar={limpiar} />}
       </div>
 
-      {comprobacion.estado === 'comprobando' && comprobacion.srcDoc && comprobaciones && (
+      {comprobacion.estado === 'comprobando' &&
+        comprobacion.srcDoc &&
+        (comprobaciones || exigirTiposCorrectos || exigirLintLimpio) && (
         <ComprobadorReact
           srcDoc={comprobacion.srcDoc}
-          comprobaciones={comprobaciones}
+          comprobaciones={comprobaciones ?? COMPROBACIONES_VACIAS}
           onTerminar={terminarComprobacion}
         />
       )}

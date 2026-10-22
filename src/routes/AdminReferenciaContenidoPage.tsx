@@ -5,6 +5,7 @@ import { Callout } from '@/components/bloques-laboratorio/Callout'
 import { CapasDeCaja } from '@/components/bloques-laboratorio/CapasDeCaja'
 import { CodigoAnotado } from '@/components/bloques-laboratorio/CodigoAnotado'
 import { ComparadorAntesDespues } from '@/components/bloques-laboratorio/ComparadorAntesDespues'
+import { CompiladorReact } from '@/components/bloques-laboratorio/CompiladorReact'
 import { DiagramaEtiqueta } from '@/components/bloques-laboratorio/DiagramaEtiqueta'
 import { EsquemaDePagina } from '@/components/bloques-laboratorio/EsquemaDePagina'
 import { EditorEnVivo } from '@/components/bloques-laboratorio/EditorEnVivo'
@@ -22,6 +23,7 @@ import { Roles } from '@/components/bloques-laboratorio/Roles'
 import { SqlAnotado } from '@/components/bloques-laboratorio/SqlAnotado'
 import { SqlEnVivo } from '@/components/bloques-laboratorio/SqlEnVivo'
 import { VistaPreviaSocial } from '@/components/bloques-laboratorio/VistaPreviaSocial'
+import codigoEjemploCompilador from '@/lib/react-kit/__fixtures__/compilador-app.jsx?raw'
 import { Acordeon } from '@/components/referencia-contenido/Acordeon'
 import { AntesDespuesDeslizante } from '@/components/referencia-contenido/AntesDespuesDeslizante'
 import { AparicionEscalonada } from '@/components/referencia-contenido/AparicionEscalonada'
@@ -208,7 +210,7 @@ export function AdminReferenciaContenidoPage() {
         </h1>
         <p className="mt-3 max-w-3xl text-sm text-pretty text-muted-foreground">
           Catálogo visual de componentes React organizado por tipo. El primer grupo, "Bloques de
-          laboratorio", son los 17 componentes reales que ya renderiza cualquier lección a través
+          laboratorio", son los 25 tipos reales que ya renderiza cualquier lección a través
           de un bloque <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">```laboratorio</code>{' '}
           en su Markdown (ver <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">specs/features/laboratorios.md</code>).
           El resto de grupos son prototipos de diseño de <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">referencia-contenido/</code> —
@@ -222,7 +224,7 @@ export function AdminReferenciaContenidoPage() {
       <CategoriaActivaContext.Provider value={categoriaActiva}>
       <GrupoCatalogo
         titulo="Bloques de laboratorio"
-        descripcion="Los 19 tipos reales que un autor puede usar dentro de un bloque ```laboratorio en el Markdown de una lección (src/components/bloques-laboratorio/). Validados por Zod, registrados en un lookup cerrado — no prototipos."
+        descripcion="Los 25 tipos reales que un autor puede usar dentro de un bloque ```laboratorio en el Markdown de una lección (src/components/bloques-laboratorio/). Validados por Zod, registrados en un lookup cerrado — no prototipos."
       >
         <Referencia nombre="PrediceElResultado">
           <PrediceElResultado
@@ -699,6 +701,90 @@ export function AdminReferenciaContenidoPage() {
                 espera: { etiqueta: 'Nueva tarea', valor: '' },
               },
             ]}
+          />
+        </Referencia>
+
+        <Referencia nombre="ReactEnVivoTsx">
+          <ReactEnVivo
+            tipo="react-en-vivo"
+            titulo="Contador con props tipadas"
+            consigna="Suma una unidad y observa que React se ejecuta aunque el panel de tipos detecte errores durante la edición."
+            archivos={[
+              {
+                nombre: 'App.tsx',
+                codigo:
+                  "import { useState } from 'react'\nimport Tarjeta from './Tarjeta'\n\nexport default function App() {\n  const [total, setTotal] = useState<number>(1)\n  return <Tarjeta titulo=\"Artículos\" total={total} onSumar={() => setTotal(total + 1)} />\n}",
+              },
+              {
+                nombre: 'Tarjeta.tsx',
+                codigo:
+                  'interface Props {\n  titulo: string\n  total: number\n  onSumar: () => void\n}\n\nexport default function Tarjeta({ titulo, total, onSumar }: Props) {\n  return (\n    <section>\n      <h2>{titulo}</h2>\n      <button onClick={onSumar}>Total: {total}</button>\n    </section>\n  )\n}',
+              },
+            ]}
+            strictMode
+            mostrarConsola={false}
+            mostrarJsGenerado
+            exigirTiposCorrectos
+            comprobaciones={[
+              {
+                descripcion: 'El contador suma una unidad',
+                pasos: [{ pulsar: { rol: 'button', nombre: 'Total: 1' } }],
+                espera: { texto: 'Total: 2' },
+              },
+            ]}
+            etiquetaSeccion="React en vivo — TSX"
+          />
+        </Referencia>
+
+        <Referencia nombre="ReactEnVivoLint">
+          <ReactEnVivo
+            tipo="react-en-vivo"
+            titulo="Un efecto que el linter rechaza"
+            consigna="Corrige la actualización síncrona de estado y declara la dependencia que falta; después pulsa «Comprobar»."
+            archivos={[
+              {
+                nombre: 'App.jsx',
+                codigo:
+                  "import { useEffect, useState } from 'react'\n\nfunction Saludo({ nombre }) {\n  const [mensaje, setMensaje] = useState('')\n\n  useEffect(() => {\n    setMensaje('Hola ' + nombre)\n  }, [])\n\n  return <p>{mensaje}</p>\n}\n\nexport default function App() {\n  return <Saludo nombre=\"Ada\" />\n}",
+              },
+            ]}
+            strictMode
+            mostrarConsola={false}
+            mostrarJsGenerado={false}
+            mostrarLint
+            exigirLintLimpio
+            comprobaciones={[
+              {
+                descripcion: 'Muestra el saludo',
+                pasos: [],
+                espera: { texto: 'Hola Ada' },
+              },
+            ]}
+            etiquetaSeccion="React en vivo — linter"
+          />
+        </Referencia>
+
+        <Referencia nombre="CompiladorReact">
+          <CompiladorReact
+            tipo="compilador-react"
+            titulo="El mismo componente, compilado"
+            consigna="Edita el código y compara la salida y el informe real de React Compiler."
+            codigo={codigoEjemploCompilador}
+          />
+        </Referencia>
+
+        <Referencia nombre="ReactEnVivoCompilador">
+          <ReactEnVivo
+            tipo="react-en-vivo"
+            titulo="Los mismos clics, menos renders"
+            consigna="Pulsa el contador: React Compiler conserva las filas y el árbol las marca sin cambios."
+            archivos={[{ nombre: 'App.jsx', codigo: codigoEjemploCompilador }]}
+            strictMode
+            mostrarConsola={false}
+            mostrarJsGenerado
+            mostrarArbol
+            compilador
+            etiquetaSeccion="React en vivo — compilador y árbol"
           />
         </Referencia>
 
