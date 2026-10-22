@@ -81,4 +81,7 @@ for (const archivo of ['index.d.ts', 'global.d.ts', 'jsx-runtime.d.ts', 'jsx-dev
 for (const archivo of ['index.d.ts', 'package.json']) {
   cpSync(aqui(`./node_modules/csstype/${archivo}`), `${tipos}csstype/${archivo}`)
 }
-console.log(`${VERSION}/tipos: @types/react ${JSON.parse(readFileSync(aqui('./node_modules/@types/react/package.json'))).version}, csstype ${JSON.parse(readFileSync(aqui('./node_modules/csstype/package.json'))).version}`)
+for (const archivo of ['index.d.ts', 'client.d.ts', 'package.json']) {
+  cpSync(aqui(`./node_modules/@types/react-dom/${archivo}`), `${tipos}react-dom/${archivo}`)
+}
+console.log(`${VERSION}/tipos: @types/react ${JSON.parse(readFileSync(aqui('./node_modules/@types/react/package.json'))).version}, @types/react-dom ${JSON.parse(readFileSync(aqui('./node_modules/@types/react-dom/package.json'))).version}, csstype ${JSON.parse(readFileSync(aqui('./node_modules/csstype/package.json'))).version}`)
