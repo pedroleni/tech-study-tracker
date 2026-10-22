@@ -118,7 +118,7 @@ Con el gol del Puerto Viejo has visto que una mutación puede acabar en pantalla
     },
     {
       "titulo": "El linter te avisa",
-      "texto": "La regla immutability de eslint-plugin-react-hooks marca las mutaciones de props y estado, incluido el caso de mutar y llamar a set con el mismo objeto. La verás con las demás reglas en la lección 70."
+      "texto": "La regla immutability de eslint-plugin-react-hooks marca las asignaciones a props y estado (pedido.total = 0), también si después llamas a set con el mismo objeto. No ve push, sort ni splice: no te fíes solo de ella. La verás con las demás reglas en la lección 70."
     }
   ]
 }

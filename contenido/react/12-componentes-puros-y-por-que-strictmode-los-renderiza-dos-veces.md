@@ -487,7 +487,7 @@ Escribir componentes puros pide algo de disciplina, pero a cambio React puede ha
     {
       "etiqueta": "Avisarte antes",
       "rol": "El linter de React",
-      "descripcion": "Tiene reglas que avisan si llamas a Math.random o Date.now durante el render (purity) o si modificas props y estado (immutability). Lo verás en la lección 70."
+      "descripcion": "Tiene reglas que avisan si llamas a Math.random o Date.now durante el render (purity) o si asignas valores a props y estado, como `props.total = 0` (immutability; un `push` o un `sort` no los ve). Lo verás en la lección 70."
     }
   ]
 }

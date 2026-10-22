@@ -154,7 +154,7 @@ Sin segundo argumento, el efecto se ejecuta **después de cada commit** del comp
 
 El segundo argumento de `useEffect` es la **lista de dependencias**: los valores de los que depende el efecto. Con `[texto]`, React compara el `texto` de este render con el del commit anterior (con `Object.is`, uno a uno) y, si todos son iguales, **se salta el efecto**. Escribir en el campo vuelve a renderizar `Rotulo`, pero su `texto` es el mismo y el efecto no se ejecuta. Al elegir otro mensaje, el registro lo explica con todas las letras: «▶ efecto · cambió texto: "Bienvenidos a Puerto Blanco" → "Nieve polvo en la Umbría"».
 
-**Las dependencias no se eligen: las dicta el código del efecto.** Si el efecto usa `texto`, `texto` va en la lista. El linter de React (`eslint-plugin-react-hooks`, con su regla `exhaustive-deps`) lo comprueba por ti; en Oxlint, el linter que propone Vite, la misma regla se llama `react/exhaustive-deps` y hay que activarla. Si dejas la lista vacía en este rótulo, `eslint-plugin-react-hooks` te lo dice así:
+**Las dependencias no se eligen: las dicta el código del efecto.** Si el efecto usa `texto`, `texto` va en la lista. El linter de React (`eslint-plugin-react-hooks`, con su regla `exhaustive-deps`) lo comprueba por ti; en Oxlint, el linter que propone Vite, la misma regla sale como `react-hooks(exhaustive-deps)` y ya viene activa como aviso con la configuración de la plantilla. Si dejas la lista vacía en este rótulo, `eslint-plugin-react-hooks` te lo dice así:
 
 ```text
 React Hook useEffect has a missing dependency: 'texto'. Either include it or remove the dependency array.

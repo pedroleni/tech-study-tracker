@@ -195,7 +195,7 @@ Fíjate en lo que **no** marca: un `set` dentro de un *callback*. El `.then` de 
 
 Tampoco lo marca todo: el `Interruptor` del gimnasio, más abajo, avisa al padre desde un efecto con `onCambiar(activo)`, que no es un `set` de ese componente, y la regla no dice nada aunque cueste el mismo render de más. El linter ayuda; la pregunta de por qué se ejecuta el código la tienes que hacer tú.
 
-La regla vive en `eslint-plugin-react-hooks`, no en el editor de estas lecciones. Si creaste tu proyecto con Vite y elegiste Oxlint (la opción por defecto, lección 2), su configuración de partida activa `rules-of-hooks`, pero no esta: Oxlint tiene su propia versión, `react/set-state-in-effect`, y hay que activarla en `.oxlintrc.json`. Las reglas del linter de React, una por una, son la lección 70.
+La regla vive en `eslint-plugin-react-hooks`, no en el editor de estas lecciones. Si creaste tu proyecto con Vite y elegiste Oxlint (la opción por defecto, lección 2), Oxlint tiene su propia versión de esta regla, `react/set-state-in-effect`, y con la configuración de partida de la plantilla ya sale como aviso (comprobado con Oxlint 1.89). Las reglas del linter de React, una por una, son la lección 70.
 
 ## La lógica de un evento va en su manejador
 
