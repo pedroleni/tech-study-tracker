@@ -335,7 +335,7 @@ export const esquemaComprobacionReact = z.object({
 })
 
 const esquemaArchivoReact = z.object({
-  nombre: z.string().regex(/^[A-Za-z][A-Za-z0-9-]*\.(jsx|css)$/),
+  nombre: z.string().regex(/^[A-Za-z][A-Za-z0-9-]*\.(jsx|tsx|ts|css)$/),
   codigo: z.string().max(4000),
 })
 
@@ -377,12 +377,16 @@ export const esquemaReactEnVivo = z
     // Árbol de renders (fase 2): qué se renderiza en cada commit y por qué.
     mostrarArbol: z.boolean().default(false),
     mostrarEfectos: z.boolean().default(false),
+    mostrarLint: z.boolean().default(false),
+    compilador: z.boolean().default(false),
+    exigirLintLimpio: z.boolean().default(false),
+    exigirTiposCorrectos: z.boolean().default(false),
     api: esquemaApiReact.optional(),
     red: esquemaRedReact.optional(),
     comprobaciones: z.array(esquemaComprobacionReact).min(1).max(8).optional(),
   })
-  .refine((datos) => datos.archivos.some((archivo) => archivo.nombre === 'App.jsx'), {
-    message: 'react-en-vivo necesita un archivo App.jsx',
+  .refine((datos) => datos.archivos.filter((archivo) => /^App\.(jsx|tsx)$/.test(archivo.nombre)).length === 1, {
+    message: 'react-en-vivo necesita exactamente uno entre App.jsx y App.tsx',
   })
   .refine((datos) => new Set(datos.archivos.map((archivo) => archivo.nombre)).size === datos.archivos.length, {
     message: 'Los nombres de archivo no pueden repetirse',
@@ -390,6 +394,12 @@ export const esquemaReactEnVivo = z
   .refine((datos) => !datos.archivoInicial || datos.archivos.some((archivo) => archivo.nombre === datos.archivoInicial), {
     message: 'archivoInicial debe ser uno de los archivos',
   })
+  .refine(
+    (datos) =>
+      !datos.exigirTiposCorrectos ||
+      datos.archivos.some((archivo) => /\.(?:ts|tsx)$/.test(archivo.nombre)),
+    { message: 'exigirTiposCorrectos necesita al menos un archivo .ts o .tsx' },
+  )
 
 export const esquemaReactAnotado = z.object({
   tipo: z.literal('react-anotado'),
@@ -406,6 +416,13 @@ export const esquemaReactAnotado = z.object({
   mostrarEfectos: z.boolean().default(false),
   api: esquemaApiReact.optional(),
   red: esquemaRedReact.optional(),
+})
+
+export const esquemaCompiladorReact = z.strictObject({
+  tipo: z.literal('compilador-react'),
+  titulo: z.string().min(1).max(140).optional(),
+  consigna: z.string().min(1).max(600).optional(),
+  codigo: z.string().max(4000),
 })
 
 // Árbol de componentes estático: el mismo dibujo que el árbol de renders,
@@ -479,6 +496,7 @@ export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaGitEnVivo,
   esquemaReactEnVivo,
   esquemaReactAnotado,
+  esquemaCompiladorReact,
   esquemaArbolDeComponentes,
   esquemaImagen,
   esquemaVideo,
@@ -507,6 +525,7 @@ export type DatosGitAnotado = z.infer<typeof esquemaGitAnotado>
 export type DatosGitEnVivo = z.infer<typeof esquemaGitEnVivo>
 export type DatosReactEnVivo = z.infer<typeof esquemaReactEnVivo>
 export type DatosReactAnotado = z.infer<typeof esquemaReactAnotado>
+export type DatosCompiladorReact = z.infer<typeof esquemaCompiladorReact>
 export type DatosArbolDeComponentes = z.infer<typeof esquemaArbolDeComponentes>
 export type ComprobacionReact = z.infer<typeof esquemaComprobacionReact>
 export type ArchivoReact = z.infer<typeof esquemaArchivoReact>

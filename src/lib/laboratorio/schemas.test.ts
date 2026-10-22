@@ -4,6 +4,7 @@ import {
   esquemaArbolDeComponentes,
   esquemaBloqueLaboratorio,
   esquemaCodigoAnotado,
+  esquemaCompiladorReact,
   esquemaComprobacionReact,
   esquemaEditorEnVivo,
   esquemaGitAnotado,
@@ -22,17 +23,87 @@ const minimoEnVivo = { tipo: 'react-en-vivo', archivos: [archivoApp] }
 describe('esquemaReactEnVivo', () => {
   it('acepta el mínimo y aplica los valores por defecto', () => {
     const datos = esquemaReactEnVivo.parse(minimoEnVivo)
-    expect(datos).toMatchObject({ strictMode: true, mostrarConsola: true, mostrarJsGenerado: false })
+    expect(datos).toMatchObject({
+      strictMode: true,
+      mostrarConsola: true,
+      mostrarJsGenerado: false,
+      compilador: false,
+      mostrarLint: false,
+      exigirLintLimpio: false,
+      exigirTiposCorrectos: false,
+    })
     expect(esquemaBloqueLaboratorio.parse(minimoEnVivo).tipo).toBe('react-en-vivo')
   })
 
-  it('exige App.jsx, nombres únicos y válidos, y un archivoInicial existente', () => {
+  it('admite activar React Compiler', () => {
+    expect(esquemaReactEnVivo.parse({ ...minimoEnVivo, compilador: true }).compilador).toBe(true)
+  })
+
+  it('admite activar el panel y exigir que el linter no marque nada', () => {
+    expect(
+      esquemaReactEnVivo.parse({
+        ...minimoEnVivo,
+        mostrarLint: true,
+        exigirLintLimpio: true,
+      }),
+    ).toMatchObject({ mostrarLint: true, exigirLintLimpio: true })
+  })
+
+  it('rechaza exigir tipos correctos si el bloque no contiene TypeScript', () => {
+    const resultado = esquemaReactEnVivo.safeParse({
+      ...minimoEnVivo,
+      exigirTiposCorrectos: true,
+    })
+
+    expect(resultado.success).toBe(false)
+    if (resultado.success) return
+    expect(resultado.error.issues.map((issue) => issue.message)).toContain(
+      'exigirTiposCorrectos necesita al menos un archivo .ts o .tsx',
+    )
+  })
+
+  it('admite jsx, tsx, ts y css, con nombres seguros', () => {
     const fallo = (datos: unknown) => esquemaReactEnVivo.safeParse(datos).success
-    expect(fallo({ ...minimoEnVivo, archivos: [{ nombre: 'Main.jsx', codigo: '' }] })).toBe(false)
-    expect(fallo({ ...minimoEnVivo, archivos: [archivoApp, archivoApp] })).toBe(false)
-    for (const nombre of ['app.tsx', '../App.jsx', 'App.js', 'estilos.scss']) {
+    expect(
+      fallo({
+        ...minimoEnVivo,
+        archivos: [
+          { nombre: 'App.tsx', codigo: '' },
+          { nombre: 'Tarjeta.tsx', codigo: '' },
+          { nombre: 'datos.ts', codigo: '' },
+          { nombre: 'estilos.css', codigo: '' },
+        ],
+      }),
+    ).toBe(true)
+    for (const nombre of ['1app.tsx', '../App.jsx', 'App.js', 'estilos.scss']) {
       expect(fallo({ ...minimoEnVivo, archivos: [archivoApp, { nombre, codigo: '' }] })).toBe(false)
     }
+  })
+
+  it('exige exactamente uno entre App.jsx y App.tsx con un mensaje claro', () => {
+    const sinApp = esquemaReactEnVivo.safeParse({
+      ...minimoEnVivo,
+      archivos: [{ nombre: 'Main.tsx', codigo: '' }],
+    })
+    const dosApp = esquemaReactEnVivo.safeParse({
+      ...minimoEnVivo,
+      archivos: [archivoApp, { nombre: 'App.tsx', codigo: '' }],
+    })
+
+    expect(sinApp.success).toBe(false)
+    expect(dosApp.success).toBe(false)
+    if (sinApp.success || dosApp.success) return
+    expect(sinApp.error.issues.map((issue) => issue.message)).toContain(
+      'react-en-vivo necesita exactamente uno entre App.jsx y App.tsx',
+    )
+    expect(dosApp.error.issues.map((issue) => issue.message)).toContain(
+      'react-en-vivo necesita exactamente uno entre App.jsx y App.tsx',
+    )
+  })
+
+  it('exige nombres únicos y un archivoInicial existente', () => {
+    const fallo = (datos: unknown) => esquemaReactEnVivo.safeParse(datos).success
+    expect(fallo({ ...minimoEnVivo, archivos: [archivoApp, archivoApp] })).toBe(false)
     expect(fallo({ ...minimoEnVivo, archivoInicial: 'Otro.jsx' })).toBe(false)
     expect(fallo({ ...minimoEnVivo, archivos: [archivoApp, { nombre: 'estilos.css', codigo: 'p{}' }], archivoInicial: 'estilos.css' })).toBe(true)
   })
@@ -88,6 +159,25 @@ describe('esquemaReactEnVivo', () => {
     expect(
       esquemaComprobacionReact.safeParse({ ...base, pasos: [{ red: 'fallar-siempre' }] }).success,
     ).toBe(false)
+  })
+})
+
+describe('esquemaCompiladorReact', () => {
+  const minimo = {
+    tipo: 'compilador-react',
+    codigo: 'export default function App() { return <p>Hola</p> }',
+  }
+
+  it('acepta el bloque mínimo y participa en el registro cerrado', () => {
+    expect(esquemaCompiladorReact.parse(minimo)).toEqual(minimo)
+    expect(esquemaBloqueLaboratorio.parse(minimo).tipo).toBe('compilador-react')
+  })
+
+  it('es estricto y limita título, consigna y código', () => {
+    expect(esquemaCompiladorReact.safeParse({ ...minimo, titulo: 't'.repeat(141) }).success).toBe(false)
+    expect(esquemaCompiladorReact.safeParse({ ...minimo, consigna: 'c'.repeat(601) }).success).toBe(false)
+    expect(esquemaCompiladorReact.safeParse({ ...minimo, codigo: 'x'.repeat(4001) }).success).toBe(false)
+    expect(esquemaCompiladorReact.safeParse({ ...minimo, inesperado: true }).success).toBe(false)
   })
 })
 

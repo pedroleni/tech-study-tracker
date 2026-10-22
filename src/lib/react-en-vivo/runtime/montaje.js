@@ -43,10 +43,13 @@
     'react-dom/client': R.ReactDOMClient,
     'react/jsx-runtime': R.JsxRuntime,
     'react/jsx-dev-runtime': R.JsxDevRuntime,
+    'react/compiler-runtime': { c: R.React.__COMPILER_RUNTIME.c },
   }
   // hasOwnProperty y no `in`: un import de "constructor" no debe encontrar
   // nada en el prototipo de Object.
   const tiene = (objeto, clave) => Object.prototype.hasOwnProperty.call(objeto, clave)
+  const rutaApp = tiene(modulos, './App.jsx') ? './App.jsx' : './App.tsx'
+  const nombreApp = rutaApp.slice(2)
 
   let cache = Object.create(null)
   let raiz = null
@@ -64,7 +67,7 @@
     if (peticion.endsWith('.css')) {
       if (archivosCss.includes(peticion)) return peticion
     } else {
-      for (const candidata of [peticion, peticion + '.jsx']) {
+      for (const candidata of [peticion, peticion + '.jsx', peticion + '.tsx', peticion + '.ts']) {
         if (tiene(modulos, candidata)) return candidata
       }
     }
@@ -89,7 +92,9 @@
 
   const ubicar = (error) => {
     const texto = String(error && error.message !== undefined ? error.message : error).slice(0, 2000)
-    const coincidencia = /([A-Za-z][A-Za-z0-9-]*\.jsx):(\d+):\d+/.exec(String((error && error.stack) || ''))
+    const coincidencia = Array.from(
+      String((error && error.stack) || '').matchAll(/([A-Za-z][A-Za-z0-9-]*\.(?:jsx|tsx|ts)):(\d+):\d+/g),
+    ).find((marco) => tiene(modulos, './' + marco[1]))
     if (!coincidencia) return { texto }
     return {
       texto,
@@ -107,12 +112,12 @@
 
   const montar = () => {
     desmontar()
-    const App = requerir('./App.jsx').default
+    const App = requerir(rutaApp).default
     const esComponente =
       typeof App === 'function' || (typeof App === 'object' && App !== null && '$$typeof' in App)
     if (!esComponente) {
       throw new Error(
-        'App.jsx tiene que exportar un componente por defecto: export default function App() { … }',
+        nombreApp + ' tiene que exportar un componente por defecto: export default function App() { … }',
       )
     }
     raiz = R.ReactDOMClient.createRoot(document.getElementById('root'), {

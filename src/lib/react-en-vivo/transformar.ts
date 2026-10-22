@@ -76,8 +76,12 @@ export async function transformarArchivos(
 
     let codigo: string
     try {
+      const usaTsx = archivo.nombre.endsWith('.tsx')
+      const usaTypeScript = archivo.nombre.endsWith('.ts') || usaTsx
       codigo = transform(archivo.codigo, {
-        transforms: ['jsx', 'imports'],
+        transforms: usaTypeScript
+          ? ['typescript', ...(usaTsx ? ['jsx' as const] : []), 'imports']
+          : ['jsx', 'imports'],
         jsxRuntime: 'automatic',
         production: false,
         filePath: archivo.nombre,
@@ -115,11 +119,15 @@ export async function transformarParaMostrar(
   const resultados: string[] = []
 
   for (const archivo of archivos) {
-    if (!archivo.nombre.endsWith('.jsx')) continue
+    if (!/\.(jsx|tsx|ts)$/.test(archivo.nombre)) continue
 
     try {
+      const usaTsx = archivo.nombre.endsWith('.tsx')
+      const usaTypeScript = archivo.nombre.endsWith('.ts') || usaTsx
       const codigo = transform(archivo.codigo, {
-        transforms: ['jsx'],
+        transforms: usaTypeScript
+          ? ['typescript', ...(usaTsx ? ['jsx' as const] : [])]
+          : ['jsx'],
         jsxRuntime: 'automatic',
         production: true,
         filePath: archivo.nombre,

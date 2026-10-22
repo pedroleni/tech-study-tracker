@@ -84,6 +84,19 @@ async function montarConOpciones(codigo: string, efectosActivos: boolean, strict
   await within(document.body).findByRole('button').catch(() => undefined)
 }
 
+async function montarTsx(codigo: string) {
+  const resultado = await transformarArchivos([{ nombre: 'App.tsx', codigo }])
+  if (!resultado.ok) throw new Error(resultado.mensaje)
+  ventana.__configReactEnVivo = {
+    modulos: resultado.modulos,
+    archivosCss: resultado.archivosCss,
+    strictMode: false,
+    efectos: true,
+  }
+  new Function(montaje)()
+  await within(document.body).findByRole('button')
+}
+
 const mensajes = () =>
   enviar.mock.calls
     .map(([mensaje]) => mensaje as { tipo: string })
@@ -96,6 +109,27 @@ const deChat = () =>
   )
 
 describe('registro de efectos', () => {
+  it('atribuye componentes, líneas y dependencias a pilas de archivos TSX', async () => {
+    await montarTsx(`import { useEffect, useState } from 'react'
+export default function App() {
+  const [sala, setSala] = useState<string>('general')
+  useEffect(() => {}, [sala])
+  return <button onClick={() => setSala('viaje')}>{sala}</button>
+}`)
+    await waitFor(() => expect(mensajes()).toHaveLength(1))
+    enviar.mockClear()
+
+    fireEvent.click(within(document.body).getByRole('button'))
+
+    await waitFor(() => expect(mensajes()).toHaveLength(1))
+    expect(mensajes()[0]).toMatchObject({
+      componente: 'App',
+      archivo: 'App.tsx',
+      linea: 4,
+      cambios: [{ nombre: 'sala', antes: '"general"', ahora: '"viaje"' }],
+    })
+  })
+
   it('conserva avisos y ejecuciones de React con retornos y dependencias inválidos', async () => {
     const casos = [
       `import { useEffect } from 'react'; export default function App(){ useEffect(async () => { window.__ejecuciones += 1 }, []); return <button>ok</button> }`,

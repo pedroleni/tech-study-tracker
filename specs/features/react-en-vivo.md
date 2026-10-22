@@ -667,6 +667,116 @@ que dura lo que dura el documento.
 - `VistaPreviaReact` gana la forma de enviar mensajes al iframe (los de
   `red`) y los reenvía al recibir `montado`.
 
+## Alcance de la fase 4: TSX, linter y React Compiler
+
+Diseño del temario (componente 8 y módulo 10), aprobado el 2026-10-22.
+Desbloquea las lecciones 68–70 (compilador y linter) y 72–74 (TSX).
+
+### Validación (2026-10-21)
+
+Prueba aislada (scratchpad `spike-fase4/`): paquetes de navegador hechos
+con esbuild y ejecutados en Chromium real, comparando la salida con la de
+Node sobre los mismos archivos.
+
+| Qué se probó | Resultado |
+|---|---|
+| `babel-plugin-react-compiler@1.0.0` sobre `@babel/standalone@8.0.7` | Funciona: **4,5 MB / 1,10 MB gzip**, carga en ~280 ms, ~34 ms por compilación. Salida idéntica a la de Node (`import { c as _c } from "react/compiler-runtime"`, ranuras `$[0]`…), con el JSX conservado |
+| `Linter` de `eslint/universal` (ESLint 10.13.0) + `eslint-plugin-react-hooks@7.1.1`, `recommended-latest` | Funciona: **4,0 MB / 0,97 MB gzip**, carga en ~210 ms, primera pasada ~54 ms y siguientes ~2 ms. Mismos mensajes que en Node, también los de las reglas basadas en el compilador (`set-state-in-effect`, `purity`) |
+| Los dos en un solo paquete | 8,3 MB / 2,0 MB gzip (cada plugin trae su copia de Babel): **se sirven por separado** |
+| Módulos de Node que arrastran (`os`, `tty`, `util`, `path`, `fs`, `crypto`, `process`) | Sustituidos por un relleno; lo que se ejecuta necesita `util.isDeepStrictEqual` y `crypto.createHmac` (clave de caché: basta un FNV-1a) |
+| Trampa 1: `require.resolve('react-native-reanimated')` | En el compilador, `enableReanimatedCheck: false`; en el plugin de ESLint, parchear `hasModule` para que devuelva `false` al empaquetar. Sin parche, las reglas del compilador fallan **en silencio** |
+| Trampa 2: `hermes-parser` | Con archivos `.jsx` el plugin de ESLint usa `hermes-parser`, que no arranca en el navegador (en silencio). Con el nombre `App.tsx` usa el parser de Babel (TS + JSX), y `hermes-parser` sale del paquete |
+| `react/compiler-runtime` en la vista previa | El `react.js` 19.3.1 del sandbox ya expone `React.__COMPILER_RUNTIME` |
+| TSX con Sucrase (`typescript`, `jsx`, `imports`) | Quita los tipos y conserva las líneas, sin peso añadido |
+| Tipos de React | `@types/react@19.3.0` + `csstype`: 1,1 MB de `.d.ts` |
+
+### Decisiones
+
+1. **En el navegador, no precompilado**: el alumno edita y ve al momento
+   la salida del compilador o los avisos del linter. Cada paquete pesa
+   menos que el compilador de TypeScript que ya carga el módulo de
+   TypeScript y solo se descarga en las lecciones que lo usan.
+2. **En un Web Worker clásico** por paquete
+   (`/vendor/react-kit/<versión>/compilador.js` y `lint.js`): la carga y
+   las pasadas no bloquean el editor, y los rellenos de Node no tocan la
+   página. Se crea al primer uso y se reutiliza.
+3. **Paquete aislado `scripts/react-kit/`** (como `scripts/react-en-vivo/`):
+   `package.json` con versiones exactas, lockfile y `construir.mjs` con los
+   rellenos y los dos parches. El resultado se versiona en
+   `public/vendor/react-kit/<versión>/` con caché inmutable en
+   `vercel.json`, junto con los tipos de React en `tipos/`.
+4. **Protocolo**: página → worker `{ id, tipo: 'compilar', codigo,
+   typescript? }` o `{ id, tipo: 'lint', archivos: { nombre, codigo }[] }`;
+   worker → página `{ id, ok: true, codigo, eventos }`, `{ id, ok: true,
+   diagnosticos }` o `{ id, ok: false, error }`. La página valida con Zod
+   y descarta las respuestas que no sean de la última petición.
+5. **TSX sin paquete nuevo**: Sucrase para ejecutar y `typescript-en-vivo`
+   para los errores de tipos, con los `.d.ts` de React. Como en Vite, los
+   errores de tipos se enseñan pero **no impiden ejecutar**.
+
+### Esquemas
+
+`react-en-vivo` gana:
+
+```ts
+archivos: nombres /^[A-Za-z][A-Za-z0-9-]*\.(jsx|tsx|ts|css)$/
+          // exactamente uno entre App.jsx y App.tsx, con export default
+mostrarLint?: boolean          // panel «Linter»; por defecto false
+compilador?: boolean           // ejecuta el código compilado con React
+                               // Compiler; por defecto false
+exigirLintLimpio?: boolean     // «Comprobar» añade «El linter no marca nada»
+exigirTiposCorrectos?: boolean // «Comprobar» añade «El código no tiene
+                               // errores de tipos»
+```
+
+Un bloque con algún `.ts` o `.tsx` enseña siempre el panel de errores de
+tipos. Las comprobaciones añadidas por `exigir*` van las primeras y su
+motivo es el primer diagnóstico («App.tsx:7:12 · Type 'string' is not
+assignable to type 'number'.»).
+
+Bloque nuevo **`compilador-react`**: `{ tipo, titulo? (≤ 140), consigna?
+(≤ 600), codigo (≤ 4000, un componente JSX editable) }`. A la izquierda
+el código (con «Restablecer»), a la derecha la salida real del compilador
+(solo lectura, resaltada como `jsx`), regenerada 300 ms después de la
+última edición; debajo, lo que dijo el compilador de cada componente
+(«Fila: compilado», «App: no se compiló · <motivo>»), sacado de su
+`logger`.
+
+### Linter (`mostrarLint`)
+
+`recommended-latest` de `eslint-plugin-react-hooks` 7.1.1, sin más reglas.
+Cada `.jsx`/`.tsx` se pasa como `.tsx` (trampa 2) y se pinta con su
+nombre real. Panel «Linter» bajo el editor: por archivo, `línea:columna`,
+regla y mensaje literal en inglés (el primer párrafo visible, el resto
+desplegable); sin diagnósticos, «El linter no marca nada». Se recalcula
+400 ms después de la última edición.
+
+### Compilador en la vista previa (`compilador`)
+
+Antes de Sucrase, cada `.jsx`/`.tsx` pasa por el worker del compilador.
+El montaje acepta el import `react/compiler-runtime` y lo resuelve a
+`{ c: React.__COMPILER_RUNTIME.c }` (y `transformar` lo admite). Si el
+compilador falla en un archivo, se ejecuta sin compilar y se avisa encima
+de la vista previa. «Ver el JavaScript generado» enseña el código
+compilado. Las líneas de los errores de render son las del código
+compilado: el recuadro lo dice.
+
+### TSX
+
+- `transformar`: `transforms: ['typescript', 'jsx', 'imports']` para `.ts`
+  y `.tsx`; `./Tarjeta` se resuelve también a `.tsx` y `.ts`.
+- Errores de tipos en la página con `typescript-en-vivo` y
+  `@typescript/vfs`: los `.ts`/`.tsx` del bloque más los `.d.ts` de React
+  y `csstype` (desde `/vendor/react-kit/<versión>/tipos/`), con
+  `jsx: 'react-jsx'`, `strict: true` y `moduleResolution: 'bundler'`.
+- Panel «Errores de tipos» como `PanelDiagnosticosTs` de `EditorEnVivo`
+  (reutilizarlo), por archivo.
+
+### Pendiente de la fase 4
+
+Opcionales del temario (tests en vivo y panel de anuncios): se decidirán
+más adelante.
+
 ## Checkpoints de seguridad
 
 - **El código del alumno nunca toca la web.** Iframe sin
@@ -720,9 +830,8 @@ comprobaciones:
   alturas fijas en los ejemplos.
 - **El CSS se aplica aunque no se importe**: todos los `.css` del
   bloque van al documento.
-- **`localStorage`** lanza `SecurityError` dentro del sandbox (origen
-  opaco). Hará falta un almacenamiento en memoria antes del proyecto
-  Wordle (fase 3).
+- **`localStorage` y `sessionStorage`** funcionan con un almacén en
+  memoria (fase 3): no sobreviven a recargar la vista previa.
 - **La consola** captura `console.log`, `info`, `warn` y `error`; no
   `table`, `dir` ni `group`.
 - **Los errores de sintaxis** salen con el mensaje de Sucrase, en

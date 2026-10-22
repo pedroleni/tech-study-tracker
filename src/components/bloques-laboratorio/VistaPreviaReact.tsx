@@ -11,11 +11,13 @@ export function VistaPreviaReact({
   onMensaje,
   red,
   fallosSolicitados = 0,
+  codigoCompilado = false,
 }: {
   srcDoc: string
   onMensaje?: (mensaje: MensajeReactEnVivo) => void
   red?: AjustesRed
   fallosSolicitados?: number
+  codigoCompilado?: boolean
 }) {
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const onMensajeRef = useRef(onMensaje)
@@ -82,7 +84,11 @@ export function VistaPreviaReact({
       if (mensaje.tipo === 'alto') setAlto(mensaje.alto)
       if (mensaje.tipo === 'error-render') {
         const donde = mensaje.archivo
-          ? ` — ${mensaje.archivo}${mensaje.linea ? `, línea ${mensaje.linea}` : ''}`
+          ? ` — ${mensaje.archivo}${
+              mensaje.linea
+                ? `, línea ${mensaje.linea}${codigoCompilado ? ' del código compilado' : ''}`
+                : ''
+            }`
           : ''
         setError({ srcDoc, texto: `Error al renderizar: ${mensaje.texto}${donde}` })
       }
@@ -92,7 +98,7 @@ export function VistaPreviaReact({
 
     window.addEventListener('message', recibir)
     return () => window.removeEventListener('message', recibir)
-  }, [srcDoc])
+  }, [codigoCompilado, srcDoc])
 
   const errorVisible = error?.srcDoc === srcDoc ? error.texto : null
 

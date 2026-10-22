@@ -7,6 +7,8 @@ import { readFileSync } from 'node:fs'
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { ArchivoReact } from '@/lib/laboratorio/schemas'
+import codigoCompilado from '@/lib/react-kit/__fixtures__/compilador-app.compilado.jsx?raw'
+import codigoOriginal from '@/lib/react-kit/__fixtures__/compilador-app.jsx?raw'
 
 import type { MensajeArbol, NodoArbolRender } from './mensajes'
 import { esquemaMensajeReactEnVivo } from './mensajes'
@@ -117,6 +119,26 @@ const nodo = (mensaje: MensajeArbol, nombre: string, clave?: string) =>
   mensaje.nodos.find((n) => n.nombre === nombre && n.clave === clave)!
 
 describe('árbol de renders', () => {
+  it('sin React Compiler, el clic vuelve a renderizar Fila porque se renderizó su padre', async () => {
+    await montar([{ nombre: 'App.jsx', codigo: codigoOriginal }])
+    const sinCompilar = await pulsar('Pulsado 0')
+    expect(nodo(sinCompilar, 'Fila', 'Pan')).toMatchObject({
+      estado: 'renderizado',
+      motivos: [{ tipo: 'padre' }],
+    })
+    expect(nodo(sinCompilar, 'Fila', 'Leche')).toMatchObject({
+      estado: 'renderizado',
+      motivos: [{ tipo: 'padre' }],
+    })
+  })
+
+  it('con React Compiler, el mismo clic deja Fila sin cambios', async () => {
+    await montar([{ nombre: 'App.jsx', codigo: codigoCompilado }])
+    const compilado = await pulsar('Pulsado 0')
+    expect(nodo(compilado, 'Fila', 'Pan').estado).toBe('sin-cambios')
+    expect(nodo(compilado, 'Fila', 'Leche').estado).toBe('sin-cambios')
+  })
+
   it('al montar, todos los componentes salen montados con su nivel y su estado', async () => {
     const montaje = await montar([{ nombre: 'App.jsx', codigo: APP }])
 

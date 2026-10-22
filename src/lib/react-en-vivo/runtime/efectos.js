@@ -90,13 +90,13 @@
   const marcosDelAlumno = (pila, modulos) => {
     const marcos = []
     for (const linea of String(pila || '').split('\n')) {
-      let coincidencia = /^\s*at\s+(.+?)\s+\((.+\.jsx):(\d+):(\d+)\)\s*$/.exec(linea)
+      let coincidencia = /^\s*at\s+(.+?)\s+\((.+\.(?:jsx|tsx|ts)):(\d+):(\d+)\)\s*$/.exec(linea)
       if (!coincidencia) {
-        const anonimo = /^\s*at\s+(.+\.jsx):(\d+):(\d+)\s*$/.exec(linea)
+        const anonimo = /^\s*at\s+(.+\.(?:jsx|tsx|ts)):(\d+):(\d+)\s*$/.exec(linea)
         if (anonimo) coincidencia = ['', '', anonimo[1], anonimo[2], anonimo[3]]
       }
       if (!coincidencia) {
-        const firefox = /^(.*?)@(.+\.jsx):(\d+):(\d+)\s*$/.exec(linea)
+        const firefox = /^(.*?)@(.+\.(?:jsx|tsx|ts)):(\d+):(\d+)\s*$/.exec(linea)
         if (firefox) coincidencia = ['', firefox[1], firefox[2], firefox[3], firefox[4]]
       }
       if (!coincidencia) continue
@@ -264,7 +264,7 @@
     const primero = marcos[0]
     const componente = marcos.find((marco) => /^[A-Z]/.test(marco.nombre || ''))
     const gancho = marcos.find((marco) => /^use[A-Z]/.test(marco.nombre || ''))
-    const archivoReserva = Object.keys(modulos).find((ruta) => ruta.endsWith('.jsx'))?.slice(2) || 'App.jsx'
+    const archivoReserva = Object.keys(modulos).find((ruta) => /\.(?:jsx|tsx)$/.test(ruta))?.slice(2) || 'App.jsx'
     const ubicacion = {
       componente: limitar(componente?.nombre || 'Componente', 60),
       ...(gancho ? { gancho: limitar(gancho.nombre, 60) } : {}),
