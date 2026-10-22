@@ -335,7 +335,7 @@ export const esquemaComprobacionReact = z.object({
 })
 
 const esquemaArchivoReact = z.object({
-  nombre: z.string().regex(/^[A-Za-z][A-Za-z0-9-]*\.(jsx|css)$/),
+  nombre: z.string().regex(/^[A-Za-z][A-Za-z0-9-]*\.(jsx|tsx|ts|css)$/),
   codigo: z.string().max(4000),
 })
 
@@ -377,12 +377,13 @@ export const esquemaReactEnVivo = z
     // Árbol de renders (fase 2): qué se renderiza en cada commit y por qué.
     mostrarArbol: z.boolean().default(false),
     mostrarEfectos: z.boolean().default(false),
+    exigirTiposCorrectos: z.boolean().default(false),
     api: esquemaApiReact.optional(),
     red: esquemaRedReact.optional(),
     comprobaciones: z.array(esquemaComprobacionReact).min(1).max(8).optional(),
   })
-  .refine((datos) => datos.archivos.some((archivo) => archivo.nombre === 'App.jsx'), {
-    message: 'react-en-vivo necesita un archivo App.jsx',
+  .refine((datos) => datos.archivos.filter((archivo) => /^App\.(jsx|tsx)$/.test(archivo.nombre)).length === 1, {
+    message: 'react-en-vivo necesita exactamente uno entre App.jsx y App.tsx',
   })
   .refine((datos) => new Set(datos.archivos.map((archivo) => archivo.nombre)).size === datos.archivos.length, {
     message: 'Los nombres de archivo no pueden repetirse',

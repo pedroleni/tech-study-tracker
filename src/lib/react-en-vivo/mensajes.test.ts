@@ -30,6 +30,14 @@ describe('leerMensajeReactEnVivo', () => {
         iframe.contentWindow,
       ),
     ).toEqual({ canal: 'react-en-vivo', tipo: 'error-render', texto: 'Roto', archivo: 'App.jsx', linea: 3 })
+    for (const archivo of ['App.tsx', 'datos.ts']) {
+      expect(
+        leerMensajeReactEnVivo(
+          evento({ canal: 'react-en-vivo', tipo: 'error-render', texto: 'Roto', archivo, linea: 3 }),
+          iframe.contentWindow,
+        ),
+      ).toEqual({ canal: 'react-en-vivo', tipo: 'error-render', texto: 'Roto', archivo, linea: 3 })
+    }
   })
 
   it('acepta el progreso de una comprobación', () => {
@@ -126,6 +134,12 @@ describe('leerMensajeReactEnVivo', () => {
     }
 
     expect(leerMensajeReactEnVivo(evento(efecto), iframe.contentWindow)).toEqual(efecto)
+    for (const archivo of ['App.tsx', 'efectos.ts']) {
+      expect(leerMensajeReactEnVivo(evento({ ...efecto, archivo }), iframe.contentWindow)).toEqual({
+        ...efecto,
+        archivo,
+      })
+    }
     expect(
       leerMensajeReactEnVivo(
         evento({

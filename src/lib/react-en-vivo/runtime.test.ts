@@ -171,6 +171,69 @@ describe('runtime de montaje', () => {
     )
   })
 
+  it('monta App.tsx, resuelve imports TSX sin extensión y supera comprobaciones', async () => {
+    await ejecutarMontaje([
+      {
+        nombre: 'App.tsx',
+        codigo: `import { useState } from 'react'
+import Tarjeta from './Tarjeta'
+interface Props { inicio?: number }
+export default function App({ inicio = 1 }: Props) {
+  const [n, setN] = useState<number>(inicio)
+  return <Tarjeta n={n} onSumar={() => setN(n + 1)} />
+}`,
+      },
+      {
+        nombre: 'Tarjeta.tsx',
+        codigo: `interface Props { n: number; onSumar: () => void }
+export default function Tarjeta({ n, onSumar }: Props) {
+  return <button onClick={onSumar}>Total: {n}</button>
+}`,
+      },
+    ])
+    ventana.__pruebasEnVivo = {
+      ...await import('@testing-library/dom'),
+      userEvent: userEventFalso,
+    }
+
+    expect(await ventana.__comprobarReactEnVivo?.([
+      {
+        descripcion: 'Suma uno',
+        pasos: [{ pulsar: { rol: 'button', nombre: 'Total: 1' } }],
+        espera: { texto: 'Total: 2' },
+      },
+    ])).toEqual([{ descripcion: 'Suma uno', ok: true }])
+  })
+
+  it('nombra App.tsx cuando falta su exportación por defecto', async () => {
+    const enviar = await ejecutarMontaje([
+      { nombre: 'App.tsx', codigo: 'export function App() { return <p /> }' },
+    ])
+
+    expect(mensajesDe(enviar)).toContainEqual(
+      expect.objectContaining({
+        tipo: 'error-render',
+        texto: expect.stringContaining('App.tsx tiene que exportar un componente por defecto'),
+      }),
+    )
+  })
+
+  it('ubica en un archivo .ts un error lanzado desde un módulo importado', async () => {
+    const enviar = await ejecutarMontaje([
+      {
+        nombre: 'App.tsx',
+        codigo: "import { romper } from './logica'\nexport default function App() { romper(); return <p /> }",
+      },
+      { nombre: 'logica.ts', codigo: "export function romper(): never {\n  throw new Error('Roto desde TS')\n}" },
+    ])
+
+    await waitFor(() => {
+      expect(mensajesDe(enviar)).toContainEqual(
+        expect.objectContaining({ tipo: 'error-render', texto: 'Roto desde TS', archivo: 'logica.ts', linea: 2 }),
+      )
+    })
+  })
+
   it('da un error claro si App.jsx no exporta por defecto', async () => {
     const enviar = await ejecutarMontaje([
       {

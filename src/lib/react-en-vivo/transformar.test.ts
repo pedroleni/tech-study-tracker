@@ -37,6 +37,27 @@ describe('transformarArchivos', () => {
       mensaje: 'Unterminated JSX contents',
     })
   })
+
+  it('quita tipos de .tsx y .ts, transforma JSX y conserva los imports CommonJS', async () => {
+    const resultado = await transformarArchivos([
+      {
+        nombre: 'App.tsx',
+        codigo: `import { limite } from './datos'
+interface Props { titulo: string }
+export default function App({ titulo }: Props) { return <p>{titulo}: {limite}</p> }`,
+      },
+      { nombre: 'datos.ts', codigo: 'export const limite: number = 3' },
+    ])
+
+    expect(resultado.ok).toBe(true)
+    if (!resultado.ok) return
+    expect(resultado.modulos['./App.tsx']).toMatch(/require\(['"]\.\/datos['"]\)/)
+    expect(resultado.modulos['./App.tsx']).toContain('require("react/jsx-dev-runtime")')
+    expect(resultado.modulos['./App.tsx']).not.toContain('interface Props')
+    expect(resultado.modulos['./App.tsx']).not.toContain(': Props')
+    expect(resultado.modulos['./datos.ts']).toContain('const limite = 3')
+    expect(resultado.modulos['./datos.ts']).not.toContain(': number')
+  })
 })
 
 describe('transformarParaMostrar', () => {
@@ -51,6 +72,22 @@ describe('transformarParaMostrar', () => {
     expect(texto).toContain('// Tarjeta.jsx')
     expect(texto).toContain('import {jsx as _jsx} from "react/jsx-runtime"')
     expect(texto).toContain("_jsx('li'")
+  })
+
+  it('incluye .tsx y .ts en el JavaScript generado sin anotaciones de tipos', async () => {
+    const texto = await transformarParaMostrar([
+      {
+        nombre: 'App.tsx',
+        codigo: 'const titulo: string = "TSX"\nexport default function App() { return <h1>{titulo}</h1> }',
+      },
+      { nombre: 'datos.ts', codigo: 'export const cantidad: number = 2' },
+    ])
+
+    expect(texto).toContain('// App.tsx')
+    expect(texto).toContain('// datos.ts')
+    expect(texto).toContain('import {jsx as _jsx} from "react/jsx-runtime"')
+    expect(texto).not.toContain(': string')
+    expect(texto).not.toContain(': number')
   })
 })
 

@@ -1,9 +1,14 @@
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { axe } from 'vitest-axe'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { DatosReactEnVivo } from '@/lib/laboratorio/schemas'
 
 import { ReactEnVivo } from './ReactEnVivo'
+
+const diagnosticarTiposReact = vi.hoisted(() => vi.fn())
+
+vi.mock('@/lib/react-en-vivo/tipos', () => ({ diagnosticarTiposReact }))
 
 // CodeMirror no se deja teclear en jsdom: aquí se prueba la lógica del
 // bloque, así que el editor se sustituye por un textarea con su etiqueta.
@@ -16,7 +21,9 @@ vi.mock('@/components/bloques-laboratorio/EditorCodeMirror', () => ({
     etiqueta: string
     valor: string
     onChange: (valor: string) => void
-  }) => <textarea aria-label={etiqueta} value={valor} onChange={(e) => onChange(e.target.value)} />,
+  }) => (
+    <textarea aria-label={etiqueta} value={valor} onChange={(e) => onChange(e.target.value)} />
+  ),
 }))
 
 const app = "import './estilos.css'\nexport default function App() {\n  return <p>Hola</p>\n}"
@@ -32,6 +39,7 @@ const datos: DatosReactEnVivo = {
   mostrarJsGenerado: true,
   mostrarArbol: false,
   mostrarEfectos: false,
+  exigirTiposCorrectos: false,
   comprobaciones: [
     { descripcion: 'Saluda', pasos: [], espera: { texto: 'Hola' } },
     { descripcion: 'Guarda', pasos: [{ pulsar: { rol: 'button', nombre: 'Guardar' } }], espera: { texto: 'Guardado' } },
@@ -51,11 +59,138 @@ async function renderizarListo(props: DatosReactEnVivo = datos) {
   await waitFor(() => expect(vista().getAttribute('srcdoc')).toContain('jsxDEV'))
 }
 
+const datosTsx: DatosReactEnVivo = {
+  ...datos,
+  archivos: [
+    {
+      nombre: 'App.tsx',
+      codigo: `import { useState } from 'react'
+export default function App() {
+  const [n, setN] = useState<number>(0)
+  return <button onClick={() => setN(n + 1)}>Total: {n}</button>
+}`,
+    },
+    { nombre: 'Tarjeta.tsx', codigo: 'export default function Tarjeta() { return <p /> }' },
+  ],
+}
+
+beforeEach(() => {
+  diagnosticarTiposReact.mockReset()
+  diagnosticarTiposReact.mockResolvedValue([])
+})
+
 afterEach(() => {
   vi.useRealTimers()
 })
 
 describe('ReactEnVivo', () => {
+  it('abre App.tsx, muestra sus errores agrupados y genera JavaScript sin tipos', async () => {
+    diagnosticarTiposReact.mockResolvedValue([
+      { archivo: 'App.tsx', linea: 3, columna: 10, mensaje: 'Error en App', severidad: 'error' },
+      { archivo: 'Tarjeta.tsx', linea: 1, columna: 1, mensaje: 'Error en Tarjeta', severidad: 'error' },
+    ])
+    await renderizarListo(datosTsx)
+
+    expect(screen.getByRole('button', { name: 'App.tsx' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByLabelText('Editor de App.tsx')).toHaveValue(datosTsx.archivos[0].codigo)
+    expect(await screen.findByRole('heading', { name: 'Errores de tipos' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'App.tsx' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Tarjeta.tsx' })).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'JavaScript generado' }))
+    await waitFor(() => {
+      const generado = screen.getByLabelText('JavaScript generado por Sucrase')
+      expect(generado).toHaveTextContent('// App.tsx')
+      expect(generado).not.toHaveTextContent('useState<number>')
+    })
+  })
+
+  it('espera 400 ms y descarta diagnósticos de una edición anterior', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    let resolverPrimero!: (valor: unknown[]) => void
+    let resolverSegundo!: (valor: unknown[]) => void
+    diagnosticarTiposReact
+      .mockImplementationOnce(() => new Promise((resolver) => { resolverPrimero = resolver }))
+      .mockImplementationOnce(() => new Promise((resolver) => { resolverSegundo = resolver }))
+    render(<ReactEnVivo {...datosTsx} />)
+
+    act(() => vi.advanceTimersByTime(399))
+    expect(diagnosticarTiposReact).not.toHaveBeenCalled()
+    act(() => vi.advanceTimersByTime(1))
+    await waitFor(() => expect(diagnosticarTiposReact).toHaveBeenCalledTimes(1))
+
+    fireEvent.change(screen.getByLabelText('Editor de App.tsx'), {
+      target: { value: 'export default function App() { return <p>Nuevo</p> }' },
+    })
+    act(() => vi.advanceTimersByTime(400))
+    await waitFor(() => expect(diagnosticarTiposReact).toHaveBeenCalledTimes(2))
+
+    await act(async () => {
+      resolverSegundo([
+        { archivo: 'App.tsx', linea: 1, columna: 1, mensaje: 'Diagnóstico nuevo', severidad: 'error' },
+      ])
+    })
+    expect(await screen.findByText('Diagnóstico nuevo')).toBeInTheDocument()
+
+    await act(async () => {
+      resolverPrimero([
+        { archivo: 'App.tsx', linea: 1, columna: 1, mensaje: 'Diagnóstico viejo', severidad: 'error' },
+      ])
+    })
+    expect(screen.queryByText('Diagnóstico viejo')).toBeNull()
+    expect(screen.getByText('Diagnóstico nuevo')).toBeInTheDocument()
+  })
+
+  it('exigirTiposCorrectos antepone el primer error al resultado de Comprobar', async () => {
+    diagnosticarTiposReact.mockResolvedValue([
+      { archivo: 'App.tsx', linea: 4, columna: 8, mensaje: 'Tipo incorrecto', severidad: 'error' },
+    ])
+    await renderizarListo({ ...datosTsx, exigirTiposCorrectos: true })
+    await screen.findByText('Tipo incorrecto')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Comprobar' }))
+    const oculto = (await screen.findByTitle('Comprobaciones')) as HTMLIFrameElement
+    enviarDesde(oculto.contentWindow, { canal: 'react-en-vivo', tipo: 'montado', version: '19.3.1' })
+    enviarDesde(oculto.contentWindow, {
+      canal: 'react-en-vivo',
+      tipo: 'resultado-comprobaciones',
+      resultados: [{ descripcion: 'Saluda', ok: true }],
+    })
+
+    const resultados = await screen.findByRole('status')
+    const filas = within(resultados).getAllByRole('listitem')
+    expect(filas[0]).toHaveTextContent('El código no tiene errores de tipos')
+    expect(filas[0]).toHaveTextContent('App.tsx:4:8 · Tipo incorrecto')
+    expect(filas[1]).toHaveTextContent('Saluda')
+  })
+
+  it('exigirTiposCorrectos aparece superada cuando no hay errores', async () => {
+    await renderizarListo({ ...datosTsx, exigirTiposCorrectos: true, comprobaciones: undefined })
+    await screen.findByText('Sin errores de tipos.')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Comprobar' }))
+    const oculto = (await screen.findByTitle('Comprobaciones')) as HTMLIFrameElement
+    enviarDesde(oculto.contentWindow, { canal: 'react-en-vivo', tipo: 'montado', version: '19.3.1' })
+    enviarDesde(oculto.contentWindow, {
+      canal: 'react-en-vivo',
+      tipo: 'resultado-comprobaciones',
+      resultados: [],
+    })
+
+    expect(await screen.findByText('1 de 1 comprobaciones superadas')).toBeInTheDocument()
+    expect(screen.getByText('El código no tiene errores de tipos')).toBeInTheDocument()
+  })
+
+  it('el panel TSX no introduce problemas automáticos de accesibilidad', async () => {
+    render(<ReactEnVivo {...datosTsx} />)
+    await screen.findByText('Sin errores de tipos.')
+    const panel = screen.getByRole('heading', { name: 'Errores de tipos' }).closest('section')
+    expect(panel).not.toBeNull()
+    expect(
+      (await axe(panel!, { rules: { 'color-contrast': { enabled: false } } })).violations,
+    ).toEqual([])
+  })
+
   it('una pestaña por archivo y otra para el JavaScript generado; abre archivoInicial', async () => {
     await renderizarListo({ ...datos, archivoInicial: 'estilos.css' })
 
@@ -74,6 +209,18 @@ describe('ReactEnVivo', () => {
 
     expect(vista().getAttribute('srcdoc')).toContain('/vendor/react-en-vivo/19.3.1/react.js')
     expect(vista().getAttribute('srcdoc')).not.toContain('/vendor/react-en-vivo/19.3.1/pruebas.js')
+  })
+
+  it('un bloque solo JSX no carga el comprobador de tipos', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    render(<ReactEnVivo {...datos} />)
+
+    await act(async () => {
+      vi.advanceTimersByTime(1_000)
+    })
+
+    expect(diagnosticarTiposReact).not.toHaveBeenCalled()
+    expect(screen.queryByRole('heading', { name: 'Errores de tipos' })).toBeNull()
   })
 
   it('un error de sintaxis no rompe la vista previa', async () => {

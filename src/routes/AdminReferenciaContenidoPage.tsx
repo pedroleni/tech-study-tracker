@@ -702,6 +702,38 @@ export function AdminReferenciaContenidoPage() {
           />
         </Referencia>
 
+        <Referencia nombre="ReactEnVivoTsx">
+          <ReactEnVivo
+            tipo="react-en-vivo"
+            titulo="Contador con props tipadas"
+            consigna="Suma una unidad y observa que React se ejecuta aunque el panel de tipos detecte errores durante la edición."
+            archivos={[
+              {
+                nombre: 'App.tsx',
+                codigo:
+                  "import { useState } from 'react'\nimport Tarjeta from './Tarjeta'\n\nexport default function App() {\n  const [total, setTotal] = useState<number>(1)\n  return <Tarjeta titulo=\"Artículos\" total={total} onSumar={() => setTotal(total + 1)} />\n}",
+              },
+              {
+                nombre: 'Tarjeta.tsx',
+                codigo:
+                  'interface Props {\n  titulo: string\n  total: number\n  onSumar: () => void\n}\n\nexport default function Tarjeta({ titulo, total, onSumar }: Props) {\n  return (\n    <section>\n      <h2>{titulo}</h2>\n      <button onClick={onSumar}>Total: {total}</button>\n    </section>\n  )\n}',
+              },
+            ]}
+            strictMode
+            mostrarConsola={false}
+            mostrarJsGenerado
+            exigirTiposCorrectos
+            comprobaciones={[
+              {
+                descripcion: 'El contador suma una unidad',
+                pasos: [{ pulsar: { rol: 'button', nombre: 'Total: 1' } }],
+                espera: { texto: 'Total: 2' },
+              },
+            ]}
+            etiquetaSeccion="React en vivo — TSX"
+          />
+        </Referencia>
+
         <Referencia nombre="PanelRed">
           <ReactEnVivo
             tipo="react-en-vivo"

@@ -530,6 +530,14 @@ diseño" con "feature real".
   consola agrupada por commit, pestaña de JavaScript generado y
   ejercicios con comprobaciones. Acento cielo, icono `Atom`. Todo el
   mecanismo en [react-en-vivo.md](react-en-vivo.md).
+  Desde la fase 4 admite archivos `.jsx`, `.tsx`, `.ts` y `.css`; debe haber
+  exactamente uno entre `App.jsx` y `App.tsx`. Si aparece algún `.ts` o
+  `.tsx`, muestra siempre «Errores de tipos» con los diagnósticos agrupados
+  por archivo, sin impedir que se ejecute la vista previa. El campo opcional
+  `exigirTiposCorrectos` (por defecto `false`) añade al principio de
+  «Comprobar» el resultado «El código no tiene errores de tipos». El catálogo
+  `AdminReferenciaContenidoPage` incluye un ejemplo `ReactEnVivoTsx` con
+  `App.tsx` y `Tarjeta.tsx`. `react-anotado` no gana estos campos.
 - `ReactAnotado.tsx` — recibe `z.infer<typeof esquemaReactAnotado>`
   (2026-10-20): código JSX con anotaciones y, debajo, el mismo código
   ejecutándose de verdad. Ver [react-en-vivo.md](react-en-vivo.md).

@@ -264,7 +264,7 @@
     const primero = marcos[0]
     const componente = marcos.find((marco) => /^[A-Z]/.test(marco.nombre || ''))
     const gancho = marcos.find((marco) => /^use[A-Z]/.test(marco.nombre || ''))
-    const archivoReserva = Object.keys(modulos).find((ruta) => ruta.endsWith('.jsx'))?.slice(2) || 'App.jsx'
+    const archivoReserva = Object.keys(modulos).find((ruta) => /\.(?:jsx|tsx)$/.test(ruta))?.slice(2) || 'App.jsx'
     const ubicacion = {
       componente: limitar(componente?.nombre || 'Componente', 60),
       ...(gancho ? { gancho: limitar(gancho.nombre, 60) } : {}),

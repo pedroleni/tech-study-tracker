@@ -5,12 +5,15 @@ import { Code2, RotateCcw } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { EditorCodeMirror } from '@/components/bloques-laboratorio/EditorCodeMirror'
+import {
+  PanelDiagnosticosTs,
+  type DiagnosticoPanelTs,
+} from '@/components/bloques-laboratorio/PanelDiagnosticosTs'
 import { Button } from '@/components/ui/button'
 import type { DatosEditorEnVivo } from '@/lib/laboratorio/schemas'
 import {
   compilarEnEntorno,
   crearEntornoTypeScript,
-  type DiagnosticoTs,
   type EntornoTypeScript,
 } from '@/lib/typescript-en-vivo/compilar'
 import { cn } from '@/lib/utils'
@@ -58,47 +61,6 @@ ${html}
 </html>`
 }
 
-function PanelDiagnosticosTs({
-  estado,
-  diagnosticos,
-}: {
-  estado: 'cargando' | 'listo' | 'error'
-  diagnosticos: DiagnosticoTs[]
-}) {
-  if (estado === 'cargando') {
-    return <p className="text-sm text-muted-foreground">Cargando el compilador de TypeScript…</p>
-  }
-  if (estado === 'error') {
-    return (
-      <p className="text-sm text-red-600 dark:text-red-400">
-        No se pudo cargar el compilador de TypeScript. Recarga la página para intentarlo de nuevo.
-      </p>
-    )
-  }
-  if (diagnosticos.length === 0) {
-    return <p className="text-sm text-green-600 dark:text-green-400">Sin errores de tipos.</p>
-  }
-  return (
-    <ul className="space-y-1 rounded-lg border bg-muted/40 p-3 text-sm">
-      {diagnosticos.map((diagnostico, indice) => (
-        <li
-          key={indice}
-          className={
-            diagnostico.severidad === 'error'
-              ? 'text-red-600 dark:text-red-400'
-              : 'text-amber-600 dark:text-amber-400'
-          }
-        >
-          <span className="font-mono text-xs">
-            {diagnostico.linea}:{diagnostico.columna}
-          </span>{' '}
-          {diagnostico.mensaje}
-        </li>
-      ))}
-    </ul>
-  )
-}
-
 export function EditorEnVivo({
   titulo = 'Prueba el código y observa el resultado.',
   consigna,
@@ -128,7 +90,7 @@ export function EditorEnVivo({
   const [estadoCompiladorTs, setEstadoCompiladorTs] = useState<'cargando' | 'listo' | 'error'>(
     'cargando',
   )
-  const [diagnosticosTs, setDiagnosticosTs] = useState<DiagnosticoTs[]>([])
+  const [diagnosticosTs, setDiagnosticosTs] = useState<DiagnosticoPanelTs[]>([])
   const entornoTsRef = useRef<EntornoTypeScript | null>(null)
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const [altoIframe, setAltoIframe] = useState<number | null>(null)

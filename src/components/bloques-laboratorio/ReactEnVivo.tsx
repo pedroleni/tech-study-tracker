@@ -10,9 +10,16 @@ import {
 } from '@/components/bloques-laboratorio/ComprobadorReact'
 import { ConsolaReact } from '@/components/bloques-laboratorio/ConsolaReact'
 import { EditorCodeMirror } from '@/components/bloques-laboratorio/EditorCodeMirror'
+import {
+  PanelDiagnosticosTs,
+  type DiagnosticoPanelTs,
+} from '@/components/bloques-laboratorio/PanelDiagnosticosTs'
 import { PanelRed, type AjustesRed } from '@/components/bloques-laboratorio/PanelRed'
 import { RegistroEfectos } from '@/components/bloques-laboratorio/RegistroEfectos'
-import { ResultadosComprobaciones } from '@/components/bloques-laboratorio/ResultadosComprobaciones'
+import {
+  ResultadosComprobaciones,
+  type ResultadoComprobacion,
+} from '@/components/bloques-laboratorio/ResultadosComprobaciones'
 import { useEntradasConsola } from '@/components/bloques-laboratorio/useEntradasConsola'
 import { useRegistroAgrupado } from '@/components/bloques-laboratorio/useRegistroAgrupado'
 import { VistaPreviaReact } from '@/components/bloques-laboratorio/VistaPreviaReact'
@@ -32,6 +39,7 @@ import { cn } from '@/lib/utils'
 
 const PESTANA_JS_GENERADO = 'JavaScript generado'
 const extensionJsx = lenguajeJavascript({ jsx: true })
+const extensionTsx = lenguajeJavascript({ jsx: true, typescript: true })
 const extensionCss = lenguajeCss()
 const RED_POR_DEFECTO: AjustesRed = { latencia: 600, desordenar: false }
 
@@ -55,6 +63,12 @@ type EstadoComprobacion =
   | { estado: 'comprobando'; srcDoc: string | null }
   | FinComprobacion
 
+type ResultadoTipos = {
+  revision: number
+  estado: 'listo' | 'error'
+  diagnosticos: DiagnosticoPanelTs[]
+}
+
 export function ReactEnVivo({
   titulo = 'Escribe React y mira cómo responde.',
   consigna,
@@ -65,24 +79,45 @@ export function ReactEnVivo({
   mostrarJsGenerado,
   mostrarArbol = false,
   mostrarEfectos = false,
+  exigirTiposCorrectos = false,
   api,
   red,
   comprobaciones,
   // Fuera del esquema de la lección, como en SqlAnotado/GitAnotado: solo
   // para no repetir el nombre de la región en la página de referencia.
   etiquetaSeccion = 'React en vivo',
-}: Omit<DatosReactEnVivo, 'mostrarArbol' | 'mostrarEfectos'> & {
+}: Omit<DatosReactEnVivo, 'mostrarArbol' | 'mostrarEfectos' | 'exigirTiposCorrectos'> & {
   mostrarArbol?: boolean
   mostrarEfectos?: boolean
+  exigirTiposCorrectos?: boolean
   etiquetaSeccion?: string
 }) {
-  const primeraPestana = archivoInicial ?? 'App.jsx'
+  const primeraPestana =
+    archivoInicial ??
+    (archivosOriginales.some((archivo) => archivo.nombre === 'App.tsx') ? 'App.tsx' : 'App.jsx')
   const [archivos, setArchivos] = useState<ArchivoReact[]>(archivosOriginales)
   const [pestana, setPestana] = useState(primeraPestana)
   const [srcDoc, setSrcDoc] = useState<string | null>(null)
   const [errorSintaxis, setErrorSintaxis] = useState<string | null>(null)
   const [jsGenerado, setJsGenerado] = useState('')
   const [comprobacion, setComprobacion] = useState<EstadoComprobacion>({ estado: 'inactivo' })
+  const usaTypeScript = archivosOriginales.some(
+    (archivo) => archivo.nombre.endsWith('.ts') || archivo.nombre.endsWith('.tsx'),
+  )
+  const [revisionTipos, setRevisionTipos] = useState(0)
+  const [resultadoTipos, setResultadoTipos] = useState<ResultadoTipos>({
+    revision: -1,
+    estado: 'listo',
+    diagnosticos: [],
+  })
+  const estadoTipos =
+    usaTypeScript && resultadoTipos.revision !== revisionTipos
+      ? 'cargando'
+      : resultadoTipos.estado
+  const diagnosticosTipos =
+    resultadoTipos.revision === revisionTipos ? resultadoTipos.diagnosticos : []
+  const versionTiposRef = useRef(0)
+  const resultadosTiposRef = useRef<ResultadoComprobacion[]>([])
   const { entradas, recibirMensaje, limpiar } = useEntradasConsola()
   const [arbol, setArbol] = useState<MensajeArbol | null>(null)
   const { entradas: peticiones, recibir: recibirPeticion, limpiar: limpiarPeticiones } =
@@ -169,8 +204,33 @@ export function ReactEnVivo({
     return () => window.clearTimeout(temporizador)
   }, [apiEstable, archivos, strictMode, mostrarJsGenerado, mostrarArbol, mostrarEfectos, limpiar, limpiarEfectos, limpiarPeticiones])
 
+  useEffect(() => {
+    if (!usaTypeScript) return
+    const version = ++versionTiposRef.current
+    const temporizador = window.setTimeout(() => {
+      void import('@/lib/react-en-vivo/tipos')
+        .then(({ diagnosticarTiposReact }) => diagnosticarTiposReact(archivos))
+        .then((diagnosticos) => {
+          if (version !== versionTiposRef.current) return
+          setResultadoTipos({ revision: revisionTipos, estado: 'listo', diagnosticos })
+        })
+        .catch(() => {
+          if (version === versionTiposRef.current) {
+            setResultadoTipos({ revision: revisionTipos, estado: 'error', diagnosticos: [] })
+          }
+        })
+    }, ESPERA_RECONSTRUIR_MS)
+    return () => {
+      window.clearTimeout(temporizador)
+      if (version === versionTiposRef.current) versionTiposRef.current += 1
+    }
+  }, [archivos, revisionTipos, usaTypeScript])
+
   const terminarComprobacion = useCallback((fin: FinComprobacion) => {
-    setComprobacion(fin)
+    setComprobacion({
+      ...fin,
+      resultados: [...resultadosTiposRef.current, ...fin.resultados],
+    })
     // user-event escribe dentro del iframe oculto y se lleva el foco; al
     // quitarlo, el foco caería en <body>. Vuelve al botón, salvo que la
     // persona ya lo haya llevado a otro sitio.
@@ -181,7 +241,27 @@ export function ReactEnVivo({
   }, [])
 
   async function comprobar() {
-    if (!comprobaciones || comprobacion.estado === 'comprobando') return
+    if (
+      (!comprobaciones && !exigirTiposCorrectos) ||
+      comprobacion.estado === 'comprobando' ||
+      (exigirTiposCorrectos && estadoTipos === 'cargando')
+    ) return
+    const primerErrorTipos = diagnosticosTipos.find(
+      (diagnostico) => diagnostico.severidad === 'error',
+    )
+    resultadosTiposRef.current = exigirTiposCorrectos
+      ? [
+          {
+            descripcion: 'El código no tiene errores de tipos',
+            ok: !primerErrorTipos,
+            ...(primerErrorTipos
+              ? {
+                  motivo: `${primerErrorTipos.archivo}:${primerErrorTipos.linea}:${primerErrorTipos.columna} · ${primerErrorTipos.mensaje}`,
+                }
+              : {}),
+          },
+        ]
+      : []
     setComprobacion({ estado: 'comprobando', srcDoc: null })
     const preparado = await prepararDocumento(archivos, {
       origen: window.location.origin,
@@ -200,9 +280,11 @@ export function ReactEnVivo({
   }
 
   function reiniciar() {
+    if (usaTypeScript) setRevisionTipos((revision) => revision + 1)
     setArchivos(archivosOriginales)
     setPestana(primeraPestana)
     setComprobacion({ estado: 'inactivo' })
+    resultadosTiposRef.current = []
     setReinicios((anteriores) => anteriores + 1)
     documentoMontadoRef.current = false
     setArbol(null)
@@ -237,7 +319,7 @@ export function ReactEnVivo({
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          {comprobaciones && (
+          {(comprobaciones || exigirTiposCorrectos) && (
             <Button
               ref={botonComprobarRef}
               type="button"
@@ -245,7 +327,10 @@ export function ReactEnVivo({
               onClick={() => void comprobar()}
               // aria-disabled y no disabled: un botón desactivado pierde el foco
               // del teclado y lo manda a <body>.
-              aria-disabled={comprobacion.estado === 'comprobando'}
+              aria-disabled={
+                comprobacion.estado === 'comprobando' ||
+                (exigirTiposCorrectos && estadoTipos === 'cargando')
+              }
               className="aria-disabled:cursor-wait aria-disabled:opacity-60"
             >
               <ListChecks aria-hidden="true" />
@@ -290,15 +375,22 @@ export function ReactEnVivo({
             <EditorCodeMirror
               key={archivoActivo.nombre}
               etiqueta={`Editor de ${archivoActivo.nombre}`}
-              extension={archivoActivo.nombre.endsWith('.css') ? extensionCss : extensionJsx}
+              extension={
+                archivoActivo.nombre.endsWith('.css')
+                  ? extensionCss
+                  : /\.(ts|tsx)$/.test(archivoActivo.nombre)
+                    ? extensionTsx
+                    : extensionJsx
+              }
               valor={archivoActivo.codigo}
-              onChange={(codigo) =>
+              onChange={(codigo) => {
+                if (usaTypeScript) setRevisionTipos((revision) => revision + 1)
                 setArchivos((actuales) =>
                   actuales.map((archivo) =>
                     archivo.nombre === archivoActivo.nombre ? { ...archivo, codigo } : archivo,
                   ),
                 )
-              }
+              }}
             />
           ) : (
             <CodigoResaltado
@@ -313,6 +405,19 @@ export function ReactEnVivo({
             <p className="rounded-lg bg-red-50 p-3 font-mono text-sm break-words text-red-700 dark:bg-red-950/30 dark:text-red-400">
               {errorSintaxis}
             </p>
+          )}
+
+          {usaTypeScript && (
+            <section aria-labelledby="errores-tipos-react" className="space-y-2">
+              <h4 id="errores-tipos-react" className="text-sm font-semibold">
+                Errores de tipos
+              </h4>
+              <PanelDiagnosticosTs
+                estado={estadoTipos}
+                diagnosticos={diagnosticosTipos}
+                agruparPorArchivo
+              />
+            </section>
           )}
         </div>
 
@@ -360,10 +465,12 @@ export function ReactEnVivo({
         {mostrarConsola && <ConsolaReact entradas={entradas} onLimpiar={limpiar} />}
       </div>
 
-      {comprobacion.estado === 'comprobando' && comprobacion.srcDoc && comprobaciones && (
+      {comprobacion.estado === 'comprobando' &&
+        comprobacion.srcDoc &&
+        (comprobaciones || exigirTiposCorrectos) && (
         <ComprobadorReact
           srcDoc={comprobacion.srcDoc}
-          comprobaciones={comprobaciones}
+          comprobaciones={comprobaciones ?? []}
           onTerminar={terminarComprobacion}
         />
       )}
