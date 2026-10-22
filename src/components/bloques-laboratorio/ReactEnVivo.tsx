@@ -1,7 +1,7 @@
 import { css as lenguajeCss } from '@codemirror/lang-css'
 import { javascript as lenguajeJavascript } from '@codemirror/lang-javascript'
 import { Atom, ListChecks, RotateCcw } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 
 import { ArbolDeRenders } from '@/components/bloques-laboratorio/ArbolDeRenders'
 import {
@@ -52,6 +52,7 @@ const extensionJsx = lenguajeJavascript({ jsx: true })
 const extensionTsx = lenguajeJavascript({ jsx: true, typescript: true })
 const extensionCss = lenguajeCss()
 const RED_POR_DEFECTO: AjustesRed = { latencia: 600, desordenar: false }
+const COMPROBACIONES_VACIAS: NonNullable<DatosReactEnVivo['comprobaciones']> = []
 
 function incorporarPeticion(actuales: MensajePeticion[], nueva: MensajePeticion) {
   const posicion = actuales.findIndex((peticion) => peticion.id === nueva.id)
@@ -77,6 +78,7 @@ type ResultadoTipos = {
   revision: number
   estado: 'listo' | 'error'
   diagnosticos: DiagnosticoPanelTs[]
+  error?: string
 }
 
 type ResultadoLintBloque = {
@@ -92,9 +94,12 @@ function recortarMotivo(texto: string, maximo = 240) {
 }
 
 function motivoDiagnosticoLint(diagnostico: DiagnosticoLint) {
+  const ubicacion = diagnostico.columna > 0
+    ? `${diagnostico.archivo}:${diagnostico.linea}:${diagnostico.columna}`
+    : `${diagnostico.archivo}:${diagnostico.linea}`
   return recortarMotivo(
     [
-      `${diagnostico.archivo}:${diagnostico.linea}:${diagnostico.columna}`,
+      ubicacion,
       diagnostico.regla,
       diagnostico.mensaje,
     ]
@@ -161,13 +166,13 @@ export function ReactEnVivo({
     estado: 'listo',
     diagnosticos: [],
   })
-  const estadoTipos =
-    usaTypeScript && resultadoTipos.revision !== revisionTipos
-      ? 'cargando'
-      : resultadoTipos.estado
-  const diagnosticosTipos =
-    resultadoTipos.revision === revisionTipos ? resultadoTipos.diagnosticos : []
+  const tiposPendientes = usaTypeScript && resultadoTipos.revision !== revisionTipos
+  const estadoPanelTipos = resultadoTipos.revision === -1 ? 'cargando' : resultadoTipos.estado
+  const diagnosticosTipos = resultadoTipos.diagnosticos
   const versionTiposRef = useRef(0)
+  const sesionTiposRef = useRef<Promise<ReturnType<
+    typeof import('@/lib/react-en-vivo/tipos')['crearSesionTiposReact']
+  >> | null>(null)
   const usaLint = mostrarLint || exigirLintLimpio
   const [revisionLint, setRevisionLint] = useState(0)
   const [resultadoLint, setResultadoLint] = useState<ResultadoLintBloque>({
@@ -181,7 +186,11 @@ export function ReactEnVivo({
     resultadoLint.revision === revisionLint ? resultadoLint.diagnosticos : []
   const versionLintRef = useRef(0)
   const sesionLint = useMemo(() => clienteReactKit.crearSesionLint(), [clienteReactKit])
-  const sesionCompilador = useMemo(
+  const sesionCompiladorVista = useMemo(
+    () => clienteReactKit.crearSesionCompilador(),
+    [clienteReactKit],
+  )
+  const sesionCompiladorComprobacion = useMemo(
     () => clienteReactKit.crearSesionCompilador(),
     [clienteReactKit],
   )
@@ -220,6 +229,7 @@ export function ReactEnVivo({
   const versionRef = useRef(0)
   const primeraVezRef = useRef(true)
   const botonComprobarRef = useRef<HTMLButtonElement>(null)
+  const idErroresTipos = useId()
   // Cambia en cada "Reiniciar": remonta la vista previa aunque el código no
   // haya cambiado, para que la app vuelva a arrancar de cero.
   const [reinicios, setReinicios] = useState(0)
@@ -235,11 +245,11 @@ export function ReactEnVivo({
     const espera = primeraVezRef.current ? 0 : ESPERA_RECONSTRUIR_MS
     primeraVezRef.current = false
     const version = ++versionRef.current
-    if (compilador) sesionCompilador.descartar()
+    if (compilador) sesionCompiladorVista.descartar()
     const temporizador = window.setTimeout(() => {
       void (async () => {
         const resultadoCompilador = compilador
-          ? await compilarArchivosReact(archivos, sesionCompilador)
+          ? await compilarArchivosReact(archivos, sesionCompiladorVista)
           : { archivos, avisos: [] }
         if (!resultadoCompilador || version !== versionRef.current) return
 
@@ -260,13 +270,18 @@ export function ReactEnVivo({
         // Una compilación o transformación que llega después de otra más
         // nueva se descarta en bloque: vista, avisos y JS siempre coinciden.
         if (version !== versionRef.current) return
-        setAvisosCompilador(resultadoCompilador.avisos)
         if (textoGenerado !== null) setJsGenerado(textoGenerado)
         if (!preparado.ok) {
+          setAvisosCompilador(
+            preparado.archivo
+              ? resultadoCompilador.avisos.filter((aviso) => aviso.archivo !== preparado.archivo)
+              : resultadoCompilador.avisos,
+          )
           // La vista previa se queda en el último resultado válido.
           setErrorSintaxis(preparado.error)
           return
         }
+        setAvisosCompilador(resultadoCompilador.avisos)
         setErrorSintaxis(null)
         limpiar()
         // El árbol de la vista previa anterior ya no describe nada.
@@ -281,25 +296,49 @@ export function ReactEnVivo({
     return () => {
       window.clearTimeout(temporizador)
       if (version === versionRef.current) versionRef.current += 1
-      if (compilador) sesionCompilador.descartar()
+      if (compilador) sesionCompiladorVista.descartar()
     }
-  }, [apiEstable, archivos, compilador, sesionCompilador, strictMode, mostrarJsGenerado, mostrarArbol, mostrarEfectos, limpiar, limpiarEfectos, limpiarPeticiones])
+  }, [apiEstable, archivos, compilador, sesionCompiladorVista, strictMode, mostrarJsGenerado, mostrarArbol, mostrarEfectos, limpiar, limpiarEfectos, limpiarPeticiones])
 
   useEffect(() => {
     if (!usaTypeScript) return
     const version = ++versionTiposRef.current
     const temporizador = window.setTimeout(() => {
-      void import('@/lib/react-en-vivo/tipos')
-        .then(({ diagnosticarTiposReact }) => diagnosticarTiposReact(archivos))
-        .then((diagnosticos) => {
+      void (async () => {
+        let sesionTipos
+        try {
+          sesionTiposRef.current ??= import('@/lib/react-en-vivo/tipos').then(
+            ({ crearSesionTiposReact }) => crearSesionTiposReact(),
+          )
+          sesionTipos = await sesionTiposRef.current
+        } catch {
+          if (version === versionTiposRef.current) {
+            setResultadoTipos((actual) => ({
+              revision: revisionTipos,
+              estado: 'error',
+              diagnosticos: actual.diagnosticos,
+              error: 'No se pudo cargar TypeScript',
+            }))
+          }
+          return
+        }
+
+        try {
+          const diagnosticos = await sesionTipos.diagnosticar(archivos)
           if (version !== versionTiposRef.current) return
           setResultadoTipos({ revision: revisionTipos, estado: 'listo', diagnosticos })
-        })
-        .catch(() => {
+        } catch (error) {
           if (version === versionTiposRef.current) {
-            setResultadoTipos({ revision: revisionTipos, estado: 'error', diagnosticos: [] })
+            const detalle = error instanceof Error ? error.message : String(error)
+            setResultadoTipos((actual) => ({
+              revision: revisionTipos,
+              estado: 'error',
+              diagnosticos: actual.diagnosticos,
+              error: detalle,
+            }))
           }
-        })
+        }
+      })()
     }, ESPERA_RECONSTRUIR_MS)
     return () => {
       window.clearTimeout(temporizador)
@@ -339,9 +378,10 @@ export function ReactEnVivo({
   useEffect(
     () => () => {
       sesionLint.descartar()
-      sesionCompilador.descartar()
+      sesionCompiladorVista.descartar()
+      sesionCompiladorComprobacion.descartar()
     },
-    [sesionCompilador, sesionLint],
+    [sesionCompiladorComprobacion, sesionCompiladorVista, sesionLint],
   )
 
   const terminarComprobacion = useCallback((fin: FinComprobacion) => {
@@ -362,7 +402,7 @@ export function ReactEnVivo({
     if (
       (!comprobaciones && !exigirTiposCorrectos && !exigirLintLimpio) ||
       comprobacion.estado === 'comprobando' ||
-      (exigirTiposCorrectos && estadoTipos === 'cargando') ||
+      (exigirTiposCorrectos && tiposPendientes) ||
       (exigirLintLimpio && lintPendiente)
     ) return
     const primerErrorTipos = diagnosticosTipos.find(
@@ -370,10 +410,15 @@ export function ReactEnVivo({
     )
     const resultadosRequisitos: ResultadoComprobacion[] = []
     if (exigirTiposCorrectos) {
+      const tiposListos = resultadoTipos.estado === 'listo'
       resultadosRequisitos.push({
         descripcion: 'El código no tiene errores de tipos',
-        ok: !primerErrorTipos,
-        ...(primerErrorTipos
+        ok: tiposListos && !primerErrorTipos,
+        ...(resultadoTipos.estado === 'error'
+          ? {
+              motivo: `No se pudieron comprobar los tipos: ${resultadoTipos.error ?? 'falló el análisis'}`,
+            }
+          : primerErrorTipos
           ? {
               motivo: `${primerErrorTipos.archivo}:${primerErrorTipos.linea}:${primerErrorTipos.columna} · ${primerErrorTipos.mensaje}`,
             }
@@ -393,9 +438,13 @@ export function ReactEnVivo({
       })
     }
     resultadosTiposRef.current = resultadosRequisitos
+    if (!comprobaciones || comprobaciones.length === 0) {
+      terminarComprobacion({ estado: 'listo', resultados: [] })
+      return
+    }
     setComprobacion({ estado: 'comprobando', srcDoc: null })
     const resultadoCompilador = compilador
-      ? await compilarArchivosReact(archivos, sesionCompilador)
+      ? await compilarArchivosReact(archivos, sesionCompiladorComprobacion)
       : { archivos, avisos: [] }
     if (!resultadoCompilador) {
       setComprobacion({ estado: 'inactivo' })
@@ -470,13 +519,17 @@ export function ReactEnVivo({
               // del teclado y lo manda a <body>.
               aria-disabled={
                 comprobacion.estado === 'comprobando' ||
-                (exigirTiposCorrectos && estadoTipos === 'cargando') ||
+                (exigirTiposCorrectos && tiposPendientes) ||
                 (exigirLintLimpio && lintPendiente)
               }
               className="aria-disabled:cursor-wait aria-disabled:opacity-60"
             >
               <ListChecks aria-hidden="true" />
-              Comprobar
+              {exigirTiposCorrectos && tiposPendientes
+                ? 'Esperando a los tipos…'
+                : exigirLintLimpio && lintPendiente
+                  ? 'Esperando al linter…'
+                  : 'Comprobar'}
             </Button>
           )}
           <Button type="button" variant="outline" size="sm" onClick={reiniciar}>
@@ -555,13 +608,18 @@ export function ReactEnVivo({
           )}
 
           {usaTypeScript && (
-            <section aria-labelledby="errores-tipos-react" className="space-y-2">
-              <h4 id="errores-tipos-react" className="text-sm font-semibold">
+            <section aria-labelledby={idErroresTipos} className="space-y-2">
+              <h4 id={idErroresTipos} className="text-sm font-semibold">
                 Errores de tipos
               </h4>
               <PanelDiagnosticosTs
-                estado={estadoTipos}
+                estado={estadoPanelTipos}
                 diagnosticos={diagnosticosTipos}
+                error={
+                  resultadoTipos.estado === 'error'
+                    ? `No se pudieron analizar los tipos: ${resultadoTipos.error ?? 'error desconocido'}`
+                    : undefined
+                }
                 agruparPorArchivo
               />
             </section>
@@ -589,7 +647,7 @@ export function ReactEnVivo({
             <ul className="space-y-1 rounded-lg bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
               {avisosCompilador.map((aviso) => (
                 <li key={aviso.archivo}>
-                  {aviso.archivo} no se pudo compilar: {aviso.error}
+                  {aviso.archivo} no se pudo compilar: {aviso.error.split(/\r?\n/, 1)[0]}
                 </li>
               ))}
             </ul>
@@ -635,7 +693,7 @@ export function ReactEnVivo({
         (comprobaciones || exigirTiposCorrectos || exigirLintLimpio) && (
         <ComprobadorReact
           srcDoc={comprobacion.srcDoc}
-          comprobaciones={comprobaciones ?? []}
+          comprobaciones={comprobaciones ?? COMPROBACIONES_VACIAS}
           onTerminar={terminarComprobacion}
         />
       )}

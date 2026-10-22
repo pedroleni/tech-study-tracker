@@ -57,6 +57,18 @@ describe('PanelLint', () => {
     )
   })
 
+  it('omite la columna cuando el worker no la conoce', () => {
+    render(
+      <PanelLint
+        estado="listo"
+        diagnosticos={[{ ...diagnosticos[0], linea: 7, columna: 0 }]}
+      />,
+    )
+
+    expect(screen.getByText('7')).toBeInTheDocument()
+    expect(screen.queryByText('7:0')).toBeNull()
+  })
+
   it('no introduce problemas automáticos de accesibilidad', async () => {
     const { container } = render(<PanelLint estado="listo" diagnosticos={diagnosticos} />)
     expect(

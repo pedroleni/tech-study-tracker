@@ -15,7 +15,7 @@ function ListaDiagnosticos({ diagnosticos }: { diagnosticos: DiagnosticoPanelTs[
           className={
             diagnostico.severidad === 'error'
               ? 'text-red-600 dark:text-red-400'
-              : 'text-amber-600 dark:text-amber-400'
+              : 'text-amber-800 dark:text-amber-300'
           }
         >
           <span className="font-mono text-xs">
@@ -32,23 +32,25 @@ export function PanelDiagnosticosTs({
   estado,
   diagnosticos,
   agruparPorArchivo = false,
+  error,
 }: {
   estado: 'cargando' | 'listo' | 'error'
   diagnosticos: DiagnosticoPanelTs[]
   agruparPorArchivo?: boolean
+  error?: string
 }) {
   if (estado === 'cargando') {
     return <p className="text-sm text-muted-foreground">Cargando el compilador de TypeScript…</p>
   }
   if (estado === 'error') {
     return (
-      <p className="text-sm text-red-600 dark:text-red-400">
-        No se pudo cargar el compilador de TypeScript. Recarga la página para intentarlo de nuevo.
+      <p className="text-sm break-words text-red-700 dark:text-red-400">
+        {error ?? 'No se pudo cargar el compilador de TypeScript. Recarga la página para intentarlo de nuevo.'}
       </p>
     )
   }
   if (diagnosticos.length === 0) {
-    return <p className="text-sm text-green-600 dark:text-green-400">Sin errores de tipos.</p>
+    return <p className="text-sm text-green-700 dark:text-green-400">Sin errores de tipos.</p>
   }
   if (!agruparPorArchivo) return <ListaDiagnosticos diagnosticos={diagnosticos} />
 

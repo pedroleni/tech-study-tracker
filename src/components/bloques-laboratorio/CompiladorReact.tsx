@@ -1,6 +1,6 @@
 import { javascript as lenguajeJavascript } from '@codemirror/lang-javascript'
 import { Braces, RotateCcw } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useId, useMemo, useState } from 'react'
 
 import { EditorCodeMirror } from '@/components/bloques-laboratorio/EditorCodeMirror'
 import { CodigoResaltado } from '@/components/codigo'
@@ -36,13 +36,14 @@ export function CompiladorReact({
   const [codigo, setCodigo] = useState(codigoOriginal)
   const [resultado, setResultado] = useState<EstadoCompilador>({ estado: 'cargando' })
   const sesion = useMemo(() => clienteReactKit.crearSesionCompilador(), [clienteReactKit])
+  const idTitulo = useId()
 
   useEffect(() => {
     // Una edición invalida de inmediato cualquier respuesta anterior, aunque
     // todavía no hayan transcurrido los 300 ms del nuevo debounce.
     sesion.descartar()
     const temporizador = window.setTimeout(() => {
-      void sesion.compilar(codigo).then((respuesta) => {
+      void sesion.compilar(codigo, { nombre: 'App.jsx' }).then((respuesta) => {
         if (!respuesta) return
         if (respuesta.ok) {
           setResultado({ estado: 'listo', codigo: respuesta.codigo, eventos: respuesta.eventos })
@@ -58,7 +59,7 @@ export function CompiladorReact({
 
   return (
     <section
-      aria-label="Compilador de React"
+      aria-labelledby={idTitulo}
       className="animate-in fade-in-0 slide-in-from-bottom-2 my-6 min-w-0 space-y-4 rounded-xl border bg-card p-4 shadow-sm duration-500 motion-reduce:animate-none sm:p-5"
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -70,7 +71,7 @@ export function CompiladorReact({
             <p className="text-[11px] font-bold tracking-wider text-violet-600 uppercase dark:text-violet-400">
               React Compiler
             </p>
-            <h3 className="text-lg font-bold tracking-tight text-balance">{titulo}</h3>
+            <h3 id={idTitulo} className="text-lg font-bold tracking-tight text-balance">{titulo}</h3>
           </div>
         </div>
         <Button
@@ -87,7 +88,7 @@ export function CompiladorReact({
       {consigna && <p className="text-sm text-pretty text-muted-foreground">{consigna}</p>}
 
       <div className="grid min-w-0 gap-4 md:grid-cols-2">
-        <section aria-label="Código del componente" className="min-w-0 space-y-2">
+        <div className="min-w-0 space-y-2">
           <h4 className="text-sm font-semibold">Componente</h4>
           <EditorCodeMirror
             etiqueta="Editor del componente JSX"
@@ -95,10 +96,9 @@ export function CompiladorReact({
             valor={codigo}
             onChange={setCodigo}
           />
-        </section>
+        </div>
 
-        <section
-          aria-label="Salida del compilador"
+        <div
           aria-live="off"
           className="min-w-0 space-y-2"
         >
@@ -118,13 +118,14 @@ export function CompiladorReact({
               numerarLineas
               etiqueta="Código compilado"
               alturaMaxima="24rem"
+              esRegion={false}
             />
           )}
-        </section>
+        </div>
       </div>
 
       {resultado.estado === 'listo' && resultado.eventos.length > 0 && (
-        <section aria-label="Informe del compilador" className="space-y-2">
+        <div className="space-y-2">
           <h4 className="text-sm font-semibold">Qué compiló React</h4>
           <ul className="space-y-1 text-sm text-muted-foreground">
             {resultado.eventos.map((evento, indice) => (
@@ -133,7 +134,7 @@ export function CompiladorReact({
               </li>
             ))}
           </ul>
-        </section>
+        </div>
       )}
     </section>
   )

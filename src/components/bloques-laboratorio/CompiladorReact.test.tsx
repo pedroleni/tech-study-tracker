@@ -30,6 +30,7 @@ class WorkerCompiladorFalso implements WorkerReactKit {
   onmessage: ((evento: MessageEvent<unknown>) => void) | null = null
   onerror: ((evento: ErrorEvent) => void) | null = null
   readonly mensajes: Array<{ id: number; tipo: string; codigo: string }> = []
+  readonly terminate = vi.fn()
 
   postMessage(mensaje: unknown) {
     this.mensajes.push(mensaje as (typeof this.mensajes)[number])
@@ -74,6 +75,7 @@ describe('CompiladorReact', () => {
     expect(workers[0].mensajes[0]).toEqual({
       id: 1,
       tipo: 'compilar',
+      nombre: 'App.jsx',
       codigo: codigoOriginal,
     })
 
@@ -94,13 +96,13 @@ describe('CompiladorReact', () => {
       })
     })
 
-    const entrada = screen.getByRole('region', { name: 'Código del componente' })
-    const salida = screen.getByRole('region', { name: 'Salida del compilador' })
+    const region = screen.getByRole('region', { name: 'React Compiler por dentro' })
+    expect(within(region).queryAllByRole('region')).toHaveLength(0)
+    const entrada = screen.getByRole('heading', { name: 'Componente' }).parentElement!
+    const salida = screen.getByRole('heading', { name: 'Código compilado' }).parentElement!
     expect(within(entrada).getByLabelText('Editor del componente JSX')).toHaveValue(codigoOriginal)
     expect(salida).toHaveAttribute('aria-live', 'off')
-    expect(within(salida).getByLabelText('Código compilado')).toHaveTextContent(
-      'react/compiler-runtime',
-    )
+    expect(salida.querySelector('pre')).toHaveTextContent('react/compiler-runtime')
     expect(screen.getByText('Fila: compilado')).toBeInTheDocument()
     expect(
       screen.getByText(

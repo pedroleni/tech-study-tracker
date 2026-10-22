@@ -49,6 +49,19 @@ describe('esquemaReactEnVivo', () => {
     ).toMatchObject({ mostrarLint: true, exigirLintLimpio: true })
   })
 
+  it('rechaza exigir tipos correctos si el bloque no contiene TypeScript', () => {
+    const resultado = esquemaReactEnVivo.safeParse({
+      ...minimoEnVivo,
+      exigirTiposCorrectos: true,
+    })
+
+    expect(resultado.success).toBe(false)
+    if (resultado.success) return
+    expect(resultado.error.issues.map((issue) => issue.message)).toContain(
+      'exigirTiposCorrectos necesita al menos un archivo .ts o .tsx',
+    )
+  })
+
   it('admite jsx, tsx, ts y css, con nombres seguros', () => {
     const fallo = (datos: unknown) => esquemaReactEnVivo.safeParse(datos).success
     expect(

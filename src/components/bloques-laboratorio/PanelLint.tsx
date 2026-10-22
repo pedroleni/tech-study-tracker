@@ -20,7 +20,7 @@ function Diagnostico({ diagnostico }: { diagnostico: DiagnosticoLint }) {
     >
       <p>
         <span className="font-mono text-xs tabular-nums">
-          {diagnostico.linea}:{diagnostico.columna}
+          {diagnostico.linea}{diagnostico.columna > 0 ? `:${diagnostico.columna}` : ''}
         </span>
         {diagnostico.regla && (
           <>

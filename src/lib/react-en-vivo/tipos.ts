@@ -1,6 +1,9 @@
 import type { ArchivoReact } from '@/lib/laboratorio/schemas'
+import { RUTA_REACT_KIT } from '@/lib/react-kit/rutas'
 
 type TsReal = typeof import('typescript')
+type Vfs = typeof import('@typescript/vfs')
+type EntornoVirtual = import('@typescript/vfs').VirtualTypeScriptEnvironment
 
 const OPCIONES_JSON = {
   target: 'ES2020',
@@ -10,6 +13,9 @@ const OPCIONES_JSON = {
   jsx: 'react-jsx',
   moduleResolution: 'bundler',
   skipLibCheck: true,
+  noUncheckedSideEffectImports: false,
+  allowJs: true,
+  checkJs: false,
 }
 
 const ARCHIVOS_TIPOS_REACT = [
@@ -18,6 +24,9 @@ const ARCHIVOS_TIPOS_REACT = [
   'react/jsx-runtime.d.ts',
   'react/jsx-dev-runtime.d.ts',
   'react/package.json',
+  'react-dom/index.d.ts',
+  'react-dom/client.d.ts',
+  'react-dom/package.json',
   'csstype/index.d.ts',
   'csstype/package.json',
 ] as const
@@ -44,7 +53,85 @@ function rutaVirtualTipo(ruta: string) {
   if (ruta.startsWith('react/')) {
     return `/node_modules/@types/react/${ruta.slice('react/'.length)}`
   }
+  if (ruta.startsWith('react-dom/')) {
+    return `/node_modules/@types/react-dom/${ruta.slice('react-dom/'.length)}`
+  }
   return `/node_modules/csstype/${ruta.slice('csstype/'.length)}`
+}
+
+type RecursosTiposReact = {
+  ts: TsReal
+  vfs: Vfs
+  opciones: import('typescript').CompilerOptions
+  mapa: Map<string, string>
+}
+
+export type FabricaEntornoTiposReact = (
+  mapa: Map<string, string>,
+  archivosRaiz: string[],
+  ts: TsReal,
+  opciones: import('typescript').CompilerOptions,
+  vfs: Vfs,
+) => EntornoVirtual
+
+export function crearEntornoTiposReact(
+  mapa: Map<string, string>,
+  archivosRaiz: string[],
+  ts: TsReal,
+  opciones: import('typescript').CompilerOptions,
+  vfs: Vfs,
+) {
+  return vfs.createVirtualTypeScriptEnvironment(
+    vfs.createSystem(mapa),
+    archivosRaiz,
+    ts,
+    opciones,
+  )
+}
+
+const promesasRecursos = new WeakMap<CargarArchivoTipos, Promise<RecursosTiposReact>>()
+
+function cargarRecursos(cargarArchivo: CargarArchivoTipos) {
+  const existente = promesasRecursos.get(cargarArchivo)
+  if (existente) return existente
+
+  const promesa = (async (): Promise<RecursosTiposReact> => {
+    const [tsModulo, vfs] = await Promise.all([
+      import('typescript-en-vivo'),
+      import('@typescript/vfs'),
+    ])
+    const ts = tsModulo as unknown as TsReal
+    const { options: opciones, errors } = ts.convertCompilerOptionsFromJson(OPCIONES_JSON, '/')
+    if (errors.length > 0) {
+      throw new Error('Opciones de compilador de TypeScript inválidas')
+    }
+
+    const nombresLib = vfs.knownLibFilesForCompilerOptions(
+      { target: ts.ScriptTarget.ES2020, lib: ['es2020', 'dom', 'dom.iterable'] },
+      ts,
+    )
+    const mapa = new Map<string, string>()
+    await Promise.all([
+      ...nombresLib.map(async (nombre) => {
+        try {
+          mapa.set(`/${nombre}`, await cargarArchivo(`/ts-libs/${nombre}`))
+        } catch {
+          // La VFS enumera nombres históricos ausentes en algunas versiones.
+        }
+      }),
+      ...ARCHIVOS_TIPOS_REACT.map(async (ruta) => {
+        const contenido = await cargarArchivo(`${RUTA_REACT_KIT}/tipos/${ruta}`)
+        mapa.set(rutaVirtualTipo(ruta), contenido)
+      }),
+    ])
+    return { ts, vfs, opciones, mapa }
+  })().catch((error: unknown) => {
+    promesasRecursos.delete(cargarArchivo)
+    throw error
+  })
+
+  promesasRecursos.set(cargarArchivo, promesa)
+  return promesa
 }
 
 function mapearDiagnostico(
@@ -68,62 +155,62 @@ function mapearDiagnostico(
   return { archivo: '', linea: 0, columna: 0, mensaje, severidad }
 }
 
+export function crearSesionTiposReact(
+  cargarArchivo: CargarArchivoTipos = cargarArchivoPorFetch,
+  { crearEntorno = crearEntornoTiposReact }: { crearEntorno?: FabricaEntornoTiposReact } = {},
+) {
+  let entorno: EntornoVirtual | null = null
+  let nombresActuales = new Set<string>()
+  let recursos: RecursosTiposReact | null = null
+
+  return {
+    async diagnosticar(archivos: ArchivoReact[]): Promise<DiagnosticoTiposReact[]> {
+      const archivosTypeScript = archivos.filter(
+        (archivo) => archivo.nombre.endsWith('.ts') || archivo.nombre.endsWith('.tsx'),
+      )
+      if (archivosTypeScript.length === 0) return []
+      const archivosDelPrograma = archivos.filter((archivo) => /\.(?:jsx|tsx|ts)$/.test(archivo.nombre))
+
+      recursos ??= await cargarRecursos(cargarArchivo)
+      const { ts, vfs, opciones, mapa } = recursos
+      const contenidos = new Map(
+        archivosDelPrograma.map((archivo) => [
+          `/src/${archivo.nombre}`,
+          archivo.codigo === '' ? ' ' : archivo.codigo,
+        ]),
+      )
+
+      if (!entorno) {
+        const mapaInicial = new Map(mapa)
+        for (const [nombre, contenido] of contenidos) mapaInicial.set(nombre, contenido)
+        entorno = crearEntorno(mapaInicial, [...contenidos.keys()], ts, opciones, vfs)
+      } else {
+        for (const nombre of nombresActuales) {
+          if (!contenidos.has(nombre)) entorno.deleteFile(nombre)
+        }
+        for (const [nombre, contenido] of contenidos) {
+          if (nombresActuales.has(nombre)) entorno.updateFile(nombre, contenido)
+          else entorno.createFile(nombre, contenido)
+        }
+      }
+      nombresActuales = new Set(contenidos.keys())
+
+      return archivosTypeScript
+        .flatMap((archivo) => {
+          const nombre = `/src/${archivo.nombre}`
+          return [
+            ...entorno!.languageService.getSyntacticDiagnostics(nombre),
+            ...entorno!.languageService.getSemanticDiagnostics(nombre),
+          ]
+        })
+        .map((diagnostico) => mapearDiagnostico(diagnostico, ts))
+    },
+  }
+}
+
 export async function diagnosticarTiposReact(
   archivos: ArchivoReact[],
   cargarArchivo: CargarArchivoTipos = cargarArchivoPorFetch,
 ): Promise<DiagnosticoTiposReact[]> {
-  const archivosTypeScript = archivos.filter(
-    (archivo) => archivo.nombre.endsWith('.ts') || archivo.nombre.endsWith('.tsx'),
-  )
-  if (archivosTypeScript.length === 0) return []
-
-  const [tsModulo, vfs] = await Promise.all([
-    import('typescript-en-vivo'),
-    import('@typescript/vfs'),
-  ])
-  // @typescript/vfs declara sus tipos contra el nombre real `typescript`,
-  // aunque en ejecución usamos el alias fijado `typescript-en-vivo`.
-  const ts = tsModulo as unknown as TsReal
-  const { options, errors } = ts.convertCompilerOptionsFromJson(OPCIONES_JSON, '/')
-  if (errors.length > 0) {
-    throw new Error('Opciones de compilador de TypeScript inválidas')
-  }
-
-  const nombresLib = vfs.knownLibFilesForCompilerOptions(
-    { target: ts.ScriptTarget.ES2020, lib: ['es2020', 'dom', 'dom.iterable'] },
-    ts,
-  )
-  const mapa = new Map<string, string>()
-
-  await Promise.all([
-    ...nombresLib.map(async (nombre) => {
-      try {
-        mapa.set(`/${nombre}`, await cargarArchivo(`/ts-libs/${nombre}`))
-      } catch {
-        // La VFS enumera nombres históricos ausentes en algunas versiones.
-      }
-    }),
-    ...ARCHIVOS_TIPOS_REACT.map(async (ruta) => {
-      const contenido = await cargarArchivo(`/vendor/react-kit/1/tipos/${ruta}`)
-      mapa.set(rutaVirtualTipo(ruta), contenido)
-    }),
-  ])
-
-  const archivosRaiz = archivosTypeScript.map((archivo) => `/src/${archivo.nombre}`)
-  for (const archivo of archivosTypeScript) {
-    mapa.set(`/src/${archivo.nombre}`, archivo.codigo)
-  }
-
-  const sistema = vfs.createSystem(mapa)
-  const entorno = vfs.createVirtualTypeScriptEnvironment(
-    sistema,
-    archivosRaiz,
-    ts,
-    options,
-  )
-
-  return archivosRaiz.flatMap((nombre) => [
-    ...entorno.languageService.getSyntacticDiagnostics(nombre),
-    ...entorno.languageService.getSemanticDiagnostics(nombre),
-  ]).map((diagnostico) => mapearDiagnostico(diagnostico, ts))
+  return crearSesionTiposReact(cargarArchivo).diagnosticar(archivos)
 }

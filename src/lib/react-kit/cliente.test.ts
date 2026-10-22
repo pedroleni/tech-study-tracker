@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import {
   RUTAS_WORKERS_REACT_KIT,
@@ -11,6 +11,7 @@ class WorkerFalso implements WorkerReactKit {
   onmessage: ((evento: MessageEvent<unknown>) => void) | null = null
   onerror: ((evento: ErrorEvent) => void) | null = null
   readonly mensajes: unknown[] = []
+  readonly terminate = vi.fn()
 
   constructor(readonly ruta: string) {}
 
@@ -113,6 +114,7 @@ describe('cliente de los workers de React Kit', () => {
       ok: false,
       error: 'No se pudo cargar el compilador de React',
     })
+    expect(workers[0].terminate).toHaveBeenCalledOnce()
   })
 
   it('crea el worker clásico al primer uso, lo reutiliza y asigna ids crecientes', async () => {
@@ -193,6 +195,35 @@ describe('cliente de los workers de React Kit', () => {
     })
   })
 
+  it('limita a dos los intentos seguidos de crear un worker', async () => {
+    const crearWorker = vi.fn(() => {
+      throw new Error('Worker no disponible')
+    })
+    const cliente = crearClienteReactKit({ crearWorker })
+    const sesion = cliente.crearSesionLint()
+
+    await expect(sesion.analizar(archivos)).resolves.toMatchObject({ ok: false })
+    await expect(sesion.analizar(archivos)).resolves.toMatchObject({ ok: false })
+    await expect(sesion.analizar(archivos)).resolves.toMatchObject({ ok: false })
+
+    expect(crearWorker).toHaveBeenCalledTimes(2)
+  })
+
+  it('resuelve con un error en español si una petición tarda más de 20 s', async () => {
+    vi.useFakeTimers()
+    const { cliente, workers } = prepararCliente()
+    const pendiente = cliente.crearSesionLint().analizar(archivos)
+
+    await vi.advanceTimersByTimeAsync(20_000)
+
+    await expect(pendiente).resolves.toEqual({
+      ok: false,
+      error: 'El linter tardó demasiado en responder',
+    })
+    workers[0].responder({ id: 1, ok: true, diagnosticos: [] })
+    await expect(pendiente).resolves.toMatchObject({ ok: false })
+  })
+
   it('reserva rutas versionadas separadas para linter y compilador', () => {
     expect(RUTAS_WORKERS_REACT_KIT).toEqual({
       lint: '/vendor/react-kit/1/lint.js',
@@ -200,3 +231,5 @@ describe('cliente de los workers de React Kit', () => {
     })
   })
 })
+
+afterEach(() => vi.useRealTimers())

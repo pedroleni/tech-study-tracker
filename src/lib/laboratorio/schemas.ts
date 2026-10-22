@@ -394,6 +394,12 @@ export const esquemaReactEnVivo = z
   .refine((datos) => !datos.archivoInicial || datos.archivos.some((archivo) => archivo.nombre === datos.archivoInicial), {
     message: 'archivoInicial debe ser uno de los archivos',
   })
+  .refine(
+    (datos) =>
+      !datos.exigirTiposCorrectos ||
+      datos.archivos.some((archivo) => /\.(?:ts|tsx)$/.test(archivo.nombre)),
+    { message: 'exigirTiposCorrectos necesita al menos un archivo .ts o .tsx' },
+  )
 
 export const esquemaReactAnotado = z.object({
   tipo: z.literal('react-anotado'),

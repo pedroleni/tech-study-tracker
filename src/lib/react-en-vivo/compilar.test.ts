@@ -24,8 +24,12 @@ describe('compilarArchivosReact', () => {
       sesion,
     )
 
-    expect(compilar).toHaveBeenNthCalledWith(1, codigoOriginal, { typescript: false })
+    expect(compilar).toHaveBeenNthCalledWith(1, codigoOriginal, {
+      nombre: 'App.jsx',
+      typescript: false,
+    })
     expect(compilar).toHaveBeenNthCalledWith(2, expect.stringContaining('Tarjeta'), {
+      nombre: 'Tarjeta.tsx',
       typescript: true,
     })
     expect(resultado).toEqual({

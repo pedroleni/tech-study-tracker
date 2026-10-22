@@ -61,6 +61,17 @@ export default function App({ titulo }: Props) { return <p>{titulo}: {limite}</p
     expect(resultado.modulos['./datos.ts']).not.toContain(': number')
   })
 
+  it('acepta aserciones angulares de TypeScript en .ts sin interpretarlas como JSX', async () => {
+    const resultado = await transformarArchivos([
+      { nombre: 'datos.ts', codigo: 'const n = <number>(5 as unknown)\nexport default n' },
+    ])
+
+    expect(resultado.ok).toBe(true)
+    if (!resultado.ok) return
+    expect(resultado.modulos['./datos.ts']).toMatch(/const n = \(5\s*\)/)
+    expect(resultado.modulos['./datos.ts']).not.toContain('<number>')
+  })
+
   it('admite la salida de React Compiler y conserva el import de su runtime', async () => {
     const resultado = await transformarArchivos([
       { nombre: 'App.jsx', codigo: codigoCompilado },

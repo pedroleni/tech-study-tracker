@@ -1,19 +1,19 @@
 import { z } from 'zod'
 
 import type { ArchivoReact } from '@/lib/laboratorio/schemas'
+import { RUTAS_WORKERS_REACT_KIT } from '@/lib/react-kit/rutas'
 
-export const RUTAS_WORKERS_REACT_KIT = {
-  lint: '/vendor/react-kit/1/lint.js',
-  compilador: '/vendor/react-kit/1/compilador.js',
-} as const
+export { RUTAS_WORKERS_REACT_KIT } from '@/lib/react-kit/rutas'
 
 const ERROR_CARGA_LINTER = 'No se pudo cargar el linter'
 const ERROR_CARGA_COMPILADOR = 'No se pudo cargar el compilador de React'
+const TIEMPO_MAXIMO_WORKER_MS = 20_000
+const MAX_INTENTOS_CREACION = 2
 
 const esquemaDiagnosticoLint = z.strictObject({
   archivo: z.string().min(1).max(120),
   linea: z.number().int().min(1).max(1_000_000),
-  columna: z.number().int().min(1).max(1_000_000),
+  columna: z.number().int().min(0).max(1_000_000),
   regla: z.string().min(1).max(200).nullable(),
   mensaje: z.string().max(2000),
   severidad: z.enum(['error', 'aviso']),
@@ -66,6 +66,7 @@ export interface WorkerReactKit {
   onmessage: ((evento: MessageEvent<unknown>) => void) | null
   onerror: ((evento: ErrorEvent) => void) | null
   postMessage: (mensaje: unknown) => void
+  terminate: () => void
 }
 
 export type FabricaWorkerReactKit = (ruta: string) => WorkerReactKit
@@ -73,6 +74,7 @@ export type FabricaWorkerReactKit = (ruta: string) => WorkerReactKit
 type Pendiente<T> = {
   esLaUltima: (id: number) => boolean
   resolver: (resultado: T | null) => void
+  temporizador: ReturnType<typeof setTimeout>
 }
 
 type ConfiguracionCanal<T> = {
@@ -80,6 +82,7 @@ type ConfiguracionCanal<T> = {
   crearWorker: FabricaWorkerReactKit
   validar: (datos: unknown) => { success: true; data: { id: number } & T } | { success: false }
   errorCarga: T
+  errorTiempo: T
 }
 
 // La mecánica de carga, ids, reutilización y descarte vive en un canal
@@ -87,6 +90,7 @@ type ConfiguracionCanal<T> = {
 class CanalWorker<T> {
   private worker: WorkerReactKit | null = null
   private siguienteId = 0
+  private intentosCreacion = 0
   private readonly pendientes = new Map<number, Pendiente<T>>()
 
   constructor(private readonly configuracion: ConfiguracionCanal<T>) {}
@@ -100,19 +104,28 @@ class CanalWorker<T> {
     registrarUltima(id)
 
     return new Promise((resolver) => {
-      this.pendientes.set(id, { resolver, esLaUltima })
+      const temporizador = setTimeout(
+        () => this.resolverPendiente(id, this.configuracion.errorTiempo),
+        TIEMPO_MAXIMO_WORKER_MS,
+      )
+      this.pendientes.set(id, { resolver, esLaUltima, temporizador })
       let worker: WorkerReactKit
       try {
         worker = this.obtenerWorker()
         worker.postMessage(construirMensaje(id))
       } catch {
-        this.resolverPendiente(id, this.configuracion.errorCarga)
+        if (this.worker) this.fallarCarga()
+        else this.resolverPendiente(id, this.configuracion.errorCarga)
       }
     })
   }
 
   private obtenerWorker() {
     if (this.worker) return this.worker
+    if (this.intentosCreacion >= MAX_INTENTOS_CREACION) {
+      throw new Error('Se agotaron los intentos de crear el worker')
+    }
+    this.intentosCreacion += 1
     const worker = this.configuracion.crearWorker(this.configuracion.ruta)
     worker.onmessage = (evento) => this.recibir(evento.data)
     worker.onerror = () => this.fallarCarga()
@@ -123,6 +136,7 @@ class CanalWorker<T> {
   private recibir(datos: unknown) {
     const respuesta = this.configuracion.validar(datos)
     if (respuesta.success) {
+      this.intentosCreacion = 0
       const { id, ...resultado } = respuesta.data
       this.resolverPendiente(id, resultado as T)
       return
@@ -144,6 +158,7 @@ class CanalWorker<T> {
     const pendiente = this.pendientes.get(id)
     if (!pendiente) return
     this.pendientes.delete(id)
+    clearTimeout(pendiente.temporizador)
     pendiente.resolver(pendiente.esLaUltima(id) ? resultado : null)
   }
 
@@ -157,6 +172,7 @@ class CanalWorker<T> {
     if (worker) {
       worker.onmessage = null
       worker.onerror = null
+      worker.terminate()
     }
     this.fallarPendientes(this.configuracion.errorCarga)
   }
@@ -170,7 +186,7 @@ export type SesionLint = {
 export type SesionCompilador = {
   compilar: (
     codigo: string,
-    opciones?: { typescript?: boolean },
+    opciones?: { nombre?: string; typescript?: boolean },
   ) => Promise<ResultadoCompilador | null>
   descartar: () => void
 }
@@ -183,12 +199,14 @@ export function crearClienteReactKit({
     crearWorker,
     validar: (datos) => esquemaRespuestaLint.safeParse(datos),
     errorCarga: { ok: false, error: ERROR_CARGA_LINTER },
+    errorTiempo: { ok: false, error: 'El linter tardó demasiado en responder' },
   })
   const canalCompilador = new CanalWorker<ResultadoCompilador>({
     ruta: RUTAS_WORKERS_REACT_KIT.compilador,
     crearWorker,
     validar: (datos) => esquemaRespuestaCompilador.safeParse(datos),
     errorCarga: { ok: false, error: ERROR_CARGA_COMPILADOR },
+    errorTiempo: { ok: false, error: 'El compilador de React tardó demasiado en responder' },
   })
 
   return {
@@ -217,6 +235,7 @@ export function crearClienteReactKit({
               id,
               tipo: 'compilar',
               codigo,
+              ...(opciones?.nombre ? { nombre: opciones.nombre } : {}),
               ...(opciones?.typescript ? { typescript: true } : {}),
             }),
             (id) => {

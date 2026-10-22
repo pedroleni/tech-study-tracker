@@ -25,6 +25,7 @@ export async function compilarArchivosReact(
     }
 
     const resultado = await sesion.compilar(archivo.codigo, {
+      nombre: archivo.nombre,
       typescript: archivo.nombre.endsWith('.tsx'),
     })
     if (!resultado) return null

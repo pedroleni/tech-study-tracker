@@ -15,7 +15,9 @@ import { ReactEnVivo } from './ReactEnVivo'
 
 const diagnosticarTiposReact = vi.hoisted(() => vi.fn())
 
-vi.mock('@/lib/react-en-vivo/tipos', () => ({ diagnosticarTiposReact }))
+vi.mock('@/lib/react-en-vivo/tipos', () => ({
+  crearSesionTiposReact: () => ({ diagnosticar: diagnosticarTiposReact }),
+}))
 
 // CodeMirror no se deja teclear en jsdom: aquí se prueba la lógica del
 // bloque, así que el editor se sustituye por un textarea con su etiqueta.
@@ -60,6 +62,7 @@ class WorkerLintFalso implements WorkerReactKit {
   onmessage: ((evento: MessageEvent<unknown>) => void) | null = null
   onerror: ((evento: ErrorEvent) => void) | null = null
   readonly mensajes: Array<{ id: number; tipo: string; archivos: DatosReactEnVivo['archivos'] }> = []
+  readonly terminate = vi.fn()
 
   postMessage(mensaje: unknown) {
     this.mensajes.push(mensaje as (typeof this.mensajes)[number])
@@ -74,6 +77,7 @@ class WorkerReactKitFalso implements WorkerReactKit {
   onmessage: ((evento: MessageEvent<unknown>) => void) | null = null
   onerror: ((evento: ErrorEvent) => void) | null = null
   readonly mensajes: unknown[] = []
+  readonly terminate = vi.fn()
 
   postMessage(mensaje: unknown) {
     this.mensajes.push(mensaje)
@@ -159,6 +163,7 @@ describe('ReactEnVivo', () => {
     expect(workers[0].mensajes[0]).toEqual({
       id: 1,
       tipo: 'compilar',
+      nombre: 'App.jsx',
       codigo: codigoOriginal,
     })
 
@@ -183,13 +188,38 @@ describe('ReactEnVivo', () => {
     )
     await act(async () => vi.advanceTimersByTime(0))
     await act(async () => {
-      workers[0].responder({ id: 1, ok: false, error: 'Construcción no compatible' })
+      workers[0].responder({
+        id: 1,
+        ok: false,
+        error: 'Construcción no compatible\n> 1 | marco interno',
+      })
     })
 
     expect(
       await screen.findByText('App.jsx no se pudo compilar: Construcción no compatible'),
     ).toBeInTheDocument()
+    expect(screen.queryByText(/marco interno/)).toBeNull()
     await waitFor(() => expect(vista().getAttribute('srcdoc')).toContain('Hola'))
+  })
+
+  it('omite el aviso del compilador si Sucrase ya explica el mismo archivo roto', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    const { clienteReactKit, workers } = prepararWorkerReactKit()
+    render(
+      <ReactEnVivo
+        {...datos}
+        archivos={[{ nombre: 'App.jsx', codigo: 'export default function App() { return <p>hola</ }' }]}
+        compilador
+        clienteReactKit={clienteReactKit}
+      />,
+    )
+    await act(async () => vi.advanceTimersByTime(0))
+    await act(async () => {
+      workers[0].responder({ id: 1, ok: false, error: 'El compilador también lo rechazó' })
+    })
+
+    expect(await screen.findByText(/Error de sintaxis en App.jsx/)).toBeInTheDocument()
+    expect(screen.queryByText(/no se pudo compilar/)).toBeNull()
   })
 
   it('las comprobaciones también montan el código compilado', async () => {
@@ -217,6 +247,66 @@ describe('ReactEnVivo', () => {
 
     const comprobaciones = (await screen.findByTitle('Comprobaciones')) as HTMLIFrameElement
     expect(comprobaciones.getAttribute('srcdoc')).toContain('react/compiler-runtime')
+  })
+
+  it('la comprobación no invalida la compilación pendiente de la vista previa', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    const { clienteReactKit, workers } = prepararWorkerReactKit()
+    render(
+      <ReactEnVivo
+        {...datos}
+        archivos={[{ nombre: 'App.jsx', codigo: codigoOriginal }]}
+        compilador
+        clienteReactKit={clienteReactKit}
+      />,
+    )
+    await act(async () => vi.advanceTimersByTime(0))
+    fireEvent.click(screen.getByRole('button', { name: 'Comprobar' }))
+    await waitFor(() => expect(workers[0].mensajes).toHaveLength(2))
+
+    await act(async () => {
+      workers[0].responder({ id: 2, ok: true, codigo: codigoCompilado, eventos: [] })
+    })
+    expect(await screen.findByTitle('Comprobaciones')).toBeInTheDocument()
+    await act(async () => {
+      workers[0].responder({ id: 1, ok: true, codigo: codigoCompilado, eventos: [] })
+    })
+
+    await waitFor(() => expect(vista().getAttribute('srcdoc')).toContain('react/compiler-runtime'))
+  })
+
+  it('editar y comprobar antes del debounce conserva ambas compilaciones', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    const { clienteReactKit, workers } = prepararWorkerReactKit()
+    render(
+      <ReactEnVivo
+        {...datos}
+        archivos={[{ nombre: 'App.jsx', codigo: codigoOriginal }]}
+        compilador
+        clienteReactKit={clienteReactKit}
+      />,
+    )
+    await act(async () => vi.advanceTimersByTime(0))
+    await act(async () => {
+      workers[0].responder({ id: 1, ok: true, codigo: codigoCompilado, eventos: [] })
+    })
+    await waitFor(() => expect(vista()).toBeInTheDocument())
+
+    fireEvent.change(screen.getByLabelText('Editor de App.jsx'), {
+      target: { value: 'export default function App() { return <p>Nuevo</p> }' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Comprobar' }))
+    await waitFor(() => expect(workers[0].mensajes).toHaveLength(2))
+    await act(async () => vi.advanceTimersByTime(400))
+    await waitFor(() => expect(workers[0].mensajes).toHaveLength(3))
+
+    await act(async () => {
+      workers[0].responder({ id: 3, ok: true, codigo: codigoCompilado, eventos: [] })
+      workers[0].responder({ id: 2, ok: true, codigo: codigoCompilado, eventos: [] })
+    })
+
+    expect(await screen.findByTitle('Comprobaciones')).toBeInTheDocument()
+    expect(screen.getByText('Comprobando…')).toBeInTheDocument()
   })
 
   it('carga el linter a los 400 ms, solo envía JSX/TSX y agrupa sus diagnósticos', async () => {
@@ -307,7 +397,7 @@ describe('ReactEnVivo', () => {
           {
             archivo: 'App.tsx',
             linea: 7,
-            columna: 12,
+            columna: 0,
             regla: 'react-hooks/set-state-in-effect',
             mensaje: `Calling setState synchronously within an effect ${'x'.repeat(300)}`,
             severidad: 'error',
@@ -330,7 +420,7 @@ describe('ReactEnVivo', () => {
     const filas = within(await screen.findByRole('status')).getAllByRole('listitem')
     expect(filas[0]).toHaveTextContent('El código no tiene errores de tipos')
     expect(filas[1]).toHaveTextContent('El linter no marca nada')
-    expect(filas[1]).toHaveTextContent('App.tsx:7:12 · react-hooks/set-state-in-effect · Calling setState')
+    expect(filas[1]).toHaveTextContent('App.tsx:7 · react-hooks/set-state-in-effect · Calling setState')
     expect(filas[1].textContent!.length).toBeLessThan(300)
     expect(filas[2]).toHaveTextContent('Saluda')
   })
@@ -351,13 +441,8 @@ describe('ReactEnVivo', () => {
       vacio.workers[0].responder({ id: 1, ok: true, diagnosticos: [] })
     })
     fireEvent.click(screen.getByRole('button', { name: 'Comprobar' }))
-    let oculto = (await screen.findByTitle('Comprobaciones')) as HTMLIFrameElement
-    enviarDesde(oculto.contentWindow, {
-      canal: 'react-en-vivo',
-      tipo: 'resultado-comprobaciones',
-      resultados: [],
-    })
     expect(await screen.findByText('1 de 1 comprobaciones superadas')).toBeInTheDocument()
+    expect(screen.queryByTitle('Comprobaciones')).toBeNull()
     unmount()
 
     const fallo = prepararWorkerLint()
@@ -374,13 +459,8 @@ describe('ReactEnVivo', () => {
       fallo.workers[0].responder({ id: 1, ok: false, error: 'El linter se rompió' })
     })
     fireEvent.click(screen.getByRole('button', { name: 'Comprobar' }))
-    oculto = (await screen.findByTitle('Comprobaciones')) as HTMLIFrameElement
-    enviarDesde(oculto.contentWindow, {
-      canal: 'react-en-vivo',
-      tipo: 'resultado-comprobaciones',
-      resultados: [],
-    })
     expect(await screen.findByText('El linter se rompió')).toBeInTheDocument()
+    expect(screen.queryByTitle('Comprobaciones')).toBeNull()
   })
 
   it('abre App.tsx, muestra sus errores agrupados y genera JavaScript sin tipos', async () => {
@@ -440,6 +520,30 @@ describe('ReactEnVivo', () => {
     expect(screen.getByText('Diagnóstico nuevo')).toBeInTheDocument()
   })
 
+  it('conserva los diagnósticos anteriores sin mostrar una carga falsa al recalcular', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    let resolverSegunda!: (valor: unknown[]) => void
+    diagnosticarTiposReact
+      .mockResolvedValueOnce([
+        { archivo: 'App.tsx', linea: 3, columna: 1, mensaje: 'Diagnóstico anterior', severidad: 'error' },
+      ])
+      .mockImplementationOnce(() => new Promise((resolver) => { resolverSegunda = resolver }))
+    render(<ReactEnVivo {...datosTsx} />)
+    await act(async () => vi.advanceTimersByTime(400))
+    expect(await screen.findByText('Diagnóstico anterior')).toBeInTheDocument()
+
+    fireEvent.change(screen.getByLabelText('Editor de App.tsx'), {
+      target: { value: 'export default function App() { return <p>Nuevo</p> }' },
+    })
+
+    expect(screen.getByText('Diagnóstico anterior')).toBeInTheDocument()
+    expect(screen.queryByText('Cargando el compilador de TypeScript…')).toBeNull()
+    act(() => vi.advanceTimersByTime(400))
+    await waitFor(() => expect(diagnosticarTiposReact).toHaveBeenCalledTimes(2))
+    await act(async () => resolverSegunda([]))
+    expect(await screen.findByText('Sin errores de tipos.')).toBeInTheDocument()
+  })
+
   it('exigirTiposCorrectos antepone el primer error al resultado de Comprobar', async () => {
     diagnosticarTiposReact.mockResolvedValue([
       { archivo: 'App.tsx', linea: 4, columna: 8, mensaje: 'Tipo incorrecto', severidad: 'error' },
@@ -468,16 +572,67 @@ describe('ReactEnVivo', () => {
     await screen.findByText('Sin errores de tipos.')
 
     fireEvent.click(screen.getByRole('button', { name: 'Comprobar' }))
-    const oculto = (await screen.findByTitle('Comprobaciones')) as HTMLIFrameElement
-    enviarDesde(oculto.contentWindow, { canal: 'react-en-vivo', tipo: 'montado', version: '19.3.1' })
-    enviarDesde(oculto.contentWindow, {
-      canal: 'react-en-vivo',
-      tipo: 'resultado-comprobaciones',
-      resultados: [],
-    })
 
     expect(await screen.findByText('1 de 1 comprobaciones superadas')).toBeInTheDocument()
     expect(screen.getByText('El código no tiene errores de tipos')).toBeInTheDocument()
+    expect(screen.queryByTitle('Comprobaciones')).toBeNull()
+  })
+
+  it('vaciar Tarjeta.tsx nunca da un positivo falso si falla el análisis', async () => {
+    diagnosticarTiposReact
+      .mockResolvedValueOnce([])
+      .mockRejectedValueOnce(new Error("TS6053: File '/src/Tarjeta.tsx' not found"))
+    await renderizarListo({ ...datosTsx, exigirTiposCorrectos: true, comprobaciones: undefined })
+    await screen.findByText('Sin errores de tipos.')
+    fireEvent.click(screen.getByRole('button', { name: 'Tarjeta.tsx' }))
+    fireEvent.change(screen.getByLabelText('Editor de Tarjeta.tsx'), { target: { value: '' } })
+
+    expect(await screen.findByText(/No se pudieron analizar los tipos/)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Comprobar' }))
+
+    expect(await screen.findByText('0 de 1 comprobaciones superadas')).toBeInTheDocument()
+    expect(screen.getByText(/No se pudieron comprobar los tipos: TS6053/)).toBeInTheDocument()
+    expect(screen.queryByTitle('Comprobaciones')).toBeNull()
+  })
+
+  it('explica por qué Comprobar espera a tipos o linter', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    diagnosticarTiposReact.mockImplementation(() => new Promise(() => {}))
+    const tipos = render(
+      <ReactEnVivo {...datosTsx} comprobaciones={undefined} exigirTiposCorrectos />,
+    )
+    expect(screen.getByRole('button', { name: 'Esperando a los tipos…' })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    )
+    tipos.unmount()
+
+    const { clienteReactKit } = prepararWorkerLint()
+    render(
+      <ReactEnVivo
+        {...datos}
+        comprobaciones={undefined}
+        exigirLintLimpio
+        clienteReactKit={clienteReactKit}
+      />,
+    )
+    expect(screen.getByRole('button', { name: 'Esperando al linter…' })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    )
+  })
+
+  it('usa ids distintos para los paneles de tipos de dos bloques', async () => {
+    render(
+      <>
+        <ReactEnVivo {...datosTsx} etiquetaSeccion="Primer bloque" />
+        <ReactEnVivo {...datosTsx} etiquetaSeccion="Segundo bloque" />
+      </>,
+    )
+    const titulos = await screen.findAllByRole('heading', { name: 'Errores de tipos' })
+    expect(titulos[0].id).not.toBe(titulos[1].id)
+    expect(titulos[0].closest('section')).toHaveAttribute('aria-labelledby', titulos[0].id)
+    expect(titulos[1].closest('section')).toHaveAttribute('aria-labelledby', titulos[1].id)
   })
 
   it('el panel TSX no introduce problemas automáticos de accesibilidad', async () => {

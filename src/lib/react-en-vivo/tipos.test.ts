@@ -1,10 +1,14 @@
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import type { ArchivoReact } from '@/lib/laboratorio/schemas'
 
-import { diagnosticarTiposReact } from './tipos'
+import {
+  crearEntornoTiposReact,
+  crearSesionTiposReact,
+  diagnosticarTiposReact,
+} from './tipos'
 
 async function cargarDesdeDisco(rutaPublica: string): Promise<string> {
   return readFile(join(process.cwd(), 'public', rutaPublica.replace(/^\//, '')), 'utf8')
@@ -95,5 +99,67 @@ export default function Tarjeta({ titulo }: Props) { return <h2>{titulo}</h2> }`
     )
 
     expect(diagnosticos).toEqual([])
+  })
+
+  it('admite un archivo TSX vacío sin tumbar el análisis', async () => {
+    const diagnosticos = await diagnosticarTiposReact(
+      app('export default function App() { return <p>Hola</p> }', [
+        { nombre: 'Tarjeta.tsx', codigo: '' },
+      ]),
+      cargarDesdeDisco,
+    )
+
+    expect(diagnosticos).toEqual([])
+  })
+
+  it('ignora imports CSS de efecto lateral', async () => {
+    const diagnosticos = await diagnosticarTiposReact(
+      app("import './estilos.css'\nexport default function App() { return <p>Hola</p> }", [
+        { nombre: 'estilos.css', codigo: 'p { color: red }' },
+      ]),
+      cargarDesdeDisco,
+    )
+
+    expect(diagnosticos).toEqual([])
+  })
+
+  it('resuelve un import sin extensión hacia un archivo JSX sin comprobar su JavaScript', async () => {
+    const diagnosticos = await diagnosticarTiposReact(
+      app(
+        "import Boton from './Boton'\nexport default function App() { return <Boton /> }",
+        [{ nombre: 'Boton.jsx', codigo: 'export default function Boton() { return <button /> }' }],
+      ),
+      cargarDesdeDisco,
+    )
+
+    expect(diagnosticos).toEqual([])
+  })
+
+  it('resuelve react-dom y react-dom/client con los tipos reales del kit', async () => {
+    const diagnosticos = await diagnosticarTiposReact(
+      app(`import { createPortal } from 'react-dom'
+import { createRoot } from 'react-dom/client'
+const nodo = document.createElement('div')
+createPortal(<p>Portal</p>, nodo)
+createRoot(nodo).render(<p>Raíz</p>)
+export default function App() { return <div /> }`),
+      cargarDesdeDisco,
+    )
+
+    expect(diagnosticos).toEqual([])
+  })
+
+  it('carga libs y tipos una vez y actualiza el mismo entorno entre pasadas', async () => {
+    const cargarArchivo = vi.fn(cargarDesdeDisco)
+    const crearEntorno = vi.fn(crearEntornoTiposReact)
+    const sesion = crearSesionTiposReact(cargarArchivo, { crearEntorno })
+
+    await sesion.diagnosticar(app('export default function App() { return <p>Uno</p> }'))
+    const cargasTrasPrimeraPasada = cargarArchivo.mock.calls.length
+    await sesion.diagnosticar(app('export default function App() { return <p>Dos</p> }'))
+
+    expect(cargasTrasPrimeraPasada).toBeGreaterThan(0)
+    expect(cargarArchivo).toHaveBeenCalledTimes(cargasTrasPrimeraPasada)
+    expect(crearEntorno).toHaveBeenCalledTimes(1)
   })
 })
