@@ -28,7 +28,7 @@ pedido explícito de seguir usando esos prototipos como inspiración al
 arrancar el temario de CSS — capas anidadas de color para el modelo de
 caja, con la misma paleta que ya usan las DevTools de Chrome/Firefox
 para su propio diagrama de box model).
-14 tipos de bloque en total, el prop `permitirLaboratorios`, y el
+25 tipos de bloque en total, el prop `permitirLaboratorios`, y el
 temario real de HTML (completo, en revisión) y de CSS (en progreso)
 sobre este mecanismo.
 
@@ -544,7 +544,22 @@ diseño" con "feature real".
   marca nada»; un diagnóstico o un fallo de carga lo dejan como no superado.
   El catálogo `AdminReferenciaContenidoPage` incluye `ReactEnVivoTsx` con
   `App.tsx`/`Tarjeta.tsx` y `ReactEnVivoLint` con dos infracciones de hooks.
+  Desde la fase 4, `compilador` (por defecto `false`) pasa cada `.jsx`/`.tsx`
+  por React Compiler antes de Sucrase. La vista previa, el JavaScript
+  generado y las comprobaciones usan la misma salida compilada; si un archivo
+  falla, se monta su original y se muestra un aviso con el nombre y el motivo.
+  `react/compiler-runtime` se resuelve dentro del iframe contra
+  `React.__COMPILER_RUNTIME`. El catálogo incluye `ReactEnVivoCompilador` con
+  `compilador` y `mostrarArbol` para comparar los renders del fixture real.
   `react-anotado` no gana estos campos.
+- `CompiladorReact.tsx` — recibe `z.infer<typeof esquemaCompiladorReact>`
+  (2026-10-22): editor JSX y salida real, solo lectura, de React Compiler.
+  Compila 300 ms después de la última edición, descarta respuestas antiguas
+  y escribe el estado y motivo de cada componente debajo del código. En móvil
+  apila entrada y salida; en escritorio usa dos columnas. El esquema estricto
+  es `{ tipo: 'compilador-react', titulo?, consigna?, codigo }`, con límites
+  de 140, 600 y 4000 caracteres respectivamente. El catálogo usa los fixtures
+  reales de `src/lib/react-kit/__fixtures__/`.
 - `ReactAnotado.tsx` — recibe `z.infer<typeof esquemaReactAnotado>`
   (2026-10-20): código JSX con anotaciones y, debajo, el mismo código
   ejecutándose de verdad. Ver [react-en-vivo.md](react-en-vivo.md).

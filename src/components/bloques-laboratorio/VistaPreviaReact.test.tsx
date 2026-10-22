@@ -28,6 +28,22 @@ describe('VistaPreviaReact', () => {
     expect(screen.queryByText(/Error al renderizar/)).toBeNull()
   })
 
+  it('aclara que la línea pertenece al código compilado', () => {
+    render(<VistaPreviaReact srcDoc="<p>a</p>" codigoCompilado />)
+
+    enviarDesde(iframe().contentWindow, {
+      canal: 'react-en-vivo',
+      tipo: 'error-render',
+      texto: 'Roto',
+      archivo: 'App.jsx',
+      linea: 12,
+    })
+
+    expect(
+      screen.getByText('Error al renderizar: Roto — App.jsx, línea 12 del código compilado'),
+    ).toBeInTheDocument()
+  })
+
   it('ajusta la altura entre 160 y 2400 px', () => {
     render(<VistaPreviaReact srcDoc="<p>a</p>" />)
 

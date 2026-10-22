@@ -48,6 +48,73 @@ const diagnostico = {
 }
 
 describe('cliente de los workers de React Kit', () => {
+  it('compila JSX/TSX con el segundo worker, valida sus eventos y descarta resultados viejos', async () => {
+    const { cliente, workers } = prepararCliente()
+    const sesion = cliente.crearSesionCompilador()
+    const vieja = sesion.compilar('function App() {}')
+    const nueva = sesion.compilar('function App(): JSX.Element {}', { typescript: true })
+
+    expect(workers).toHaveLength(1)
+    expect(workers[0].ruta).toBe('/vendor/react-kit/1/compilador.js')
+    expect(workers[0].mensajes).toEqual([
+      { id: 1, tipo: 'compilar', codigo: 'function App() {}' },
+      {
+        id: 2,
+        tipo: 'compilar',
+        codigo: 'function App(): JSX.Element {}',
+        typescript: true,
+      },
+    ])
+
+    workers[0].responder({
+      id: 1,
+      ok: true,
+      codigo: 'viejo',
+      eventos: [{ componente: 'App', estado: 'compilado', linea: 1 }],
+    })
+    workers[0].responder({
+      id: 2,
+      ok: true,
+      codigo: 'nuevo',
+      eventos: [
+        { componente: 'Fila', estado: 'compilado', linea: 2 },
+        { componente: null, estado: 'omitido', linea: null, motivo: 'No es un componente' },
+      ],
+    })
+
+    await expect(vieja).resolves.toBeNull()
+    await expect(nueva).resolves.toEqual({
+      ok: true,
+      codigo: 'nuevo',
+      eventos: [
+        { componente: 'Fila', estado: 'compilado', linea: 2 },
+        { componente: null, estado: 'omitido', linea: null, motivo: 'No es un componente' },
+      ],
+    })
+  })
+
+  it('rechaza respuestas inválidas del compilador y traduce un fallo de carga', async () => {
+    const { cliente, workers } = prepararCliente()
+    const invalida = cliente.crearSesionCompilador().compilar('function App() {}')
+    workers[0].responder({
+      id: 1,
+      ok: true,
+      codigo: 'salida',
+      eventos: [{ componente: 'App', estado: 'desconocido', linea: 1 }],
+    })
+    await expect(invalida).resolves.toEqual({
+      ok: false,
+      error: 'No se pudo cargar el compilador de React',
+    })
+
+    const fallo = cliente.crearSesionCompilador().compilar('function App() {}')
+    workers[0].fallar()
+    await expect(fallo).resolves.toEqual({
+      ok: false,
+      error: 'No se pudo cargar el compilador de React',
+    })
+  })
+
   it('crea el worker clásico al primer uso, lo reutiliza y asigna ids crecientes', async () => {
     const { cliente, workers } = prepararCliente()
     const bloqueA = cliente.crearSesionLint()

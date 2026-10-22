@@ -28,6 +28,10 @@ import { CodigoResaltado } from '@/components/codigo'
 import { Button } from '@/components/ui/button'
 import type { ArchivoReact, DatosReactEnVivo } from '@/lib/laboratorio/schemas'
 import { ESPERA_RECONSTRUIR_MS } from '@/lib/react-en-vivo/constantes'
+import {
+  compilarArchivosReact,
+  type AvisoCompiladorReact,
+} from '@/lib/react-en-vivo/compilar'
 import type {
   MensajeArbol,
   MensajeEfecto,
@@ -110,6 +114,7 @@ export function ReactEnVivo({
   mostrarArbol = false,
   mostrarEfectos = false,
   mostrarLint = false,
+  compilador = false,
   exigirLintLimpio = false,
   exigirTiposCorrectos = false,
   api,
@@ -124,12 +129,14 @@ export function ReactEnVivo({
   | 'mostrarArbol'
   | 'mostrarEfectos'
   | 'mostrarLint'
+  | 'compilador'
   | 'exigirLintLimpio'
   | 'exigirTiposCorrectos'
 > & {
   mostrarArbol?: boolean
   mostrarEfectos?: boolean
   mostrarLint?: boolean
+  compilador?: boolean
   exigirLintLimpio?: boolean
   exigirTiposCorrectos?: boolean
   clienteReactKit?: ClienteReactKit
@@ -143,6 +150,7 @@ export function ReactEnVivo({
   const [srcDoc, setSrcDoc] = useState<string | null>(null)
   const [errorSintaxis, setErrorSintaxis] = useState<string | null>(null)
   const [jsGenerado, setJsGenerado] = useState('')
+  const [avisosCompilador, setAvisosCompilador] = useState<AvisoCompiladorReact[]>([])
   const [comprobacion, setComprobacion] = useState<EstadoComprobacion>({ estado: 'inactivo' })
   const usaTypeScript = archivosOriginales.some(
     (archivo) => archivo.nombre.endsWith('.ts') || archivo.nombre.endsWith('.tsx'),
@@ -173,6 +181,10 @@ export function ReactEnVivo({
     resultadoLint.revision === revisionLint ? resultadoLint.diagnosticos : []
   const versionLintRef = useRef(0)
   const sesionLint = useMemo(() => clienteReactKit.crearSesionLint(), [clienteReactKit])
+  const sesionCompilador = useMemo(
+    () => clienteReactKit.crearSesionCompilador(),
+    [clienteReactKit],
+  )
   const resultadosTiposRef = useRef<ResultadoComprobacion[]>([])
   const { entradas, recibirMensaje, limpiar } = useEntradasConsola()
   const [arbol, setArbol] = useState<MensajeArbol | null>(null)
@@ -222,20 +234,34 @@ export function ReactEnVivo({
     // La primera vista previa sale sin esperar; después, 400 ms tras la última tecla.
     const espera = primeraVezRef.current ? 0 : ESPERA_RECONSTRUIR_MS
     primeraVezRef.current = false
+    const version = ++versionRef.current
+    if (compilador) sesionCompilador.descartar()
     const temporizador = window.setTimeout(() => {
-      versionRef.current += 1
-      const version = versionRef.current
-      void prepararDocumento(archivos, {
-        origen: window.location.origin,
-        strictMode,
-        conPruebas: false,
-        conArbol: mostrarArbol,
-        conEfectos: mostrarEfectos,
-        api: apiEstable,
-        red: redActualRef.current,
-      }).then((preparado) => {
-        // Una transformación que llega después de otra más nueva se descarta.
+      void (async () => {
+        const resultadoCompilador = compilador
+          ? await compilarArchivosReact(archivos, sesionCompilador)
+          : { archivos, avisos: [] }
+        if (!resultadoCompilador || version !== versionRef.current) return
+
+        const [preparado, textoGenerado] = await Promise.all([
+          prepararDocumento(resultadoCompilador.archivos, {
+            origen: window.location.origin,
+            strictMode,
+            conPruebas: false,
+            conArbol: mostrarArbol,
+            conEfectos: mostrarEfectos,
+            api: apiEstable,
+            red: redActualRef.current,
+          }),
+          mostrarJsGenerado
+            ? transformarParaMostrar(resultadoCompilador.archivos)
+            : Promise.resolve(null),
+        ])
+        // Una compilación o transformación que llega después de otra más
+        // nueva se descarta en bloque: vista, avisos y JS siempre coinciden.
         if (version !== versionRef.current) return
+        setAvisosCompilador(resultadoCompilador.avisos)
+        if (textoGenerado !== null) setJsGenerado(textoGenerado)
         if (!preparado.ok) {
           // La vista previa se queda en el último resultado válido.
           setErrorSintaxis(preparado.error)
@@ -250,15 +276,14 @@ export function ReactEnVivo({
         limpiarEfectos()
         setFalloPendiente(false)
         setSrcDoc(preparado.srcDoc)
-      })
-      if (mostrarJsGenerado) {
-        void transformarParaMostrar(archivos).then((texto) => {
-          if (version === versionRef.current) setJsGenerado(texto)
-        })
-      }
+      })()
     }, espera)
-    return () => window.clearTimeout(temporizador)
-  }, [apiEstable, archivos, strictMode, mostrarJsGenerado, mostrarArbol, mostrarEfectos, limpiar, limpiarEfectos, limpiarPeticiones])
+    return () => {
+      window.clearTimeout(temporizador)
+      if (version === versionRef.current) versionRef.current += 1
+      if (compilador) sesionCompilador.descartar()
+    }
+  }, [apiEstable, archivos, compilador, sesionCompilador, strictMode, mostrarJsGenerado, mostrarArbol, mostrarEfectos, limpiar, limpiarEfectos, limpiarPeticiones])
 
   useEffect(() => {
     if (!usaTypeScript) return
@@ -311,7 +336,13 @@ export function ReactEnVivo({
     }
   }, [archivos, revisionLint, sesionLint, usaLint])
 
-  useEffect(() => () => sesionLint.descartar(), [sesionLint])
+  useEffect(
+    () => () => {
+      sesionLint.descartar()
+      sesionCompilador.descartar()
+    },
+    [sesionCompilador, sesionLint],
+  )
 
   const terminarComprobacion = useCallback((fin: FinComprobacion) => {
     setComprobacion({
@@ -363,7 +394,15 @@ export function ReactEnVivo({
     }
     resultadosTiposRef.current = resultadosRequisitos
     setComprobacion({ estado: 'comprobando', srcDoc: null })
-    const preparado = await prepararDocumento(archivos, {
+    const resultadoCompilador = compilador
+      ? await compilarArchivosReact(archivos, sesionCompilador)
+      : { archivos, avisos: [] }
+    if (!resultadoCompilador) {
+      setComprobacion({ estado: 'inactivo' })
+      return
+    }
+    setAvisosCompilador(resultadoCompilador.avisos)
+    const preparado = await prepararDocumento(resultadoCompilador.archivos, {
       origen: window.location.origin,
       strictMode,
       conPruebas: true,
@@ -385,6 +424,7 @@ export function ReactEnVivo({
     setArchivos(archivosOriginales)
     setPestana(primeraPestana)
     setComprobacion({ estado: 'inactivo' })
+    setAvisosCompilador([])
     resultadosTiposRef.current = []
     setReinicios((anteriores) => anteriores + 1)
     documentoMontadoRef.current = false
@@ -500,7 +540,11 @@ export function ReactEnVivo({
               codigo={jsGenerado || '// Preparando el JavaScript…'}
               lenguaje="js"
               numerarLineas
-              etiqueta="JavaScript generado por Sucrase"
+              etiqueta={
+                compilador
+                  ? 'JavaScript generado por React Compiler y Sucrase'
+                  : 'JavaScript generado por Sucrase'
+              }
             />
           )}
 
@@ -541,6 +585,15 @@ export function ReactEnVivo({
 
         <div className="min-w-0 space-y-2">
           <h4 className="text-sm font-semibold">Vista previa</h4>
+          {avisosCompilador.length > 0 && (
+            <ul className="space-y-1 rounded-lg bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
+              {avisosCompilador.map((aviso) => (
+                <li key={aviso.archivo}>
+                  {aviso.archivo} no se pudo compilar: {aviso.error}
+                </li>
+              ))}
+            </ul>
+          )}
           {srcDoc === null ? (
             <p className="text-sm text-muted-foreground">Preparando React…</p>
           ) : (
@@ -550,6 +603,7 @@ export function ReactEnVivo({
               onMensaje={recibir}
               red={api ? redActual : undefined}
               fallosSolicitados={fallosSolicitados}
+              codigoCompilado={compilador}
             />
           )}
         </div>

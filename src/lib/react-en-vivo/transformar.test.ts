@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
+import codigoCompilado from '@/lib/react-kit/__fixtures__/compilador-app.compilado.jsx?raw'
+
 import { transformarArchivos, transformarParaMostrar } from './transformar'
 
 describe('transformarArchivos', () => {
@@ -57,6 +59,17 @@ export default function App({ titulo }: Props) { return <p>{titulo}: {limite}</p
     expect(resultado.modulos['./App.tsx']).not.toContain(': Props')
     expect(resultado.modulos['./datos.ts']).toContain('const limite = 3')
     expect(resultado.modulos['./datos.ts']).not.toContain(': number')
+  })
+
+  it('admite la salida de React Compiler y conserva el import de su runtime', async () => {
+    const resultado = await transformarArchivos([
+      { nombre: 'App.jsx', codigo: codigoCompilado },
+    ])
+
+    expect(resultado.ok).toBe(true)
+    if (!resultado.ok) return
+    expect(resultado.modulos['./App.jsx']).toContain("require('react/compiler-runtime')")
+    expect(resultado.modulos['./App.jsx']).toContain('_compilerruntime.c.call(void 0, 9)')
   })
 })
 

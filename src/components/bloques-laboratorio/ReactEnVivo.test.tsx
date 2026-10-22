@@ -3,6 +3,8 @@ import { axe } from 'vitest-axe'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { DatosReactEnVivo } from '@/lib/laboratorio/schemas'
+import codigoCompilado from '@/lib/react-kit/__fixtures__/compilador-app.compilado.jsx?raw'
+import codigoOriginal from '@/lib/react-kit/__fixtures__/compilador-app.jsx?raw'
 import {
   crearClienteReactKit,
   type FabricaWorkerReactKit,
@@ -45,6 +47,7 @@ const datos: DatosReactEnVivo = {
   mostrarArbol: false,
   mostrarEfectos: false,
   mostrarLint: false,
+  compilador: false,
   exigirLintLimpio: false,
   exigirTiposCorrectos: false,
   comprobaciones: [
@@ -65,6 +68,30 @@ class WorkerLintFalso implements WorkerReactKit {
   responder(datos: unknown) {
     this.onmessage?.(new MessageEvent('message', { data: datos }))
   }
+}
+
+class WorkerReactKitFalso implements WorkerReactKit {
+  onmessage: ((evento: MessageEvent<unknown>) => void) | null = null
+  onerror: ((evento: ErrorEvent) => void) | null = null
+  readonly mensajes: unknown[] = []
+
+  postMessage(mensaje: unknown) {
+    this.mensajes.push(mensaje)
+  }
+
+  responder(datos: unknown) {
+    this.onmessage?.(new MessageEvent('message', { data: datos }))
+  }
+}
+
+function prepararWorkerReactKit() {
+  const workers: WorkerReactKitFalso[] = []
+  const crearWorker: FabricaWorkerReactKit = () => {
+    const worker = new WorkerReactKitFalso()
+    workers.push(worker)
+    return worker
+  }
+  return { clienteReactKit: crearClienteReactKit({ crearWorker }), workers }
 }
 
 function prepararWorkerLint() {
@@ -115,6 +142,83 @@ afterEach(() => {
 })
 
 describe('ReactEnVivo', () => {
+  it('compila el fixture antes de montar y el JavaScript generado enseña esa salida', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    const { clienteReactKit, workers } = prepararWorkerReactKit()
+    render(
+      <ReactEnVivo
+        {...datos}
+        archivos={[{ nombre: 'App.jsx', codigo: codigoOriginal }]}
+        compilador
+        mostrarJsGenerado
+        clienteReactKit={clienteReactKit}
+      />,
+    )
+    await act(async () => vi.advanceTimersByTime(0))
+    expect(workers).toHaveLength(1)
+    expect(workers[0].mensajes[0]).toEqual({
+      id: 1,
+      tipo: 'compilar',
+      codigo: codigoOriginal,
+    })
+
+    await act(async () => {
+      workers[0].responder({ id: 1, ok: true, codigo: codigoCompilado, eventos: [] })
+    })
+    await waitFor(() => expect(vista().getAttribute('srcdoc')).toContain('react/compiler-runtime'))
+
+    fireEvent.click(screen.getByRole('button', { name: 'JavaScript generado' }))
+    await waitFor(() => {
+      const generado = screen.getByLabelText('JavaScript generado por React Compiler y Sucrase')
+      expect(generado).toHaveTextContent('react/compiler-runtime')
+      expect(generado).toHaveTextContent('_c(9)')
+    })
+  })
+
+  it('si un archivo no se puede compilar lo monta original y muestra un aviso', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    const { clienteReactKit, workers } = prepararWorkerReactKit()
+    render(
+      <ReactEnVivo {...datos} compilador clienteReactKit={clienteReactKit} />,
+    )
+    await act(async () => vi.advanceTimersByTime(0))
+    await act(async () => {
+      workers[0].responder({ id: 1, ok: false, error: 'Construcción no compatible' })
+    })
+
+    expect(
+      await screen.findByText('App.jsx no se pudo compilar: Construcción no compatible'),
+    ).toBeInTheDocument()
+    await waitFor(() => expect(vista().getAttribute('srcdoc')).toContain('Hola'))
+  })
+
+  it('las comprobaciones también montan el código compilado', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    const { clienteReactKit, workers } = prepararWorkerReactKit()
+    render(
+      <ReactEnVivo
+        {...datos}
+        archivos={[{ nombre: 'App.jsx', codigo: codigoOriginal }]}
+        compilador
+        clienteReactKit={clienteReactKit}
+      />,
+    )
+    await act(async () => vi.advanceTimersByTime(0))
+    await act(async () => {
+      workers[0].responder({ id: 1, ok: true, codigo: codigoCompilado, eventos: [] })
+    })
+    await waitFor(() => expect(vista()).toBeInTheDocument())
+
+    fireEvent.click(screen.getByRole('button', { name: 'Comprobar' }))
+    await waitFor(() => expect(workers[0].mensajes).toHaveLength(2))
+    await act(async () => {
+      workers[0].responder({ id: 2, ok: true, codigo: codigoCompilado, eventos: [] })
+    })
+
+    const comprobaciones = (await screen.findByTitle('Comprobaciones')) as HTMLIFrameElement
+    expect(comprobaciones.getAttribute('srcdoc')).toContain('react/compiler-runtime')
+  })
+
   it('carga el linter a los 400 ms, solo envía JSX/TSX y agrupa sus diagnósticos', async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true })
     const { clienteReactKit, workers } = prepararWorkerLint()

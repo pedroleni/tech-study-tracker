@@ -43,6 +43,7 @@
     'react-dom/client': R.ReactDOMClient,
     'react/jsx-runtime': R.JsxRuntime,
     'react/jsx-dev-runtime': R.JsxDevRuntime,
+    'react/compiler-runtime': { c: R.React.__COMPILER_RUNTIME.c },
   }
   // hasOwnProperty y no `in`: un import de "constructor" no debe encontrar
   // nada en el prototipo de Object.

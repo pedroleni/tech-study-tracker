@@ -4,6 +4,7 @@ import {
   esquemaArbolDeComponentes,
   esquemaBloqueLaboratorio,
   esquemaCodigoAnotado,
+  esquemaCompiladorReact,
   esquemaComprobacionReact,
   esquemaEditorEnVivo,
   esquemaGitAnotado,
@@ -26,11 +27,16 @@ describe('esquemaReactEnVivo', () => {
       strictMode: true,
       mostrarConsola: true,
       mostrarJsGenerado: false,
+      compilador: false,
       mostrarLint: false,
       exigirLintLimpio: false,
       exigirTiposCorrectos: false,
     })
     expect(esquemaBloqueLaboratorio.parse(minimoEnVivo).tipo).toBe('react-en-vivo')
+  })
+
+  it('admite activar React Compiler', () => {
+    expect(esquemaReactEnVivo.parse({ ...minimoEnVivo, compilador: true }).compilador).toBe(true)
   })
 
   it('admite activar el panel y exigir que el linter no marque nada', () => {
@@ -140,6 +146,25 @@ describe('esquemaReactEnVivo', () => {
     expect(
       esquemaComprobacionReact.safeParse({ ...base, pasos: [{ red: 'fallar-siempre' }] }).success,
     ).toBe(false)
+  })
+})
+
+describe('esquemaCompiladorReact', () => {
+  const minimo = {
+    tipo: 'compilador-react',
+    codigo: 'export default function App() { return <p>Hola</p> }',
+  }
+
+  it('acepta el bloque mínimo y participa en el registro cerrado', () => {
+    expect(esquemaCompiladorReact.parse(minimo)).toEqual(minimo)
+    expect(esquemaBloqueLaboratorio.parse(minimo).tipo).toBe('compilador-react')
+  })
+
+  it('es estricto y limita título, consigna y código', () => {
+    expect(esquemaCompiladorReact.safeParse({ ...minimo, titulo: 't'.repeat(141) }).success).toBe(false)
+    expect(esquemaCompiladorReact.safeParse({ ...minimo, consigna: 'c'.repeat(601) }).success).toBe(false)
+    expect(esquemaCompiladorReact.safeParse({ ...minimo, codigo: 'x'.repeat(4001) }).success).toBe(false)
+    expect(esquemaCompiladorReact.safeParse({ ...minimo, inesperado: true }).success).toBe(false)
   })
 })
 

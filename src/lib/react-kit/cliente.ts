@@ -8,6 +8,7 @@ export const RUTAS_WORKERS_REACT_KIT = {
 } as const
 
 const ERROR_CARGA_LINTER = 'No se pudo cargar el linter'
+const ERROR_CARGA_COMPILADOR = 'No se pudo cargar el compilador de React'
 
 const esquemaDiagnosticoLint = z.strictObject({
   archivo: z.string().min(1).max(120),
@@ -31,9 +32,34 @@ const esquemaRespuestaLint = z.discriminatedUnion('ok', [
   }),
 ])
 
+const esquemaEventoCompilador = z.strictObject({
+  componente: z.string().max(200).nullable(),
+  estado: z.enum(['compilado', 'omitido', 'error']),
+  linea: z.number().int().min(1).max(1_000_000).nullable(),
+  motivo: z.string().max(600).optional(),
+})
+
+const esquemaRespuestaCompilador = z.discriminatedUnion('ok', [
+  z.strictObject({
+    id: z.number().int().positive(),
+    ok: z.literal(true),
+    codigo: z.string().max(100_000),
+    eventos: z.array(esquemaEventoCompilador).max(200),
+  }),
+  z.strictObject({
+    id: z.number().int().positive(),
+    ok: z.literal(false),
+    error: z.string().min(1).max(2000),
+  }),
+])
+
 export type DiagnosticoLint = z.infer<typeof esquemaDiagnosticoLint>
 export type ResultadoLint =
   | { ok: true; diagnosticos: DiagnosticoLint[] }
+  | { ok: false; error: string }
+export type EventoCompilador = z.infer<typeof esquemaEventoCompilador>
+export type ResultadoCompilador =
+  | { ok: true; codigo: string; eventos: EventoCompilador[] }
   | { ok: false; error: string }
 
 export interface WorkerReactKit {
@@ -141,6 +167,14 @@ export type SesionLint = {
   descartar: () => void
 }
 
+export type SesionCompilador = {
+  compilar: (
+    codigo: string,
+    opciones?: { typescript?: boolean },
+  ) => Promise<ResultadoCompilador | null>
+  descartar: () => void
+}
+
 export function crearClienteReactKit({
   crearWorker = (ruta) => new Worker(ruta),
 }: { crearWorker?: FabricaWorkerReactKit } = {}) {
@@ -150,6 +184,12 @@ export function crearClienteReactKit({
     validar: (datos) => esquemaRespuestaLint.safeParse(datos),
     errorCarga: { ok: false, error: ERROR_CARGA_LINTER },
   })
+  const canalCompilador = new CanalWorker<ResultadoCompilador>({
+    ruta: RUTAS_WORKERS_REACT_KIT.compilador,
+    crearWorker,
+    validar: (datos) => esquemaRespuestaCompilador.safeParse(datos),
+    errorCarga: { ok: false, error: ERROR_CARGA_COMPILADOR },
+  })
 
   return {
     crearSesionLint(): SesionLint {
@@ -158,6 +198,27 @@ export function crearClienteReactKit({
         analizar: (archivos) =>
           canalLint.solicitar(
             (id) => ({ id, tipo: 'lint', archivos }),
+            (id) => {
+              ultimoId = id
+            },
+            (id) => id === ultimoId,
+          ),
+        descartar: () => {
+          ultimoId = 0
+        },
+      }
+    },
+    crearSesionCompilador(): SesionCompilador {
+      let ultimoId = 0
+      return {
+        compilar: (codigo, opciones) =>
+          canalCompilador.solicitar(
+            (id) => ({
+              id,
+              tipo: 'compilar',
+              codigo,
+              ...(opciones?.typescript ? { typescript: true } : {}),
+            }),
             (id) => {
               ultimoId = id
             },

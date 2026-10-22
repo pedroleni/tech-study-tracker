@@ -5,6 +5,7 @@ import { Callout } from '@/components/bloques-laboratorio/Callout'
 import { CapasDeCaja } from '@/components/bloques-laboratorio/CapasDeCaja'
 import { CodigoAnotado } from '@/components/bloques-laboratorio/CodigoAnotado'
 import { ComparadorAntesDespues } from '@/components/bloques-laboratorio/ComparadorAntesDespues'
+import { CompiladorReact } from '@/components/bloques-laboratorio/CompiladorReact'
 import { DiagramaEtiqueta } from '@/components/bloques-laboratorio/DiagramaEtiqueta'
 import { EsquemaDePagina } from '@/components/bloques-laboratorio/EsquemaDePagina'
 import { EditorEnVivo } from '@/components/bloques-laboratorio/EditorEnVivo'
@@ -32,6 +33,7 @@ export const registroBloquesLaboratorio: Record<string, ComponentType<any>> = {
   'predice-el-resultado': PrediceElResultado,
   'codigo-anotado': CodigoAnotado,
   'comparador-antes-despues': ComparadorAntesDespues,
+  'compilador-react': CompiladorReact,
   'notas-clave': NotasClave,
   'diagrama-etiqueta': DiagramaEtiqueta,
   callout: Callout,

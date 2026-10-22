@@ -378,6 +378,7 @@ export const esquemaReactEnVivo = z
     mostrarArbol: z.boolean().default(false),
     mostrarEfectos: z.boolean().default(false),
     mostrarLint: z.boolean().default(false),
+    compilador: z.boolean().default(false),
     exigirLintLimpio: z.boolean().default(false),
     exigirTiposCorrectos: z.boolean().default(false),
     api: esquemaApiReact.optional(),
@@ -409,6 +410,13 @@ export const esquemaReactAnotado = z.object({
   mostrarEfectos: z.boolean().default(false),
   api: esquemaApiReact.optional(),
   red: esquemaRedReact.optional(),
+})
+
+export const esquemaCompiladorReact = z.strictObject({
+  tipo: z.literal('compilador-react'),
+  titulo: z.string().min(1).max(140).optional(),
+  consigna: z.string().min(1).max(600).optional(),
+  codigo: z.string().max(4000),
 })
 
 // Árbol de componentes estático: el mismo dibujo que el árbol de renders,
@@ -482,6 +490,7 @@ export const esquemaBloqueLaboratorio = z.discriminatedUnion('tipo', [
   esquemaGitEnVivo,
   esquemaReactEnVivo,
   esquemaReactAnotado,
+  esquemaCompiladorReact,
   esquemaArbolDeComponentes,
   esquemaImagen,
   esquemaVideo,
@@ -510,6 +519,7 @@ export type DatosGitAnotado = z.infer<typeof esquemaGitAnotado>
 export type DatosGitEnVivo = z.infer<typeof esquemaGitEnVivo>
 export type DatosReactEnVivo = z.infer<typeof esquemaReactEnVivo>
 export type DatosReactAnotado = z.infer<typeof esquemaReactAnotado>
+export type DatosCompiladorReact = z.infer<typeof esquemaCompiladorReact>
 export type DatosArbolDeComponentes = z.infer<typeof esquemaArbolDeComponentes>
 export type ComprobacionReact = z.infer<typeof esquemaComprobacionReact>
 export type ArchivoReact = z.infer<typeof esquemaArchivoReact>

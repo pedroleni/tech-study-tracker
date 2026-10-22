@@ -26,6 +26,8 @@ const nombresComponentes = [
   'ReactEnVivo',
   'ReactEnVivoTsx',
   'ReactEnVivoLint',
+  'CompiladorReact',
+  'ReactEnVivoCompilador',
   'PanelRed',
   'RegistroEfectos',
   'Acordeon',

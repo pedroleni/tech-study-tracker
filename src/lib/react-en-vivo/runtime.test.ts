@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs'
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 
 import type { ArchivoReact, ComprobacionReact } from '@/lib/laboratorio/schemas'
+import codigoCompilado from '@/lib/react-kit/__fixtures__/compilador-app.compilado.jsx?raw'
 
 import pruebasReales from '../../../public/vendor/react-en-vivo/19.3.1/pruebas.js?raw'
 import reactReal from '../../../public/vendor/react-en-vivo/19.3.1/react.js?raw'
@@ -152,6 +153,20 @@ afterEach(() => {
 })
 
 describe('runtime de montaje', () => {
+  it('el React real expone compiler-runtime y monta su salida compilada', async () => {
+    const react = reactDelSandbox.React as {
+      __COMPILER_RUNTIME?: { c?: unknown }
+    }
+    expect(react.__COMPILER_RUNTIME).toBeDefined()
+    expect(react.__COMPILER_RUNTIME?.c).toBeTypeOf('function')
+
+    const enviar = await ejecutarMontaje([{ nombre: 'App.jsx', codigo: codigoCompilado }])
+    fireEvent.click(await within(document.body).findByRole('button', { name: 'Pulsado 0' }))
+
+    expect(await within(document.body).findByRole('button', { name: 'Pulsado 1' })).toBeInTheDocument()
+    expect(mensajesDe(enviar)).not.toContainEqual(expect.objectContaining({ tipo: 'error-render' }))
+  })
+
   it('monta App con varios archivos y avisa con montado', async () => {
     const enviar = await ejecutarMontaje([
       {
