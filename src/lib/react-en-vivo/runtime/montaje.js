@@ -270,10 +270,18 @@
   const envolverFocoDuranteComprobacion = () => {
     const focoOriginal = HTMLElement.prototype.focus
     HTMLElement.prototype.focus = function (...argumentos) {
+      const anterior = document.activeElement
       focoOriginal.apply(this, argumentos)
+      // WebKit rechaza el foco sin moverlo: el elemento activo sigue siendo el
+      // de antes. Si cambió a otro elemento, lo movió la propia app durante la
+      // llamada (un centinela de una trampa de foco que lo reenvía): no es un
+      // rechazo.
+      const activo = document.activeElement
+      const rechazado = activo === anterior
       if (
         ejecutorEnfocando ||
-        document.activeElement === this ||
+        activo === this ||
+        !rechazado ||
         !esEnfocable(this)
       ) return
       focoSimulado = true
