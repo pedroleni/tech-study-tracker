@@ -740,6 +740,35 @@ export default function App() {
     ])
   })
 
+  it('respeta el foco que un centinela reenvía a otro elemento', async () => {
+    await ejecutarMontajeConBundlesReales([
+      {
+        nombre: 'App.jsx',
+        codigo: `import { useRef, useState } from 'react'
+export default function App() {
+  const [nombre, setNombre] = useState('')
+  const centinelaRef = useRef(null)
+  const nombreRef = useRef(null)
+  return <div>
+    <button onClick={() => centinelaRef.current.focus()}>Ir</button>
+    <span ref={centinelaRef} tabIndex={0} onFocus={() => nombreRef.current.focus()} />
+    <label>Nombre <input ref={nombreRef} value={nombre} onChange={(e) => setNombre(e.target.value)} /></label>
+  </div>
+}`,
+      },
+    ])
+
+    const resultados = await ventana.__comprobarReactEnVivo!([
+      {
+        descripcion: 'El centinela lleva el foco al campo',
+        pasos: [{ pulsar: { rol: 'button', nombre: 'Ir' } }, { teclear: 'Ana' }],
+        espera: { etiqueta: 'Nombre', valor: 'Ana' },
+      },
+    ])
+
+    expect(resultados).toEqual([{ descripcion: 'El centinela lleva el foco al campo', ok: true }])
+  })
+
   it('respeta el foco real devuelto al botón que abre un diálogo', async () => {
     await ejecutarMontajeConBundlesReales([
       {
