@@ -22,7 +22,7 @@ Es el módulo 8 entero en una aplicación de verdad, con lo que la lección 62 n
 - **Un servidor que no existe**, simulado con MSW (lección 84): los mismos manejadores contestan en el navegador y en los tests.
 - **TSX** (lecciones 72 y 73) y **tests** con Vitest, Testing Library, user-event y axe (lecciones 83 y 84).
 
-Los nombres, las zonas y las altitudes de los refugios son reales. **Las plazas, los precios y las reservas son inventados**: este proyecto no reserva nada en ningún refugio. En el sitio de cada foto hay, de momento, un marcador de color con las iniciales.
+Los nombres, las zonas y las altitudes de los refugios son reales. **Las plazas, los precios y las reservas son inventados**: este proyecto no reserva nada en ningún refugio. **Las imágenes están generadas con IA**: un refugio genérico en el paisaje de cada sitio, no fotos de los refugios reales. El pie de la página lo dice.
 
 ```laboratorio
 {
@@ -93,7 +93,7 @@ Para lanzar solo un archivo mientras trabajas: `npm test -- esquema`. Y `npx vit
   "tipo": "callout",
   "variante": "info",
   "titulo": "Todo lo de esta lección está ejecutado de verdad",
-  "contenido": "El proyecto usa React 19.3.1, Vite 8.3.5, TypeScript 6.0.3 y Oxlint, como la plantilla react-ts de create-vite, más Zod 4.6.7 y MSW 3.0.3. Para los tests, Vitest 5.0.5, Testing Library React 16.3.3, user-event 14.6.8, jest-dom 7.0.1, vitest-axe 0.1.0 (con axe-core 4.14.0) y jsdom 28.1.0. Las salidas que verás son copias de la terminal, solo recortadas, del 22 de octubre de 2026, y lo que se dice del navegador está comprobado en Chromium."
+  "contenido": "El proyecto usa React 19.3.1, Vite 8.3.5, TypeScript 6.0.3 y Oxlint, como la plantilla react-ts de create-vite, más Zod 4.6.7 y MSW 3.0.3. Para los tests, Vitest 5.0.5, Testing Library React 16.3.3, user-event 14.6.8, jest-dom 7.0.1, vitest-axe 0.1.0 (con axe-core 4.14.0) y jsdom 28.1.0. Las salidas que verás son copias de la terminal, solo recortadas, del 22 y el 23 de octubre de 2026, y lo que se dice del navegador está comprobado en Chromium."
 }
 ```
 
@@ -103,6 +103,7 @@ Para lanzar solo un archivo mientras trabajas: `npm test -- esquema`. Y `npx vit
 src/
 ├── main.tsx                 ← arranca MSW con npm run dev y monta la aplicación
 ├── App.tsx                  ← cabecera, <Reserva /> y pie
+├── assets/refugios/         ← las cinco imágenes, generadas con IA
 ├── reserva/
 │   ├── esquema.ts           ← paso 1: el esquema de Zod de toda la reserva
 │   ├── accion.ts            ← paso 3: la acción de useActionState
@@ -111,7 +112,7 @@ src/
 │   ├── PasoRefugio.tsx      ← paso 4 (el grupo de opciones); el resto, hecho
 │   ├── BotonesPaso.tsx      ← paso 4: botones que no pierden el foco
 │   ├── PasoGrupo.tsx, PasoConfirmar.tsx, ReservaHecha.tsx
-│   ├── Pasos.tsx, TuReserva.tsx, Disponibilidad.tsx, ResumenReserva.tsx, Marcador.tsx
+│   ├── Pasos.tsx, TuReserva.tsx, Disponibilidad.tsx, ResumenReserva.tsx, FotoRefugio.tsx
 │   ├── api.ts               ← las dos peticiones: plazas y reserva
 │   ├── refugios.ts, fechas.ts, importe.ts, tipos.ts
 ├── servidor/
@@ -594,7 +595,17 @@ Hasta aquí, la reserva funciona para quien la ve. Este paso es para quien usa u
 - **La lista de pasos** es una `<ol>` con `aria-current="step"` en el actual, y «(hecho)», solo para el lector, en los anteriores. No son enlaces: no se puede saltar un paso sin validarlo.
 - **Dos regiones vivas**, pintadas desde el principio y vacías (lección 37): una con `role="alert"` para los errores y los avisos («Hay 3 campos por corregir.»), y otra con `role="status"` para lo que pasa mientras se envía («Buscando plazas libres…»).
 
-Lo que falta son cuatro cosas.
+### Las imágenes: decorativas, con `alt=""`
+
+Antes, algo que tampoco tienes que escribir. Cada tarjeta lleva arriba una imagen de su refugio, y la columna «Tu reserva», la del elegido. Ya vienen hechas, en `FotoRefugio.tsx`, y su `alt` está vacío a propósito. La pregunta que decide el `alt` de una imagen es qué se pierde quien no la ve, y aquí la respuesta es nada: la imagen está siempre junto al nombre del refugio, que ya se lee. Un `alt="Refugio de Respomuso"` haría que el lector lo dijera dos veces seguidas. Y describirla sería peor: está generada con IA, así que un «Vista del refugio de Respomuso junto al ibón» presentaría como real algo que no lo es. `alt=""` le dice al lector que la salte; sin el atributo, en cambio, algunos lectores leen el nombre del archivo.
+
+```tsx
+<img src={IMAGENES[refugio.id]} alt="" width={512} height={512} decoding="async" />
+```
+
+`width` y `height` son el tamaño real del archivo, y con ellos el navegador reserva el hueco antes de que llegue la imagen: la página no da saltos mientras cargan. El tamaño con el que se ve lo pone el CSS (`width: 100%` y un `aspect-ratio`, recortando con `object-fit: cover`). Y como se importan desde `src/assets/` (`import pineta from '../assets/refugios/pineta.jpg'`), en el build cada una sale con un hash en el nombre, como el JavaScript (lección 85). Lo pasamos por axe con las imágenes puestas: ninguna violación.
+
+Ahora sí, lo que falta son cuatro cosas.
 
 ### El campo, unido a su ayuda y a su error
 
@@ -762,7 +773,7 @@ La salida es **`aria-disabled`**: el botón dice a un lector que no está dispon
 }
 ```
 
-Con el paso 4, quedan 2 tests en rojo: los de las plazas retenidas. Para ver el resultado como lo vería alguien sin ver la pantalla, recorre la reserva solo con el teclado y con el lector de tu sistema (VoiceOver en macOS con `Cmd + F5`, Narrador en Windows con `Ctrl + Win + Intro`). Y para lo que ningún lector te dice, axe: lo pasamos con axe-core 4.14.0 en Chromium, en seis momentos de la reserva (el paso 1 recién cargado y con errores, el paso 2 con errores, el paso 3 reteniendo plazas y con el error del servidor, y la reserva confirmada), con todas las reglas de WCAG 2.2 AA y de buenas prácticas, **contraste incluido**. Ninguna violación.
+Con el paso 4, quedan 2 tests en rojo: los de las plazas retenidas. Para ver el resultado como lo vería alguien sin ver la pantalla, recorre la reserva solo con el teclado y con el lector de tu sistema (VoiceOver en macOS con `Cmd + F5`, Narrador en Windows con `Ctrl + Win + Intro`). Y para lo que ningún lector te dice, axe: lo pasamos con axe-core 4.14.0 en Chromium y en WebKit, en seis momentos de la reserva (el paso 1 recién cargado y con errores, el paso 2 con errores, el paso 3 reteniendo plazas y con el error del servidor, y la reserva confirmada), con todas las reglas de WCAG 2.2 AA y de buenas prácticas, **contraste incluido**. Ninguna violación.
 
 ## Paso 5: la disponibilidad, optimista (`src/reserva/Reserva.tsx`)
 
@@ -1035,14 +1046,19 @@ Y `npm run build`, que antes de construir comprueba los tipos con `tsc -b`:
 
 ```text
 vite v8.3.5 building client environment for production...
-✓ 130 modules transformed.
-dist/index.html                   0.48 kB │ gzip:  0.30 kB
-dist/assets/index-CXPuevwB.css    8.28 kB │ gzip:  2.64 kB
-dist/assets/index-BQiqiIYT.js   322.35 kB │ gzip: 98.39 kB
-✓ built in 72ms
+✓ 135 modules transformed.
+dist/index.html                        0.48 kB │ gzip:  0.30 kB
+dist/assets/angel-orus-ukP-yyyu.jpg   79.23 kB
+dist/assets/renclusa-VTOQyQCz.jpg     87.14 kB
+dist/assets/respomuso-6kPZsW5p.jpg    87.79 kB
+dist/assets/pineta-CFkIXeOr.jpg       92.63 kB
+dist/assets/estos-NnR9sORo.jpg        93.97 kB
+dist/assets/index-Cxt3j3wX.css         8.22 kB │ gzip:  2.64 kB
+dist/assets/index-BnCwygVy.js        322.44 kB │ gzip: 98.44 kB
+✓ built in 75ms
 ```
 
-Unos 98 kB comprimidos, y la mayor parte son React y React DOM: el gestor de tareas del proyecto 92, con la misma versión y casi nada más, ocupaba 70. Ni MSW ni el panel entran en el build.
+Unos 98 kB de JavaScript comprimido, y la mayor parte son React y React DOM: el gestor de tareas del proyecto 92, con la misma versión y casi nada más, ocupaba 70. Las cinco imágenes van aparte, de unos 90 kB cada una. Ni MSW ni el panel entran en el build.
 
 ## Errores típicos
 
@@ -1165,6 +1181,14 @@ Received:
 ```
 
 **Quedarse con las plazas viejas tras un 409.** Si en el caso `'sin-plazas'` de `confirmar` devuelves solo el aviso, sin `noches: respuesta.noches`, lo optimista se retira y vuelven las plazas del paso 1, que dicen que hay sitio. El aviso dice una cosa y la columna otra. El valor de verdad de `useOptimistic` tiene que ser siempre lo último que ha dicho el servidor.
+
+**Describir las imágenes.** Con `alt="Refugio de Respomuso"`, un lector lee el nombre dos veces, el de la imagen y el de la opción; con una descripción del paisaje, presenta como una foto del refugio una imagen generada con IA. Y si quitas el `alt` del todo, algunos lectores leen el nombre del archivo, y los cinco tests de axe se ponen en rojo con esta línea:
+
+```text
++   "image-alt: Images must have alternative text (5)",
+```
+
+Es decir: las imágenes tienen que tener texto alternativo, y hay cinco que no lo tienen. Una imagen que acompaña a un texto que ya lo dice todo es decorativa: `alt=""`, que es un texto alternativo vacío, no la falta de uno.
 
 **Lanzar el error en vez de devolverlo.** Igual que en el proyecto 62: si la acción lanza, el error va al error boundary más cercano (aquí no hay ninguno, y la página se quedaría en blanco) y React cancela lo que hubiera en la cola de `useActionState` (lección 58). Un 409 o un 500 son resultados esperados: se devuelven como estado.
 
