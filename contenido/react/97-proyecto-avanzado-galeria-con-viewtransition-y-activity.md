@@ -11,7 +11,7 @@
 
 ## Qué vas a construir
 
-«Luz del Norte» es la exposición de invierno de la **Asociación Fotográfica Cuarto Oscuro**, de Gijón: doce fotos de la costa, la montaña y los pueblos de Asturias, hechas por nueve socios entre noviembre y marzo. Su web tiene tres pestañas: «Galería», con la cuadrícula de fotos y la ficha de cada una; «Participa», con un formulario para proponer una foto para el año que viene, y «Visita», con el horario.
+«Luz del Norte» es la exposición de invierno de la **Asociación Fotográfica Cuarto Oscuro**, de Gijón: doce fotos de la costa, la montaña y los pueblos de Asturias, firmadas por nueve socios y fechadas entre noviembre y marzo. La exposición, la asociación y sus socios son inventados, y las fotos están generadas con inteligencia artificial; los lugares, en cambio, son reales. Su web tiene tres pestañas: «Galería», con la cuadrícula de fotos y la ficha de cada una; «Participa», con un formulario para proponer una foto para el año que viene, y «Visita», con el horario.
 
 La web ya funciona: navegas, abres fotos, pasas a la siguiente, cambias de pestaña. Pero todo cambia **de golpe**, y al irte de «Participa» pierdes lo que llevabas escrito. Tu trabajo es lo que la lección 55 dejó para este proyecto: juntar en una aplicación de verdad las tres piezas de las lecciones 54 y 55.
 
@@ -63,8 +63,8 @@ Es el proyecto más visual del temario, y también el que menos se puede comprob
 {
   "tipo": "callout",
   "variante": "aviso",
-  "titulo": "Las fotos, de momento, son degradados",
-  "contenido": "Las doce fotos de la muestra todavía no están. Mientras tanto, cada una es un degradado con sus tres colores y las iniciales de su título, dibujado por el componente Foto. Tiene la proporción de la foto de verdad (horizontal, vertical o 4 × 5) y su texto alternativo, así que todo lo que hagas funcionará igual cuando Foto pase a ser un <img>."
+  "titulo": "Las fotos están generadas con IA",
+  "contenido": "Las doce fotos se generaron con inteligencia artificial (la herramienta de imágenes de Codex, de OpenAI) a partir de una descripción de cada una: no son fotografías de esos lugares, y ni la exposición ni sus autores existen. El pie de la web y el README del proyecto lo dicen igual. Sirven para lo que importa aquí: fotos de verdad, con su peso y su tiempo de carga, viajando de la cuadrícula a la ficha."
 }
 ```
 
@@ -94,6 +94,7 @@ Antes de tocar nada, prueba la galería tal cual: abre una foto, pasa a la sigui
 ## Cómo está organizado
 
 ```text
+public/fotos/                 las doce fotos, a 1400 px en su lado largo
 src/
 ├── main.tsx                  StrictMode y BrowserRouter
 ├── App.tsx                   la cabecera, las pestañas y las tres secciones      ← pasos 1, 2 y 6
@@ -103,7 +104,7 @@ src/
 ├── estilos.css               el resto de estilos
 ├── datos.ts                  las doce fotos
 ├── componentes/
-│   ├── Foto.tsx              la foto (de momento, degradado e iniciales)
+│   ├── Foto.tsx              la foto: un <img> con su tamaño y un degradado mientras carga
 │   ├── EnlaceConTipo.tsx     un enlace que navega con un tipo de transición     ← paso 5
 │   └── Pestanas.tsx          las pestañas y su raya                              ← paso 6
 ├── paginas/
@@ -694,6 +695,50 @@ En Safari probamos con WebKit 27.2: las mismas animaciones, con los mismos tipos
 }
 ```
 
+## Las fotos de verdad: qué espera React antes de animar
+
+En tu ordenador, con `npm run dev`, las doce fotos llegan al momento y todo vuela con su imagen. Con una red de verdad no siempre: cada foto pesa entre 140 y 340 KB, 2,8 MB las doce. `Foto.tsx`, que ya viene hecho, está preparado para eso:
+
+```laboratorio
+{
+  "tipo": "codigo-anotado",
+  "lenguaje": "tsx",
+  "codigo": "export default function Foto({ foto, forma }: Props) {\n  const [oscuro, medio, claro] = foto.colores\n  const estilo = {\n    '--oscuro': oscuro,\n    '--medio': medio,\n    '--claro': claro,\n    '--proporcion': foto.ancho / foto.alto,\n  } as CSSProperties\n\n  return (\n    <img\n      className={`foto foto-${forma}`}\n      src={urlFoto(foto)}\n      alt={foto.alt}\n      width={foto.ancho}\n      height={foto.alto}\n      style={estilo}\n    />\n  )\n}",
+  "anotaciones": [
+    {
+      "fragmento": "src={urlFoto(foto)}",
+      "nota": "Las fotos están en public/fotos: Vite las sirve tal cual en desarrollo y las copia al build. urlFoto, en datos.ts, les pone delante import.meta.env.BASE_URL, por si un día publicas la app en una subcarpeta."
+    },
+    {
+      "fragmento": "width={foto.ancho}",
+      "nota": "El ancho y el alto del archivo (1400 × 934, por ejemplo). Con ellos, el navegador sabe la proporción antes de descargar nada y reserva el hueco: la página no salta cuando llega la foto."
+    },
+    {
+      "fragmento": "alt={foto.alt}",
+      "nota": "Lo que se ve en la foto, contado para quien no la ve. Es también el nombre accesible con el que la encuentran los tests."
+    },
+    {
+      "fragmento": "'--proporcion': foto.ancho / foto.alto,",
+      "nota": "Para el CSS de la ficha, que calcula el ancho máximo de la foto a partir de su alto máximo."
+    },
+    {
+      "fragmento": "const [oscuro, medio, claro] = foto.colores",
+      "nota": "Los tonos de cada foto, en datos.ts. Con ellos, estilos.css le pone a la imagen un fondo degradado: es lo que se ve mientras la foto no ha llegado."
+    }
+  ]
+}
+```
+
+Ni `loading="lazy"` ni `decoding`, y es a propósito. En el código de `react-dom` 19.3.1 se ve que, en una transición, **React espera a que carguen las `<img>` nuevas antes de animar**: con un límite de tiempo (como mucho medio segundo dentro de la transición de vista), solo si calcula que la red da para descargarlas a tiempo, y nunca a las que llevan `loading="lazy"` o un `onLoad`. A las que espera, además, les pide él mismo que se decodifiquen (con `decode()`), así que `decoding` tampoco aporta nada aquí. Lo medimos en Chromium con el build de producción, limitando la red desde las DevTools:
+
+- **Sin limitar la red**, todo vuela con su foto: React empieza la transición a los 50 ms del clic.
+- **Con una red rápida (9 Mbps)**, entrando directamente en `/foto/teitos-de-somiedo` y pulsando «Volver a la galería»: React esperó unos 540 ms a las miniaturas que quedaban a la vista. La de los teitos ya estaba (es el mismo archivo que la foto grande, en caché) y voló con su imagen; las demás aún no habían llegado y se vio su degradado.
+- **Con la misma red**, abriendo el faro 0,4 s después de entrar, con ninguna foto cargada todavía: React esperó 300 ms y la foto voló ya cargada.
+- **Con una red lenta (1,6 Mbps)**, React no esperó: calcula que no daría tiempo. La foto viajó como su degradado y la imagen fue apareciendo según llegaba, también durante la animación: la «foto de después» que anima el navegador no es una captura fija, sino la página en directo.
+- **Con `loading="lazy"`** en todas las fotos, React dejó de esperar también en la red rápida, y el faro voló sin su imagen.
+
+Por eso las fotos no son perezosas, y por eso el degradado de fondo no sobra: es lo que viaja cuando la red no da para más.
+
 ## Antes de darlo por terminado
 
 ```laboratorio
@@ -719,6 +764,10 @@ En Safari probamos con WebKit 27.2: las mismas animaciones, con los mismos tipos
     {
       "titulo": "¿Se mueve todo hacia el lado que toca?",
       "texto": "Anterior y siguiente, y las tres pestañas en todos los órdenes: de «Galería» a «Visita» y de «Visita» a «Participa»."
+    },
+    {
+      "titulo": "¿Y con la red lenta?",
+      "texto": "DevTools, panel Network, una red limitada y la caché desactivada. Entra directamente en una foto y vuelve: lo que no haya llegado viaja como su degradado, sin huecos ni saltos."
     },
     {
       "titulo": "¿Con prefers-reduced-motion emulado, nada se mueve?",
@@ -903,7 +952,7 @@ Sin comprobación automática, salvo la que escribas tú.
 1. **Las flechas del teclado en la ficha.** Que ← y → hagan lo mismo que «Foto anterior» y «Foto siguiente». Escucha `keydown` en un efecto con su limpieza (lección 38), lee la foto actual con `useEffectEvent` (lección 41) y navega con `useNavigate`, dentro de `startTransition` y con su tipo, como `EnlaceConTipo`. Que no salte si el foco está en un campo de texto.
 2. **Que cada pestaña recuerde su scroll.** Baja por la cuadrícula, ve a «Visita» y vuelve: estás arriba. Activity conserva el DOM, pero el scroll de la ventana es uno para todas. En `Panel`, guarda en una ref el `scrollY` mientras la pestaña se ve (un efecto con un `listener` de `scroll`, que Activity apaga al esconderla) y devuélveselo en un efecto de layout al volver a enseñarla. Cuidado con el orden: los efectos de los hijos se ejecutan antes que los del padre.
 3. **Un filtro por categoría.** Tres botones, «Costa», «Montaña» y «Pueblo», encima de la cuadrícula, con la categoría en la URL (`?categoria=Costa`, lección 77). Para que las miniaturas que se quedan se recoloquen deslizándose, cada `<li>` necesita su propio `<ViewTransition>` con `key`, como el escaparate que se reordena en la lección 55. Comprueba que la foto sigue volando hasta la ficha.
-4. **Las fotos de verdad.** Cuando estén, `Foto` pasará a ser un `<img>` con su `alt`, y `width` y `height` para que el navegador reserve el hueco antes de cargarla. Prueba la animación con la red lenta de las DevTools. En el código de `react-dom` 19.3.1 se ve que, en una transición de vista, React espera a que carguen las `<img>` nuevas que quedan a la vista (si no llevan `loading="lazy"` ni `onLoad`), como mucho medio segundo, antes de animar. ¿Se nota esa espera al abrir una foto que no estaba en caché?
+4. **Miniaturas más ligeras.** La cuadrícula descarga las doce fotos enteras, 2,8 MB, para enseñarlas a menos de 300 px. Genera miniaturas de 540 px en su lado corto (con calidad media pesan unos 840 KB las doce) y úsalas en la cuadrícula con `srcSet` y `sizes`, para que un móvil que necesite más se lleve la entera. Lo probamos, y tiene una contrapartida: al abrir una foto, la grande ya no está en caché, y con la red rápida de la sección anterior React retrasó la animación hasta 730 ms esperándola. Arréglalo precargándola cuando el ratón pasa por encima o la miniatura recibe el foco, con `preload` de `react-dom` (lección 81): con el ratón 300 ms encima antes de pulsar, la espera bajó a 340 ms. Si precargas también la anterior y la siguiente desde la ficha, «Foto siguiente» sale al momento, pero Chrome avisa en la consola de cada precarga que no se usa en unos segundos.
 
 ## Para profundizar
 
