@@ -24,6 +24,16 @@ Al terminar tendrás dos versiones de la misma aplicación, y la última parte d
 
 ```laboratorio
 {
+  "tipo": "video",
+  "src": "https://www.techstudytracker.com/img/1678d40ed106c76c807598163d39757eb07d3ae4025efd119ada98a3affa682f.mp4",
+  "poster": "https://www.techstudytracker.com/img/72b50b79f8d5b27c5581629611cca0c48ee7a0bae55ea3899b4e0f66eddc430b.jpg",
+  "titulo": "El gestor de tareas en React, funcionando",
+  "descripcion": "Se añaden cuatro tareas con el botón y con Intro, se completan dos, se recorren los filtros y se borra una. Al recargar la página, las tareas siguen ahí: se guardan en localStorage."
+}
+```
+
+```laboratorio
+{
   "tipo": "callout",
   "variante": "info",
   "titulo": "El repositorio",

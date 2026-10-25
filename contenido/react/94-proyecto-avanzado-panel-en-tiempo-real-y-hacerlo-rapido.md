@@ -22,6 +22,16 @@ Al final, como en los proyectos 92 y 93, las dos versiones frente a frente: lo q
 
 ```laboratorio
 {
+  "tipo": "video",
+  "src": "https://www.techstudytracker.com/img/914ba6351a8253cd8080e089cf69a181e80690ff51c188d48b6d610da65a1974.mp4",
+  "poster": "https://www.techstudytracker.com/img/514e32a6a9d1c1ee15a70fe466bdd38bdd1b9f3ec9d1d5a2f5e30d5f516a07df.jpg",
+  "titulo": "El panel con Binance en directo",
+  "descripcion": "Los 516 pares en USDT llegan por WebSocket cada segundo: scroll por la tabla virtual, favoritos, búsqueda, orden y el medidor del Profiler al quitar y poner la virtualización."
+}
+```
+
+```laboratorio
+{
   "tipo": "callout",
   "variante": "info",
   "titulo": "El repositorio",

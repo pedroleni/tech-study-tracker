@@ -23,6 +23,16 @@ Es el proyecto más visual del temario, y también el que menos se puede comprob
 
 ```laboratorio
 {
+  "tipo": "video",
+  "src": "https://www.techstudytracker.com/img/fa366347c92adce08bbfc5dda66e0a503db5fc11669c6f5bbd3e5d5539d9f28f.mp4",
+  "poster": "https://www.techstudytracker.com/img/fe83c659a15d27180d35b957078885a06ec5f32eda1391a1fd0a62dae5f2710e.jpg",
+  "titulo": "La galería terminada: elemento compartido, dirección y pestañas que no olvidan",
+  "descripcion": "La miniatura crece hasta la ficha y vuelve a su sitio; anterior y siguiente se deslizan cada uno hacia su lado, y las pestañas conservan lo escrito. Fotos generadas con IA."
+}
+```
+
+```laboratorio
+{
   "tipo": "roles",
   "titulo": "Quién hace qué",
   "roles": [

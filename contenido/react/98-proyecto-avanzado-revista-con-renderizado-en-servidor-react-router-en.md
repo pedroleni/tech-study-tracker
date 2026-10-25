@@ -24,6 +24,16 @@ Es el proyecto que convierte en práctica el módulo 13. Lo que las lecciones 87
 
 ```laboratorio
 {
+  "tipo": "video",
+  "src": "https://www.techstudytracker.com/img/a11003c9ac33ffc702a96a781aeb8ca7feff4b646f349cd27cfb71615a171949.mp4",
+  "poster": "https://www.techstudytracker.com/img/2d184f408e6410aff2aefcc90c3eea5adaa7c4ac31dbcf87301cb26d2be0acd2.jpg",
+  "titulo": "Caja Baja: una revista renderizada en el servidor",
+  "descripcion": "La portada y un artículo llegan del servidor; una carta con el correo mal escrito vuelve con su error y, corregida, se publica. Al final, sin JavaScript, el mismo formulario."
+}
+```
+
+```laboratorio
+{
   "tipo": "roles",
   "titulo": "Quién hace qué",
   "roles": [

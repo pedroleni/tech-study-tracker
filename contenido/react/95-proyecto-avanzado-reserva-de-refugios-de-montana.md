@@ -26,6 +26,16 @@ Los nombres, las zonas y las altitudes de los refugios son reales. **Las plazas,
 
 ```laboratorio
 {
+  "tipo": "video",
+  "src": "https://www.techstudytracker.com/img/c0269e6a180c32483c911f7ad20cbdb69507d87cd3b83fdf4a8ef6296e68b6b4.mp4",
+  "poster": "https://www.techstudytracker.com/img/7ecafdd0eb62ad4a05b8213afc1c6ee6ca82548a23c9ad3f3264386eb5472d0e.jpg",
+  "titulo": "La reserva de refugios, funcionando",
+  "descripcion": "Pineta no tiene plazas y el paso 1 lo dice; el paso 2 lleva el foco al primer error. En Estós las plazas se retienen al momento y vuelven solas cuando el servidor falla."
+}
+```
+
+```laboratorio
+{
   "tipo": "callout",
   "variante": "info",
   "titulo": "El repositorio",

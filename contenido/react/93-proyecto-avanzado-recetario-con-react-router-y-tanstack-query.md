@@ -21,6 +21,16 @@ Como los proyectos avanzados de JavaScript, no vive en el editor de esta web: es
 
 ```laboratorio
 {
+  "tipo": "video",
+  "src": "https://www.techstudytracker.com/img/2d01a295a818fbc479880fd0e7d6c3974fabbcbe9406136130e830cf3d4bc127.mp4",
+  "poster": "https://www.techstudytracker.com/img/c00c460e72ed365d81f8fbe8444a0b5d8a248d4b3e3d7b101299a6ffee50bb69.jpg",
+  "titulo": "El recetario en React, contra la API real",
+  "descripcion": "Se busca «curry» mientras se escribe, se abre una receta y se vuelve con Atrás al instante, desde la caché; las categorías son rutas anidadas y solo cambia la lista."
+}
+```
+
+```laboratorio
+{
   "tipo": "callout",
   "variante": "info",
   "titulo": "El repositorio",

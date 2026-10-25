@@ -17,6 +17,16 @@ Y al final, la pregunta que la lección 80 dejó en el aire, ahora con números:
 
 ```laboratorio
 {
+  "tipo": "video",
+  "src": "https://www.techstudytracker.com/img/e6f2f04a59d820265cf8d594c7b0c3fd3b5a9f5cdcf2ef4a4445a2b535f6a871.mp4",
+  "poster": "https://www.techstudytracker.com/img/7f58b4a7cd922a92ecb0e000d8b5840ec501dfa1f2f6af0ad353155b16dc4f9e.jpg",
+  "titulo": "La matrícula, solo con el teclado",
+  "descripcion": "El combobox de idiomas, la modalidad con las flechas, el menú de un grupo y el diálogo para pedir plaza: el Tab da la vuelta dentro y, al cerrar, el foco vuelve a «Opciones»."
+}
+```
+
+```laboratorio
+{
   "tipo": "roles",
   "titulo": "Las cuatro piezas, cada una con su patrón de la APG",
   "roles": [
