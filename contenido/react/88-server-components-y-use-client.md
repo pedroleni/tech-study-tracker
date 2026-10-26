@@ -487,7 +487,7 @@ Junto a `cache` está `cacheSignal` (19.2): devuelve un `AbortSignal` que se abo
 
 ## Dónde existen hoy
 
-Los Server Components son una función de React, pero no se pueden usar con React solo: hace falta un bundler que separe los dos mundos y un servidor que hable el protocolo con el navegador. La documentación lo dice sin rodeos: los Server Components de React 19 son estables, pero **las APIs para construir un bundler o un framework que los soporte no siguen el versionado semántico** y pueden romperse entre versiones menores de 19.x. De hecho, la única novedad de 19.3.1 es una mejora de ese protocolo de transporte.
+Los Server Components son una función de React, pero no se pueden usar con React solo: hace falta un bundler que separe los dos mundos y un servidor que hable el protocolo con el navegador. La documentación lo dice sin rodeos: los Server Components de React 19 son estables, pero **las APIs para construir un bundler o un framework que los soporte no siguen el versionado semántico** y pueden romperse entre versiones menores de 19.x. De hecho, 19.3.1 solo toca ese protocolo de transporte: sus notas dicen «Improve transport protocol», y es la versión que corrige un fallo crítico de seguridad en él (lección 89).
 
 ```laboratorio
 {

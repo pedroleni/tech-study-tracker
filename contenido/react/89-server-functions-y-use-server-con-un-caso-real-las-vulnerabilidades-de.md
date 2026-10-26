@@ -416,7 +416,17 @@ El 29 de noviembre de 2025, el investigador Lachlan Davidson comunicó al progra
     {
       "fecha": "26 ene 2026",
       "titulo": "Otra denegación de servicio",
-      "texto": "CVE-2026-23864 (7,5). Se corrige en 19.0.4, 19.1.5 y 19.2.4, que son las versiones que React da por seguras para esas líneas."
+      "texto": "CVE-2026-23864 (7,5). Se corrige en 19.0.4, 19.1.5 y 19.2.4. Es el último aviso que recoge el blog de React: actualiza el post del 11 de diciembre."
+    },
+    {
+      "fecha": "abr, may y jul 2026",
+      "titulo": "Tres denegaciones de servicio más",
+      "texto": "CVE-2026-23869 (8 de abril), CVE-2026-23870 (6 de mayo) y CVE-2026-44907 (21 de julio), las tres con 7,5. Cada una sube la versión mínima segura; tras la última, 19.0.8, 19.1.9 y 19.2.8. Ninguna sale en el blog de React: solo en sus avisos de seguridad de GitHub."
+    },
+    {
+      "fecha": "14 oct 2026",
+      "titulo": "Otra ejecución remota de código",
+      "texto": "Aviso crítico GHSA-xqc2-xf4c-x3h3 (9,5 sobre 10): un payload preparado puede ejecutar código, aunque solo en casos muy raros (respuestas con varios typed arrays y un valor del atacante). Afecta hasta 19.0.8, 19.1.9, 19.2.8 y 19.3.0; se corrige en 19.0.9, 19.1.10, 19.2.9 y 19.3.1. El mismo día, otra denegación de servicio (8,2)."
     }
   ]
 }
@@ -460,7 +470,7 @@ Lo comprobé en los paquetes publicados. Sin la guarda `hasOwnProperty`, en el r
 
 ### Versiones afectadas y corregidas
 
-Los paquetes afectados son `react-server-dom-webpack`, `react-server-dom-parcel` y `react-server-dom-turbopack`. **El paquete `react` no es el vulnerable.** El aviso lista las versiones 19.0 (en el registro del CVE, 19.0.0), 19.1.0, 19.1.1 y 19.2.0, y las correcciones 19.0.1, 19.1.2 y 19.2.1: coincide con lo que dijo la lección 82 en dos líneas. Con lo que vino después, el cuadro completo a 21 de octubre de 2026 es este:
+Los paquetes afectados son `react-server-dom-webpack`, `react-server-dom-parcel` y `react-server-dom-turbopack`. **El paquete `react` no es el vulnerable.** El aviso lista las versiones 19.0 (en el registro del CVE, 19.0.0), 19.1.0, 19.1.1 y 19.2.0, y las correcciones 19.0.1, 19.1.2 y 19.2.1: coincide con lo que dijo la lección 82 en dos líneas. Con todo lo que vino después, el cuadro a 26 de octubre de 2026 es este:
 
 ```laboratorio
 {
@@ -469,18 +479,18 @@ Los paquetes afectados son `react-server-dom-webpack`, `react-server-dom-parcel`
   "roles": [
     {
       "etiqueta": "19.0.0, 19.1.0, 19.1.1, 19.2.0",
-      "rol": "Vulnerables a la ejecución remota de código",
-      "descripcion": "CVE-2025-55182, puntuación 10. Son las del aviso del 3 de diciembre de 2025."
+      "rol": "Vulnerables a React2Shell",
+      "descripcion": "CVE-2025-55182, puntuación 10: las del aviso del 3 de diciembre de 2025. También les afecta todo lo que vino después."
     },
     {
-      "etiqueta": "19.0.1-3, 19.1.2-4, 19.2.1-3",
-      "rol": "Sin RCE, pero con otros fallos",
-      "descripcion": "Cierran el CVE-2025-55182, pero siguen con las denegaciones de servicio y la exposición de código fuente. Las últimas de cada serie fueron incompletas."
+      "etiqueta": "19.0.1-8, 19.1.2-9, 19.2.1-8, 19.3.0",
+      "rol": "Vulnerables a la ejecución remota de octubre de 2026",
+      "descripcion": "Cierran React2Shell, pero no el aviso crítico del 14 de octubre de 2026 (9,5) y, según la versión, tampoco las denegaciones de servicio anteriores."
     },
     {
-      "etiqueta": "19.0.4, 19.1.5, 19.2.4 y posteriores",
-      "rol": "Las que React da por seguras",
-      "descripcion": "Corrigen todo hasta el aviso de enero de 2026. La 19.3.0 y la 19.3.1 son posteriores y no figuran en ningún aviso del blog de React."
+      "etiqueta": "19.0.9, 19.1.10, 19.2.9, 19.3.1",
+      "rol": "Las que React da por seguras (26 de octubre de 2026)",
+      "descripcion": "Corrigen todos los avisos publicados hasta hoy. Mañana puede salir otro: lo que manda es la lista de avisos de React en GitHub, no esta tabla."
     }
   ]
 }
@@ -517,7 +527,9 @@ Severity: critical
 Next.js is vulnerable to RCE in React flight protocol - https://github.com/advisories/GHSA-9qr9-h5gf-34mp
 ```
 
-Es el informe de hoy, 21 de octubre de 2026, y lista decenas de avisos más de esas versiones. Un proyecto con Server Functions se actualiza a menudo.
+Es el informe del 21 de octubre de 2026, y lista decenas de avisos más de esas versiones. Un proyecto con Server Functions se actualiza a menudo.
+
+Y no esperes a leerlo en el blog. De los avisos de 2026, el blog de React solo recoge el de enero; los demás, incluida una ejecución remota de código crítica el 14 de octubre, están solo en la [lista de avisos de seguridad del repositorio de React](https://github.com/react/react/security/advisories). De esa base de avisos salen las alertas de `npm audit` y de Dependabot: actívalas.
 
 **2. El `package-lock.json` fija lo que instalas** (lección 82): te protege de una versión nueva y rota, pero también te deja en una vieja y vulnerable hasta que actualices tú. Para saber si tienes los paquetes del aviso, `npm ls react-server-dom-webpack` te lo dice en un segundo.
 
@@ -805,6 +817,12 @@ Lo que la vista previa no puede enseñar es lo importante: que esas tres peticio
       "descripcion": "Los dos avisos posteriores (11 de diciembre de 2025, actualizado el 26 de enero de 2026) y las versiones que se consideran seguras.",
       "url": "https://react.dev/blog/2025/12/11/denial-of-service-and-source-code-exposure-in-react-server-components",
       "etiqueta": "react.dev"
+    },
+    {
+      "titulo": "Avisos de seguridad de React",
+      "descripcion": "La lista oficial del repositorio: cada aviso con sus paquetes, versiones afectadas y corregidas, y gravedad. Aquí salen avisos que el blog no publica.",
+      "url": "https://github.com/react/react/security/advisories",
+      "etiqueta": "GitHub"
     },
     {
       "titulo": "CVE-2025-55182",
