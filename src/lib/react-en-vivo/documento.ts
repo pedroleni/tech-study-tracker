@@ -4,6 +4,7 @@ import CODIGO_EFECTOS from './runtime/efectos.js?raw'
 import CODIGO_MONTAJE from './runtime/montaje.js?raw'
 import CODIGO_PUENTE from './runtime/puente.js?raw'
 import CODIGO_RED from './runtime/red.js?raw'
+import CODIGO_REGISTRO_ROUTER from './runtime/registro-router.js?raw'
 import CODIGO_ROUTER from './runtime/router.js?raw'
 
 export type OpcionesDocumentoReact = {
@@ -17,6 +18,7 @@ export type OpcionesDocumentoReact = {
   // iframe de las comprobaciones.
   conArbol?: boolean
   conEfectos?: boolean
+  conRegistroRouter?: boolean
   api?: Record<string, unknown[]>
   red?: { latencia?: number; desordenar: boolean }
   urlInicial?: string
@@ -40,6 +42,7 @@ export function construirDocumentoReact({
   conPruebas,
   conArbol = false,
   conEfectos = false,
+  conRegistroRouter = false,
   api,
   red,
   urlInicial,
@@ -82,6 +85,10 @@ export function construirDocumentoReact({
   // a fetch en su nivel superior, antes incluso del primer render.
   const codigoRed = api ? `\n    <script>${escaparScript(CODIGO_RED)}</script>` : ''
   const codigoEfectos = conEfectos ? `\n    <script>${escaparScript(CODIGO_EFECTOS)}</script>` : ''
+  const codigoRegistroRouter =
+    conRegistroRouter && usaRouter && !conPruebas
+      ? `\n    <script>${escaparScript(CODIGO_REGISTRO_ROUTER)}</script>`
+      : ''
   const codigoRouter = usaRouter ? `\n    <script>${escaparScript(CODIGO_ROUTER)}</script>` : ''
 
   return `<!doctype html>
@@ -96,7 +103,7 @@ export function construirDocumentoReact({
   </head>
   <body>
     <div id="root"></div>${arbol}
-    <script>window.__configReactEnVivo = ${configuracion}</script>${codigoRed}${codigoEfectos}${codigoRouter}
+    <script>window.__configReactEnVivo = ${configuracion}</script>${codigoRed}${codigoEfectos}${codigoRegistroRouter}${codigoRouter}
     <script>${escaparScript(CODIGO_MONTAJE)}</script>
   </body>
 </html>`

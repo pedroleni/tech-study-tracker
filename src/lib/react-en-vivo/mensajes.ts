@@ -27,6 +27,18 @@ const motivoRender = z.discriminatedUnion('tipo', [
   z.object({ tipo: z.literal('gancho') }),
 ])
 const valorCorto = z.string().max(80)
+const nombreRuta = z.string().min(1).max(60)
+const milisegundos = z.number().int().min(0).max(600_000)
+const pasoRouter = z.object({
+  tipo: z.enum(['middleware', 'loader', 'action', 'lazy']),
+  ruta: nombreRuta,
+  fase: z.enum(['carga', 'envio', 'revalidacion', 'redireccion']),
+  inicio: milisegundos,
+  duracion: milisegundos.optional(),
+  estado: z.enum(['en-curso', 'ok', 'error']),
+  error: z.string().max(200).optional(),
+  tarde: z.boolean().optional(),
+})
 const nodoArbol = z.object({
   id: z.number().int().min(1),
   nivel: z.number().int().min(0).max(40),
@@ -111,6 +123,36 @@ export const esquemaMensajeReactEnVivo = z.discriminatedUnion('tipo', [
     truncado: z.boolean(),
     cambiosDom: entero,
   }),
+  z.object({
+    canal,
+    tipo: z.literal('router-operacion'),
+    id: z.number().int().min(1).max(100_000),
+    clase: z.enum([
+      'carga-inicial',
+      'navegacion',
+      'envio',
+      'atras',
+      'adelante',
+      'revalidacion',
+      'fetcher-carga',
+      'fetcher-envio',
+    ]),
+    metodo: z.string().regex(/^[A-Z]{1,10}$/),
+    destino: z.string().max(200),
+    fetcher: z.string().max(60).optional(),
+    estado: z.enum(['en-curso', 'terminada', 'cancelada']),
+    canceladaPor: z.number().int().min(1).max(100_000).optional(),
+    duracion: milisegundos.optional(),
+    urlFinal: z.string().max(200).optional(),
+    pasos: z.array(pasoRouter).max(40),
+    truncado: z.boolean(),
+    sinEjecutar: z.array(nombreRuta).max(16).optional(),
+    errores: z
+      .array(z.object({ ruta: nombreRuta, texto: z.string().max(200) }))
+      .max(8)
+      .optional(),
+  }),
+  z.object({ canal, tipo: z.literal('router-lleno') }),
 ])
 
 export type MensajeReactEnVivo = z.infer<typeof esquemaMensajeReactEnVivo>
@@ -118,6 +160,10 @@ export type MensajeArbol = Extract<MensajeReactEnVivo, { tipo: 'arbol' }>
 export type MensajePeticion = Extract<MensajeReactEnVivo, { tipo: 'peticion' }>
 export type MensajeEfecto = Extract<MensajeReactEnVivo, { tipo: 'efecto' }>
 export type MensajeUbicacion = Extract<MensajeReactEnVivo, { tipo: 'ubicacion' }>
+export type MensajeRouterOperacion = Extract<
+  MensajeReactEnVivo,
+  { tipo: 'router-operacion' }
+>
 export type NodoArbolRender = MensajeArbol['nodos'][number]
 export type MotivoRender = NodoArbolRender['motivos'][number]
 

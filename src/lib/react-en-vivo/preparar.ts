@@ -18,6 +18,7 @@ export async function prepararDocumento(
     conPruebas: boolean
     conArbol?: boolean
     conEfectos?: boolean
+    conRegistroRouter?: boolean
     api?: Record<string, unknown[]>
     red?: { latencia?: number; desordenar: boolean }
     urlInicial?: string
@@ -49,6 +50,7 @@ export async function prepararDocumento(
       conPruebas: opciones.conPruebas,
       conArbol: opciones.conArbol,
       conEfectos: opciones.conEfectos,
+      conRegistroRouter: opciones.conRegistroRouter,
       api: opciones.api,
       red: opciones.red,
       urlInicial: opciones.urlInicial,

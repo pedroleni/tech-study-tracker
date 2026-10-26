@@ -1508,10 +1508,10 @@ y `docs/how-to/instrumentation.md` de `scripts/react-en-vivo/`.
 | Un `<Form method="post">` | Un solo `navigate`, que dura hasta el final, envuelve el `middleware` y la `action` del `POST` y después el `middleware` y los `loader` de la revalidación (`GET`). Un `loader` saltado por `shouldRevalidate` no aparece |
 | Un fetcher con `POST` | Igual: el `fetch` instrumentado incluye la `action` **y la revalidación** |
 | Una navegación interrumpida | La primera termina su `navigate` con `status: 'success'` en cuanto empieza la segunda. Su `loader`, si no escucha `request.signal`, sigue y termina después |
-| Atrás (`navigate(-1)`) | Su `navigate` termina en el acto, antes que sus `loader` |
+| Atrás (`navigate(-1)`) | En 8.5, su `navigate` espera a que terminen sus `loader` (corregido tras la revisión: la prueba original decía que terminaba en el acto) |
 | Un `throw data('No existe', { status: 404 })` en un `loader` | La instrumentación lo da como **`success`** (solo marca `error` si lo lanzado es un `Error`). Sí queda en `router.state.errors` |
 | `router.revalidate()` (lo que llama `useRevalidator`) y la navegación que sigue a un `redirect()` | No pasan por `navigate` |
-| `getContext` | El router lo llama una vez por navegación (también la inicial, la revalidación y la que sigue a una redirección) y una vez por llamada de fetcher. La `action` y su revalidación **comparten** el mismo contexto. `info.context.get(marca)` lee lo que puso `getContext`. Lo llama **después** de que `llamar()` haya devuelto el control (no se puede atar con una variable síncrona), pero **en el mismo orden** en que empezaron las operaciones, también con un fetcher y una navegación lanzados seguidos. Una navegación a una ruta que no existe no lo llama |
+| `getContext` | El router lo llama una vez por navegación (también la inicial, la revalidación y la que sigue a una redirección) y una vez por llamada de fetcher. La `action` y su revalidación **comparten** el mismo contexto. `info.context.get(marca)` lee lo que puso `getContext`. En 8.5 lo llama de forma síncrona dentro de `llamar()`, así que la cola de espera nunca tiene más de una operación (corregido tras la revisión). Se mantiene la cola, y su test, por si una versión futura lo retrasa. Una navegación a una ruta que no existe no lo llama |
 | Varias instrumentaciones | «Each instrumentation wraps the previous one»: la primera del array es la más interior. Si una función de instrumentación lanza, React Router la traga y escribe «An instrumentation function threw an error:» con `console.error`, que acabaría en la consola del alumno |
 | Prototipo completo del diseño de abajo | Atribuye bien la carga inicial, el envío con su revalidación (y el `loader` de la raíz «sin ejecutar» por su `shouldRevalidate`), el fetcher con `POST`, un `fetcher.load` y una navegación a la vez, la navegación cancelada con su `loader` «tardío», `revalidate()`, el envío que redirige, Atrás, la ruta inexistente (404 en `errores`), el 404 lanzado con `data()` y un `Error` |
 
@@ -1985,3 +1985,24 @@ y módulos TSX que pasan por `transformarArchivos`. Los mensajes se leen de
 1. **Atribuir cada paso por el orden de llamada a `getContext`:** aprobado. El test del orden con los bundles reales es obligatorio: es el que avisa si una versión nueva de React Router lo cambia.
 2. **Ninguna comprobación nueva sobre el registro:** aprobado. Los ejercicios de las lecciones 4 y 5 usan un contador pintado en la app y las esperas de texto y de `url`.
 3. **`mostrarRouter` también en `react-anotado`:** aprobado, para la lección 1.
+
+### Corregido tras la revisión (2026-10-26)
+
+La revisión independiente encontró que las operaciones **sintéticas** (las que no tienen un `navigate` ni un `fetch` instrumentado: la carga inicial, `revalidate()` y seguir tras `useBlocker`) se cerraban antes de que el router confirmara su estado. Daban información falsa justo en las lecciones 4 y 10 y en el proyecto 13. El diseño cambia así:
+
+- **Cuándo se cierran.** Al conectar, el registro se suscribe al router (`router.subscribe`) y cierra las sintéticas abiertas cuando el estado está `initialized` y `navigation` y `revalidation` vuelven a `idle`. Hasta entonces no se calculan `urlFinal`, `errores` ni `sinEjecutar`. Así, un 404 lanzado en la carga inicial sale en `errores`, y una revalidación sin `loader` termina.
+- **Qué clase tienen.** Sale del estado del router al llamar a `getContext`:
+  - `carga-inicial` si aún no está `initialized`;
+  - `revalidacion` si `revalidation === 'loading'`;
+  - `navegacion` en otro caso (por ejemplo, seguir tras `useBlocker`).
+
+  Antes se usaba «es la primera operación».
+- **Redirecciones.** Las sintéticas abiertas también reciben la fase `redireccion`. La redirección de un middleware en la carga inicial queda en la misma operación.
+- **Cancelación.** Una navegación nueva cancela cualquier operación abierta que no sea de un fetcher, incluidas la carga inicial y una revalidación.
+- **`getContext` del alumno.** Si lanza, su error se propaga como sin registro. Solo `contexto.set(marca, …)` va protegido.
+- **El panel.**
+  - En una carga dice «Se ejecutó»; solo en una revalidación dice «Se volvió a ejecutar».
+  - Las barras ya no llevan `sm:col-start-2`, que las desalineaba.
+  - La fusión de operaciones recorta a 100 en cada paso.
+- **Sin test automático para `useBlocker`.** En el entorno jsdom de los tests, `useBlocker` no bloquea (tampoco sin registro), así que ese caso se verifica en el navegador.
+

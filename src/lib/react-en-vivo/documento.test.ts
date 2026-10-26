@@ -185,3 +185,36 @@ describe('árbol de renders en el documento', () => {
     expect(construirDocumentoReact({ ...base, conPruebas: true, conArbol: true })).not.toContain(MARCA)
   })
 })
+
+describe('registro del router en el documento', () => {
+  const MARCA_REGISTRO = 'window.__registroRouterEnVivo ='
+  const MARCA_ROUTER = 'const ERROR_CARGA ='
+
+  it('incluye registro-router.js antes de router.js con conRegistroRouter y un require de react-router', () => {
+    const doc = construirDocumentoReact({
+      ...base,
+      conRegistroRouter: true,
+      modulos: { './App.jsx': "require('react-router')" },
+    })
+
+    expect(doc.indexOf(MARCA_REGISTRO)).toBeGreaterThan(-1)
+    expect(doc.indexOf(MARCA_REGISTRO)).toBeLessThan(doc.indexOf(MARCA_ROUTER))
+  })
+
+  it('no lo incluye sin conRegistroRouter, sin react-router ni en el documento de las comprobaciones', () => {
+    expect(
+      construirDocumentoReact({ ...base, modulos: { './App.jsx': "require('react-router')" } }),
+    ).not.toContain(MARCA_REGISTRO)
+    expect(construirDocumentoReact({ ...base, conRegistroRouter: true })).not.toContain(
+      MARCA_REGISTRO,
+    )
+    expect(
+      construirDocumentoReact({
+        ...base,
+        conPruebas: true,
+        conRegistroRouter: true,
+        modulos: { './App.jsx': "require('react-router')" },
+      }),
+    ).not.toContain(MARCA_REGISTRO)
+  })
+})

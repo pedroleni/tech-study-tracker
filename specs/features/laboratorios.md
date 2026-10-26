@@ -557,6 +557,10 @@ diseño" con "feature real".
   router). Las comprobaciones pueden fijar su propia `urlInicial`, navegar,
   retroceder, avanzar, recargar y esperar una `url` exacta. `react-anotado`
   admite además `lenguaje: "jsx" | "tsx"` (`"jsx"` por defecto).
+  Ambos bloques admiten también `mostrarRouter` (por defecto `false`):
+  muestra el registro de operaciones de un router de datos, sus fases y sus
+  pasos. Solo valida si el código importa `react-router`; el registro nunca se
+  incluye en el iframe oculto de las comprobaciones.
 - `CompiladorReact.tsx` — recibe `z.infer<typeof esquemaCompiladorReact>`
   (2026-10-22): editor JSX y salida real, solo lectura, de React Compiler.
   Compila 300 ms después de la última edición, descarta respuestas antiguas
@@ -579,6 +583,10 @@ diseño" con "feature real".
   hook propio y el motivo escritos en español. Solo aparece con
   `mostrarEfectos`; no usa `aria-live`, porque puede cambiar varias veces en
   un mismo commit.
+- `RegistroRouter.tsx` (2026-10-26, fase R2 de React Router) — registro de
+  hasta 100 operaciones del router de datos, agrupadas por fase, con pasos,
+  tiempos, cancelaciones, errores y loaders no ejecutados. Solo aparece con
+  `mostrarRouter`; limita los anuncios del lector de pantalla a uno por segundo.
 - `ArbolVisual.tsx` (2026-10-20, fase 2 de React) — dibujo común del
   árbol de componentes: guías tipo `tree` (├─ └─ │), `key=…`, contador
   `·N`, insignias de marca/etiqueta y el estado con color **y** texto

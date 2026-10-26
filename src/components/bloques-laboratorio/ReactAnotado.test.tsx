@@ -9,6 +9,27 @@ export default function App() {
 }`
 
 describe('ReactAnotado', () => {
+  it('con mostrarRouter enseña el registro', async () => {
+    render(
+      <ReactAnotado
+        tipo="react-anotado"
+        codigo={"import { createMemoryRouter } from 'react-router'\nimport { RouterProvider } from 'react-router/dom'\nconst router = createMemoryRouter([{ path: '/', Component: () => <p>Inicio</p> }])\nexport default function App() { return <RouterProvider router={router} /> }"}
+        css=""
+        anotaciones={[{ fragmento: 'createMemoryRouter', nota: 'Router de datos.' }]}
+        strictMode
+        mostrarConsola={false}
+        mostrarRouter
+      />,
+    )
+
+    expect(screen.getByRole('heading', { name: 'Registro del router' })).toBeInTheDocument()
+    await waitFor(() =>
+      expect((screen.getByTitle('Vista previa de React') as HTMLIFrameElement).getAttribute('srcdoc')).toContain(
+        'window.__registroRouterEnVivo =',
+      ),
+    )
+  })
+
   it('con lenguaje tsx ejecuta App.tsx y resalta como tsx', async () => {
     render(
       <ReactAnotado
