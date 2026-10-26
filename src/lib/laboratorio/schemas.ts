@@ -304,6 +304,9 @@ export const ROLES_COMPROBACION = [
 
 const textoCorto = z.string().min(1).max(120)
 
+// Una ruta interna, nunca una URL externa ni una ruta de protocolo relativo.
+export const esquemaUrlRouter = z.string().min(1).max(200).regex(/^\/(?!\/)\S*$/)
+
 const esquemaConsultaElementoReact = z.union([
   z.strictObject({ texto: textoCorto }),
   z.strictObject({
@@ -320,16 +323,22 @@ const esquemaPasoComprobacionReact = z.union([
   z.strictObject({ teclear: z.string().min(1).max(60) }),
   z.strictObject({ seleccionar: z.strictObject({ etiqueta: textoCorto, opcion: textoCorto }) }),
   z.strictObject({ red: z.literal('fallar-siguiente') }),
+  z.strictObject({ navegar: esquemaUrlRouter }),
+  z.strictObject({ atras: z.literal(true) }),
+  z.strictObject({ adelante: z.literal(true) }),
+  z.strictObject({ recargar: z.literal(true) }),
 ])
 
 const esquemaEsperaComprobacionReact = z.union([
   esquemaConsultaElementoReact,
   z.strictObject({ ausente: esquemaConsultaElementoReact }),
   z.strictObject({ etiqueta: textoCorto, valor: z.string().max(200) }),
+  z.strictObject({ url: esquemaUrlRouter }),
 ])
 
 export const esquemaComprobacionReact = z.object({
   descripcion: z.string().min(1).max(160),
+  urlInicial: esquemaUrlRouter.optional(),
   pasos: z.array(esquemaPasoComprobacionReact).max(10).default([]),
   espera: esquemaEsperaComprobacionReact,
 })
@@ -371,6 +380,8 @@ export const esquemaReactEnVivo = z
     consigna: z.string().min(1).max(600).optional(),
     archivos: z.array(esquemaArchivoReact).min(1).max(6),
     archivoInicial: z.string().optional(),
+    urlInicial: esquemaUrlRouter.optional(),
+    barraDeDirecciones: z.boolean().default(true),
     strictMode: z.boolean().default(true),
     mostrarConsola: z.boolean().default(true),
     mostrarJsGenerado: z.boolean().default(false),
@@ -400,6 +411,26 @@ export const esquemaReactEnVivo = z
       datos.archivos.some((archivo) => /\.(?:ts|tsx)$/.test(archivo.nombre)),
     { message: 'exigirTiposCorrectos necesita al menos un archivo .ts o .tsx' },
   )
+  .refine(
+    (datos) => {
+      const usaUrl = datos.comprobaciones?.some(
+        (comprobacion) =>
+          comprobacion.urlInicial !== undefined ||
+          'url' in comprobacion.espera ||
+          comprobacion.pasos.some(
+            (paso) =>
+              'navegar' in paso || 'atras' in paso || 'adelante' in paso || 'recargar' in paso,
+          ),
+      )
+      return (
+        !usaUrl ||
+        datos.archivos.some((archivo) =>
+          /\bfrom\s*['"]react-router(?:\/dom)?['"]/.test(archivo.codigo),
+        )
+      )
+    },
+    { message: 'Las comprobaciones con URL necesitan que algún archivo importe react-router' },
+  )
 
 export const esquemaReactAnotado = z.object({
   tipo: z.literal('react-anotado'),
@@ -411,6 +442,9 @@ export const esquemaReactAnotado = z.object({
     .min(1)
     .max(8),
   strictMode: z.boolean().default(true),
+  urlInicial: esquemaUrlRouter.optional(),
+  barraDeDirecciones: z.boolean().default(true),
+  lenguaje: z.enum(['jsx', 'tsx']).default('jsx'),
   mostrarConsola: z.boolean().default(false),
   mostrarArbol: z.boolean().default(false),
   mostrarEfectos: z.boolean().default(false),

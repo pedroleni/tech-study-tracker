@@ -5,6 +5,10 @@ import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 
 import { ArbolDeRenders } from '@/components/bloques-laboratorio/ArbolDeRenders'
 import {
+  BarraDirecciones,
+  type AccionNavegador,
+} from '@/components/bloques-laboratorio/BarraDirecciones'
+import {
   ComprobadorReact,
   type FinComprobacion,
 } from '@/components/bloques-laboratorio/ComprobadorReact'
@@ -125,10 +129,13 @@ export function ReactEnVivo({
   api,
   red,
   comprobaciones,
+  urlInicial,
+  barraDeDirecciones = true,
   clienteReactKit = clienteReactKitCompartido,
   // Fuera del esquema de la lección, como en SqlAnotado/GitAnotado: solo
   // para no repetir el nombre de la región en la página de referencia.
   etiquetaSeccion = 'React en vivo',
+  etiquetaPanelTipos = 'Errores de tipos',
 }: Omit<
   DatosReactEnVivo,
   | 'mostrarArbol'
@@ -137,6 +144,7 @@ export function ReactEnVivo({
   | 'compilador'
   | 'exigirLintLimpio'
   | 'exigirTiposCorrectos'
+  | 'barraDeDirecciones'
 > & {
   mostrarArbol?: boolean
   mostrarEfectos?: boolean
@@ -144,8 +152,10 @@ export function ReactEnVivo({
   compilador?: boolean
   exigirLintLimpio?: boolean
   exigirTiposCorrectos?: boolean
+  barraDeDirecciones?: boolean
   clienteReactKit?: ClienteReactKit
   etiquetaSeccion?: string
+  etiquetaPanelTipos?: string
 }) {
   const primeraPestana =
     archivoInicial ??
@@ -153,6 +163,16 @@ export function ReactEnVivo({
   const [archivos, setArchivos] = useState<ArchivoReact[]>(archivosOriginales)
   const [pestana, setPestana] = useState(primeraPestana)
   const [srcDoc, setSrcDoc] = useState<string | null>(null)
+  const [ubicacion, setUbicacion] = useState<
+    Extract<MensajeReactEnVivo, { tipo: 'ubicacion' }> | null
+  >(null)
+  const urlActualRef = useRef<string | null>(null)
+  const [ordenNavegador, setOrdenNavegador] = useState<{
+    id: number
+    accion: AccionNavegador
+    url?: string
+  }>()
+  const siguienteOrdenNavegadorRef = useRef(0)
   const [errorSintaxis, setErrorSintaxis] = useState<string | null>(null)
   const [jsGenerado, setJsGenerado] = useState('')
   const [avisosCompilador, setAvisosCompilador] = useState<AvisoCompiladorReact[]>([])
@@ -217,6 +237,10 @@ export function ReactEnVivo({
     (mensaje: MensajeReactEnVivo) => {
       recibirMensaje(mensaje)
       if (mensaje.tipo === 'montado') documentoMontadoRef.current = true
+      if (mensaje.tipo === 'ubicacion') {
+        urlActualRef.current = mensaje.url
+        setUbicacion(mensaje)
+      }
       if (mensaje.tipo === 'arbol' && documentoMontadoRef.current) setArbol(mensaje)
       if (mensaje.tipo === 'peticion' && documentoMontadoRef.current) {
         recibirPeticion(mensaje)
@@ -262,6 +286,7 @@ export function ReactEnVivo({
             conEfectos: mostrarEfectos,
             api: apiEstable,
             red: redActualRef.current,
+            urlInicial: urlActualRef.current ?? urlInicial,
           }),
           mostrarJsGenerado
             ? transformarParaMostrar(resultadoCompilador.archivos)
@@ -286,6 +311,7 @@ export function ReactEnVivo({
         limpiar()
         // El árbol de la vista previa anterior ya no describe nada.
         documentoMontadoRef.current = false
+        setUbicacion(null)
         setArbol(null)
         limpiarPeticiones()
         limpiarEfectos()
@@ -298,7 +324,7 @@ export function ReactEnVivo({
       if (version === versionRef.current) versionRef.current += 1
       if (compilador) sesionCompiladorVista.descartar()
     }
-  }, [apiEstable, archivos, compilador, sesionCompiladorVista, strictMode, mostrarJsGenerado, mostrarArbol, mostrarEfectos, limpiar, limpiarEfectos, limpiarPeticiones])
+  }, [apiEstable, archivos, compilador, sesionCompiladorVista, strictMode, mostrarJsGenerado, mostrarArbol, mostrarEfectos, limpiar, limpiarEfectos, limpiarPeticiones, reinicios, urlInicial])
 
   useEffect(() => {
     if (!usaTypeScript) return
@@ -458,6 +484,7 @@ export function ReactEnVivo({
       conEfectos: mostrarEfectos,
       api,
       red,
+      urlInicial,
     })
     if (!preparado.ok) {
       setErrorSintaxis(preparado.error)
@@ -471,6 +498,10 @@ export function ReactEnVivo({
     if (usaTypeScript) setRevisionTipos((revision) => revision + 1)
     if (usaLint) setRevisionLint((revision) => revision + 1)
     setArchivos(archivosOriginales)
+    urlActualRef.current = null
+    setUbicacion(null)
+    setOrdenNavegador(undefined)
+    setSrcDoc(null)
     setPestana(primeraPestana)
     setComprobacion({ estado: 'inactivo' })
     setAvisosCompilador([])
@@ -484,6 +515,21 @@ export function ReactEnVivo({
     setFallosSolicitados(0)
     limpiar()
   }
+
+  const actuarEnNavegador = useCallback(
+    (accion: AccionNavegador, url?: string) => {
+      if (accion === 'recargar' || accion === 'ir') {
+        limpiar()
+        setArbol(null)
+        limpiarPeticiones()
+        limpiarEfectos()
+        setFalloPendiente(false)
+      }
+      siguienteOrdenNavegadorRef.current += 1
+      setOrdenNavegador({ id: siguienteOrdenNavegadorRef.current, accion, ...(url ? { url } : {}) })
+    },
+    [limpiar, limpiarEfectos, limpiarPeticiones],
+  )
 
   const pestanas = [
     ...archivos.map((archivo) => archivo.nombre),
@@ -610,7 +656,7 @@ export function ReactEnVivo({
           {usaTypeScript && (
             <section aria-labelledby={idErroresTipos} className="space-y-2">
               <h4 id={idErroresTipos} className="text-sm font-semibold">
-                Errores de tipos
+                {etiquetaPanelTipos}
               </h4>
               <PanelDiagnosticosTs
                 estado={estadoPanelTipos}
@@ -655,14 +701,20 @@ export function ReactEnVivo({
           {srcDoc === null ? (
             <p className="text-sm text-muted-foreground">Preparando React…</p>
           ) : (
-            <VistaPreviaReact
-              key={reinicios}
-              srcDoc={srcDoc}
-              onMensaje={recibir}
-              red={api ? redActual : undefined}
-              fallosSolicitados={fallosSolicitados}
-              codigoCompilado={compilador}
-            />
+            <>
+              {barraDeDirecciones && ubicacion && (
+                <BarraDirecciones ubicacion={ubicacion} onAccion={actuarEnNavegador} />
+              )}
+              <VistaPreviaReact
+                key={reinicios}
+                srcDoc={srcDoc}
+                onMensaje={recibir}
+                red={api ? redActual : undefined}
+                fallosSolicitados={fallosSolicitados}
+                codigoCompilado={compilador}
+                ordenNavegador={ordenNavegador}
+              />
+            </>
           )}
         </div>
 

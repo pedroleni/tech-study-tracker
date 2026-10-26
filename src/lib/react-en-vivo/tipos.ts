@@ -1,5 +1,11 @@
 import type { ArchivoReact } from '@/lib/laboratorio/schemas'
 import { RUTA_REACT_KIT } from '@/lib/react-kit/rutas'
+import { z } from 'zod'
+
+import {
+  RUTA_REACT_ROUTER_EN_VIVO,
+  VERSION_REACT_ROUTER_EN_VIVO,
+} from './constantes'
 
 type TsReal = typeof import('typescript')
 type Vfs = typeof import('@typescript/vfs')
@@ -90,6 +96,63 @@ export function crearEntornoTiposReact(
 }
 
 const promesasRecursos = new WeakMap<CargarArchivoTipos, Promise<RecursosTiposReact>>()
+const promesasTiposRouter = new WeakMap<CargarArchivoTipos, Promise<Record<string, string>>>()
+
+const esquemaTiposRouter = z
+  .strictObject({
+    version: z.literal(VERSION_REACT_ROUTER_EN_VIVO),
+    archivos: z.record(
+      z.string().regex(/^(react-router|cookie-es)\/[\w./-]+$/),
+      z.string(),
+    ),
+  })
+  .superRefine((datos, contexto) => {
+    if (Object.keys(datos.archivos).length > 100) {
+      contexto.addIssue({ code: 'custom', message: 'Demasiados archivos de tipos' })
+    }
+    const caracteres = Object.entries(datos.archivos).reduce(
+      (total, [ruta, contenido]) => total + ruta.length + contenido.length,
+      0,
+    )
+    if (caracteres > 2_000_000) {
+      contexto.addIssue({ code: 'custom', message: 'Los tipos superan el tamaño admitido' })
+    }
+  })
+
+export function cargarTiposReactRouter(cargarArchivo: CargarArchivoTipos) {
+  const existente = promesasTiposRouter.get(cargarArchivo)
+  if (existente) return existente
+  const promesa = cargarArchivo(`${RUTA_REACT_ROUTER_EN_VIVO}/tipos.json`)
+    .then((texto) => {
+      let json: unknown
+      try {
+        json = JSON.parse(texto)
+      } catch {
+        throw new Error('Los tipos de React Router no tienen el formato esperado')
+      }
+      const resultado = esquemaTiposRouter.safeParse(json)
+      if (!resultado.success) {
+        throw new Error('Los tipos de React Router no tienen el formato esperado')
+      }
+      return resultado.data.archivos
+    })
+    .catch((error: unknown) => {
+      promesasTiposRouter.delete(cargarArchivo)
+      throw error
+    })
+  promesasTiposRouter.set(cargarArchivo, promesa)
+  return promesa
+}
+
+function necesitaTiposRouter(archivos: ArchivoReact[]) {
+  return archivos.some(
+    (archivo) =>
+      /\.(?:ts|tsx)$/.test(archivo.nombre) &&
+      /\b(?:from|import(?:\s+type)?)\s*\(?\s*['"]react-router(?:\/dom)?['"]/.test(
+        archivo.codigo,
+      ),
+  )
+}
 
 function cargarRecursos(cargarArchivo: CargarArchivoTipos) {
   const existente = promesasRecursos.get(cargarArchivo)
@@ -162,6 +225,7 @@ export function crearSesionTiposReact(
   let entorno: EntornoVirtual | null = null
   let nombresActuales = new Set<string>()
   let recursos: RecursosTiposReact | null = null
+  let tiposRouterCargados = false
 
   return {
     async diagnosticar(archivos: ArchivoReact[]): Promise<DiagnosticoTiposReact[]> {
@@ -173,6 +237,16 @@ export function crearSesionTiposReact(
 
       recursos ??= await cargarRecursos(cargarArchivo)
       const { ts, vfs, opciones, mapa } = recursos
+      if (necesitaTiposRouter(archivosDelPrograma) && !tiposRouterCargados) {
+        const tiposRouter = await cargarTiposReactRouter(cargarArchivo)
+        for (const [ruta, contenido] of Object.entries(tiposRouter)) {
+          mapa.set(`/node_modules/${ruta}`, contenido)
+        }
+        tiposRouterCargados = true
+        // TypeScript fija la resolución de paquetes al crear el entorno. Si
+        // el programa empieza a importar el router después, hay que recrearlo.
+        entorno = null
+      }
       const contenidos = new Map(
         archivosDelPrograma.map((archivo) => [
           `/src/${archivo.nombre}`,

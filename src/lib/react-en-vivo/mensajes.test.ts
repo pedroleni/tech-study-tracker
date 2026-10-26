@@ -15,6 +15,41 @@ afterEach(() => {
 })
 
 describe('leerMensajeReactEnVivo', () => {
+  it('acepta una ubicacion válida', () => {
+    const { iframe, evento } = prepararIframe()
+    const ubicacion = {
+      canal: 'react-en-vivo',
+      tipo: 'ubicacion',
+      url: '/recetas?q=pan#lista',
+      puedeAtras: true,
+      puedeAdelante: false,
+      origen: 'createMemoryRouter',
+    }
+    expect(leerMensajeReactEnVivo(evento(ubicacion), iframe.contentWindow)).toEqual(ubicacion)
+  })
+
+  it('rechaza una ubicacion con url sin / inicial, con //, de más de 500 caracteres o con un origen desconocido', () => {
+    const { iframe, evento } = prepararIframe()
+    const baseUbicacion = {
+      canal: 'react-en-vivo',
+      tipo: 'ubicacion',
+      url: '/',
+      puedeAtras: false,
+      puedeAdelante: false,
+      origen: 'MemoryRouter',
+    }
+    for (const cambios of [
+      { url: 'recetas' },
+      { url: '//otro.example' },
+      { url: `/${'a'.repeat(500)}` },
+      { origen: 'createStaticRouter' },
+    ]) {
+      expect(
+        leerMensajeReactEnVivo(evento({ ...baseUbicacion, ...cambios }), iframe.contentWindow),
+      ).toBeNull()
+    }
+  })
+
   it('acepta un mensaje válido de su propio iframe', () => {
     const { iframe, evento } = prepararIframe()
 

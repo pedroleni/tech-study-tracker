@@ -9,6 +9,58 @@ export default function App() {
 }`
 
 describe('ReactAnotado', () => {
+  it('con lenguaje tsx ejecuta App.tsx y resalta como tsx', async () => {
+    render(
+      <ReactAnotado
+        tipo="react-anotado"
+        codigo={'type Mensaje = string\nexport default function App() { return <p>TSX</p> }'}
+        css=""
+        anotaciones={[{ fragmento: 'type Mensaje', nota: 'Un tipo.' }]}
+        strictMode
+        mostrarConsola={false}
+        lenguaje="tsx"
+      />,
+    )
+
+    expect(screen.getByLabelText('Código de React anotado')).toHaveTextContent('type Mensaje')
+    await waitFor(() => {
+      const srcdoc = (screen.getByTitle('Vista previa de React') as HTMLIFrameElement).getAttribute('srcdoc')
+      expect(srcdoc).toContain('./App.tsx')
+      expect(srcdoc).not.toContain('type Mensaje')
+    })
+  })
+
+  it('enseña la barra cuando llega una ubicacion', async () => {
+    render(
+      <ReactAnotado
+        tipo="react-anotado"
+        codigo={codigo}
+        css=""
+        anotaciones={[{ fragmento: 'tareas.map', nota: 'n' }]}
+        strictMode
+        mostrarConsola={false}
+        urlInicial="/lista"
+        barraDeDirecciones
+      />,
+    )
+    const iframe = (await screen.findByTitle('Vista previa de React')) as HTMLIFrameElement
+    act(() => {
+      window.dispatchEvent(new MessageEvent('message', {
+        source: iframe.contentWindow,
+        data: {
+          canal: 'react-en-vivo',
+          tipo: 'ubicacion',
+          url: '/lista',
+          puedeAtras: false,
+          puedeAdelante: false,
+          origen: 'BrowserRouter',
+        },
+      }))
+    })
+
+    expect(screen.getByRole('form', { name: 'Barra de direcciones de la vista previa' })).toBeInTheDocument()
+  })
+
   it('enseña el código JSX anotado y lo ejecuta debajo', async () => {
     render(
       <ReactAnotado

@@ -1,3 +1,4 @@
+import { StrictMode } from 'react'
 import { act, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
@@ -12,6 +13,130 @@ function enviarDesde(origen: Window | null, data: unknown) {
 const iframe = () => screen.getByTitle('Vista previa de React') as HTMLIFrameElement
 
 describe('VistaPreviaReact', () => {
+  it('envía la orden del navegador cuando cambia su id y el iframe ya montó', () => {
+    const { rerender } = render(<VistaPreviaReact srcDoc="<p>a</p>" />)
+    const enviar = vi.spyOn(iframe().contentWindow!, 'postMessage')
+    enviarDesde(iframe().contentWindow, { canal: 'react-en-vivo', tipo: 'montado', version: '19.3.1' })
+
+    rerender(
+      <VistaPreviaReact
+        srcDoc="<p>a</p>"
+        ordenNavegador={{ id: 1, accion: 'ir', url: '/recetas' }}
+      />,
+    )
+    expect(enviar).toHaveBeenCalledWith(
+      { canal: 'react-en-vivo', tipo: 'navegador', accion: 'ir', url: '/recetas' },
+      '*',
+    )
+  })
+
+  it('guarda la orden hasta el primer montado', () => {
+    const { rerender } = render(<VistaPreviaReact srcDoc="<p>a</p>" />)
+    rerender(
+      <VistaPreviaReact
+        srcDoc="<p>a</p>"
+        ordenNavegador={{ id: 1, accion: 'recargar' }}
+      />,
+    )
+    const enviar = vi.spyOn(iframe().contentWindow!, 'postMessage')
+    expect(enviar).not.toHaveBeenCalled()
+
+    enviarDesde(iframe().contentWindow, { canal: 'react-en-vivo', tipo: 'montado', version: '19.3.1' })
+    expect(enviar).toHaveBeenCalledWith(
+      { canal: 'react-en-vivo', tipo: 'navegador', accion: 'recargar' },
+      '*',
+    )
+  })
+
+  it('no reenvía una orden que ya existía al crear la vista previa', () => {
+    render(
+      <VistaPreviaReact
+        srcDoc="<p>a</p>"
+        ordenNavegador={{ id: 7, accion: 'ir', url: '/secreto' }}
+      />,
+    )
+    const enviar = vi.spyOn(iframe().contentWindow!, 'postMessage')
+
+    enviarDesde(iframe().contentWindow, { canal: 'react-en-vivo', tipo: 'montado', version: '19.3.1' })
+
+    expect(enviar).not.toHaveBeenCalled()
+  })
+
+  it('conserva montado entre las dos ejecuciones de StrictMode con el mismo documento', () => {
+    const quitarOriginal = window.removeEventListener.bind(window)
+    let montadoEntreEfectos = false
+    const quitar = vi.spyOn(window, 'removeEventListener').mockImplementation(
+      (tipo, listener, opciones) => {
+        if (tipo === 'message' && !montadoEntreEfectos) {
+          montadoEntreEfectos = true
+          const marco = document.querySelector('iframe') as HTMLIFrameElement
+          ;(listener as EventListener)(
+            new MessageEvent('message', {
+              source: marco.contentWindow,
+              data: { canal: 'react-en-vivo', tipo: 'montado', version: '19.3.1' },
+            }),
+          )
+        }
+        quitarOriginal(tipo, listener, opciones)
+      },
+    )
+    const { rerender } = render(
+      <StrictMode>
+        <VistaPreviaReact
+          srcDoc="<p>a</p>"
+          red={{ latencia: 600, desordenar: false }}
+          fallosSolicitados={1}
+        />
+      </StrictMode>,
+    )
+    quitar.mockRestore()
+    const enviar = vi.spyOn(iframe().contentWindow!, 'postMessage')
+
+    rerender(
+      <StrictMode>
+        <VistaPreviaReact
+          srcDoc="<p>a</p>"
+          red={{ latencia: 1200, desordenar: true }}
+          fallosSolicitados={2}
+          ordenNavegador={{ id: 1, accion: 'recargar' }}
+        />
+      </StrictMode>,
+    )
+
+    expect(enviar).toHaveBeenCalledWith(
+      { canal: 'react-en-vivo', tipo: 'navegador', accion: 'recargar' },
+      '*',
+    )
+    expect(enviar).toHaveBeenCalledWith(
+      { canal: 'react-en-vivo', tipo: 'red', latencia: 1200, desordenar: true },
+      '*',
+    )
+    expect(enviar).toHaveBeenCalledWith(
+      { canal: 'react-en-vivo', tipo: 'fallar-siguiente' },
+      '*',
+    )
+  })
+
+  it.each(['recargar', 'ir'] as const)('borra el error al enviar la orden %s', (accion) => {
+    const { rerender } = render(<VistaPreviaReact srcDoc="<p>a</p>" />)
+    enviarDesde(iframe().contentWindow, { canal: 'react-en-vivo', tipo: 'montado', version: '19.3.1' })
+    enviarDesde(iframe().contentWindow, {
+      canal: 'react-en-vivo',
+      tipo: 'error-render',
+      texto: 'Roto',
+    })
+    expect(screen.getByText('Error al renderizar: Roto')).toBeInTheDocument()
+
+    rerender(
+      <VistaPreviaReact
+        srcDoc="<p>a</p>"
+        ordenNavegador={{ id: 1, accion, ...(accion === 'ir' ? { url: '/bien' } : {}) }}
+      />,
+    )
+
+    expect(screen.queryByText('Error al renderizar: Roto')).toBeNull()
+  })
+
   it('muestra el último error con archivo y línea, y lo olvida al cambiar el documento', () => {
     const { rerender } = render(<VistaPreviaReact srcDoc="<p>a</p>" />)
 

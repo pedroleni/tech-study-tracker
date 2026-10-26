@@ -551,7 +551,12 @@ diseño" con "feature real".
   `react/compiler-runtime` se resuelve dentro del iframe contra
   `React.__COMPILER_RUNTIME`. El catálogo incluye `ReactEnVivoCompilador` con
   `compilador` y `mostrarArbol` para comparar los renders del fixture real.
-  `react-anotado` no gana estos campos.
+  `react-anotado` no gana estos campos. Para React Router, ambos bloques
+  admiten `urlInicial` (ruta interna de hasta 200 caracteres) y
+  `barraDeDirecciones` (por defecto `true`, solo aparece cuando la app crea un
+  router). Las comprobaciones pueden fijar su propia `urlInicial`, navegar,
+  retroceder, avanzar, recargar y esperar una `url` exacta. `react-anotado`
+  admite además `lenguaje: "jsx" | "tsx"` (`"jsx"` por defecto).
 - `CompiladorReact.tsx` — recibe `z.infer<typeof esquemaCompiladorReact>`
   (2026-10-22): editor JSX y salida real, solo lectura, de React Compiler.
   Compila 300 ms después de la última edición, descarta respuestas antiguas

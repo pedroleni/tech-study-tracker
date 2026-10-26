@@ -7,6 +7,9 @@ probar a mano en Firefox y Safari (ver "Pendiente" al final). ✅ Fase 2
 (árbol de renders y árbol estático) en `main` (PR #56). 🔨 Fase 3 (API
 simulada, registro de efectos y almacenamiento) especificada abajo, en
 construcción. La fase 4 queda descrita a nivel de diseño en el temario.
+React Router en la vista previa (fases R0, R1 y R3, para la ficha de
+React Router): especificado al final, el 2026-10-26, pendiente de
+implementar.
 
 **Configuración manual requerida:** ninguna en Supabase (`technologies`
 y `lecciones` no ganan columnas). La tecnología "React" se crea desde el
@@ -872,3 +875,579 @@ Antes de dar una fase por cerrada, `npm run test`, `npm run build` y
     `[object Object]` o `{}`).
   - Que la consola se desplace sola hasta la última entrada.
   - Un test que demuestre el volcado agrupado de la consola.
+
+## React Router en la vista previa (fases R0, R1 y R3)
+
+Diseño aprobado con el temario de React Router
+([contenido/react-router/TEMARIO.md](../../contenido/react-router/TEMARIO.md),
+aprobado el 2026-10-26, componentes 1 a 4). Desbloquea los módulos 1 a 3
+de esa ficha (lecciones 1 a 13), que van **en TSX desde la primera
+lección**, con React Router 8.5.0 de verdad en la vista previa y sus
+errores de tipos reales. Esta tanda tiene tres partes:
+
+- **R0:** el bundle de React Router y su carga.
+- **R1:** la barra de direcciones, el alias al historial en memoria y las
+  comprobaciones con URL.
+- **R3:** los tipos de React Router en el panel de errores de tipos, y
+  `react-anotado` en TSX.
+
+**R2**, el registro del router (`mostrarRouter`), va en una tanda
+posterior con su propia especificación.
+
+Esta sección amplía la decisión de diseño 7 («solo se puede importar
+React y los archivos del bloque») y saca «importar librerías de npm» de
+«Fuera de alcance», solo para `react-router` y `react-router/dom`.
+
+### Validación (2026-10-26)
+
+Prueba aislada en el *scratchpad* (`spike-src/`, `spike-jsdom/` y
+`tipos-src/`), sin tocar el repositorio. Las piezas: `react-router@8.5.0`
+de npm, el `react.js` 19.3.1 de `public/vendor/react-en-vivo/19.3.1/`,
+esbuild 0.28.2, Chrome for Testing r1243 y WebKit con `playwright-core`
+1.64.1, el Vitest de la web con jsdom, y TypeScript 6.0.3 (el
+`typescript-en-vivo` de la web) con `@typescript/vfs` 1.6.4.
+
+| Qué se probó | Resultado |
+|---|---|
+| Empaquetar `react-router` y `react-router/dom` en un IIFE con un plugin que resuelve `react` y `react-dom` a `globalThis.__reactEnVivo` | **224 KB / 71 KB gzip** (build de desarrollo, minificado). El router solo importa `react` y `react-dom`; el metafile no tiene ninguna entrada de `node_modules/react`, `react-dom` ni `scheduler`. Trae `@remix-run/route-pattern` y `cookie-es` |
+| Ese bundle detrás del `react.js` del sandbox, en un iframe `srcdoc` con `sandbox="allow-scripts allow-forms"` (origen `null`), en Chromium y en WebKit | Funcionan `createMemoryRouter` + `RouterProvider` de `react-router/dom` con `StrictMode`, `loader`, `action` con `<Form method="post">` y `request.formData()`, la revalidación tras la `action`, `useFetcher`, un `data('No existe', { status: 404 })` lanzado que llega al `ErrorBoundary`, el middleware de cliente con `createContext`, `instrumentations`, `<Await>`, `use()` y `useBlocker` |
+| `createHashRouter` y `createBrowserRouter` en ese iframe | **Fallan**: Chromium, «Failed to construct 'URL': Invalid URL»; WebKit, «"/b" cannot be parsed as a URL.». Solo vale el historial en memoria |
+| `request.url` en un `loader` del router en memoria | `http://localhost/recetas`: es el origen del historial en memoria |
+| Los dos bundles reales en el jsdom de Vitest | Funciona todo, **incluido el envío de un `<Form method="post">`** a la `action` y la revalidación: Codex puede probarlo sin navegador |
+| Sucrase con `import { … } from 'react-router'`, `import { RouterProvider } from "react-router/dom"` e `import type { Params } from 'react-router'` | `require('react-router')` y `require('react-router/dom')`, con las comillas del original. **El `import type` desaparece**: no pide el bundle |
+| Sucrase con `import('./Pagina.tsx')` | `Promise.resolve().then(() => _interopRequireWildcard(require('./Pagina.tsx')))`: el `lazy` del router recibe un módulo que ya está en memoria |
+| Los `.d.ts` de `react-router` 8.5.0 en la VFS del panel (`/node_modules/react-router/…`, con su `package.json`) más los de `cookie-es` | Los mismos diagnósticos que `tsc`. **61 archivos, 469 KB**. Mensajes exactos en «Tests» |
+
+### Decisiones
+
+1. **El bundle es solo la librería; la lógica de la vista previa va en
+   `src/`.** `public/vendor/react-en-vivo/react-router/8.5.0/` tiene caché
+   inmutable: si el alias o la barra viviesen dentro del bundle, cambiarlos
+   obligaría a cambiar la ruta. El envoltorio es un runtime más,
+   `src/lib/react-en-vivo/runtime/router.js`, incrustado con `?raw` como
+   `red.js` y `efectos.js`.
+2. **Una sola copia de React.** El plugin del build resuelve `react` y
+   `react-dom` a lo que ya expone `react.js`. Si el metafile tiene alguna
+   entrada de React, el build se para.
+3. **Se carga solo si el código lo usa.** `construirDocumentoReact` busca
+   `require('react-router')` o `require('react-router/dom')` en los
+   módulos ya transformados. Las lecciones de React sin router no pagan
+   nada.
+4. **El alias aprobado.** Dentro de la vista previa,
+   `createBrowserRouter` y `createHashRouter` crean un router en memoria,
+   y `BrowserRouter` y `HashRouter` son un `MemoryRouter`. La barra lo
+   dice («Historial en memoria · …») y la consola avisa una vez por
+   documento.
+5. **«Recargar» e «Ir» no reconstruyen el documento.** El iframe desmonta
+   la app, vacía la caché de módulos y la vuelve a montar en la URL nueva:
+   como al recargar una página, se pierde todo el estado de la app. La API
+   simulada (`red.js`) y el almacenamiento en memoria (`puente.js`) no se
+   reinician, como un servidor y un `localStorage` de verdad. Editar el
+   código sí construye un documento nuevo, como hasta ahora, pero empieza
+   en la última URL. «Reiniciar» lo devuelve todo al principio, también la
+   URL.
+6. **Los tipos de React Router van en un solo `tipos.json`** junto al
+   bundle, no en `/vendor/react-kit/`. Una versión nueva del router cambia
+   una sola carpeta. El panel lo pide solo si algún `.ts` o `.tsx`
+   importa `react-router`.
+
+### Dependencias y construcción (`scripts/react-en-vivo/`)
+
+- **`package.json`:** gana `"react-router": "8.5.0"` (versión exacta).
+  Lo instala Claude antes de que empiece Codex (ver «Quién hace qué»). Su
+  `peerDependencies` pide `react >=19.2.7`, y el paquete tiene 19.3.1.
+- **`entrada-react-router.js`** (nuevo):
+
+  ```js
+  import * as ReactRouter from 'react-router'
+  import * as ReactRouterDom from 'react-router/dom'
+
+  globalThis.__reactRouterEnVivo = { ReactRouter, ReactRouterDom }
+  ```
+
+- **`construir.mjs`:** los dos builds de ahora no cambian. Añade dos
+  salidas, leyendo la versión de
+  `node_modules/react-router/package.json`:
+  1. **`public/vendor/react-en-vivo/react-router/<versión>/react-router.js`.**
+     Mismas opciones que `react.js` (`bundle`, `format: 'iife'`,
+     `platform: 'browser'`, `minify`, `legalComments: 'eof'`, `define`
+     de `process.env.NODE_ENV` a `"development"`). Además:
+     - `conditions: ['development']`, para que `exports` elija
+       `dist/development`;
+     - `metafile: true`;
+     - el plugin `reactCompartido`: un `onResolve` para
+       `/^react(-dom)?(\/.*)?$/` que manda `react` →
+       `globalThis.__reactEnVivo.React`, `react-dom` → `.ReactDOM`,
+       `react-dom/client` → `.ReactDOMClient` y `react/jsx-runtime` →
+       `.JsxRuntime` a un espacio de nombres propio, cuyo `onLoad`
+       devuelve `module.exports = <expresión>`. Cualquier otra ruta de
+       React es un error de build.
+
+     Si alguna entrada del metafile casa con
+     `/node_modules\/(react|react-dom|scheduler)\//`, el script lanza
+     «React Router ha empaquetado su propia copia de React».
+  2. **`public/vendor/react-en-vivo/react-router/<versión>/tipos.json`**:
+     `{ "version": "8.5.0", "archivos": { "<ruta>": "<contenido>" } }`,
+     con las claves ordenadas y relativas a `node_modules`:
+     - `react-router/package.json`;
+     - todos los `react-router/dist/production/**/*.d.ts` (58);
+     - `cookie-es/package.json` y `cookie-es/dist/index.d.mts`.
+
+     Son 61 archivos y unos 469 KB. Se usa el `package.json` real del
+     router, porque la resolución `bundler` necesita sus `exports` (con la
+     condición `types`) para encontrar `react-router` y `react-router/dom`.
+- El script imprime el peso de cada salida, como hoy («8.5.0/react-router.js:
+  224 KB (gzip 71 KB)», «8.5.0/tipos.json: 61 archivos, 469 KB»). La
+  salida se commitea, como `react.js`.
+- **`vercel.json` no cambia:** `/vendor/react-en-vivo/(.*)` ya tiene caché
+  inmutable, y la versión va en la ruta. `eslint.config.js` tampoco:
+  `public/vendor` ya está en `ignores`.
+
+### Constantes (`src/lib/react-en-vivo/constantes.ts`)
+
+```ts
+export const VERSION_REACT_ROUTER_EN_VIVO = '8.5.0'
+export const RUTA_REACT_ROUTER_EN_VIVO = `/vendor/react-en-vivo/react-router/${VERSION_REACT_ROUTER_EN_VIVO}`
+```
+
+### Esquemas (`src/lib/laboratorio/schemas.ts`)
+
+```ts
+// Una ruta de la app, como la escribiría el alumno en un <Link to>: empieza
+// por una sola "/" (nunca "//otro.sitio") y no lleva espacios.
+const esquemaUrlRouter = z.string().min(1).max(200).regex(/^\/(?!\/)\S*$/)
+
+// esquemaPasoComprobacionReact gana cuatro variantes estrictas:
+z.strictObject({ navegar: esquemaUrlRouter })   // como un navigate(url)
+z.strictObject({ atras: z.literal(true) })      // como navigate(-1)
+z.strictObject({ adelante: z.literal(true) })   // como navigate(1)
+z.strictObject({ recargar: z.literal(true) })   // como el botón «Recargar»
+
+// esquemaEsperaComprobacionReact gana:
+z.strictObject({ url: esquemaUrlRouter })       // ruta + búsqueda + almohadilla, exactas
+
+// esquemaComprobacionReact gana:
+urlInicial: esquemaUrlRouter.optional()         // dónde arranca la app en esta comprobación
+
+// esquemaReactEnVivo y esquemaReactAnotado ganan:
+urlInicial: esquemaUrlRouter.optional()         // dónde arranca la app; sustituye a initialEntries
+barraDeDirecciones: z.boolean().default(true)   // solo se ve si la app crea un router
+
+// esquemaReactAnotado gana (R3):
+lenguaje: z.enum(['jsx', 'tsx']).default('jsx') // el código corre como App.jsx o App.tsx
+```
+
+`esquemaReactEnVivo` gana un `.refine`. Si alguna comprobación usa
+`urlInicial`, `navegar`, `atras`, `adelante`, `recargar` o la espera
+`url`, algún archivo tiene que casar con
+`/\bfrom\s*['"]react-router(?:\/dom)?['"]/`. Mensaje: «Las comprobaciones
+con URL necesitan que algún archivo importe react-router».
+
+Los bloques que ya existen siguen validando igual: todo lo nuevo es
+opcional o tiene valor por defecto.
+
+### Runtime en el iframe
+
+#### `documento.ts`
+
+- `OpcionesDocumentoReact` gana `urlInicial?: string`, y
+  `prepararDocumento` la pasa.
+- `usaRouter = Object.values(modulos).some((codigo) =>
+  /\brequire\((['"])react-router(?:\/dom)?\1\)/.test(codigo))`.
+- Si `usaRouter`:
+  - en `<head>`, justo después de `react.js` (y de `pruebas.js` si lo
+    hay), va
+    `<script src="{origen}{RUTA_REACT_ROUTER_EN_VIVO}/react-router.js"></script>`;
+  - en `<body>`, `runtime/router.js` (`?raw`, con `escaparScript`) va
+    después de la configuración, `red.js` y `efectos.js`, y justo antes
+    del montaje.
+- La configuración gana `urlInicial` si viene, escapada como el resto
+  (`<` como `<`).
+
+#### `runtime/router.js` (nuevo; solo si `usaRouter`)
+
+Un IIFE sin dependencias, como `red.js`. Define
+`window.__routerEnVivo`.
+
+- **Si no hay `window.__reactRouterEnVivo`** (el bundle no llegó), deja
+  `window.__routerEnVivo = { error: 'No se pudo cargar React Router en la
+  vista previa. Recarga la página para intentarlo de nuevo.' }` y termina.
+- **`espacios`:**
+  - `'react-router'` es un objeto congelado con todo `ReactRouter` (spread
+    del espacio de nombres) más los seis envoltorios de abajo;
+  - `'react-router/dom'` es `ReactRouterDom` tal cual.
+- **Carga pendiente.** `prepararCarga(url | null)` guarda la URL con la
+  que arrancará el próximo router. Al cargar el documento vale
+  `window.__configReactEnVivo.urlInicial ?? null`.
+- **Envoltorios de los routers de datos:**
+  - `createMemoryRouter(rutas, opciones = {})`. Con carga pendiente, pasa
+    `{ ...opciones, initialEntries: [carga], initialIndex: 0 }`; sin ella,
+    `opciones` tal cual. Crea el router con el original y lo registra con
+    `origen: 'createMemoryRouter'`.
+  - `createBrowserRouter(rutas, opciones = {})` y
+    `createHashRouter(rutas, opciones = {})`. Quitan `window` de
+    `opciones` y llaman al original `createMemoryRouter` con
+    `initialEntries: [carga ?? '/']` y `initialIndex: 0`. Lo registran con
+    su propio nombre como `origen` y avisan **una vez por documento** con
+    `console.info`:
+    - para el primero, «createBrowserRouter usa aquí un historial en
+      memoria: la vista previa no puede cambiar la dirección de verdad. En
+      tu proyecto usará la del navegador.»;
+    - para el segundo, «… En tu proyecto guardará la ruta detrás de la #.».
+- **Envoltorios de los routers declarativos.** `MemoryRouter`,
+  `BrowserRouter` y `HashRouter` son componentes que pintan el
+  `MemoryRouter` original con `basename` y `children`. Las entradas
+  iniciales:
+  - con carga pendiente, `initialEntries = [carga]`;
+  - si no, `MemoryRouter` respeta sus `initialEntries` e `initialIndex`, y
+    los otros dos empiezan en `['/']`.
+
+  Dentro, antes de `children`, pintan un `SensorDeUbicacion` que no pinta
+  nada. Con `useLocation`, `useNavigationType` y `useNavigate`, y en un
+  `useLayoutEffect` del React original (así no sale en el registro de
+  efectos), registra un navegador declarativo. Ese navegador navega con
+  `navigate(destino)` y nunca está ocupado. `BrowserRouter` y `HashRouter`
+  avisan en la consola como sus versiones de datos.
+- **El navegador activo.** Es el último registrado en el documento, y
+  expone:
+  - `navegar(destino)`, donde `destino` es una URL o `-1`/`1`
+    (`router.navigate` en los de datos);
+  - `ubicacion()`: `ReactRouter.createPath(location)`;
+  - `ocupado()`: en los de datos, `router.state.navigation.state !==
+    'idle' || router.state.revalidation !== 'idle'`; en los declarativos,
+    siempre `false`;
+  - `puedeAtras()` y `puedeAdelante()`.
+
+  En los de datos se suscribe con `router.subscribe`; en los declarativos,
+  avisa el sensor en cada render.
+- **Historial propio.** Ni el router ni el historial en memoria exponen su
+  índice, así que `router.js` lleva su propia lista `{ clave, url }[]` y
+  un `indice`:
+  - empieza con las entradas iniciales y el índice inicial (`initialIndex`,
+    o la última);
+  - con cada `location.key` nueva: `PUSH` corta la lista tras `indice` y
+    añade; `REPLACE` sustituye la entrada actual; `POP` busca la clave en
+    la lista y, si no está (una entrada inicial aún no visitada), busca la
+    URL en `indice - 1` y luego en `indice + 1`; si tampoco, sustituye la
+    actual.
+- **Mensaje `ubicacion`.** Se envía al registrar el navegador y cada vez
+  que cambia la URL, `puedeAtras` o `puedeAdelante`; nunca dos iguales
+  seguidos. La `url` va recortada a 500 caracteres.
+- **`reiniciar()`.** Llama a `dispose()` en todos los routers de datos
+  registrados, vacía el registro y el historial, y deja sin avisar (para
+  que la consola vuelva a avisar en el documento recargado).
+- **Mensajes de la página.** Solo con `evento.source === parent` y
+  `canal: 'react-en-vivo'`, `{ tipo: 'navegador', accion, url? }`:
+  - `atras` y `adelante` hacen `navegar(-1)` o `navegar(1)`, si se puede;
+  - `recargar` hace `__recargarAppReactEnVivo(ubicación actual)`;
+  - `ir` hace `__recargarAppReactEnVivo(url)`, solo si `url` casa con
+    `/^\/(?!\/)\S*$/` y mide como mucho 200 caracteres; si no, se ignora.
+
+#### `runtime/montaje.js`
+
+- **`EXTERNOS`** gana `'react-router'` y `'react-router/dom'` desde
+  `window.__routerEnVivo.espacios`, si existe.
+- **Errores al importar.** Si el código pide `react-router` y no hay
+  espacios, `resolver` lanza `window.__routerEnVivo?.error` (o el mismo
+  texto si no hay `__routerEnVivo`). El mensaje de un paquete desconocido
+  pasa a ser: «En este editor solo se puede importar React, React Router y
+  tus propios archivos: «x» no está disponible.».
+- **`window.__recargarAppReactEnVivo(url)`** (nuevo): llama a
+  `__routerEnVivo.reiniciar()` y a `prepararCarga(url)`, vacía `cache`, pone
+  `ultimoError = null`, desmonta y monta. Si falla al montar, envía
+  `error-render`, igual que el primer montaje. No toca `red.js` ni el
+  almacenamiento.
+- **`comprobar`**, en cada comprobación y antes de montar:
+  `__routerEnVivo?.reiniciar()` y
+  `__routerEnVivo?.prepararCarga(comprobacion.urlInicial ?? config.urlInicial ?? null)`.
+  Si la comprobación usa URL (cualquiera de las piezas nuevas) y no hay
+  `window.__routerEnVivo`, falla con «Esta comprobación usa la dirección,
+  pero la app no importa react-router.».
+- **Pasos nuevos.** Primero esperan al navegador activo (`waitFor`,
+  `ESPERA_MS`; si no aparece, «La app no ha creado ningún router: no puedo
+  navegar a «/x».»).
+  - `navegar` → `navegar(url)`;
+  - `atras` y `adelante` → `navegar(-1)` o `navegar(1)`. Si no se puede,
+    fallan con «No hay ninguna página anterior a la que volver.» o «No hay
+    ninguna página siguiente a la que ir.»;
+  - `recargar` → `__recargarAppReactEnVivo(ubicación actual)`.
+
+  Después, los cuatro esperan a que `ocupado()` sea `false`, como mucho
+  `ESPERA_MS`; si no, «La navegación a «/x» no terminó a tiempo.».
+- **Espera `url`** en `motivoDeEspera`:
+  - sin navegador, «La app no ha creado ningún router, así que no tiene
+    dirección.»;
+  - si la ubicación no coincide, «La dirección es «/a» y debería ser
+    «/b».»;
+  - si coincide, `null`.
+
+#### `runtime/red.js`
+
+Una ruta que empieza por `http://localhost/api/` se trata como `/api/…`
+(se quita `http://localhost`, sin puerto). Es el origen que da el router
+en memoria a `request.url`, así que `fetch(new URL('/api/x', request.url))`
+y `fetch(new Request(…))` llegan a la API simulada. En el mensaje
+`peticion`, la `ruta` va ya sin el origen. Cierra en parte el pendiente de
+la fase 3 sobre «`fetch` con objetos `Request`/`URL`».
+
+### Mensajes
+
+Iframe → página, en `esquemaMensajeReactEnVivo` (`mensajes.ts`):
+
+| `tipo` | Campos | Uso |
+|---|---|---|
+| `ubicacion` | `url`: texto ≤ 500 que casa con `/^\/(?!\/)\S*$/`; `puedeAtras` y `puedeAdelante`: booleanos; `origen`: `'createMemoryRouter' \| 'createBrowserRouter' \| 'createHashRouter' \| 'MemoryRouter' \| 'BrowserRouter' \| 'HashRouter'` | La barra de direcciones |
+
+Página → iframe (el iframe solo los acepta si `event.source === parent`):
+
+| Mensaje | Cuándo |
+|---|---|
+| `{ canal, tipo: 'navegador', accion: 'atras' \| 'adelante' \| 'recargar' }` | Botones de la barra |
+| `{ canal, tipo: 'navegador', accion: 'ir', url }` | «Ir» con una dirección que ya validó la página con `esquemaUrlRouter` |
+
+La URL se pinta siempre como texto, nunca como HTML ni como `href`.
+
+### Componentes (`src/components/bloques-laboratorio/`)
+
+- **`BarraDirecciones.tsx`** (nuevo, presentacional). Props:
+  `{ ubicacion: MensajeUbicacion, onAccion: (accion, url?) => void }`.
+  - Un `<form aria-label="Barra de direcciones de la vista previa">` con
+    botones «Atrás», «Adelante» y «Recargar» (iconos con `aria-label`;
+    Atrás y Adelante, `disabled` según `puedeAtras` y `puedeAdelante`), un
+    campo «Dirección de la vista previa» en monoespaciada y el botón «Ir».
+  - El campo enseña la URL recibida hasta que el alumno escribe. Una
+    `ubicacion` nueva descarta lo escrito, como en un navegador.
+  - «Ir» valida con `esquemaUrlRouter`. Si no vale, enseña «La dirección
+    tiene que empezar por una sola / y no llevar espacios.» y no envía
+    nada.
+  - Debajo, en pequeño, el texto según `origen`:
+    - `createMemoryRouter` y `MemoryRouter`: «Historial en memoria
+      (`<origen>`)»;
+    - `createBrowserRouter` y `BrowserRouter`: «Historial en memoria · en
+      tu proyecto, `<origen>` usa la dirección del navegador»;
+    - `createHashRouter` y `HashRouter`: «Historial en memoria · en tu
+      proyecto, `<origen>` guarda la ruta detrás de #».
+  - Tema claro y oscuro con los tokens de la web; a 320 px de ancho, el
+    campo ocupa su propia fila.
+- **`VistaPreviaReact.tsx`:** nueva prop `ordenNavegador?: { id: number;
+  accion: 'atras' | 'adelante' | 'recargar' | 'ir'; url?: string }`,
+  con el mismo patrón que `fallosSolicitados`. Envía el mensaje
+  `navegador` cuando cambia `id` y el iframe ya avisó de `montado`; si
+  llega antes, lo envía al recibir `montado`.
+- **`ReactEnVivo.tsx`:**
+  - guarda la última `ubicacion` de la vista previa visible, y su URL en
+    `urlActualRef`;
+  - pinta la `BarraDirecciones` encima del iframe si
+    `barraDeDirecciones` y ya llegó alguna `ubicacion`;
+  - al reconstruir por una edición, pasa a `prepararDocumento`
+    `urlInicial: urlActualRef.current ?? urlInicial`, y vacía la
+    `ubicacion` hasta que llegue la del documento nuevo;
+  - «Reiniciar» vacía `urlActualRef` y la `ubicacion`, así que el
+    documento vuelve a la `urlInicial` del bloque;
+  - con «Recargar» o «Ir», vacía consola, árbol, registro de efectos y
+    registro de red, igual que hace hoy al reconstruir, y manda la orden
+    sin reconstruir el documento;
+  - «Comprobar» prepara el documento oculto con la `urlInicial` del
+    bloque; la de cada comprobación la aplica el montaje.
+- **`ReactAnotado.tsx`:** lo mismo para la barra y `urlInicial` (sin
+  comprobaciones). Con `lenguaje: 'tsx'`, el archivo se llama `App.tsx` y
+  el código se resalta con `lenguaje="tsx"`. No enseña el panel de tipos:
+  es un bloque para explicar.
+- **`/admin/referencia-contenido`:** un `react-en-vivo` en TSX con
+  `createMemoryRouter`, dos rutas con `loader`, una `action` con `<Form>`,
+  la API simulada, `urlInicial` y dos comprobaciones (una con `navegar` y
+  espera `url`, otra con `recargar`). También un `react-anotado` con
+  `lenguaje: "tsx"` y `createBrowserRouter`, para ver el alias.
+  `specs/features/laboratorios.md` lista los campos nuevos.
+
+### R3: los tipos de React Router en el panel (`src/lib/react-en-vivo/tipos.ts`)
+
+- **Cuándo.** El programa necesita los tipos del router si algún `.ts` o
+  `.tsx` casa con
+  `/\b(?:from|import)\s*\(?\s*['"]react-router(?:\/dom)?['"]/`. Esto
+  incluye `import type`, porque el tipo hace falta aunque el código no
+  ejecute el router.
+- **Carga.** `cargarTiposReactRouter(cargarArchivo)` pide
+  `${RUTA_REACT_ROUTER_EN_VIVO}/tipos.json` **una vez por cada
+  `cargarArchivo`** (un `WeakMap` de promesas, como `cargarRecursos`; si
+  falla, se borra la promesa para reintentar).
+- **Validación con Zod:**
+  - `version` igual a `VERSION_REACT_ROUTER_EN_VIVO`;
+  - `archivos`: claves que casan con
+    `/^(react-router|cookie-es)\/[\w./-]+$/`, como mucho 100 claves y
+    2.000.000 de caracteres en total.
+
+  Si no vale, se lanza «Los tipos de React Router no tienen el formato
+  esperado», y el panel lo enseña como hoy enseña los demás fallos de
+  carga («No se pudieron analizar los tipos…»).
+- **Montaje en la VFS.** Cada archivo va a `/node_modules/<clave>`.
+- **En la sesión** (`crearSesionTiposReact`):
+  - la primera vez que un programa necesita los tipos del router, se
+    cargan, se añaden al mapa base y, si el entorno ya existía, se crea de
+    nuevo con ellos. Pasa una vez por sesión;
+  - un programa que deja de importar el router no los quita (no
+    estorban).
+- **Opciones del compilador:** las de hoy (`moduleResolution: 'bundler'`,
+  `skipLibCheck: true`, `strict`). No hace falta nada más: comprobado en
+  la VFS.
+
+### Tests
+
+Los escribe y los pasa Codex. Cada uno, con su nombre y lo que demuestra.
+
+**`src/lib/laboratorio/schemas.test.ts`**
+
+- «react-en-vivo acepta urlInicial y barraDeDirecciones, y barraDeDirecciones vale true por defecto».
+- «rechaza una urlInicial sin / inicial, con espacios, con // o de más de 200 caracteres»: `pistas`, `/a b`, `//otro.example` y `/` + 200 `a`, cada una con `success: false`.
+- «las comprobaciones admiten urlInicial, navegar, atras, adelante, recargar y la espera url».
+- «rechaza { atras: false } y un paso con dos claves».
+- «pide que algún archivo importe react-router si hay comprobaciones con URL»: sin el `import` falla con el mensaje exacto; con `import { createMemoryRouter } from 'react-router'`, valida.
+- «react-anotado acepta lenguaje tsx y usa jsx por defecto».
+
+**`src/lib/react-en-vivo/documento.test.ts`**
+
+- «no carga React Router si ningún módulo lo pide»: el `srcdoc` no contiene `/react-router/8.5.0/react-router.js`.
+- «carga react-router.js después de react.js y el runtime del router antes del montaje si un módulo hace require('react-router')»: comprueba el orden con `indexOf`.
+- «también lo carga con require("react-router/dom") entre comillas dobles».
+- «un import type de react-router no lo carga»: pasa por `transformarArchivos` un `App.tsx` que solo importa tipos.
+- «urlInicial va en la configuración con < escapado»: con `/buscar?q=<b>`, el `srcdoc` no contiene `<b>` y sí `<b>`.
+
+**`src/lib/react-en-vivo/mensajes.test.ts`**
+
+- «acepta una ubicacion válida».
+- «rechaza una ubicacion con url sin / inicial, con //, de más de 500 caracteres o con un origen desconocido».
+
+**`src/lib/react-en-vivo/router.test.ts`** (nuevo, jsdom, **bundles reales**)
+
+Carga `public/vendor/react-en-vivo/19.3.1/react.js` y
+`public/vendor/react-en-vivo/react-router/8.5.0/react-router.js` con
+`new Function`, como `runtime.test.ts`. Después ejecuta `router.js` y
+`montaje.js` sobre módulos que pasan por `transformarArchivos` (en TSX).
+Los mensajes de la página se simulan con `new MessageEvent('message', {
+source: window, data })`: en jsdom, `parent === window`.
+
+- «el bundle no lleva su propia copia de React»: `react-router.js` no contiene `__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE` (que `react.js` sí contiene) y sí contiene `react-router v8.5.0`.
+- «monta un createMemoryRouter con loader, envía un `<Form method="post">` a la action, revalida y pinta el 404 lanzado en el ErrorBoundary»: aparece «Migas»; tras `requestSubmit()`, «Pisto», y el `loader` se ha ejecutado dos veces; tras navegar a `/nada`, «404».
+- «el router y el alumno comparten React: con StrictMode no hay «Invalid hook call»»: `console.error` no recibe nada que case con `/Invalid hook call/`.
+- «el middleware de cliente pasa un valor al loader con createContext».
+- «envía ubicacion al montar y al navegar, con puedeAtras y puedeAdelante correctos tras atrás y adelante»: `{ url: '/', puedeAtras: false, puedeAdelante: false, origen: 'createMemoryRouter' }`; tras pulsar un `Link`, `/recetas` con `puedeAtras: true`; tras `atras`, `/` con `puedeAdelante: true`.
+- «createBrowserRouter va a memoria, arranca en / y avisa una sola vez en la consola»: un único `console.info` que contiene «historial en memoria», y `origen: 'createBrowserRouter'`.
+- «createHashRouter, BrowserRouter y HashRouter también van a memoria y envían ubicacion»: con `BrowserRouter` + `Routes`, pulsar un `Link` envía `/juegos`.
+- «urlInicial de la configuración sustituye a initialEntries en createMemoryRouter y en MemoryRouter».
+- «ir recarga la app en esa URL: los módulos se evalúan de nuevo y el loader se repite»: un contador a nivel de módulo vuelve a 1.
+- «recargar conserva los datos de la API simulada y el almacenamiento en memoria»: con `red.js`, una `action` hace `POST` a `/api/recetas`; tras `recargar`, el `loader` la ve y un `localStorage.getItem` sigue devolviendo lo guardado.
+- «ignora los mensajes navegador que no vienen de parent y los ir con una URL no válida»: con `source: null` y con `url: '//otro.example'`, la ubicación no cambia.
+- «fetch a http://localhost/api/… pasa por la API simulada»: un `loader` con `fetch(new URL('/api/recetas', request.url))` recibe los datos, y el mensaje `peticion` lleva `ruta: '/api/recetas'`.
+- «importar react-router sin el bundle da un error claro»: sin cargar `react-router.js`, el montaje envía `error-render` con «No se pudo cargar React Router en la vista previa. Recarga la página para intentarlo de nuevo.».
+- «un paquete desconocido dice «solo React, React Router y tus propios archivos»».
+- Comprobaciones, con `window.__comprobarReactEnVivo`:
+  - «urlInicial de la comprobación monta la app en esa URL».
+  - «navegar, atras, adelante y recargar esperan a que la navegación termine»: con un `loader` que tarda 50 ms, la espera `url` y el texto de la página nueva se cumplen.
+  - «la espera url falla con «La dirección es «/a» y debería ser «/b».»».
+  - «atras sin página anterior falla con «No hay ninguna página anterior a la que volver.»».
+  - «una comprobación con URL en una app sin router falla con un motivo claro».
+  - «cada comprobación desecha el router de la anterior»: la primera navega a `/b`; la segunda, sin `urlInicial`, empieza en `/`.
+
+**`src/lib/react-en-vivo/tipos.test.ts`** (R3, con el `tipos.json` real
+leído de `public/` mediante `cargarDesdeDisco`)
+
+- «un App.tsx con createMemoryRouter, RouterProvider de react-router/dom y `useLoaderData<typeof loader>` no tiene errores».
+- «params.id es string | undefined: asignarlo a un string da error»: el mensaje contiene `Type 'string | undefined' is not assignable to type 'string'.`
+- «`createContext<Usuario>`: un set con otro tipo da error»: `Argument of type 'number' is not assignable to parameter of type 'Usuario'.`
+- «`useLoaderData<typeof loader>` conoce las propiedades»: `Property 'apellido' does not exist on type 'Usuario'.`
+- «sin importar react-router no pide tipos.json»: espía sobre `cargarArchivo`.
+- «un import type de react-router también carga sus tipos».
+- «pide tipos.json una sola vez por sesión».
+- «un tipos.json con otra versión o mal formado da un error, y la sesión se recupera con uno bueno».
+
+Los tres mensajes de tipos se comprobaron con TypeScript 6.0.3 en la VFS
+del panel.
+
+**Componentes**
+
+- `BarraDirecciones.test.tsx`:
+  - «enseña la URL y el texto del historial según el origen»;
+  - «Atrás y Adelante se desactivan según la ubicación y llaman a onAccion»;
+  - «Ir con una dirección válida llama a onAccion('ir', url); con una no válida enseña el error y no llama»;
+  - «Recargar llama a onAccion('recargar')»;
+  - «una ubicación nueva sustituye a lo escrito»;
+  - nombres accesibles: «Atrás», «Adelante», «Recargar», «Ir» y el campo «Dirección de la vista previa».
+- `VistaPreviaReact.test.tsx`:
+  - «envía la orden del navegador cuando cambia su id y el iframe ya montó»;
+  - «guarda la orden hasta el primer montado».
+- `ReactEnVivo.test.tsx`:
+  - «no enseña la barra hasta que llega una ubicacion, ni con barraDeDirecciones: false»;
+  - «al editar el código, el documento nuevo arranca en la última URL»: lo dice la configuración del `srcdoc`;
+  - «Reiniciar vuelve a la urlInicial del bloque»;
+  - «Recargar vacía la consola y manda la orden sin reconstruir el documento»: el `srcdoc` no cambia;
+  - «Comprobar prepara el documento con la urlInicial del bloque».
+- `ReactAnotado.test.tsx`:
+  - «con lenguaje tsx ejecuta App.tsx y resalta como tsx»;
+  - «enseña la barra cuando llega una ubicacion».
+
+### Quién hace qué
+
+1. **Claude, antes de Codex (Codex no tiene red):**
+   - `cd scripts/react-en-vivo && npm ci && npm install --save-exact react-router@8.5.0`.
+     El worktree no tiene `scripts/react-en-vivo/node_modules`. Esto deja
+     `package.json` y `package-lock.json` actualizados, con `cookie-es` y
+     `@remix-run/route-pattern` como dependencias del router.
+   - Comprobar con `npm ls react-router` que es la 8.5.0.
+   - La web no necesita nada: el `typescript-en-vivo` (6.0.3) y
+     `@typescript/vfs` del panel ya están en el `node_modules` de la raíz.
+2. **Codex:**
+   - implementa esta sección y escribe los tests;
+   - ejecuta `npm run construir` en `scripts/react-en-vivo` (esbuild y los
+     paquetes ya estarán instalados: no hace falta red) para generar
+     `react-router.js` y `tipos.json`, que los tests leen de `public/`;
+   - pasa `npm run test` y `npm run lint`.
+3. **Claude, después:**
+   - revisa el diff y vuelve a ejecutar `npm run construir`, para comprobar
+     que la salida es idéntica a la que commitea Codex;
+   - pasa `npm run test`, `npm run build` y `npm run lint` en local, porque
+     la CI no los ejecuta;
+   - verifica con Playwright, contra el servidor de desarrollo, en
+     **Chromium, WebKit y Firefox** (Firefox sigue sin probar desde la
+     fase 1), el bloque del catálogo de referencia:
+     - la barra (Atrás, Adelante, Recargar, Ir y el texto del alias);
+     - «Recargar» con datos de la API que sobreviven;
+     - una edición que conserva la URL;
+     - el panel de tipos con un error del router;
+     - las comprobaciones con URL;
+     - el modo oscuro y 320 px de ancho.
+
+### Riesgos
+
+- **Nadie sabe cuándo termina una navegación declarativa.** El navegador
+  de `MemoryRouter`, `BrowserRouter` y `HashRouter` no tiene un «ocupado»;
+  en el modo declarativo no hay `loader`, así que no hace falta. Las
+  comprobaciones de la ficha usan los routers de datos.
+- **Historial propio.** Si el alumno pasa varias `initialEntries` y vuelve
+  atrás a una que no visitó, la búsqueda por URL puede elegir mal cuando
+  dos entradas tienen la misma URL. Solo afecta a que Atrás y Adelante
+  estén activos o no; la navegación la hace el router.
+- **`createRoutesStub`** crea su propio router en memoria por dentro, sin
+  pasar por el envoltorio: no aparece en la barra. Su lección (la 21)
+  monta el stub en la vista previa **sin verificar**.
+- **`lazy`** recibe módulos que ya están en memoria: no hay trozos reales
+  ni espera. Que `lazy` funcione dentro del router está **sin verificar**
+  hasta esta tanda.
+- **El árbol de renders** (`mostrarArbol`) enseñaría los componentes
+  internos del router, con nombres minificados. Ninguna lección de la
+  ficha lo usa con el router; queda como opcional en el temario.
+- **Dos copias de React.** Si una versión futura de React Router
+  importase algo de React que el plugin no conoce, el build se para en
+  vez de meter una segunda copia. Es lo que se busca.
+
+### Fuera de alcance de esta tanda
+
+- **R2: el registro del router (`mostrarRouter`),** con `instrumentations`.
+  Va en la tanda siguiente, con su especificación.
+  Decidido el 2026-10-26: las lecciones de la ficha que lo usan (1, 2, 4,
+  5, 10 y 11) se escriben después de R2; las demás pueden empezar con R0,
+  R1 y R3.
+- Sacar del árbol de renders los componentes del router.
+- `createRoutesStub` registrado en la barra.
+- Más bibliotecas en la vista previa (TanStack Query llegará con su ficha,
+  reutilizando el mecanismo de R0).
+- Las comprobaciones sobre peticiones de red concretas (`{ peticion: … }`).

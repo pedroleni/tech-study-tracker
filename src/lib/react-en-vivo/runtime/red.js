@@ -202,12 +202,15 @@
     }
 
     window.fetch = function (entrada, opciones) {
-      const ruta =
+      const rutaOriginal =
         typeof entrada === 'string'
           ? entrada
           : entrada && typeof entrada.url === 'string'
             ? entrada.url
             : String(entrada)
+      const ruta = rutaOriginal.startsWith('http://localhost/api/')
+        ? rutaOriginal.slice('http://localhost'.length)
+        : rutaOriginal
       if (!ruta.startsWith('/api/')) return fetchOriginal.apply(this, arguments)
 
       if (debeFallarMontaje) huboPeticionDuranteMontaje = true

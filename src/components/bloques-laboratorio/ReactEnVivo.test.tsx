@@ -45,6 +45,7 @@ const datos: DatosReactEnVivo = {
   ],
   strictMode: true,
   mostrarConsola: true,
+  barraDeDirecciones: true,
   mostrarJsGenerado: true,
   mostrarArbol: false,
   mostrarEfectos: false,
@@ -633,6 +634,8 @@ describe('ReactEnVivo', () => {
     expect(titulos[0].id).not.toBe(titulos[1].id)
     expect(titulos[0].closest('section')).toHaveAttribute('aria-labelledby', titulos[0].id)
     expect(titulos[1].closest('section')).toHaveAttribute('aria-labelledby', titulos[1].id)
+    expect(titulos[0].closest('section')).not.toHaveAttribute('aria-label')
+    expect(titulos[1].closest('section')).not.toHaveAttribute('aria-label')
   })
 
   it('el panel TSX no introduce problemas automáticos de accesibilidad', async () => {
@@ -781,7 +784,8 @@ describe('ReactEnVivo', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Reiniciar' }))
 
-    expect(vista()).not.toBe(antes)
+    expect(screen.queryByTitle('Vista previa de React')).toBeNull()
+    await waitFor(() => expect(vista()).not.toBe(antes), { timeout: 3000 })
   })
 
   it('Comprobar conserva el foco del teclado', async () => {
@@ -993,5 +997,136 @@ describe('ReactEnVivo', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Comprobar' }))
     const oculto = (await screen.findByTitle('Comprobaciones')) as HTMLIFrameElement
     expect(oculto.getAttribute('srcdoc')).toContain('"red":{"latencia":0,"desordenar":false}')
+  })
+
+  it('no enseña la barra hasta que llega una ubicacion, ni con barraDeDirecciones false', async () => {
+    const { unmount } = render(<ReactEnVivo {...datos} barraDeDirecciones />)
+    await waitFor(() => expect(vista()).toBeInTheDocument())
+    expect(screen.queryByRole('form', { name: 'Barra de direcciones de la vista previa' })).toBeNull()
+    enviarDesde(vista().contentWindow, {
+      canal: 'react-en-vivo',
+      tipo: 'ubicacion',
+      url: '/',
+      puedeAtras: false,
+      puedeAdelante: false,
+      origen: 'createMemoryRouter',
+    })
+    expect(screen.getByRole('form', { name: 'Barra de direcciones de la vista previa' })).toBeInTheDocument()
+
+    unmount()
+    await renderizarListo({ ...datos, barraDeDirecciones: false })
+    enviarDesde(vista().contentWindow, {
+      canal: 'react-en-vivo',
+      tipo: 'ubicacion',
+      url: '/',
+      puedeAtras: false,
+      puedeAdelante: false,
+      origen: 'MemoryRouter',
+    })
+    expect(screen.queryByRole('form', { name: 'Barra de direcciones de la vista previa' })).toBeNull()
+  })
+
+  it('al editar el código, el documento nuevo arranca en la última URL', async () => {
+    await renderizarListo({ ...datos, urlInicial: '/inicio' })
+    enviarDesde(vista().contentWindow, {
+      canal: 'react-en-vivo',
+      tipo: 'ubicacion',
+      url: '/recetas/2',
+      puedeAtras: true,
+      puedeAdelante: false,
+      origen: 'createMemoryRouter',
+    })
+    fireEvent.change(screen.getByLabelText('Editor de App.jsx'), {
+      target: { value: 'export default function App() { return <p>Nuevo</p> }' },
+    })
+
+    await waitFor(() => expect(vista().getAttribute('srcdoc')).toContain('Nuevo'), { timeout: 3000 })
+    expect(vista().getAttribute('srcdoc')).toContain('"urlInicial":"/recetas/2"')
+  })
+
+  it('Reiniciar descarta la orden y el srcdoc anteriores antes de volver a urlInicial', async () => {
+    await renderizarListo({ ...datos, urlInicial: '/inicio' })
+    enviarDesde(vista().contentWindow, { canal: 'react-en-vivo', tipo: 'montado', version: '19.3.1' })
+    enviarDesde(vista().contentWindow, {
+      canal: 'react-en-vivo',
+      tipo: 'ubicacion',
+      url: '/inicio',
+      puedeAtras: false,
+      puedeAdelante: false,
+      origen: 'createMemoryRouter',
+    })
+    fireEvent.change(screen.getByLabelText('Dirección de la vista previa'), {
+      target: { value: '/secreto' },
+    })
+    fireEvent.submit(screen.getByRole('form', { name: 'Barra de direcciones de la vista previa' }))
+    const ventanaAnterior = vista().contentWindow
+    enviarDesde(ventanaAnterior, {
+      canal: 'react-en-vivo',
+      tipo: 'ubicacion',
+      url: '/secreto',
+      puedeAtras: true,
+      puedeAdelante: false,
+      origen: 'createMemoryRouter',
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Reiniciar' }))
+
+    expect(screen.queryByTitle('Vista previa de React')).toBeNull()
+    enviarDesde(ventanaAnterior, {
+      canal: 'react-en-vivo',
+      tipo: 'ubicacion',
+      url: '/secreto',
+      puedeAtras: true,
+      puedeAdelante: false,
+      origen: 'createMemoryRouter',
+    })
+
+    await waitFor(() => expect(vista().getAttribute('srcdoc')).toContain('"urlInicial":"/inicio"'), {
+      timeout: 3000,
+    })
+    const enviar = vi.spyOn(vista().contentWindow!, 'postMessage')
+    enviarDesde(vista().contentWindow, { canal: 'react-en-vivo', tipo: 'montado', version: '19.3.1' })
+    expect(enviar).not.toHaveBeenCalledWith(
+      { canal: 'react-en-vivo', tipo: 'navegador', accion: 'ir', url: '/secreto' },
+      '*',
+    )
+  })
+
+  it('Recargar vacía la consola y manda la orden sin reconstruir el documento', async () => {
+    await renderizarListo({ ...datos, urlInicial: '/inicio' })
+    enviarDesde(vista().contentWindow, { canal: 'react-en-vivo', tipo: 'montado', version: '19.3.1' })
+    enviarDesde(vista().contentWindow, {
+      canal: 'react-en-vivo',
+      tipo: 'consola',
+      nivel: 'log',
+      texto: 'antes',
+      commit: 1,
+    })
+    enviarDesde(vista().contentWindow, {
+      canal: 'react-en-vivo',
+      tipo: 'ubicacion',
+      url: '/inicio',
+      puedeAtras: false,
+      puedeAdelante: false,
+      origen: 'createMemoryRouter',
+    })
+    expect(await screen.findByText('antes')).toBeInTheDocument()
+    const srcDocAnterior = vista().getAttribute('srcdoc')
+    const enviar = vi.spyOn(vista().contentWindow!, 'postMessage')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Recargar' }))
+
+    expect(screen.queryByText('antes')).toBeNull()
+    expect(vista().getAttribute('srcdoc')).toBe(srcDocAnterior)
+    expect(enviar).toHaveBeenCalledWith(
+      { canal: 'react-en-vivo', tipo: 'navegador', accion: 'recargar' },
+      '*',
+    )
+  })
+
+  it('Comprobar prepara el documento con la urlInicial del bloque', async () => {
+    await renderizarListo({ ...datos, urlInicial: '/comienzo' })
+    fireEvent.click(screen.getByRole('button', { name: 'Comprobar' }))
+    const oculto = (await screen.findByTitle('Comprobaciones')) as HTMLIFrameElement
+    expect(oculto.getAttribute('srcdoc')).toContain('"urlInicial":"/comienzo"')
   })
 })

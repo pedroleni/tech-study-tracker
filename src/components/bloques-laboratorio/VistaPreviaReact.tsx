@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import { leerMensajeReactEnVivo, type MensajeReactEnVivo } from '@/lib/react-en-vivo/mensajes'
 import { CANAL_REACT_EN_VIVO } from '@/lib/react-en-vivo/constantes'
@@ -12,12 +12,18 @@ export function VistaPreviaReact({
   red,
   fallosSolicitados = 0,
   codigoCompilado = false,
+  ordenNavegador,
 }: {
   srcDoc: string
   onMensaje?: (mensaje: MensajeReactEnVivo) => void
   red?: AjustesRed
   fallosSolicitados?: number
   codigoCompilado?: boolean
+  ordenNavegador?: {
+    id: number
+    accion: 'atras' | 'adelante' | 'recargar' | 'ir'
+    url?: string
+  }
 }) {
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const onMensajeRef = useRef(onMensaje)
@@ -25,10 +31,29 @@ export function VistaPreviaReact({
   const montadoRef = useRef(false)
   const fallosEnviadosRef = useRef(0)
   const fallosSolicitadosRef = useRef(fallosSolicitados)
+  const ordenNavegadorRef = useRef(ordenNavegador)
+  const ultimaOrdenNavegadorEnviadaRef = useRef(ordenNavegador?.id ?? 0)
+  const documentoRef = useRef<{ srcDoc: string; codigoCompilado: boolean } | null>(null)
   const [alto, setAlto] = useState<number | null>(null)
   // El error se guarda junto al documento que lo produjo: al cambiar srcDoc
   // deja de mostrarse sin tener que borrarlo desde un efecto.
   const [error, setError] = useState<{ srcDoc: string; texto: string } | null>(null)
+
+  const enviarOrdenNavegador = useCallback((orden: NonNullable<typeof ordenNavegador>) => {
+    const ventana = iframeRef.current?.contentWindow
+    if (!ventana) return
+    ventana.postMessage(
+      {
+        canal: CANAL_REACT_EN_VIVO,
+        tipo: 'navegador',
+        accion: orden.accion,
+        ...(orden.url ? { url: orden.url } : {}),
+      },
+      '*',
+    )
+    ultimaOrdenNavegadorEnviadaRef.current = orden.id
+    if (orden.accion === 'recargar' || orden.accion === 'ir') setError(null)
+  }, [])
 
   useEffect(() => {
     onMensajeRef.current = onMensaje
@@ -37,6 +62,19 @@ export function VistaPreviaReact({
   useLayoutEffect(() => {
     fallosSolicitadosRef.current = fallosSolicitados
   }, [fallosSolicitados])
+
+  useLayoutEffect(() => {
+    ordenNavegadorRef.current = ordenNavegador
+  }, [ordenNavegador])
+
+  useEffect(() => {
+    if (
+      !ordenNavegador ||
+      !montadoRef.current ||
+      ordenNavegador.id === ultimaOrdenNavegadorEnviadaRef.current
+    ) return
+    enviarOrdenNavegador(ordenNavegador)
+  }, [enviarOrdenNavegador, ordenNavegador])
 
   useEffect(() => {
     redRef.current = red
@@ -61,7 +99,15 @@ export function VistaPreviaReact({
   // useEffect (después de pintar), un iframe rápido podía adelantarse y su
   // mensaje perderse.
   useLayoutEffect(() => {
-    montadoRef.current = false
+    const documento = documentoRef.current
+    if (
+      !documento ||
+      documento.srcDoc !== srcDoc ||
+      documento.codigoCompilado !== codigoCompilado
+    ) {
+      montadoRef.current = false
+      documentoRef.current = { srcDoc, codigoCompilado }
+    }
     const recibir = (evento: MessageEvent) => {
       const mensaje = leerMensajeReactEnVivo(evento, iframeRef.current?.contentWindow)
       if (!mensaje) return
@@ -79,6 +125,10 @@ export function VistaPreviaReact({
             '*',
           )
           fallosEnviadosRef.current = fallosSolicitadosRef.current
+        }
+        const orden = ordenNavegadorRef.current
+        if (orden && orden.id !== ultimaOrdenNavegadorEnviadaRef.current) {
+          enviarOrdenNavegador(orden)
         }
       }
       if (mensaje.tipo === 'alto') setAlto(mensaje.alto)
@@ -98,7 +148,7 @@ export function VistaPreviaReact({
 
     window.addEventListener('message', recibir)
     return () => window.removeEventListener('message', recibir)
-  }, [codigoCompilado, srcDoc])
+  }, [codigoCompilado, enviarOrdenNavegador, srcDoc])
 
   const errorVisible = error?.srcDoc === srcDoc ? error.texto : null
 

@@ -45,6 +45,10 @@
     'react/jsx-dev-runtime': R.JsxDevRuntime,
     'react/compiler-runtime': { c: R.React.__COMPILER_RUNTIME.c },
   }
+  if (window.__routerEnVivo && window.__routerEnVivo.espacios) {
+    EXTERNOS['react-router'] = window.__routerEnVivo.espacios['react-router']
+    EXTERNOS['react-router/dom'] = window.__routerEnVivo.espacios['react-router/dom']
+  }
   // hasOwnProperty y no `in`: un import de "constructor" no debe encontrar
   // nada en el prototipo de Object.
   const tiene = (objeto, clave) => Object.prototype.hasOwnProperty.call(objeto, clave)
@@ -57,9 +61,15 @@
 
   const resolver = (peticion) => {
     if (tiene(EXTERNOS, peticion)) return peticion
+    if (peticion === 'react-router' || peticion === 'react-router/dom') {
+      throw new Error(
+        (window.__routerEnVivo && window.__routerEnVivo.error) ||
+          'No se pudo cargar React Router en la vista previa. Recarga la página para intentarlo de nuevo.',
+      )
+    }
     if (!peticion.startsWith('./')) {
       throw new Error(
-        'En este editor solo se puede importar React y tus propios archivos: «' +
+        'En este editor solo se puede importar React, React Router y tus propios archivos: «' +
           peticion +
           '» no está disponible.',
       )
@@ -128,6 +138,24 @@
     })
     const elemento = R.React.createElement(App)
     raiz.render(strictMode ? R.React.createElement(R.React.StrictMode, null, elemento) : elemento)
+  }
+
+  window.__recargarAppReactEnVivo = (url, accion = 'recargar') => {
+    if (window.__routerEnVivo && window.__routerEnVivo.reiniciar) {
+      const carga = window.__routerEnVivo.capturarCarga
+        ? window.__routerEnVivo.capturarCarga(accion, url)
+        : url
+      window.__routerEnVivo.reiniciar()
+      window.__routerEnVivo.prepararCarga(carga)
+    }
+    cache = Object.create(null)
+    ultimoError = null
+    try {
+      montar()
+    } catch (error) {
+      ultimoError = ubicar(error)
+      enviar({ tipo: 'error-render', ...ultimoError })
+    }
   }
 
   try {
@@ -401,6 +429,49 @@
       if (window.__redReactEnVivo) window.__redReactEnVivo.fallarSiguiente()
       return
     }
+    if (
+      paso.navegar !== undefined ||
+      paso.atras === true ||
+      paso.adelante === true ||
+      paso.recargar === true
+    ) {
+      const destino = paso.navegar ?? (paso.atras ? -1 : paso.adelante ? 1 : null)
+      const etiquetaDestino = typeof destino === 'string' ? destino : 'la página solicitada'
+      let navegador
+      await window.__pruebasEnVivo.waitFor(
+        () => {
+          navegador = window.__routerEnVivo && window.__routerEnVivo.navegador()
+          if (!navegador) {
+            throw new FalloComprobacion(
+              'La app no ha creado ningún router: no puedo navegar a «' + etiquetaDestino + '».',
+            )
+          }
+        },
+        { timeout: ESPERA_MS, onTimeout: (error) => error },
+      )
+      if (paso.atras && !navegador.puedeAtras()) {
+        throw new FalloComprobacion('No hay ninguna página anterior a la que volver.')
+      }
+      if (paso.adelante && !navegador.puedeAdelante()) {
+        throw new FalloComprobacion('No hay ninguna página siguiente a la que ir.')
+      }
+      if (paso.recargar) window.__recargarAppReactEnVivo(navegador.ubicacion())
+      else navegador.navegar(destino)
+      await window.__pruebasEnVivo.waitFor(
+        () => {
+          const actual = window.__routerEnVivo && window.__routerEnVivo.navegador()
+          if (!actual || actual.ocupado()) {
+            throw new FalloComprobacion(
+              'La navegación a «' +
+                (typeof destino === 'string' ? destino : actual ? actual.ubicacion() : etiquetaDestino) +
+                '» no terminó a tiempo.',
+            )
+          }
+        },
+        { timeout: ESPERA_MS, onTimeout: (error) => error },
+      )
+      return
+    }
     if (paso.escribir) {
       const campo = await campoPorEtiqueta(pantalla, paso.escribir.etiqueta)
       // WebKit solo permite enfocar un iframe de otro origen durante un
@@ -481,6 +552,14 @@
 
   // null si se cumple; si no, el motivo en español.
   const motivoDeEspera = (pantalla, espera) => {
+    if (espera.url !== undefined) {
+      const navegador = window.__routerEnVivo && window.__routerEnVivo.navegador()
+      if (!navegador) return 'La app no ha creado ningún router, así que no tiene dirección.'
+      const actual = navegador.ubicacion()
+      return actual === espera.url
+        ? null
+        : 'La dirección es «' + actual + '» y debería ser «' + espera.url + '».'
+    }
     if (espera.ausente) {
       return buscarTodos(pantalla, espera.ausente).length > 0
         ? 'Después de los pasos, todavía aparece ' + describir(espera.ausente, false) + '.'
@@ -524,6 +603,12 @@
       cache = Object.create(null)
       ultimoError = null
       desmontar()
+      if (window.__routerEnVivo && window.__routerEnVivo.reiniciar) {
+        window.__routerEnVivo.reiniciar()
+        window.__routerEnVivo.prepararCarga(
+          comprobacion.urlInicial ?? window.__configReactEnVivo.urlInicial ?? null,
+        )
+      }
       campoActivo = null
       focoSimulado = false
       cambiosFocoSimulado = 0
@@ -531,6 +616,27 @@
       limpiarAlmacen('localStorage')
       limpiarAlmacen('sessionStorage')
       const pasos = comprobacion.pasos || []
+      const usaDireccion =
+        comprobacion.urlInicial !== undefined ||
+        (comprobacion.espera && comprobacion.espera.url !== undefined) ||
+        pasos.some(
+          (paso) =>
+            paso.navegar !== undefined ||
+            paso.atras === true ||
+            paso.adelante === true ||
+            paso.recargar === true,
+        )
+      if (usaDireccion && (!window.__routerEnVivo || !window.__routerEnVivo.espacios)) {
+        resultados.push(
+          fallo(
+            comprobacion,
+            (window.__routerEnVivo && window.__routerEnVivo.error) ||
+              'Esta comprobación usa la dirección, pero la app no importa react-router.',
+          ),
+        )
+        enviar({ tipo: 'progreso-comprobaciones', resultado: resultados[resultados.length - 1] })
+        continue
+      }
       let primerPasoNormal = 0
       while (pasos[primerPasoNormal] && pasos[primerPasoNormal].red === 'fallar-siguiente') {
         primerPasoNormal += 1
