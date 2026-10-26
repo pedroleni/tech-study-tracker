@@ -1090,6 +1090,216 @@ En jsdom, con el menú o el diálogo de Radix abiertos, los hijos de `<body>` qu
 2. **Bloquear el scroll del fondo** mientras el diálogo está abierto, en el mismo `useLayoutEffect`. Guarda el `overflow` que tenía `body` y devuélvelo en la limpieza. ¿Qué pasa con la anchura de la página cuando desaparece la barra de desplazamiento?
 3. **Un menú que se abre hacia arriba si no cabe.** En `abrir`, compara `caja.bottom` más la altura del menú con `window.innerHeight`. ¿Cómo sabes la altura del menú antes de pintarlo? (Pista: lección 45.)
 4. **El combobox con React Aria.** Haz `src/aria/` con el `ComboBox` de `react-aria-components` (lección 80) y un tercer modo en `vite.config.ts`. ¿Cuántos de los 8 tests del combobox pasan sin tocarlos?
+5. **El kit en Storybook.** El reto más largo, con su propia sección justo debajo.
+
+## Reto final: el kit en Storybook
+
+Este reto no tiene ningún `TODO` en el repositorio: lo montas tú sobre tu kit terminado, y si algo se tuerce, lo deshaces sin perder nada. **Storybook** es un taller de componentes: una web aparte, solo para desarrollo, donde cada pieza del kit se ve sola y en cada uno de sus estados, sin la página de matrícula alrededor. Es la «guía de estilo viva» que viste nombrada en la lección 23. Y, de paso, te da una segunda red de accesibilidad que tus tests de jsdom no pueden tender.
+
+### Qué es una historia
+
+Una **historia** (*story*) es un estado con nombre de un componente: el combobox vacío, con ayuda, con la lista abierta, sin resultados. Las historias de un componente van en un archivo `*.stories.tsx`, junto a él, escrito en **CSF** (*Component Story Format*), que no es más que un módulo de JavaScript:
+
+- El `export default` es la ficha del componente (en la documentación, `meta`): qué componente es, dónde sale en el catálogo y sus props por defecto, que Storybook llama `args`.
+- Cada `export` con nombre es una historia, que cambia los `args` que quiera: `export const ConAyuda: Story = { args: { ayuda: '…' } }`.
+- Una historia puede llevar un `play`: una función que se ejecuta después de pintarla, teclea y pulsa con las mismas consultas por rol de Testing Library, y comprueba con `expect`. Así se llega a los estados que solo existen después de teclear, como la lista abierta.
+
+### Montarlo con el asistente
+
+En la carpeta `kit-accesible/`, con el proyecto en verde:
+
+```bash
+npm create storybook@latest
+```
+
+El asistente detecta React con Vite y hace dos preguntas: si eres nuevo en Storybook (con «sí», te deja historias de ejemplo y un recorrido guiado) y qué configuración quieres. Elige **Recommended**, que trae documentación, tests y accesibilidad. Lo probamos con Storybook 10.6.4 sobre una copia del kit terminado, con esas respuestas pero sin preguntas (`npm create storybook@10.6.4 -- --yes --features docs test a11y`), y esto es lo que cambió:
+
+- **`.storybook/main.ts`**: dónde están las historias y qué complementos se cargan: `@storybook/addon-vitest`, `@storybook/addon-a11y`, `@storybook/addon-docs` y `@chromatic-com/storybook`.
+- **`.storybook/preview.tsx`**: la configuración común a todas las historias.
+- **Dos scripts**: `npm run storybook`, que abre el catálogo en `http://localhost:6006`, y `npm run build-storybook`, que lo construye como una web estática.
+- **`vite.config.ts` pasa a tener dos proyectos de Vitest**: tus 36 tests de siempre, con jsdom, y uno nuevo llamado `storybook`, que convierte cada historia en un test y la ejecuta en un Chromium de verdad, con Playwright. El asistente descarga ese navegador.
+- **`src/stories/`**, con historias de ejemplo (`Button`, `Header` y `Page`). Míralas y bórralas.
+
+Tres retoques para dejarlo a la altura del resto del proyecto:
+
+- El asistente instala `@chromatic-com/storybook` y `playwright` con la versión `latest`. Cámbialas por las exactas que se instalaron, que están en `package-lock.json`.
+- Cada `npm test` sale con un aviso de Vite sobre el `__dirname` que el asistente escribió en `vite.config.ts`. Cámbialo por `import.meta.dirname`, como propone el propio aviso, y desaparece.
+- Al borrar `src/stories/`, sale otro: «No story files found for the specified pattern: src/**/*.mdx». `main.ts` busca también páginas de documentación en MDX y ya no queda ninguna: quita ese patrón.
+
+### Las historias del combobox
+
+En `src/kit/Combobox.stories.tsx`:
+
+```laboratorio
+{
+  "tipo": "codigo-anotado",
+  "lenguaje": "tsx",
+  "codigo": "import { useState } from 'react'\nimport type { Meta, StoryObj } from '@storybook/react-vite'\nimport { expect, fn } from 'storybook/test'\nimport { Combobox } from '@kit'\nimport { IDIOMAS } from '../datos'\n\nconst meta = {\n  title: 'Kit/Combobox',\n  component: Combobox,\n  args: {\n    etiqueta: 'Idioma',\n    opciones: IDIOMAS,\n    valor: null,\n    onCambiar: fn(),\n  },\n  // El combobox es controlado: la historia guarda el valor, como haría App.\n  render: function Historia(args) {\n    const [valor, setValor] = useState(args.valor)\n    return (\n      <Combobox\n        {...args}\n        valor={valor}\n        onCambiar={(nuevo) => {\n          setValor(nuevo)\n          args.onCambiar(nuevo)\n        }}\n      />\n    )\n  },\n} satisfies Meta<typeof Combobox>\n\nexport default meta\ntype Story = StoryObj<typeof meta>\n\nexport const Inicial: Story = {}\n\nexport const ConAyuda: Story = {\n  args: { ayuda: 'Escribe para filtrar: «ale» encuentra Alemán.' },\n}\n\nexport const ConValor: Story = {\n  args: { valor: 'Portugués' },\n}\n\nexport const ListaAbierta: Story = {\n  play: async ({ canvas, userEvent }) => {\n    const campo = canvas.getByRole('combobox', { name: 'Idioma' })\n    await userEvent.type(campo, 'es')\n    await userEvent.keyboard('{ArrowDown}{ArrowDown}')\n    const frances = canvas.getByRole('option', { name: 'Francés' })\n    await expect(campo).toHaveFocus()\n    await expect(campo).toHaveAttribute('aria-activedescendant', frances.id)\n    await expect(canvas.getByRole('status')).toHaveTextContent('6 resultados')\n  },\n}\n\nexport const SinResultados: Story = {\n  play: async ({ canvas, userEvent }) => {\n    await userEvent.type(canvas.getByRole('combobox', { name: 'Idioma' }), 'klingon')\n    await expect(canvas.getByRole('status')).toHaveTextContent('Sin resultados')\n  },\n}",
+  "anotaciones": [
+    {
+      "fragmento": "import type { Meta, StoryObj } from '@storybook/react-vite'",
+      "nota": "Los tipos vienen del paquete del framework, react-vite. Las utilidades para probar (fn y expect), de storybook/test."
+    },
+    {
+      "fragmento": "import { Combobox } from '@kit'",
+      "nota": "De @kit, como los tests: así llega también kit.css, que importa index.ts. Y con --mode radix, las historias prueban la otra versión del kit."
+    },
+    {
+      "fragmento": "title: 'Kit/Combobox',",
+      "nota": "Dónde sale en la barra lateral: en la carpeta Kit, con el nombre Combobox."
+    },
+    {
+      "fragmento": "onCambiar: fn(),",
+      "nota": "fn() es una función espía: cada llamada sale en el panel Actions, y un play puede comprobar con qué se la llamó."
+    },
+    {
+      "fragmento": "render: function Historia(args) {",
+      "nota": "El combobox es controlado: alguien tiene que guardar el valor. La historia hace de App con un useState, en una función con nombre en mayúscula, como cualquier componente que usa Hooks (lección 44)."
+    },
+    {
+      "fragmento": "} satisfies Meta<typeof Combobox>",
+      "nota": "satisfies comprueba que la ficha encaja con Meta sin perder su tipo exacto, y StoryObj<typeof meta> lo aprovecha: sabe qué args ya tienen valor, y no te obliga a repetirlos en cada historia. Por eso Inicial puede ser un objeto vacío."
+    },
+    {
+      "fragmento": "play: async ({ canvas, userEvent }) => {",
+      "nota": "Se ejecuta después de pintar la historia. canvas tiene las consultas de Testing Library, limitadas a la historia, y userEvent teclea y pulsa como en tus tests."
+    },
+    {
+      "fragmento": "await expect(campo).toHaveAttribute('aria-activedescendant', frances.id)",
+      "nota": "Lo mismo que comprueba Combobox.test.tsx, ahora en Chromium: el foco sigue en el campo y aria-activedescendant apunta a Francés, la segunda de las seis opciones que contienen «es». Si algo falla, el panel Interactions te dice en qué paso."
+    }
+  ]
+}
+```
+
+### Las del diálogo
+
+En `src/kit/Dialogo.stories.tsx`. El diálogo se pinta en un portal, y eso se nota también aquí:
+
+```laboratorio
+{
+  "tipo": "codigo-anotado",
+  "lenguaje": "tsx",
+  "codigo": "import { useState } from 'react'\nimport type { Meta, StoryObj } from '@storybook/react-vite'\nimport { expect, fn, screen } from 'storybook/test'\nimport { Dialogo } from '@kit'\n\nconst meta = {\n  title: 'Kit/Dialogo',\n  component: Dialogo,\n  args: {\n    abierto: true,\n    onCerrar: fn(),\n    titulo: 'Pedir plaza en Alemán B2 (extensivo)',\n    descripcion: 'Martes y jueves, de 18:00 a 20:00. Te escribiremos para confirmarla.',\n    children: (\n      <form>\n        <label>\n          Nombre y apellidos <input name=\"nombre\" autoComplete=\"name\" />\n        </label>\n        <button type=\"submit\">Enviar solicitud</button>\n      </form>\n    ),\n  },\n} satisfies Meta<typeof Dialogo>\n\nexport default meta\ntype Story = StoryObj<typeof meta>\n\n// El diálogo va en un portal, fuera del lienzo de la historia: se busca con screen.\nexport const Abierto: Story = {\n  play: async () => {\n    await expect(await screen.findByRole('dialog', { name: /Pedir plaza/ })).toBeVisible()\n    await expect(screen.getByRole('textbox', { name: 'Nombre y apellidos' })).toHaveFocus()\n  },\n}\n\nexport const SinDescripcion: Story = {\n  name: 'Sin descripción',\n  args: { descripcion: undefined },\n}\n\nexport const DevuelveElFoco: Story = {\n  args: { abierto: false },\n  render: function Historia(args) {\n    const [abierto, setAbierto] = useState(args.abierto)\n    return (\n      <>\n        <button type=\"button\" onClick={() => setAbierto(true)}>\n          Pedir plaza\n        </button>\n        <Dialogo\n          {...args}\n          abierto={abierto}\n          onCerrar={() => {\n            setAbierto(false)\n            args.onCerrar()\n          }}\n        />\n      </>\n    )\n  },\n  play: async ({ canvas, userEvent, args }) => {\n    const boton = canvas.getByRole('button', { name: 'Pedir plaza' })\n    await userEvent.click(boton)\n    await userEvent.keyboard('{Escape}')\n    await expect(args.onCerrar).toHaveBeenCalled()\n    await expect(boton).toHaveFocus()\n  },\n}",
+  "anotaciones": [
+    {
+      "fragmento": "children: (",
+      "nota": "Los args también pueden ser JSX: aquí, el formulario que va dentro del diálogo."
+    },
+    {
+      "fragmento": "await expect(await screen.findByRole('dialog', { name: /Pedir plaza/ })).toBeVisible()",
+      "nota": "El diálogo está en un portal, fuera del lienzo de la historia, y canvas no lo encontraría. screen, de storybook/test, busca en todo el documento. Es el error típico 4 de este proyecto, que aquí también existe."
+    },
+    {
+      "fragmento": "await expect(screen.getByRole('textbox', { name: 'Nombre y apellidos' })).toHaveFocus()",
+      "nota": "Al abrirse, el foco entra en el primer campo: el Fragment del paso 3."
+    },
+    {
+      "fragmento": "name: 'Sin descripción',",
+      "nota": "El nombre de una historia sale del export: SinDescripcion se vería como «Sin Descripcion». name lo cambia, aquí para ponerle la tilde."
+    },
+    {
+      "fragmento": "args: { abierto: false },",
+      "nota": "Esta empieza cerrada y la abre un botón, como en la página. Así se puede comprobar adónde vuelve el foco."
+    },
+    {
+      "fragmento": "await expect(args.onCerrar).toHaveBeenCalled()\n    await expect(boton).toHaveFocus()",
+      "nota": "Escape llama a onCerrar y el foco vuelve al botón que abrió el diálogo. Comprobado en Chromium, donde inert existe de verdad, y no en jsdom."
+    }
+  ]
+}
+```
+
+Con `npm run storybook` las tienes en la barra lateral, dentro de «Kit», y bajo cada historia, sus paneles: «Controls» para cambiar sus `args` a mano, «Interactions» con cada paso del `play` y «Accessibility». En la terminal, cada historia es un test. Esta es la salida de `npx vitest run --project=storybook --reporter=verbose`, recortada:
+
+```text
+ ✓ |storybook (chromium)| src/kit/Dialogo.stories.tsx > Abierto
+ ✓ |storybook (chromium)| src/kit/Dialogo.stories.tsx > Sin descripción
+ ✓ |storybook (chromium)| src/kit/Dialogo.stories.tsx > Devuelve El Foco
+ ✓ |storybook (chromium)| src/kit/Combobox.stories.tsx > Inicial
+ ✓ |storybook (chromium)| src/kit/Combobox.stories.tsx > Con Ayuda
+ ✓ |storybook (chromium)| src/kit/Combobox.stories.tsx > Con Valor
+ ✓ |storybook (chromium)| src/kit/Combobox.stories.tsx > Lista Abierta
+ ✓ |storybook (chromium)| src/kit/Combobox.stories.tsx > Sin Resultados
+
+ Test Files  2 passed (2)
+      Tests  8 passed (8)
+```
+
+### La segunda red: el complemento de accesibilidad
+
+`@storybook/addon-a11y` pasa **axe** a cada historia, el mismo motor de tu `accesibilidad.test.tsx` (en la copia de prueba, axe-core 4.14.0 en los dos). En el panel «Accessibility» lo ves en tres pestañas, «Violations», «Passes» e «Inconclusive»: el diálogo abierto da 0 problemas y 24 comprobaciones superadas. Y en el proyecto `storybook` de Vitest, cada historia es también un test de accesibilidad: axe la revisa cuando termina su `play`.
+
+¿No lo hacían ya tus tests? Solo en parte. Corren en jsdom, que no pinta, y por eso desactivan siempre la regla `color-contrast` (paso 6). Las historias corren en Chromium, y ahí axe sí calcula el contraste. Para verlo, aclara el gris de `kit.css` (`--kit-suave: #9aa5b1;` en vez de `#52606d`) y pasa `npm test`, que ahora ejecuta los dos proyectos. Recortada, la salida es esta:
+
+```text
+ ❯ |storybook (chromium)| src/kit/Dialogo.stories.tsx (3 tests | 1 failed)
+   × Abierto
+ ❯ |storybook (chromium)| src/kit/Combobox.stories.tsx (5 tests | 2 failed)
+   × Con Ayuda
+   × Sin Resultados
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |storybook (chromium)| src/kit/Combobox.stories.tsx > Con Ayuda
+Error:
+Click to debug the error directly in Storybook: http://localhost:6006/?path=/story/kit-combobox--con-ayuda&addonPanel=storybook/interactions/panel
+
+expect(received).toHaveNoViolations(expected)
+
+Expected the HTML found at $('#_r_1_-ayuda') to have no violations:
+
+<p id="_r_1_-ayuda" class="kit-combobox-ayuda">Escribe para filtrar: «ale» encuentra Alemán.</p>
+
+Received:
+
+"Elements must meet minimum color contrast ratio thresholds (color-contrast)"
+
+Fix any of the following:
+  Element has insufficient color contrast of 2.5 (foreground color: #9aa5b1, background color: #ffffff, font size: 10.8pt (14.4px), font weight: normal). Expected contrast ratio of 4.5:1
+
+You can find more information on this issue here:
+https://dequeuniversity.com/rules/axe/4.14/color-contrast?application=axeAPI
+
+(…)
+
+ Test Files  2 failed | 6 passed (8)
+      Tests  3 failed | 41 passed (44)
+```
+
+Es decir: el texto de ayuda tiene un contraste de 2,5 a 1 con el fondo, y para un texto de ese tamaño el mínimo es 4,5 a 1 (criterio 1.4.3 de las WCAG). **Los 36 tests de jsdom siguen en verde**, y caen las tres historias que pintan texto con ese gris: «Con Ayuda», «Sin Resultados» y el diálogo «Abierto». La de «Sin Resultados» enseña cuándo mira axe: ese texto no existe hasta que el `play` teclea.
+
+**Una línea que tienes que cambiar tú.** El asistente deja en `.storybook/preview.tsx` `a11y: { test: 'todo' }`, y con `'todo'` los problemas de accesibilidad solo salen como avisos en la interfaz de Storybook: con el mismo gris, `npx vitest run --project=storybook` da 8 de 8 en verde. Para que paren la terminal y la integración continua, pon `'error'`:
+
+```tsx
+a11y: {
+  // 'todo' - show a11y violations in the test UI only
+  // 'error' - fail CI on a11y violations
+  // 'off' - skip a11y checks entirely
+  test: 'error'
+}
+```
+
+```laboratorio
+{
+  "tipo": "roles",
+  "titulo": "Dos redes, cada una con su hueco",
+  "roles": [
+    {
+      "etiqueta": "Tests con jsdom",
+      "rol": "La primera red: rápida",
+      "descripcion": "Roles, nombres, teclado y foco de la página entera, y axe sobre document.body. Sin contraste, porque jsdom no pinta. Son tus 36 tests."
+    },
+    {
+      "etiqueta": "Historias en Chromium",
+      "rol": "La segunda red: lo que se ve",
+      "descripcion": "Cada estado de cada componente en un navegador de verdad, con su contraste, su inert y su maqueta. Más lenta, porque arranca un navegador."
+    }
+  ]
+}
+```
+
+Lo que no cambia: `npm run build` genera el mismo JavaScript que antes, 72,29 kB comprimido, porque las historias no entran en la aplicación (y `tsc -b` también las revisa). Y como importan de `@kit`, `npm run test:radix` las pasa contra Radix: siguen saliendo los 4 rojos del paso 7, todos de jsdom, y las 8 historias en verde.
 
 ## Para profundizar
 
@@ -1145,6 +1355,39 @@ En jsdom, con el menú o el diálogo de Radix abiertos, los hijos de `<body>` qu
       "descripcion": "El atributo que deja una parte de la página sin foco, sin clics y fuera del árbol de accesibilidad.",
       "url": "https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/inert",
       "etiqueta": "MDN"
+    }
+  ]
+}
+```
+
+```laboratorio
+{
+  "tipo": "recursos",
+  "titulo": "Para el reto de Storybook",
+  "recursos": [
+    {
+      "titulo": "Install Storybook",
+      "descripcion": "El asistente, sus preguntas, la configuración Recommended y qué cambia en tu proyecto.",
+      "url": "https://storybook.js.org/docs/get-started/install",
+      "etiqueta": "Storybook"
+    },
+    {
+      "titulo": "How to write stories",
+      "descripcion": "Historias en CSF: la ficha del componente, una historia por estado, args y render.",
+      "url": "https://storybook.js.org/docs/writing-stories",
+      "etiqueta": "Storybook"
+    },
+    {
+      "titulo": "Play function",
+      "descripcion": "Interactuar con una historia después de pintarla, con canvas, userEvent y screen para lo que sale en un portal.",
+      "url": "https://storybook.js.org/docs/writing-stories/play-function",
+      "etiqueta": "Storybook"
+    },
+    {
+      "titulo": "Accessibility tests",
+      "descripcion": "El complemento addon-a11y, sus opciones de axe y los modos todo, error y off con Vitest.",
+      "url": "https://storybook.js.org/docs/writing-tests/accessibility-testing",
+      "etiqueta": "Storybook"
     }
   ]
 }

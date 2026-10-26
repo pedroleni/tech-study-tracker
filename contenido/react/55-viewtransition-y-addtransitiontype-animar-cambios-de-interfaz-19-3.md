@@ -416,6 +416,89 @@ Un último aviso, para los routers: si una navegación «Atrás» llega por el e
 }
 ```
 
+## Cuándo te conviene Motion en vez de `<ViewTransition>`
+
+La última nota de arriba merece algo más que una línea. Antes de React 19.3, animar algo que aparece, desaparece o cambia de sitio era cosa de una librería, y la más usada es **Motion**: el paquete `motion`, que hasta su versión 12 (enero de 2025) se llamaba `framer-motion`. Se importa de `motion/react` y, a 26 de octubre de 2026, va por la 14.6.0. Si en un proyecto ves `from 'framer-motion'`, es la misma librería con el nombre antiguo.
+
+Esto no es un tutorial de Motion, sino el criterio para elegir. **Lo que ya sabe hacer `<ViewTransition>`, hazlo con él**: aparecer, desaparecer, reordenar, el elemento compartido y la dirección con `addTransitionType`, sin instalar nada y con CSS. La diferencia de fondo está en qué anima cada uno: **`<ViewTransition>` anima fotos, de un estado al siguiente; Motion anima los elementos de verdad, fotograma a fotograma.** De ahí salen los cuatro casos en los que Motion gana:
+
+```laboratorio
+{
+  "tipo": "notas-clave",
+  "items": [
+    {
+      "titulo": "Salidas que se pueden deshacer a medias: AnimatePresence",
+      "texto": "AnimatePresence deja en el DOM al hijo que quitas hasta que termina su animación exit, con cualquier set y no solo dentro de una transición. Si vuelve antes de acabar de irse, da la vuelta desde donde está. Con ViewTransition, lo que pidas mientras dura una animación espera a que acabe: React junta esos cambios y los anima después, de una vez."
+    },
+    {
+      "titulo": "Listas que se mueven y se pueden seguir usando: layout",
+      "texto": "Con la prop layout, Motion mide dónde estaba y dónde queda cada elemento y lo lleva a su sitio con transform, sin fotos: los botones de una fila que se está moviendo siguen funcionando. En una transición de vista, un clic sobre lo que se está animando no llega a su botón."
+    },
+    {
+      "titulo": "Arrastrar y otros gestos: drag, whileTap, whileHover",
+      "texto": "Arrastrar es un cambio continuo que sigue al dedo en cada fotograma, y no hay un estado final que fotografiar. ViewTransition no tiene nada para esto. Motion trae drag con límites, elasticidad e inercia, y animaciones que duran lo que dura el gesto: whileTap, whileHover y whileDrag."
+    },
+    {
+      "titulo": "Muelles que heredan la velocidad",
+      "texto": "Un muelle físico de Motion (stiffness y damping) arranca con la velocidad que ya llevaba el elemento: si lo interrumpes, o sueltas una fila a medio arrastrar, sigue desde ahí sin saltos. Las de ViewTransition son keyframes de CSS (o de la Web Animations API, con sus eventos), con su duración y su curva fijas, y mientras corren no admiten cambios: lo nuevo espera."
+    }
+  ]
+}
+```
+
+Así quedaría con Motion la cesta de El Zoco: deslizar una especia hacia la izquierda la quita, y las de debajo suben a ocupar su hueco. Va en un bloque de código anotado porque la vista previa de esta web solo trae React:
+
+```laboratorio
+{
+  "tipo": "codigo-anotado",
+  "lenguaje": "jsx",
+  "codigo": "import { AnimatePresence, MotionConfig, motion } from 'motion/react'\n\n// Un muelle físico (rigidez y amortiguación): si lo interrumpes,\n// sigue desde donde está y con la velocidad que llevaba.\nconst MUELLE = { type: 'spring', stiffness: 500, damping: 35 }\n\nexport default function Cesta({ especias, onQuitar }) {\n  return (\n    <MotionConfig reducedMotion=\"user\" transition={MUELLE}>\n      <ul className=\"cesta\" style={{ position: 'relative' }}>\n        <AnimatePresence mode=\"popLayout\" initial={false}>\n          {especias.map((especia) => (\n            <motion.li\n              key={especia.id}\n              layout\n              initial={{ opacity: 0, scale: 0.8 }}\n              animate={{ opacity: 1, scale: 1, x: 0 }}\n              exit={{ opacity: 0, x: -120 }}\n              drag=\"x\"\n              dragConstraints={{ left: 0, right: 0 }}\n              dragElastic={0.6}\n              onDragEnd={(evento, info) => {\n                if (info.offset.x < -100) onQuitar(especia.id)\n              }}\n            >\n              <span className=\"muestra\" style={{ background: especia.color }} aria-hidden=\"true\" />\n              {especia.nombre}\n              <button type=\"button\" onClick={() => onQuitar(especia.id)}>\n                Quitar {especia.nombre}\n              </button>\n            </motion.li>\n          ))}\n        </AnimatePresence>\n      </ul>\n    </MotionConfig>\n  )\n}",
+  "anotaciones": [
+    {
+      "fragmento": "import { AnimatePresence, MotionConfig, motion } from 'motion/react'",
+      "nota": "Se instala con npm install motion. Antes del cambio de nombre se importaba de framer-motion; el resto del código es igual."
+    },
+    {
+      "fragmento": "const MUELLE = { type: 'spring', stiffness: 500, damping: 35 }",
+      "nota": "Un muelle físico: rigidez y amortiguación. Es el que hereda la velocidad. Motion también admite muelles por duración (visualDuration y bounce), más fáciles de ajustar, pero su documentación avisa de que esos no tienen en cuenta la velocidad."
+    },
+    {
+      "fragmento": "<MotionConfig reducedMotion=\"user\" transition={MUELLE}>",
+      "nota": "transition es la animación por defecto de todos los motion de dentro. Y reducedMotion vale never si no lo pones: Motion, como React, no respeta por sí solo la preferencia de reducir el movimiento. Con user, quita las animaciones de transform y de layout y deja las de opacidad. Comprobado en Chromium: la especia que sale ya no se desliza, solo se desvanece, y las de debajo suben de golpe."
+    },
+    {
+      "fragmento": "<AnimatePresence mode=\"popLayout\" initial={false}>",
+      "nota": "AnimatePresence vigila a sus hijos directos por su key y no deja quitar del DOM al que sale hasta que termina su exit. popLayout lo saca de la maqueta en cuanto sale, para que los demás suban ya; por eso la lista tiene position relative. initial={false}: lo que ya está al cargar no hace su animación de entrada."
+    },
+    {
+      "fragmento": "layout\n              initial={{ opacity: 0, scale: 0.8 }}",
+      "nota": "Con layout, cuando una fila cambia de sitio porque se ha ido la de encima, Motion la lleva a su sitio nuevo con transform. initial es cómo empieza una especia que aparece."
+    },
+    {
+      "fragmento": "animate={{ opacity: 1, scale: 1, x: 0 }}\n              exit={{ opacity: 0, x: -120 }}",
+      "nota": "exit es la salida: se desliza a la izquierda y se desvanece. El x: 0 de animate parece que sobra, y no sobra: al probarlo sin él, una especia que volvía a la cesta a medio salir recuperaba la opacidad, pero se quedaba desplazada 120 píxeles, porque nadie le decía que volviera."
+    },
+    {
+      "fragmento": "drag=\"x\"\n              dragConstraints={{ left: 0, right: 0 }}\n              dragElastic={0.6}",
+      "nota": "Se arrastra solo en horizontal. Con los dos límites a 0, la fila no tiene adónde ir: se estira con elasticidad (se mueve el 60 % de lo que mueves el dedo) y, al soltarla, vuelve con la inercia que llevaba."
+    },
+    {
+      "fragmento": "if (info.offset.x < -100) onQuitar(especia.id)",
+      "nota": "Deslizar para quitar: si al soltar has llevado el dedo más de 100 píxeles a la izquierda, se quita. El botón «Quitar» hace lo mismo para quien no puede arrastrar: las WCAG 2.2 piden que lo que se hace arrastrando se pueda hacer también con un solo toque o clic (criterio 2.5.7), y con el teclado no hay gesto posible."
+    }
+  ]
+}
+```
+
+Lo comprobamos en Chromium 156, con React 19.3.1 y motion 14.6.0, con la misma cesta hecha de las dos formas, más un botón «Reponer», que la vuelve a llenar, y un contador que no se anima. La versión de `<ViewTransition>` lleva uno por fila y la animación a 0,8 segundos, como los ejemplos de esta lección:
+
+- **Deshacer a medias.** Quitas el comino y, antes de una décima de segundo, pulsas «Reponer». Con `<ViewTransition>`, el comino no vuelve a la lista hasta los 0,9 segundos, cuando acaba la primera animación, y entonces empieza otra. Con Motion da la vuelta en el acto, desde donde iba (a 55 píxeles de su sitio y medio transparente), y en un cuarto de segundo está en su sitio, pasándose algo más de un píxel, como buen muelle.
+- **Pulsar lo que se mueve.** Quitas el comino y, a los 150 milisegundos, pulsas «Quitar» en la canela, que sube a ocupar el hueco. Con `<ViewTransition>`, su botón ya está en el sitio nuevo en el DOM, pero lo que se ve es una foto en movimiento, y el clic no le llega: lo recibe `<html>`, y la canela se queda. Con Motion, la canela se quita. Lo que no se anima responde en los dos casos: un contador de la página sumó su clic con la transición en marcha.
+- **Arrastrar.** Una fila arrastrada 90 píxeles no llega al umbral: al soltarla, sigue un poco hacia la izquierda con la inercia del dedo y vuelve a su sitio. Si la coges otra vez a medio camino, sigue tu dedo desde donde está.
+- **Lo que pesa.** Construida con Vite, la versión con `<ViewTransition>` ocupa 68,99 kB comprimidos con gzip, React incluido, y la de Motion, 114,59 kB: **unos 46 kB más**. Motion puede cargar sus funciones más tarde con `m` y `LazyMotion`, como explica su guía «Reduce bundle size».
+
+En resumen: **si el cambio va de un estado a otro (abrir, cerrar, ordenar, filtrar, navegar), `<ViewTransition>`; si la animación tiene que seguir a la persona mientras ocurre (arrastrar, deshacer a medias, pulsar cosas que se mueven), Motion.** Caben las dos en la misma aplicación. Motion trae además `AnimateView`, que, según su documentación, se apoya en el `<ViewTransition>` de React 19.3 para usar sus muelles en las transiciones de vista; se importa aparte, de `motion/react-animate-view`.
+
 ## Lo que conviene no confundir
 
 ```laboratorio
@@ -441,6 +524,10 @@ Un último aviso, para los routers: si una navegación «Atrás» llega por el e
     {
       "mito": "En un navegador sin soporte, la app se rompe",
       "realidad": "React aplica el cambio sin animar, sin errores. El resultado final es el mismo."
+    },
+    {
+      "mito": "Con ViewTransition ya no hace falta ninguna librería de animación",
+      "realidad": "Cubre los cambios de un estado a otro. Para arrastrar, deshacer una animación a medias o pulsar cosas que se están moviendo, Motion sigue siendo la herramienta."
     }
   ]
 }
@@ -654,6 +741,18 @@ El Zoco publica cada mes una receta con sus especias, paso a paso. Este mes, pol
       "descripcion": "La media query para respetar a quien pide menos movimiento en su sistema.",
       "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/@media/prefers-reduced-motion",
       "etiqueta": "MDN"
+    },
+    {
+      "titulo": "Layout animation (Motion)",
+      "descripcion": "Las props layout y layoutId, y una comparación, escrita por los autores de Motion, entre sus animaciones de layout y la View Transition API.",
+      "url": "https://motion.dev/docs/react-layout-animations",
+      "etiqueta": "Motion"
+    },
+    {
+      "titulo": "AnimatePresence (Motion)",
+      "descripcion": "Las animaciones de salida de Motion: exit, los modos sync, wait y popLayout, y por qué cada hijo necesita su key.",
+      "url": "https://motion.dev/docs/react-animate-presence",
+      "etiqueta": "Motion"
     }
   ]
 }

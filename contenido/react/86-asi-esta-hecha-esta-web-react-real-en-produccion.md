@@ -549,6 +549,111 @@ El lint es el de las lecciones 44 y 70: `eslint-plugin-react-hooks` (7.1.1, con 
 }
 ```
 
+## Las carpetas: por tipo o por funcionalidad
+
+Cuando una aplicación pasa de diez archivos a cien, la pregunta deja de ser dónde va un componente y pasa a ser **cómo agrupar los archivos para que un cambio no te obligue a recorrer media carpeta `src/`**. Hay dos respuestas clásicas, y esta web usa sobre todo la primera. Este es su `src/`, leído el 26 de octubre de 2026 y resumido:
+
+```text
+src/
+├── main.tsx · App.tsx
+├── routes/            una página por ruta (16, con sus tests)
+├── components/
+│   ├── ui/            los de shadcn/ui
+│   ├── auth/ · comment/ · leccion/ · layout/ …
+│   └── bloques-laboratorio/   un componente por bloque
+├── lib/
+│   ├── hooks/         useAuth, useLeccion, useComments…
+│   ├── queries/       las llamadas a Supabase
+│   ├── utils/         funciones puras, con su test
+│   ├── sql-en-vivo/ · react-en-vivo/ …   un motor cada una
+│   ├── supabaseClient.ts
+│   └── queryClient.ts
+└── types/
+```
+
+Es una organización **por tipo**: cada archivo va a la carpeta de lo que es (página, componente, hook, consulta, utilidad), y los tests van al lado de lo que prueban (`ProtectedRoute.test.tsx`, junto a `ProtectedRoute.tsx`). Dentro de `components/` ya hay un primer reparto por tema, y los motores de `lib/*-en-vivo/` son módulos cerrados, cada uno con todo lo suyo. Los imports usan el alias `@/` (`@/lib/hooks/useAuth`), que apunta a `src/` en `vite.config.ts` y en `tsconfig.app.json`.
+
+Ahora sigue una funcionalidad entera, los comentarios de las lecciones, y mira dónde está cada pieza:
+
+- `components/comment/CommentsSection.tsx`: la sección que ves debajo de cada lección.
+- `lib/hooks/useComments.ts`: los hooks de TanStack Query para leer, crear, editar y borrar (lección 78).
+- `lib/queries/comments.ts`: las llamadas a Supabase. Su clave de caché está en `queryKeys.ts` y su conversión de filas en `mappers.ts`, que comparten todas.
+- `lib/utils/groupComments.ts`: junta cada comentario con sus respuestas.
+- `types/index.ts`: el tipo `Comment`, con los de todo lo demás.
+
+**Cinco carpetas para una funcionalidad.** Es el precio de ordenar por tipo cuando la aplicación crece. La otra respuesta es ordenar **por funcionalidad** (en inglés, *feature folders*): una carpeta por cada cosa que hace la aplicación, con todo lo suyo dentro. Los mismos archivos quedarían así:
+
+```text
+src/
+├── routes/              las páginas, que juntan funcionalidades
+├── features/
+│   ├── comentarios/
+│   │   ├── CommentsSection.tsx
+│   │   ├── useComments.ts
+│   │   ├── comments.ts         las llamadas a Supabase
+│   │   ├── groupComments.ts    y su test
+│   │   └── index.ts            lo que pueden usar los demás
+│   ├── favoritos/
+│   └── progreso/
+├── components/ui/       lo compartido: botones, tarjetas…
+└── lib/                 lo compartido: supabaseClient, queryClient
+```
+
+```laboratorio
+{
+  "tipo": "notas-clave",
+  "items": [
+    {
+      "titulo": "Por tipo: para empezar, y mientras te quepa en la cabeza",
+      "texto": "No hay nada que decidir: cada archivo va a la carpeta de lo que es. Funciona bien en proyectos pequeños y medianos, con poca gente. Empieza a pesar cuando cada cambio toca cinco carpetas, hooks/ tiene decenas de archivos sin relación entre sí y nadie se atreve a borrar nada porque no sabe quién lo usa."
+    },
+    {
+      "titulo": "Por funcionalidad: cuando crece en pantallas y en personas",
+      "texto": "Todo lo de los comentarios está junto: lo encuentras, lo cambias y, si un día sobra, lo borras con su carpeta. Varias personas pueden trabajar en funcionalidades distintas sin pisarse. Lo que usan varias (los botones, el cliente de Supabase) sale a carpetas compartidas."
+    },
+    {
+      "titulo": "No hace falta elegir de golpe",
+      "texto": "Lo habitual es empezar por tipo y pasar a features/ una funcionalidad cuando ya tiene su componente, sus hooks y sus consultas. Las dos formas conviven: esta web ya lo hace con sus motores de lib/*-en-vivo."
+    }
+  ]
+}
+```
+
+### La regla: no se importa una funcionalidad por dentro
+
+Ordenar por funcionalidad solo sirve si **cada funcionalidad es una caja: lo de dentro es suyo, y desde fuera solo se usa lo que ella publica**. Si `favoritos` importa `@/features/comentarios/groupComments`, ya no puedes cambiar ese archivo sin mirar quién más lo usa, y las carpetas separadas son solo apariencia. Hay dos formas de cumplirla:
+
+- **Una puerta de entrada.** Cada funcionalidad tiene un `index.ts` que exporta lo que los demás pueden usar, y desde fuera se importa de `@/features/comentarios`, nunca de un archivo de dentro.
+- **Juntarlas arriba.** Las funcionalidades no se importan entre sí: las combina la página. `LeccionPage` pinta la lección y, debajo, `CommentsSection`, y ninguna de las dos sabe de la otra. Es la versión estricta, la de la guía bulletproof-react, que además pide que el código vaya en una sola dirección: de lo compartido a las funcionalidades, y de estas a la aplicación. Esa guía desaconseja también los `index.ts` que reexportan mucho, porque, dice, dificultan que Vite descarte el código que no se usa.
+
+Una regla que depende de la memoria de cada cual se rompe la primera semana. ESLint la vigila sin plugins, con su regla `no-restricted-imports`:
+
+```js
+// eslint.config.js: un bloque más de la configuración
+{
+  files: ['src/**/*.{ts,tsx}'],
+  rules: {
+    'no-restricted-imports': ['error', {
+      patterns: [{
+        regex: '^@/features/[^/]+/.+',
+        message: 'Importa la funcionalidad por su puerta de entrada (@/features/<nombre>), no sus archivos de dentro.',
+      }],
+    }],
+  },
+},
+```
+
+Con un `ListaFavoritos.tsx` que importa `groupComments` de dentro de `comentarios`, esto es lo que dice (igual con ESLint 9.39.5, la versión de esta web, que con la 10.13.0):
+
+```text
+src/features/favoritos/ListaFavoritos.tsx
+  1:1  error  '@/features/comentarios/groupComments' import is restricted from being used by a pattern. Importa la funcionalidad por su puerta de entrada (@/features/<nombre>), no sus archivos de dentro  no-restricted-imports
+```
+
+Es decir: ese import está prohibido por un patrón, y después viene tu mensaje. El de `@/features/comentarios` pasa sin problemas. Fíjate en que la regla solo mira cómo está escrita la ruta: `../comentarios/groupComments` se colaría, y lo comprobamos. Por eso va en pareja con una costumbre: dentro de una funcionalidad, rutas relativas (`./useComments`); hacia otra, siempre el alias. Para cerrar también ese hueco, bulletproof-react usa la regla `import/no-restricted-paths` del plugin `eslint-plugin-import`, que mira carpetas y no textos.
+
+¿Y esta web? Con 16 páginas y nueve hooks en `lib/hooks/`, ordenada por tipo todavía se recorre bien, y no la pondría en la lista de abajo. Si siguiera creciendo, los comentarios, los favoritos y el progreso serían los primeros candidatos a `features/`: cada uno tiene ya su hook y su archivo de consultas.
+
 ## Lo que mejoraría
 
 La lista, ordenada por lo que más afecta a quien visita la web. **Ninguna de estas mejoras está hecha todavía**: las propongo yo a partir de lo que he leído, y las de abajo marcan lo que he comprobado y lo que solo he deducido del código.
@@ -592,6 +697,8 @@ La lista, ordenada por lo que más afecta a quien visita la web. **Ninguna de es
   ]
 }
 ```
+
+**9. Que entrar te devuelva a donde ibas (comprobado en el código y reproducido; añadida el 26 de octubre).** Si abres tus favoritos sin sesión, la web te manda a iniciar sesión, pero al entrar acabas en la portada, no en tus favoritos. El código y el arreglo, al final de esta sección.
 
 Las dos primeras, escritas como yo las haría. Primero la ruta comodín, dentro del mismo `AppShell`, y la raíz con los dos avisos de errores que ya conoces de la lección 53:
 
@@ -640,6 +747,55 @@ Y el boundary que pondría alrededor de los bloques, con la API de la lección 5
   ]
 }
 ```
+
+### La novena, con su código
+
+Así manda hoy la web a la página de entrada, y esto hace el formulario después de entrar:
+
+```laboratorio
+{
+  "tipo": "codigo-anotado",
+  "lenguaje": "tsx",
+  "codigo": "// src/components/auth/ProtectedRoute.tsx\nexport function ProtectedRoute() {\n  const { session, loading, isPasswordRecovery } = useAuth()\n\n  if (loading) {\n    return <p role=\"status\">Comprobando sesión…</p>\n  }\n\n  if (isPasswordRecovery) {\n    return <Navigate to=\"/nueva-password\" replace />\n  }\n\n  return session ? <Outlet /> : <Navigate to=\"/login\" replace />\n}\n\n// src/components/auth/AuthForm.tsx (recortado)\nconst onSubmit = async ({ email, password }: AuthFields) => {\n  setAuthError(null)\n\n  try {\n    if (isLogin) {\n      await signIn(email, password)\n      navigate('/')\n      return\n    }\n    // … el registro",
+  "anotaciones": [
+    {
+      "fragmento": "if (isPasswordRecovery) {",
+      "nota": "Quien llega desde un enlace para recuperar la contraseña tiene que poner una nueva antes de nada."
+    },
+    {
+      "fragmento": "<Navigate to=\"/login\" replace />",
+      "nota": "Sin sesión, a /login, pero sin state: la dirección que pedías, /favoritos, se pierde aquí."
+    },
+    {
+      "fragmento": "navigate('/')",
+      "nota": "Después de entrar, siempre a la portada. Y sin replace: el formulario se queda en el historial, y Atrás te devuelve a él con la sesión ya abierta."
+    }
+  ]
+}
+```
+
+Lo reproduje con React Router 7.18.2 y React 19.2.4, las versiones de la web, con una copia reducida de los dos componentes y un historial con la portada y después `/favoritos?orden=fecha`, sin sesión:
+
+- **Como está:** la guarda te lleva a `/login`; al entrar, acabas en `/`, la portada; y si pulsas Atrás, vuelves a `/login`.
+- **Con el arreglo:** la guarda te lleva a `/login`; al entrar, vuelves a `/favoritos?orden=fecha`, con la búsqueda incluida; y Atrás te lleva a la portada.
+
+El arreglo son dos cambios, uno en cada archivo:
+
+```tsx
+// PROPUESTA (no está en el repositorio)
+// ProtectedRoute.tsx: recordar adónde ibas
+const location = useLocation()
+// …
+return session ? <Outlet /> : <Navigate to="/login" replace state={{ from: location }} />
+
+// AuthForm.tsx: volver ahí, sin dejar el formulario en el historial
+const location = useLocation()
+// …
+await signIn(email, password)
+navigate(location.state?.from ?? '/', { replace: true })
+```
+
+Compila con TypeScript 5.9.3 en modo estricto. `state` viaja con la navegación pero no en la URL, así que nadie puede fabricar un enlace que, después de entrar, te lleve a otra web. Es el patrón que explica la lección «Autenticación en una SPA: sesión, rutas protegidas y dónde guardar el token», con el porqué de `replace` en los dos sitios y la versión con `loader` y `redirect`.
 
 ## Errores típicos
 
@@ -818,6 +974,18 @@ En una aplicación real, cualquiera de los tres tumbaría la pantalla entera si 
       "descripcion": "La guía de Vite que complementa la lección 85: build, preview y despliegue.",
       "url": "https://vite.dev/guide/static-deploy",
       "etiqueta": "Vite"
+    },
+    {
+      "titulo": "Project Structure (bulletproof-react)",
+      "descripcion": "Una guía muy citada para ordenar por funcionalidad: qué va en features/, qué es compartido, por qué no se cruzan las funcionalidades y cómo vigilarlo con ESLint.",
+      "url": "https://github.com/alan2207/bulletproof-react/blob/master/docs/project-structure.md",
+      "etiqueta": "GitHub"
+    },
+    {
+      "titulo": "no-restricted-imports",
+      "descripcion": "La regla de ESLint que prohíbe importar ciertas rutas, con patrones de gitignore o con expresiones regulares.",
+      "url": "https://eslint.org/docs/latest/rules/no-restricted-imports",
+      "etiqueta": "ESLint"
     }
   ]
 }

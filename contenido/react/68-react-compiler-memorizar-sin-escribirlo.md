@@ -358,6 +358,15 @@ npm install -D babel-plugin-react-compiler @rolldown/plugin-babel @babel/core
 
 Con otras herramientas cambia la instalación, no la idea: Next.js lo activa con una opción de su configuración, Expo lo trae activado desde el SDK 54 y con Babel a secas basta con añadir el plugin. react.dev tiene una sección para cada una. Con React 17 o 18 necesitas además la opción `target` y el paquete `react-compiler-runtime`.
 
+### El compilador en Rust, todavía experimental
+
+Todo lo anterior usa el compilador estable, el plugin de Babel. En 2026, el equipo de React lo ha portado a Rust, para que las herramientas escritas en Rust lo ejecuten directamente, sin pasar por Babel, y más deprisa. Ya se puede probar de dos formas:
+
+- **Next.js**, desde la 16.3 (3 de agosto de 2026): la opción [`experimental.turbopackRustReactCompiler`](https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopackRustReactCompiler), junto a `reactCompiler: true`. Solo funciona con Turbopack y no necesita `babel-plugin-react-compiler`.
+- **Oxc**, el que ya traduce tu JSX en Vite, lo [integra](https://oxc.rs/blog/2026-08-18-react-compiler-support) en el paquete `oxc-transform-react`. Si lo instalas, `@vitejs/plugin-react` (desde la 6.1) lo usa con `react({ compiler: true })`, en lugar del `babel(…)` de arriba.
+
+Lo probé el 26 de octubre de 2026 con el `App` del censo, en Next.js 16.4.3 y en Vite con `@vitejs/plugin-react` 6.1.2: en los dos sale lo mismo que leíste en «Lo que escribe el compilador»: `c(11)`, el bloque que compara `censo` y el centinela de `sumar`. Pero **nadie lo da todavía por terminado**. React lo presentó como un port [en desarrollo](https://github.com/react/react/pull/36173), compartido antes de probarlo dentro de Meta; Next.js lo ofrece como experimental para recoger opiniones antes de hacerlo la opción por defecto, y al construir avisa con «Experiments (use with caution)»; Oxc advierte de que sus opciones y su comportamiento pueden cambiar. **Para producción, quédate con el plugin de Babel 1.0**; el de Rust, pruébalo en una rama para comparar tiempos de build.
+
 ### Comprobar que funciona
 
 En tu proyecto tienes dos formas de saber qué se ha compilado:

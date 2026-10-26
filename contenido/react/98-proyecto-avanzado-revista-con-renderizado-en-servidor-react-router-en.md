@@ -3,9 +3,9 @@
 - **Módulo:** Proyectos avanzados
 - **Slug:** `proyecto-avanzado-revista-con-renderizado-en-servidor-react-router-en-modo-framework` (autogenerado del título)
 - **Orden:** 980
-- **Fuentes:** [Framework: Installation](https://reactrouter.com/start/framework/installation) + [Data Loading](https://reactrouter.com/start/framework/data-loading) + [Actions](https://reactrouter.com/start/framework/actions) + [hydrateRoot](https://react.dev/reference/react-dom/client/hydrateRoot) — ver `contenido/react/TEMARIO.md` #98
+- **Fuentes:** [Framework: Installation](https://reactrouter.com/start/framework/installation) + [Data Loading](https://reactrouter.com/start/framework/data-loading) + [Actions](https://reactrouter.com/start/framework/actions) + [Using Fetchers](https://reactrouter.com/how-to/fetchers) + [Middleware](https://reactrouter.com/how-to/middleware) + [hydrateRoot](https://react.dev/reference/react-dom/client/hydrateRoot) — ver `contenido/react/TEMARIO.md` #98
 - **Repositorio:** [github.com/pedroleni/react-proyectos](https://github.com/pedroleni/react-proyectos) (carpeta `revista`)
-- **Requiere:** Las lecciones 76 y 77 (React Router), 81 (`<title>` y `<meta>`), 46 (`useSyncExternalStore`), 61 (validar formularios), 87 a 90 (el módulo 13), 83 y 84 (tests) y la 4 de HTML (metadatos del `<head>`), y el módulo 10 (TypeScript)
+- **Requiere:** Las lecciones 76 y 77 (React Router), la 99, «El router también carga y envía datos» (`loader`, `action`, `<Form>` y `useFetcher` en el modo de datos), 81 (`<title>` y `<meta>`), 46 (`useSyncExternalStore`), 61 (validar formularios), 87 a 90 (el módulo 13), 83 y 84 (tests) y la 4 de HTML (metadatos del `<head>`), y el módulo 10 (TypeScript)
 
 ---
 
@@ -19,7 +19,9 @@ Es el proyecto que convierte en práctica el módulo 13. Lo que las lecciones 87
 - **Los datos los carga un `loader`**, una función que solo se ejecuta en el servidor, antes de pintar.
 - **Un 404 de verdad**: la dirección de un artículo que no existe responde con el estado 404, no con una página que dice «no existe» y un 200.
 - **Cartas al director con una `action`**, validadas en el servidor. El formulario funciona **también sin JavaScript**, con un `POST` de toda la vida; con JavaScript, se envía sin recargar la página.
+- **Un boletín en el pie que no te saca del artículo**: se envía con `useFetcher`, sin navegar.
 - **Dos fechas que no rompen la hidratación**: la hora de publicación, que en tu ordenador funciona y en un servidor en UTC no, y «hace dos días», que el servidor no puede saber.
+- **Un middleware que mide cada petición** en el servidor y se lo cuenta al navegador con la cabecera `Server-Timing`.
 - **Lo que solo vive en el servidor**, en archivos `.server.ts`: los textos de los artículos y los correos de los lectores no llegan nunca al navegador.
 
 ```laboratorio
@@ -94,6 +96,7 @@ Es el proyecto que convierte en práctica el módulo 13. Lo que las lecciones 87
 
 - **Node.js 22.22.2 o superior, o la LTS actual (24).** React Router 8.5.0 pide Node 22.22 o superior, y jsdom, con el que corren los tests, 22.22.2. La lección 90 ya enseñó lo que pasa con uno más antiguo. Compruébalo con `node --version`.
 - **Las lecciones 87 a 90**, sobre todo la 87. Este proyecto las aplica; cuando una idea ya tiene su explicación allí, te remito en vez de repetirla.
+- **La lección «El router también carga y envía datos»**: `loader`, `action`, `<Form>`, `useNavigation` y `useFetcher` en el modo de datos. Aquí son los mismos, pero se ejecutan en el servidor.
 - **Un navegador con herramientas de desarrollo**, para desactivar JavaScript en el paso 5.
 
 ### Del cero al proyecto en marcha
@@ -104,35 +107,39 @@ Es el proyecto que convierte en práctica el módulo 13. Lo que las lecciones 87
 4. **Ejecuta los tests en otra terminal**: `npm test`. Empiezan casi todos en rojo, y es a propósito:
 
 ```text
-      Tests  20 failed | 2 passed (22)
+      Tests  28 failed | 2 passed (30)
 ```
 
-Los dos que pasan comprueban la capa de datos, que ya está hecha. Los otros veinte se ponen en verde a medida que avanzas: tras el paso 1 pasan 4; tras el 2, 6; tras el 3, 8; tras el 4, 11; tras el 5, 17; tras el 6, 18; tras el 7, 19, y tras el 8, los 22.
+Los dos que pasan comprueban la capa de datos, que ya está hecha. Los otros veintiocho se ponen en verde a medida que avanzas: tras el paso 1 pasan 4; tras el 2, 6; tras el 3, 8; tras el 4, 11; tras el 5, 17; tras el 6, 18; tras el 7, 23; tras el 8, 24; tras el 9, 27, y tras el 10, los 30.
 
-Al abrir la revista verás «La portada está vacía: le falta su loader (paso 2).», y cualquier dirección de un artículo te dará «Esta página no existe», con un `Error: No route matches URL "/articulos/…"` en la terminal: la ruta todavía no está registrada. `npm run typecheck` también se queja, de dos cosas que se arreglan solas: de `./+types/articulo` hasta el paso 1, y de los tests hasta el paso 5, porque usan funciones que todavía no existen.
+Al abrir la revista verás «La portada está vacía: le falta su loader (paso 2).», y cualquier dirección de un artículo te dará «Esta página no existe», con un `Error: No route matches URL "/articulos/…"` en la terminal: la ruta todavía no está registrada. `npm run typecheck` también se queja, de tres cosas que se arreglan solas: de `./+types/articulo` hasta el paso 1, de `./+types/boletin` hasta el 7 (los tipos de una ruta solo se generan cuando está registrada) y de los tests hasta el 7, porque usan funciones que todavía no existen.
 
 ## Cómo está organizado
 
 ```text
 app/
-├── root.tsx                  el documento entero (<html>), la cabecera, el pie y el error general
-├── routes.ts                 las rutas                                              ← paso 1
+├── root.tsx                  el documento (<html>), la cabecera, el pie y el error ← paso 10
+├── routes.ts                 las rutas                                             ← pasos 1 y 7
 ├── routes/
 │   ├── portada.tsx           /                  loader de la portada               ← pasos 2 y 4
-│   ├── articulo.tsx          /articulos/:slug   loader, 404, action                ← pasos 3, 4, 5 y 6
+│   ├── articulo.tsx          /articulos/:slug   loader, 404, action                ← pasos 3 a 6 y 10
+│   ├── boletin.tsx           /boletin           la action del boletín              ← paso 7
 │   └── no-encontrada.tsx     cualquier otra dirección                              ← paso 3
 ├── componentes/
 │   ├── Metadatos.tsx         <title>, <meta> y Open Graph                          ← paso 4
 │   ├── FormularioCarta.tsx   el formulario de las cartas                           ← pasos 5 y 6
+│   ├── FormularioBoletin.tsx el boletín, en el pie                                 ← paso 7
 │   ├── TarjetaArticulo.tsx   un artículo en la portada
 │   ├── FechaPublicacion.tsx  «21 de octubre de 2026 a las 9:30»
-│   └── HaceCuanto.tsx        «· anteayer»                                          ← paso 8
+│   └── HaceCuanto.tsx        «· anteayer»                                          ← paso 9
 ├── datos/
 │   ├── articulos.server.ts   los seis artículos
-│   └── cartas.server.ts      leer, guardar y validar las cartas                    ← paso 5
+│   ├── cartas.server.ts      leer, guardar y validar las cartas                    ← paso 5
+│   └── boletin.server.ts     guardar y validar los correos del boletín
 ├── config.server.ts          la URL pública, de la variable de entorno URL_PUBLICA
-├── fechas.ts                 formatear fechas                                      ← paso 7
-├── reloj.ts                  useAhora(): la hora, como almacén externo            ← paso 8
+├── tiempos.server.ts         el middleware que mide cada petición                  ← paso 10
+├── fechas.ts                 formatear fechas                                      ← paso 8
+├── reloj.ts                  useAhora(): la hora, como almacén externo             ← paso 9
 ├── tipos.ts                  los tipos que comparten los dos lados
 └── app.css
 public/og/                    las tarjetas de Open Graph
@@ -152,7 +159,7 @@ Lo primero que choca viniendo de Vite: **no hay `index.html` ni `main.tsx`**. El
       "nombre": "root",
       "nivel": 0,
       "etiqueta": "root.tsx",
-      "nota": "← el documento, la cabecera y el pie; su ErrorBoundary, para lo inesperado"
+      "nota": "← el documento, la cabecera y el pie; el middleware de todas las rutas y su ErrorBoundary, para lo inesperado"
     },
     {
       "nombre": "portada",
@@ -165,6 +172,12 @@ Lo primero que choca viniendo de Vite: **no hay `index.html` ni `main.tsx`**. El
       "nivel": 1,
       "etiqueta": "articulos/:slug",
       "nota": "← loader, action y un ErrorBoundary para el 404"
+    },
+    {
+      "nombre": "boletin",
+      "nivel": 1,
+      "etiqueta": "boletin",
+      "nota": "← la action del boletín; sin JavaScript, también su página"
     },
     {
       "nombre": "no-encontrada",
@@ -186,7 +199,7 @@ Y esto es lo que pasa en una visita, de principio a fin. Todo lo de la lección 
     {
       "fecha": "Servidor",
       "titulo": "Llega la petición",
-      "texto": "GET /articulos/la-raya-no-es-un-guion. React Router busca la ruta que encaja y ejecuta su loader: el artículo y sus cartas."
+      "texto": "GET /articulos/la-raya-no-es-un-guion. React Router busca la ruta que encaja, pasa la petición por el middleware (paso 10) y ejecuta su loader: el artículo y sus cartas."
     },
     {
       "fecha": "Servidor",
@@ -671,7 +684,7 @@ Vuelve a activar JavaScript. Todo sigue funcionando igual, pero sin recargar: Re
     },
     {
       "fragmento": "navegacion.state === 'submitting'",
-      "nota": "Mientras la action trabaja. Un Form normal provoca una navegación, así que su estado es el de toda la página; un useFetcher tendría el suyo propio."
+      "nota": "Mientras la action trabaja. Un Form normal provoca una navegación, así que su estado es el de toda la página; un useFetcher tiene el suyo propio (paso 7)."
     },
     {
       "fragmento": "disabled={enviando}",
@@ -721,7 +734,107 @@ fetch    GET  /articulos/componer-una-linea-a-mano.data?carta=6f60…  → 200
 - **El 400 no vuelve a pedir nada.** La documentación de React Router lo dice: solo una respuesta 2xx de la `action` hace que se vuelvan a pedir los datos de la página. Unos errores de validación no cambian nada en el servidor.
 - **Lo que va bien, sí.** La `action` redirige; a ese `POST` hecho con `fetch` el servidor responde con un 202 en vez de un 302, y React Router pide los datos de la dirección de destino, esta misma página con `?carta=`. Su `loader` se ejecuta otra vez, y la lista de cartas llega con la nueva. Es la **revalidación**: después de cambiar algo en el servidor, los datos de la página se vuelven a pedir solos.
 
-## Paso 7: la hora de publicación, igual en los dos lados (`app/fechas.ts`)
+## Paso 7: el boletín, sin cambiar de página (`routes.ts`, `boletin.tsx` y `FormularioBoletin.tsx`)
+
+El pie de todas las páginas tiene un formulario para recibir el boletín de la revista, un correo al mes con los artículos nuevos. En la rama `main` es un `<Form>` como el de las cartas, que envía a `/boletin`, una ruta que todavía no existe. Regístrala en `routes.ts` con `route('boletin', 'routes/boletin.tsx')` y escribe la `action` en ese módulo. La validación ya está hecha en `datos/boletin.server.ts`, con la misma expresión que la de las cartas:
+
+```tsx
+export async function action({ request }: Route.ActionArgs) {
+  const resultado = validarSuscripcion(await request.formData())
+  if (!resultado.ok) return data(resultado, { status: 400 })
+  await apuntarAlBoletin(resultado.correo)
+  return resultado
+}
+```
+
+Un correo mal escrito responde con un 400, como una carta (paso 5). Uno bueno **no redirige a ninguna parte: devuelve datos**, porque quien se apunta tiene que quedarse donde estaba. El componente de la ruta, `PaginaBoletin`, ya viene hecho; enseguida verás para qué sirve.
+
+Con la ruta y la `action`, el formulario del pie ya apunta correos. Ahora apúntate desde la mitad de un artículo:
+
+```laboratorio
+{
+  "tipo": "predice-el-resultado",
+  "lenguaje": "jsx",
+  "codigo": "// FormularioBoletin.tsx, en la rama main\n<Form method=\"post\" action=\"/boletin\" noValidate className=\"boletin\">\n  {/* el campo del correo y el botón «Apuntarme» */}\n</Form>\n\n// Con JavaScript, Ana lee «La raya no es un guion», baja hasta el pie,\n// escribe su correo y pulsa «Apuntarme». La action responde { ok: true, … }.\n// ¿Qué pasa?",
+  "opciones": [
+    "Se apunta y sigue en el artículo, a la misma altura",
+    "El navegador recarga la página entera y la deja otra vez en el artículo",
+    "Acaba en /boletin, arriba del todo y con una entrada nueva en el historial, aunque sin recargar",
+    "Nada: un Form solo puede enviar a la action de su propia ruta"
+  ],
+  "correcta": 2,
+  "explicacion": "Un Form es una navegación, con JavaScript o sin él: cambia la URL, añade una entrada al historial y pinta la página de destino. Comprobado: la URL pasó de /articulos/la-raya-no-es-un-guion a /boletin, history.length de 2 a 3 y el scroll de 1162 a 0. La marca que dejamos en window seguía allí: React Router no recarga, pero te saca del artículo."
+}
+```
+
+Es lo que la lección «El router también carga y envía datos» resolvía con la estrella de favoritos de El Clavijero: un envío que no tiene que cambiar de página. **`useFetcher` da un envío con su propio estado, que no navega.** Aquí, su `action` está en el servidor:
+
+```laboratorio
+{
+  "tipo": "codigo-anotado",
+  "lenguaje": "tsx",
+  "codigo": "import { useEffect, useRef } from 'react'\nimport { useFetcher } from 'react-router'\nimport type { action } from '~/routes/boletin'\n\n/**\n * El boletín, en el pie de todas las páginas. Con un fetcher, apuntarse no es\n * una navegación: la URL, el historial y la página se quedan como estaban.\n * Sin JavaScript, es un formulario normal que lleva a /boletin.\n */\nexport default function FormularioBoletin() {\n  // Un envío con su propio estado. typeof action le da el tipo de fetcher.data.\n  const fetcher = useFetcher<typeof action>()\n  const enviando = fetcher.state !== 'idle'\n  const resultado = fetcher.data\n  const error = resultado && !resultado.ok ? resultado.error : undefined\n  const formulario = useRef<HTMLFormElement>(null)\n\n  // Apuntado: el campo se vacía. Nadie lo hace por ti, porque no hay navegación\n  // y el formulario sigue montado.\n  useEffect(() => {\n    if (resultado?.ok) formulario.current?.reset()\n  }, [resultado])\n\n  // defaultShouldRevalidate={false}: apuntarse no cambia nada de lo que enseña\n  // la página, así que no hace falta volver a pedir sus datos.\n  return (\n    <fetcher.Form\n      method=\"post\"\n      action=\"/boletin\"\n      defaultShouldRevalidate={false}\n      noValidate\n      ref={formulario}\n      className=\"boletin\"\n    >\n      <label htmlFor=\"boletin-correo\">Recibe el boletín: un correo al mes con los artículos nuevos</label>\n      <div className=\"boletin-fila\">\n        <input\n          id=\"boletin-correo\"\n          name=\"correo\"\n          type=\"email\"\n          autoComplete=\"email\"\n          required\n          aria-invalid={error ? true : undefined}\n          aria-describedby={error ? 'boletin-respuesta' : undefined}\n        />\n        <button type=\"submit\" disabled={enviando}>\n          {enviando ? 'Apuntándote…' : 'Apuntarme'}\n        </button>\n      </div>\n      <p id=\"boletin-respuesta\" role=\"status\" className={error ? 'boletin-respuesta error' : 'boletin-respuesta'}>\n        {resultado?.ok ? `Hecho: te escribiremos a ${resultado.correo}.` : error}\n      </p>\n    </fetcher.Form>\n  )\n}",
+  "anotaciones": [
+    {
+      "fragmento": "import type { action } from '~/routes/boletin'",
+      "nota": "Solo el tipo: con import type, la línea desaparece al compilar, y ni la action ni boletin.server llegan al navegador."
+    },
+    {
+      "fragmento": "const fetcher = useFetcher<typeof action>()",
+      "nota": "Un fetcher para este formulario, con su propio estado. typeof action le da a fetcher.data el tipo de lo que devuelve la action: { ok: true, correo } o { ok: false, error, correo }."
+    },
+    {
+      "fragmento": "const enviando = fetcher.state !== 'idle'",
+      "nota": "idle, submitting o loading, como el useNavigation del paso 6, pero solo de este envío. Comprobado en un test: mientras el boletín se envía, useNavigation sigue en idle, así que el botón de las cartas no se entera."
+    },
+    {
+      "fragmento": "if (resultado?.ok) formulario.current?.reset()",
+      "nota": "Sin navegación, el formulario sigue montado y nadie vacía el campo. En el paso 6 lo resolvía la key; aquí basta con reset() cuando la respuesta dice ok."
+    },
+    {
+      "fragmento": "action=\"/boletin\"",
+      "nota": "A qué ruta se envía. Sin action, un formulario envía a la ruta en la que está pintado, y el pie es de root: lo verás en los errores típicos."
+    },
+    {
+      "fragmento": "defaultShouldRevalidate={false}",
+      "nota": "Tras una action que va bien, React Router vuelve a pedir los datos de la página (paso 6). Apuntarse no cambia nada de lo que se ve, así que aquí se ahorra esa petición."
+    },
+    {
+      "fragmento": "role=\"status\"",
+      "nota": "El párrafo está siempre, vacío al principio: cuando cambia su texto, el lector de pantalla anuncia la respuesta (lección 37)."
+    }
+  ]
+}
+```
+
+Sin JavaScript, `fetcher.Form` pinta lo mismo que el `<Form>` de antes, un formulario de toda la vida:
+
+```html
+<form noValidate="" class="boletin" data-discover="true" action="/boletin" method="post">
+```
+
+### Lo que va por la red
+
+Con JavaScript, desde un artículo, primero con un correo mal escrito y después con el bueno, estas fueron las peticiones del boletín en Chromium (en WebKit, las mismas):
+
+```text
+fetch    POST /boletin.data   → 400   «Escribe un correo válido, como nombre@ejemplo.es.», junto al campo
+fetch    POST /boletin.data   → 200   «Hecho: te escribiremos a ana@correo.es.», y el campo, vacío
+```
+
+La URL, `history.length`, el scroll y la marca que dejamos en `window` siguieron igual. Y **después del 200 no hay ninguna petición más**: es el `defaultShouldRevalidate={false}`. Sin él, justo después del `POST` salió un `GET /articulos/la-raya-no-es-un-guion.data → 200`: el `loader` del artículo volvía a leer las cartas, que no habían cambiado.
+
+Sin JavaScript no hay forma de quedarse: el navegador va a donde diga `action`, y lo que vuelve es la página de `/boletin`. Para eso está `PaginaBoletin`, que pinta lo que devolvió la `action` con `actionData`:
+
+```text
+GET  /articulos/componer-una-linea-a-mano   → 200
+POST /boletin                               → 400   «Escribe un correo válido, como nombre@ejemplo.es. Vuelve a intentarlo en el formulario del pie.»
+POST /boletin                               → 200   «Hecho: te escribiremos a ana@correo.es cada vez que salga un número.»
+```
+
+La misma `action` responde a los dos: con JavaScript, lo que devuelve llega a `fetcher.data`; sin él, al `actionData` de la página de `/boletin`. Los cinco tests del paso comprueban la ruta y la `action` (`boletin.test.ts`) y el formulario (`formulario-boletin.test.tsx`), montado en un artículo de mentira con `createRoutesStub`: después de apuntarse, el artículo tiene que seguir ahí.
+
+## Paso 8: la hora de publicación, igual en los dos lados (`app/fechas.ts`)
 
 Cada artículo dice cuándo se publicó: «21 de octubre de 2026 a las 9:30». En la rama `main`, `formatearFecha` es así:
 
@@ -779,13 +892,13 @@ El arreglo no es callar el aviso con `suppressHydrationWarning`, que dejaría en
 
 Con el servidor en UTC, la página se hidrata sin un aviso y dice «a las 9:30»: comprobado en Chromium con el navegador en Madrid y en Ciudad de México, y en WebKit en Madrid. El test del paso lo hace en jsdom: genera el HTML con `renderToString` y `process.env.TZ = 'UTC'`, cambia la zona a `Europe/Madrid` e hidrata con `hydrateRoot`, apuntando lo que llega a `onRecoverableError`.
 
-## Paso 8: «hace dos días», solo en el navegador (`reloj.ts` y `HaceCuanto.tsx`)
+## Paso 9: «hace dos días», solo en el navegador (`reloj.ts` y `HaceCuanto.tsx`)
 
 Junto a la fecha, la portada dice cuánto hace: «· anteayer», «· hace 2 semanas». En la rama `main` está así:
 
 ```tsx
 export default function HaceCuanto({ fecha }: { fecha: string }) {
-  // TODO (paso 8): el servidor no sabe cuándo vas a leer la página. Si el HTML
+  // TODO (paso 9): el servidor no sabe cuándo vas a leer la página. Si el HTML
   // se generó antes (una caché, un prerenderizado), la hidratación falla.
   // Lee el instante con useAhora() de ~/reloj: null en el servidor y al
   // hidratar (y entonces no pintes nada), y la hora del navegador después.
@@ -833,7 +946,7 @@ La solución es la que la lección 87 dio para lo que solo sabe el navegador: `u
 }
 ```
 
-Con `reloj.ts` y `HaceCuanto.tsx` así, `npm test` pasa entero. En el navegador se nota en lo que tarda la firma en completarse: el HTML llega sin «anteayer», y aparece en cuanto React hidrata. En las navegaciones posteriores no hay hidratación, y `useSyncExternalStore` usa directamente la hora del navegador.
+Con `reloj.ts` y `HaceCuanto.tsx` así, pasan los tres tests del paso. En el navegador se nota en lo que tarda la firma en completarse: el HTML llega sin «anteayer», y aparece en cuanto React hidrata. En las navegaciones posteriores no hay hidratación, y `useSyncExternalStore` usa directamente la hora del navegador.
 
 En tu proyecto no puedes ver este fallo en directo sin una caché delante. Aquí sí: el simulador de la lección 87 tiene el HTML que generó de verdad `renderToString` con la versión arreglada, y la tuya tiene que hidratarse sobre él.
 
@@ -908,6 +1021,150 @@ En tu proyecto no puedes ver este fallo en directo sin una caché delante. Aquí
 
 Con estado y un efecto (`montado`, de la lección 87) también pasa, a costa de un render de más. Lo que no vale es `suppressHydrationWarning` en el `<span>`: lo probamos y la hidratación sigue fallando, porque aquí no difiere un texto, **sobra un elemento entero**, y esa diferencia de estructura no se puede silenciar.
 
+## Paso 10: cuánto tarda cada petición, con un middleware (`tiempos.server.ts`, `root.tsx` y `articulo.tsx`)
+
+Cada `loader` y cada `action` hace lo suyo, pero hay trabajo que es de todas las rutas a la vez: medir cuánto tarda cada petición, comprobar una sesión, añadir una cabecera a todas las respuestas. Para eso React Router tiene **middleware: funciones que envuelven a los `loader` y las `action` de una petición**, de la ruta madre a la hija y vuelta. En la 7 había que activarlo con `future.v8_middleware`; **en la 8 está siempre activo**, y por eso el `context` que reciben los `loader` y las `action` es siempre un `RouterContextProvider`, lo uses o no (los tests de este proyecto le pasan uno a cada `loader`: está en `pruebas/peticion.ts`).
+
+La revista va a medir cuánto tarda cada petición en el servidor y a contárselo al navegador con la cabecera **`Server-Timing`**, que, según MDN, sirve para enseñar en las herramientas de desarrollo del navegador lo que tarda cada parte del trabajo del servidor. El middleware mide el total; el `loader` del artículo, lo que tarda en leer las cartas del disco. Para que el `loader` le pase su medida, el middleware le deja un sitio en el **context**:
+
+```laboratorio
+{
+  "tipo": "codigo-anotado",
+  "lenguaje": "tsx",
+  "codigo": "import { createContext, type MiddlewareFunction } from 'react-router'\n\n/** Lo que tarda cada parte de una petición, en milisegundos: «cartas», «total»... */\nexport type Tiempos = Map<string, number>\n\n// El sitio del context donde el middleware deja los tiempos de cada petición.\n// Vale null si no hay middleware: por ejemplo, en un test que llama a un loader.\nexport const tiemposContext = createContext<Tiempos | null>(null)\n\n/** Ejecuta una tarea y apunta lo que ha tardado, con su nombre. */\nexport async function medir<T>(tiempos: Tiempos | null, nombre: string, tarea: () => Promise<T>): Promise<T> {\n  const inicio = performance.now()\n  try {\n    return await tarea()\n  } finally {\n    tiempos?.set(nombre, performance.now() - inicio)\n  }\n}\n\n/**\n * Envuelve cada petición que llega a React Router, de documento o de datos.\n * Antes de next(), deja en el context dónde apuntar los tiempos; después, con\n * la respuesta ya hecha, añade el total, la cabecera Server-Timing y una línea\n * en la terminal.\n */\nexport const registrarTiempos: MiddlewareFunction<Response> = async ({ request, context }, next) => {\n  const inicio = performance.now()\n  const tiempos: Tiempos = new Map()\n  context.set(tiemposContext, tiempos)\n\n  const respuesta = await next()\n\n  tiempos.set('total', performance.now() - inicio)\n  const cabecera = [...tiempos].map(([nombre, ms]) => `${nombre};dur=${ms.toFixed(1)}`).join(', ')\n  respuesta.headers.set('Server-Timing', cabecera)\n  console.log(`${request.method} ${new URL(request.url).pathname} → ${respuesta.status} · ${cabecera}`)\n  return respuesta\n}",
+  "anotaciones": [
+    {
+      "fragmento": "export const tiemposContext = createContext<Tiempos | null>(null)",
+      "nota": "createContext de react-router, no el de React: una clave con tipo para guardar y leer un valor en el context de una petición. El null es su valor por defecto; sin él, leer la clave cuando nadie la ha puesto lanza «No value found for context»."
+    },
+    {
+      "fragmento": "tiempos?.set(nombre, performance.now() - inicio)",
+      "nota": "En el finally: la medida se apunta aunque la tarea falle. Con tiempos a null, en un test sin middleware, no se apunta nada."
+    },
+    {
+      "fragmento": "async ({ request, context }, next) => {",
+      "nota": "Recibe lo mismo que un loader (request, url, params y context) y, además, next."
+    },
+    {
+      "fragmento": "context.set(tiemposContext, tiempos)",
+      "nota": "Antes de next: un Map nuevo para cada petición. Los loader y las action de cualquier ruta lo encuentran con context.get."
+    },
+    {
+      "fragmento": "const respuesta = await next()",
+      "nota": "Aquí se ejecutan los loader o la action y, en una petición de documento, se renderiza el HTML. next no lanza: si algo falla por debajo, devuelve la respuesta del ErrorBoundary."
+    },
+    {
+      "fragmento": "respuesta.headers.set('Server-Timing', cabecera)",
+      "nota": "Después de next, la respuesta ya existe. La documentación de React Router pide que un middleware de servidor solo lea el estado y las cabeceras y añada cabeceras: el cuerpo no se toca."
+    },
+    {
+      "fragmento": "${new URL(request.url).pathname}",
+      "nota": "request.url es la petición tal cual, con su .data. La dirección de la página, sin .data, llega en url."
+    }
+  ]
+}
+```
+
+En la rama `main`, `tiempos.server.ts` trae hechos `tiemposContext` y `medir`; lo tuyo es el middleware. Se exporta desde un módulo de ruta, y desde `root.tsx`, que en `main` exporta la lista vacía, envuelve a todas. El `loader` del artículo saca los tiempos del `context` y mide la lectura de las cartas:
+
+```tsx
+// app/root.tsx
+import { registrarTiempos } from './tiempos.server'
+
+export const middleware: Route.MiddlewareFunction[] = [registrarTiempos]
+
+// app/routes/articulo.tsx
+export async function loader({ params, request, context }: Route.LoaderArgs) {
+  // ...buscar el artículo, como en el paso 3...
+  const tiempos = context.get(tiemposContext)
+  return {
+    articulo,
+    cartas: await medir(tiempos, 'cartas', () => leerCartas(articulo.slug)),
+    // ...lo demás, igual...
+  }
+}
+```
+
+`root.tsx` importa un módulo `.server` y el build no se queja: `middleware` desaparece del JavaScript del navegador igual que `loader` y `action`, y con él su `import` (comprobado: ni `registrarTiempos` ni `Server-Timing` aparecen en `build/client`). Cada ruta puede exportar el suyo: los de las madres se ejecutan antes y terminan después, como las capas de una cebolla. En una petición de un artículo, el orden es este:
+
+```text
+middleware de root, antes de next()     deja el Map en el context
+  loader del artículo                   apunta «cartas»
+  (en una visita: el HTML)
+middleware de root, después de next()   apunta «total», pone Server-Timing y escribe la línea
+```
+
+### Lo que apunta
+
+Este es el registro de `npm run dev` en un recorrido: abrir un artículo, ir a otro, mandar una carta con errores, la misma corregida y apuntarse al boletín. Los tiempos son los del ordenador en el que lo probamos:
+
+```text
+GET /articulos/componer-una-linea-a-mano → 200 · cartas;dur=0.1, total;dur=4.2
+GET /articulos/caja-alta-y-caja-baja.data → 200 · cartas;dur=0.1, total;dur=0.7
+POST /articulos/caja-alta-y-caja-baja.data → 400 · total;dur=1.2
+POST /articulos/caja-alta-y-caja-baja.data → 302 · total;dur=1.3
+GET /articulos/caja-alta-y-caja-baja.data → 200 · cartas;dur=0.2, total;dur=0.5
+POST /boletin.data → 200 · total;dur=1.2
+```
+
+- **Solo pasa por él lo que llega a React Router**: las peticiones de documento y las `.data`. Los archivos de JavaScript y CSS, las imágenes de `/og` y las consultas a `/__manifest` no salen.
+- **La carta con errores no lleva `cartas`**: la `action` no las lee, y tras un 400 no se vuelven a pedir los datos (paso 6). La corregida, sí: detrás del `POST` va el `GET` de la revalidación.
+- **El middleware ve la redirección tal cual, un 302**, aunque el navegador reciba el 202 del paso 6: React Router la convierte después, ya fuera del middleware. Con `npm start` se ve, porque el servidor apunta su propia línea detrás de la nuestra:
+
+```text
+POST /articulos/la-raya-no-es-un-guion.data → 302 · total;dur=1.2
+POST /articulos/la-raya-no-es-un-guion.data 202 - - 1.681 ms
+```
+
+- **`request.url` es la petición tal cual**, con su `.data`: en la 8, React Router ya no la retoca. La dirección de la página, sin `.data` ni los parámetros internos, llega en `url`; en el segundo `GET`, `/articulos/caja-alta-y-caja-baja`.
+
+La cabecera viaja en cada respuesta:
+
+```text
+$ curl -s -D - -o /dev/null http://localhost:3000/articulos/la-raya-no-es-un-guion | grep -i server-timing
+server-timing: cartas;dur=0.1, total;dur=2.5
+```
+
+Y en el navegador, JavaScript la lee con la API de rendimiento. En la consola, sobre un artículo recién abierto (en Chromium y en WebKit salió lo mismo, con otros números):
+
+```js
+performance.getEntriesByType('navigation')[0].serverTiming.map(({ name, duration }) => ({ name, duration }))
+// [{ name: 'cartas', duration: 0.1 }, { name: 'total', duration: 1.6 }]
+```
+
+Las navegaciones posteriores tienen la suya en `performance.getEntriesByType('resource')`, en la entrada de cada `.data`. Los tres tests del paso (`pruebas/tiempos.test.ts`) llaman al middleware con un `next` de mentira que hace de `loader`, y al `loader` del artículo con un `context` preparado a mano.
+
+### Lo que sí viaja al navegador: `clientMiddleware` y `splitRouteModules`
+
+El `middleware` no llega al navegador. Su pareja, **`clientMiddleware`**, sí: envuelve cada navegación en el navegador, tenga la ruta `loader` o no. La revista no lo necesita, pero sirve para ver otra novedad de la 8. Con este en `articulo.tsx`:
+
+```tsx
+export const clientMiddleware: Route.ClientMiddlewareFunction[] = [
+  async (_, next) => {
+    const inicio = performance.now()
+    await next()
+    console.log(`Navegación al artículo: ${Math.round(performance.now() - inicio)} ms`)
+  },
+]
+```
+
+el build saca dos archivos para el artículo, donde antes había uno:
+
+```text
+build/client/assets/articulo-client-middleware-CxnaqHBt.js    0.16 kB │ gzip:  0.15 kB
+build/client/assets/articulo-main-DTxjWKKA.js                 4.69 kB │ gzip:  1.68 kB
+```
+
+Es **`splitRouteModules`**, que en la 7 se activaba con `future.v8_splitRouteModules` y en la 8 viene **activo por defecto**. React Router parte cada módulo de ruta y saca a su propio archivo lo que el navegador ejecuta antes de pintar la ruta: `clientLoader`, `clientAction`, `clientMiddleware` y `HydrateFallback`. Así puede empezar a ejecutarlos mientras el componente todavía se descarga. Al pulsar un artículo en la portada, el navegador pidió los dos archivos en el mismo milisegundo, y después los datos:
+
+```text
+633 ms  → /assets/articulo-client-middleware-CxnaqHBt.js
+633 ms  → /assets/articulo-main-DTxjWKKA.js
+672 ms  → /articulos/la-raya-no-es-un-guion.data
+```
+
+La opción se cambia en `react-router.config.ts`. Con `splitRouteModules: false`, vuelve a haber un solo `articulo-….js`, de 4,84 kB, con todo dentro. Con `splitRouteModules: 'enforce'`, el build falla si una ruta no se puede partir, por ejemplo porque el `clientMiddleware` y el componente usan la misma función: «This export could not be split into its own chunk because it shares code with other exports», es decir, esa exportación comparte código con las demás. La revista no exporta nada de eso, así que su build sale con un archivo por ruta y la opción no se nota.
+
 ## Antes de darlo por terminado
 
 ```laboratorio
@@ -916,7 +1173,7 @@ Con estado y un efecto (`montado`, de la lección 87) también pasa, a costa de 
   "items": [
     {
       "titulo": "¿npm test pasa entero?",
-      "texto": "Veintidós tests: las rutas, los loader, el 404, las etiquetas del head, la action y su validación, el formulario y las dos fechas."
+      "texto": "Treinta tests: las rutas, los loader, el 404, las etiquetas del head, la action y su validación, el formulario, el boletín, las dos fechas y el middleware."
     },
     {
       "titulo": "¿npm run typecheck no marca nada?",
@@ -932,7 +1189,11 @@ Con estado y un efecto (`montado`, de la lección 87) también pasa, a costa de 
     },
     {
       "titulo": "¿Y con JavaScript, sin recargar?",
-      "texto": "En la pestaña Red, al navegar y al enviar solo hay peticiones .data, y el botón dice «Enviando…» mientras tanto. Tras publicar, el formulario queda vacío."
+      "texto": "En la pestaña Red, al navegar y al enviar solo hay peticiones .data, cada una con su cabecera Server-Timing, y el botón dice «Enviando…» mientras tanto. Tras publicar, el formulario queda vacío."
+    },
+    {
+      "titulo": "¿El boletín te deja donde estabas?",
+      "texto": "Apúntate desde la mitad de un artículo: la URL y el scroll no cambian, la respuesta sale en el pie y no hay más petición que el POST a /boletin.data. Sin JavaScript, acabas en /boletin con la misma respuesta."
     },
     {
       "titulo": "¿La consola sigue limpia con el servidor en UTC?",
@@ -978,6 +1239,22 @@ Con estado y un efecto (`montado`, de la lección 87) también pasa, a costa de 
 
 **Importar un módulo `.server` desde un componente.** Lo viste en el paso 2: es un error de build, no de ejecución, y es justo lo que quieres. Sin el sufijo, el mismo `import` no da ningún error y se lleva tus datos al navegador.
 
+**Un `fetcher.Form` sin `action` en el pie.** Sin `action`, un formulario envía a la ruta en la que está pintado, y el pie está en el `Layout` de `root.tsx`. Como root no tiene `action`, React Router ni siquiera hace la petición: comprobado, la página entera pasó al `ErrorBoundary` de root, «Algo ha fallado», y en la consola salió esto:
+
+```text
+Route "root" does not have an action, but you are trying to submit to it. To fix this, please add an `action` function to the route
+```
+
+Es decir: «la ruta root no tiene action, pero intentas enviarle algo». Al formulario de las cartas, si no fuera por el ancla, le bastaría con no llevar `action`, porque está dentro del artículo, cuya ruta sí la tiene; el del boletín vive en todas las páginas, así que tiene que decir adónde va.
+
+**Usar el `context` como un objeto.** En la 7, si no activabas el middleware, el `context` de los `loader` era un objeto normal, y muchos ejemplos de entonces hacen `context.tiempos = tiempos`. En la 8 es un `RouterContextProvider`, y TypeScript no te deja:
+
+```text
+app/tiempos.server.ts(32,11): error TS2339: Property 'tiempos' does not exist on type 'Readonly<RouterContextProvider>'.
+```
+
+Es decir: «la propiedad tiempos no existe en el tipo RouterContextProvider». Los valores se guardan con `context.set` y se leen con `context.get`, con una clave hecha con `createContext`.
+
 ```laboratorio
 {
   "tipo": "mitos",
@@ -997,6 +1274,10 @@ Con estado y un efecto (`montado`, de la lección 87) también pasa, a costa de 
     {
       "mito": "Un 404 es una página que dice que no existe",
       "realidad": "Es un código de estado de la respuesta. La página puede decir lo que quiera; un buscador mira el número."
+    },
+    {
+      "mito": "El middleware del servidor se ejecuta en cada navegación",
+      "realidad": "Solo cuando el navegador le pide algo al servidor: un documento o un .data. Lo comprobamos con un enlace a /boletin, una ruta sin loader: al navegar, el navegador solo descargó su JavaScript, y en la terminal no salió ninguna línea. Para lo que tenga que pasar en cada navegación está clientMiddleware."
     }
   ]
 }
@@ -1006,10 +1287,10 @@ Con estado y un efecto (`montado`, de la lección 87) también pasa, a costa de 
 
 Sin comprobación automática, salvo la que escribas tú.
 
-1. **Prerenderizar los artículos.** Añade a `react-router.config.ts` una función `prerender` que devuelva la portada y las seis direcciones de los artículos, construye y mira qué aparece en `build/client`. Después piensa en dos cosas: las cartas se guardan mientras el servidor está en marcha (¿qué pasa con las de una página prerenderizada?), y el HTML se genera al construir, que es justo el caso del paso 8.
-2. **Un boletín en el pie.** Un formulario para suscribirse, con su propia ruta, `/boletin`, y su `action`. Envíalo con `useFetcher` y su `fetcher.Form`, para que suscribirse no cambie de página, y comprueba que sin JavaScript también funciona: el navegador acabará en `/boletin`, así que esa ruta necesita un componente que diga algo útil.
-3. **Caché en los artículos.** Exporta una función `headers` en `articulo.tsx` que devuelva un `Cache-Control` y compruébalo con `curl -I`. ¿Qué duración tiene sentido para una página cuyas cartas cambian? ¿Y qué pasaría con «hace dos días» si una caché la guarda?
-4. **Datos estructurados.** Añade a cada artículo un `<script type="application/ld+json">` con su tipo (Article), su título, su autoría y su fecha. Cuidado con cómo metes el JSON dentro del `<script>`: si un título contuviera la etiqueta que cierra el script, `JSON.stringify` no basta (lección 82).
+1. **Prerenderizar los artículos.** Añade a `react-router.config.ts` una función `prerender` que devuelva la portada y las seis direcciones de los artículos, construye y mira qué aparece en `build/client`. Después piensa en dos cosas: las cartas se guardan mientras el servidor está en marcha (¿qué pasa con las de una página prerenderizada?), y el HTML se genera al construir, que es justo el caso del paso 9.
+2. **Caché en los artículos.** Exporta una función `headers` en `articulo.tsx` que devuelva un `Cache-Control` y compruébalo con `curl -I`. ¿Qué duración tiene sentido para una página cuyas cartas cambian? ¿Y qué pasaría con «hace dos días» si una caché la guarda?
+3. **Datos estructurados.** Añade a cada artículo un `<script type="application/ld+json">` con su tipo (Article), su título, su autoría y su fecha. Cuidado con cómo metes el JSON dentro del `<script>`: si un título contuviera la etiqueta que cierra el script, `JSON.stringify` no basta (lección 82).
+4. **Un buscador que carga sin navegar.** Una ruta `/buscar` con un `loader` que filtre los artículos por `?q=`, y en la cabecera un campo dentro de un `fetcher.Form` con `method="get"` y `action="/buscar"`, que enseñe las sugerencias de `fetcher.data` sin cambiar de página. Envíalo mientras se escribe con `fetcher.submit(evento.currentTarget.form)`, como en la guía «Using Fetchers», y piensa qué tiene que devolver el `loader`: ¿los artículos enteros, o solo el título y el slug (paso 2)?
 
 ## Para profundizar
 
@@ -1037,15 +1318,15 @@ Sin comprobación automática, salvo la que escribas tú.
       "etiqueta": "React Router"
     },
     {
-      "titulo": "Data Loading",
-      "descripcion": "loader y clientLoader, y por qué el loader desaparece del JavaScript del navegador.",
-      "url": "https://reactrouter.com/start/framework/data-loading",
-      "etiqueta": "React Router"
-    },
-    {
       "titulo": "Actions",
       "descripcion": "action y clientAction, cómo se llaman con Form, useSubmit y useFetcher, y la revalidación de los datos de la página.",
       "url": "https://reactrouter.com/start/framework/actions",
+      "etiqueta": "React Router"
+    },
+    {
+      "titulo": "Middleware",
+      "descripcion": "middleware y clientMiddleware, el context con createContext, el orden de la cadena con next y cuándo se ejecuta cada uno.",
+      "url": "https://reactrouter.com/how-to/middleware",
       "etiqueta": "React Router"
     },
     {

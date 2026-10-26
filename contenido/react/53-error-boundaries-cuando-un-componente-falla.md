@@ -16,6 +16,7 @@ Un **error boundary** es un cortafuegos. Envuelve una parte de la interfaz y, si
 - **Qué captura y qué no.** No todo error pasa por un boundary: los de un manejador de eventos o un temporizador, por ejemplo, no.
 - **Dónde ponerlos**, y cómo hacer que se recuperen: desde fuera con una `key`, como en las lecciones 48 y 49, o desde dentro, con un «Reintentar» que es el propio boundary quien ejecuta.
 - **Las opciones de errores de `createRoot`**, la librería `react-error-boundary` y la regla del linter que vigila que no uses `try`/`catch` donde hace falta un boundary.
+- **Qué pasa con esos errores en producción**: mandarlos a un servicio como Sentry, con *source maps* para poder leer las trazas y sin datos personales.
 
 Los ejemplos son del panel del Centro de Buceo Posidonia: el parte del mar de cada cala y las salidas del día.
 
@@ -392,6 +393,294 @@ Escribir tu `LimiteDeError` es un buen ejercicio, pero en un proyecto real puede
 
 Ejecutado fuera de esta web con `react-error-boundary` 6.1.6 y React 19.3.1: el parte de Los Farallones sale con su aviso, «Ver Cala Azul» lo reinicia por `resetKeys` y, al pulsar «Reservar plaza», el 500 de la reserva aparece en el aviso del segundo boundary gracias a `showBoundary`. En las vistas previas de estas lecciones no se puede instalar, así que aquí sigues usando tu `LimiteDeError`.
 
+## En producción: `informar` se convierte en un servicio de errores
+
+La función `informar` de más arriba manda cada error a `/api/errores`. La idea es buena, pero alguien tiene que recibir ese POST, guardarlo, juntar en uno el mismo fallo cuando se repite trescientas veces, avisarte y, lo más difícil, **traducir una traza de código minificado a tus archivos**. Eso es un **servicio de registro de errores**, y el más extendido en React es **Sentry**, con su SDK `@sentry/react` (versión 11.9.0, del 23 de octubre de 2026).
+
+Todo lo de esta sección lo probamos en un proyecto de Vite 8.3.5 con React 19.3.1 y el panel de Posidonia, **sin cuenta de Sentry**: el DSN apuntaba a una dirección inventada, `errores.posidonia.example`, y un Chromium controlado por Playwright interceptaba esas peticiones. Lo que ves es, literalmente, lo que el SDK intentó enviar.
+
+### Conectar `createRoot` con Sentry
+
+Se instala con `npm install @sentry/react`, y son dos piezas: la configuración, en un archivo propio que se importa el primero, y las tres opciones de `createRoot`, que ya no llaman a `informar` sino al SDK:
+
+```laboratorio
+{
+  "tipo": "codigo-anotado",
+  "lenguaje": "jsx",
+  "codigo": "// src/instrument.js\nimport * as Sentry from '@sentry/react'\n\nif (import.meta.env.PROD) {\n  Sentry.init({\n    dsn: import.meta.env.VITE_SENTRY_DSN,\n    environment: import.meta.env.MODE,\n  })\n}\n\n// src/main.jsx\nimport './instrument.js'\nimport * as Sentry from '@sentry/react'\nimport { createRoot } from 'react-dom/client'\nimport App from './App.jsx'\n\nconst opciones = import.meta.env.PROD\n  ? {\n      onUncaughtError: Sentry.reactErrorHandler(() => {\n        document.getElementById('error-global').hidden = false\n      }),\n      onCaughtError: Sentry.reactErrorHandler(),\n      onRecoverableError: Sentry.reactErrorHandler(),\n    }\n  : {}\n\ncreateRoot(document.getElementById('root'), opciones).render(<App />)",
+  "anotaciones": [
+    {
+      "fragmento": "if (import.meta.env.PROD) {",
+      "nota": "En desarrollo no se envía nada: los errores de npm run dev solo te interesan a ti, y React sigue escribiendo sus mensajes en la consola. Para apagar el SDK del todo, la documentación de Sentry recomienda justo esto: llamar a init solo cuando toca."
+    },
+    {
+      "fragmento": "dsn: import.meta.env.VITE_SENTRY_DSN",
+      "nota": "La dirección a la que el SDK manda los eventos, que te da el panel de Sentry. Puede ir en una variable VITE_ (lección 85): según su documentación, el DSN es público a propósito, porque solo sirve para enviar eventos, no para leerlos."
+    },
+    {
+      "fragmento": "environment: import.meta.env.MODE",
+      "nota": "production o, con vite build --mode staging, staging (lección 85): en Sentry podrás separar los errores de cada entorno."
+    },
+    {
+      "fragmento": "import './instrument.js'",
+      "nota": "El primer import de la app, antes que App: así Sentry ya escucha cuando se ejecuta el resto del código."
+    },
+    {
+      "fragmento": "onUncaughtError: Sentry.reactErrorHandler(() => {",
+      "nota": "reactErrorHandler devuelve una función con la forma que espera React: envía el error con su componentStack y después llama a la tuya, que sigue destapando el aviso de index.html."
+    },
+    {
+      "fragmento": "onCaughtError: Sentry.reactErrorHandler(),",
+      "nota": "Cada error que captura un boundary, sea tu LimiteDeError, el de react-error-boundary o cualquier otro. Tu boundary no necesita ni una línea de Sentry: lo comprobamos con el LimiteDeError de esta lección y llegó un evento."
+    },
+    {
+      "fragmento": "onRecoverableError: Sentry.reactErrorHandler(),",
+      "nota": "Los recuperables, también. El SDK sigue la cadena de error.cause (lo verás en el evento de abajo), así que el error original del componente llega con el aviso de React."
+    }
+  ]
+}
+```
+
+Con el `LimiteDeError` de esta lección alrededor del parte, elegir «Los Farallones» produjo **una sola petición**. Esto es lo que llevaba, recortado:
+
+```text
+POST https://errores.posidonia.example/api/1/envelope/?sentry_version=7&sentry_key=clavepublica&sentry_client=sentry.javascript.react%2F11.9.0
+
+"exception": [
+  {
+    "type": "React ErrorBoundary TypeError",
+    "value": "Cannot read properties of undefined (reading 'metros')",
+    "mechanism": { "type": "chained", "source": "cause" },
+    "stacktrace": … 4 marcos: la pila de componentes
+  },
+  {
+    "type": "TypeError",
+    "value": "Cannot read properties of undefined (reading 'metros')",
+    "mechanism": { "type": "auto.function.react.error_handler", "handled": false },
+    "stacktrace": … 16 marcos; el último:
+      { "filename": "http://localhost:4181/assets/index-C0KANSYa.js",
+        "function": "Nl", "lineno": 23, "colno": 51689 }
+  }
+],
+"request": { "url": "http://localhost:4181/", "headers": { "User-Agent": "Mozilla/5.0 (…) HeadlessChrome/153.0.8010.12 Safari/537.36" } },
+"contexts": { "react": { "version": "19.3.1" }, "culture": { "locale": "en-US", "timezone": "Europe/Madrid" } },
+"environment": "production",
+"sdk": { "settings": { "infer_ip": "auto" } }
+```
+
+Dos errores encadenados: el tuyo, `TypeError`, y otro que el SDK fabrica con la pila de componentes (lección 64) y cuelga de su `cause`, para que Sentry la enseñe junto a la traza. Con ellos viajan la página, el navegador, la versión de React, el idioma y la zona horaria. Y `"infer_ip": "auto"`, que retomaremos al hablar de datos personales.
+
+El marco que importa es el último: el fallo está en la función `Nl`, línea 23, columna 51 689 de `index-C0KANSYa.js`. Ni `Nl` está en tu código ni tienes un archivo con ese nombre: es el build minificado (lección 64). Lo arreglan los *source maps*, dos apartados más abajo.
+
+Sentry tampoco es gratis en bytes. En esta prueba, el JavaScript de la app pasó de unos 220 kB (69 kB comprimido) sin Sentry a 313 kB (100 kB) con él, y eso solo con la captura de errores, sin las trazas de rendimiento ni la grabación de sesiones que también ofrece. Lo puedes ver con el analizador de la lección 85.
+
+### `Sentry.ErrorBoundary`: un boundary que además informa
+
+El SDK trae también su propio boundary, muy parecido al de `react-error-boundary`, que manda el error desde su `componentDidCatch`:
+
+```laboratorio
+{
+  "tipo": "codigo-anotado",
+  "lenguaje": "jsx",
+  "codigo": "import * as Sentry from '@sentry/react'\nimport { useState } from 'react'\nimport { PARTES } from './datos.js'\nimport { ParteDelMar } from './Panel.jsx'\n\nexport default function App() {\n  const [calaId, setCalaId] = useState('cala-azul')\n\n  return (\n    <main>\n      <h1>Centro de Buceo Posidonia</h1>\n      <label>\n        Cala{' '}\n        <select value={calaId} onChange={(e) => setCalaId(e.target.value)}>\n          <option value=\"cala-azul\">Cala Azul</option>\n          <option value=\"el-bajo\">El Bajo de la Morena</option>\n          <option value=\"los-farallones\">Los Farallones</option>\n        </select>\n      </label>\n      <Sentry.ErrorBoundary\n        key={calaId}\n        beforeCapture={(scope) => scope.setTag('zona', 'parte-del-mar')}\n        fallback={({ resetError }) => (\n          <div role=\"alert\">\n            <p>No hemos podido leer el parte de esta cala.</p>\n            <button onClick={resetError}>Reintentar</button>\n          </div>\n        )}\n      >\n        <ParteDelMar parte={PARTES[calaId]} />\n      </Sentry.ErrorBoundary>\n    </main>\n  )\n}",
+  "anotaciones": [
+    {
+      "fragmento": "<Sentry.ErrorBoundary",
+      "nota": "Un error boundary que, además de pintar la alternativa, envía el error a Sentry. No tiene resetKeys: para que cada cala empiece limpia, la key de siempre."
+    },
+    {
+      "fragmento": "beforeCapture={(scope) => scope.setTag('zona', 'parte-del-mar')}",
+      "nota": "Se ejecuta antes de enviar y añade una etiqueta al evento: en Sentry podrás filtrar los errores por zona de la pantalla. Pero lee la pregunta de abajo antes de contar con ella."
+    },
+    {
+      "fragmento": "fallback={({ resetError }) => (",
+      "nota": "La alternativa como función, igual que tu alternativa o el FallbackComponent de react-error-boundary. Recibe error, componentStack, resetError (el reintentar desde dentro) y eventId, el identificador del evento en Sentry. También admite un elemento fijo."
+    },
+    {
+      "fragmento": "<button onClick={resetError}>Reintentar</button>",
+      "nota": "Con un parte que sigue roto, cada reintento vuelve a fallar y es otro evento: lo comprobamos, dos eventos tras pulsar una vez. Sentry los agrupa en el mismo problema y cuenta las veces."
+    }
+  ]
+}
+```
+
+Ahora junta este boundary con el `main.jsx` de antes, el que tiene `onCaughtError` conectado al SDK:
+
+```laboratorio
+{
+  "tipo": "predice-el-resultado",
+  "lenguaje": "jsx",
+  "codigo": "// main.jsx: las tres opciones conectadas, como arriba\ncreateRoot(document.getElementById('root'), {\n  // …\n  onCaughtError: Sentry.reactErrorHandler(),\n  // …\n}).render(<App />)\n\n// App.jsx\n<Sentry.ErrorBoundary\n  key={calaId}\n  beforeCapture={(scope) => scope.setTag('zona', 'parte-del-mar')}\n  fallback={({ resetError }) => (…)}\n>\n  <ParteDelMar parte={PARTES[calaId]} />\n</Sentry.ErrorBoundary>\n\n// Eliges Los Farallones y ParteDelMar falla.\n// ¿Qué le llega a Sentry?",
+  "opciones": [
+    "Dos eventos: uno de onCaughtError y otro del boundary",
+    "Un evento, con la etiqueta zona: parte-del-mar",
+    "Un evento, sin la etiqueta zona",
+    "Nada: el boundary ya ha capturado el error"
+  ],
+  "correcta": 2,
+  "explicacion": "Llega uno solo, porque el SDK marca los errores que ya ha enviado y no los repite. Pero React llama a onCaughtError antes que al componentDidCatch del boundary, así que lo envía la raíz sin pasar por beforeCapture, y la etiqueta se pierde. Comprobado con React 19.3.1 y @sentry/react 11.9.0: quitando onCaughtError de createRoot, el evento sí lleva zona: parte-del-mar."
+}
+```
+
+Así que elige un camino, cualquiera de los dos funciona:
+
+- **Una red en la raíz.** Las tres opciones de `createRoot` conectadas al SDK y tus boundaries (`LimiteDeError`, `react-error-boundary`) sin nada de Sentry dentro. Todo error capturado pasa por `onCaughtError`.
+- **Los boundaries de Sentry.** `Sentry.ErrorBoundary` donde quieras etiquetas, y `onCaughtError` fuera de `createRoot`. Ojo: entonces un error que capture otro boundary no se envía (con `LimiteDeError`, ni una petición), salvo que ese boundary llame a `Sentry.captureReactException(error, info)` en su `componentDidCatch`, como indica la documentación de Sentry.
+
+### Source maps: de `Nl` a `ParteDelMar`
+
+`Nl`, línea 23, columna 51 689. Así es como el navegador ve tu app después de `npm run build`: unos pocos archivos enormes, con los nombres acortados. Un **source map** es un archivo JSON (`index-C0KANSYa.js.map`) que, para cada posición del archivo construido, dice de qué archivo, línea y columna de tu código viene. Vite lo genera con la opción `build.sourcemap`, y además, por defecto, guarda dentro el texto completo de tus archivos originales.
+
+Con el `.map` de esa misma build, cualquiera puede deshacer el camino. Lo hicimos en local con la librería `@jridgewell/trace-mapping`, que es, en pequeño, lo que hace Sentry en su servidor con cada evento:
+
+```text
+TypeError: Cannot read properties of undefined (reading 'metros')
+    at Nl (index-C0KANSYa.js:23:51689)  →  src/Panel.jsx:8:42
+    at ns (index-C0KANSYa.js:22:49195)  →  react-dom-client.production.js:4645
+    at Kc (index-C0KANSYa.js:22:71863)  →  react-dom-client.production.js:6799 (renderWithHooks)
+    … 13 marcos más, de React y del SDK
+
+La pila de componentes (el error «React ErrorBoundary»):
+    at Nl (index-C0KANSYa.js:23:51453)  →  src/Panel.jsx:3:31
+    at jl (index-C0KANSYa.js:23:50916)  →  src/LimiteDeError.jsx:3:1
+    at main (<anonymous>)
+    at Il (index-C0KANSYa.js:23:52487)  →  src/App.jsx:8:31
+```
+
+En ese proyecto, `ParteDelMar` vive en `src/Panel.jsx`: la línea 8, columna 42, es exactamente el `metros` de `{parte.visibilidad.metros}`, y la línea 3, `export function ParteDelMar`. La pila de componentes se traduce igual: `Nl` es `ParteDelMar`, `jl` es tu `LimiteDeError` e `Il`, `App`. Solo `main` conserva su nombre, porque las etiquetas HTML no se minifican (lección 64).
+
+La opción `build.sourcemap` de Vite admite cuatro valores:
+
+- `false`, el valor por defecto: no hay `.map`.
+- `true`: un `.map` junto a cada archivo y, al final del JavaScript, un comentario que dice dónde está (`//# sourceMappingURL=index-….js.map`). Las herramientas del navegador lo leen solas.
+- `'inline'`: el mapa va dentro del propio JavaScript.
+- `'hidden'`: como `true`, pero sin el comentario. El navegador no los busca, y el `.map` sigue en `dist/`.
+
+**Un `.map` publicado es tu código fuente publicado**, con sus comentarios. En la build de prueba, el `.map` llevaba el texto completo de 150 archivos: los cinco de `src/` y los de las librerías.
+
+### Subirlos sin publicarlos
+
+La salida es generarlos, entregárselos al servicio de errores y borrarlos antes de publicar. Sentry tiene un plugin de Vite que hace las tres cosas al construir:
+
+```laboratorio
+{
+  "tipo": "codigo-anotado",
+  "lenguaje": "jsx",
+  "codigo": "// vite.config.js\nimport { sentryVitePlugin } from '@sentry/vite-plugin'\nimport react from '@vitejs/plugin-react'\nimport { defineConfig } from 'vite'\n\nexport default defineConfig({\n  build: { sourcemap: 'hidden' },\n  plugins: [\n    react(),\n    sentryVitePlugin({\n      org: 'posidonia',\n      project: 'panel',\n      authToken: process.env.SENTRY_AUTH_TOKEN,\n      telemetry: false,\n      sourcemaps: { filesToDeleteAfterUpload: ['./dist/**/*.map'] },\n    }),\n  ],\n})",
+  "anotaciones": [
+    {
+      "fragmento": "build: { sourcemap: 'hidden' }",
+      "nota": "Genera los .map sin el comentario que dice dónde están: el navegador no los pide. Siguen estando en dist/, así que no basta con esto."
+    },
+    {
+      "fragmento": "sentryVitePlugin({",
+      "nota": "El plugin de Sentry para Vite (npm install -D @sentry/vite-plugin, también la 11.9.0). Va el último de la lista, como pide su documentación. Solo actúa al construir: con npm run dev no sube nada."
+    },
+    {
+      "fragmento": "org: 'posidonia',",
+      "nota": "La organización y el proyecto de tu cuenta de Sentry, con los nombres cortos que aparecen en sus direcciones."
+    },
+    {
+      "fragmento": "authToken: process.env.SENTRY_AUTH_TOKEN,",
+      "nota": "Un token que permite subir archivos a tu cuenta: este sí es un secreto. Va en una variable de la máquina que construye (el CI, el panel del alojamiento), nunca con prefijo VITE_ ni en git. vite.config.js se ejecuta en Node, por eso es process.env."
+    },
+    {
+      "fragmento": "telemetry: false,",
+      "nota": "Por defecto, el plugin envía a Sentry datos sobre la propia build (lo avisa en la consola al construir). Con false, no envía nada de eso."
+    },
+    {
+      "fragmento": "filesToDeleteAfterUpload: ['./dist/**/*.map']",
+      "nota": "Después de subirlos, borra los .map de dist/: lo que publicas ya no lleva tu código fuente. Comprobado: los borra incluso cuando no ha podido subirlos."
+    }
+  ]
+}
+```
+
+Sin token, así fue la build de prueba:
+
+```text
+$ npm run build
+…
+rendering chunks...
+[sentry-vite-plugin] Warning: No auth token provided. Will not upload source maps. Please set the `authToken` option. You can find information on how to generate a Sentry auth token here: https://docs.sentry.io/api/auth/
+computing gzip size...
+dist/index.html                   0.62 kB │ gzip:   0.38 kB
+dist/assets/index-qdx_qTh8.css    0.10 kB │ gzip:   0.11 kB
+dist/assets/index-Cytt3Q1x.js   313.39 kB │ gzip: 100.56 kB │ map: 2,058.71 kB
+```
+
+Es decir: no hay token, así que no sube los source maps (y explica dónde se genera uno). La build no falla. Aun sin subir nada, el plugin hizo dos cosas: borró el `.map` de `dist/assets/`, donde solo quedaron el JavaScript y el CSS, y añadió al principio del JavaScript un fragmento que registra un **debug ID**, `611e7d04-2a65-49eb-985d-1fd19ba0cc77`. Ese identificador viaja en cada evento y, según la documentación de Sentry, es lo que le permite encontrar el `.map` de ese archivo exacto entre todos los que has subido. La subida y la traducción en los servidores de Sentry no las pudimos probar sin cuenta; la traducción en sí es la de arriba.
+
+```laboratorio
+{
+  "tipo": "mitos",
+  "mitos": [
+    {
+      "mito": "Con sourcemap hidden, mi código fuente ya no es público",
+      "realidad": "hidden solo quita el comentario que apunta al .map. Si el archivo está en dist/ y lo publicas, se descarga con su nombre: lo comprobamos con vite preview, y la petición del .map respondió 200 con el mapa entero. Hay que borrarlo antes de publicar."
+    },
+    {
+      "mito": "El DSN de Sentry es una clave secreta",
+      "realidad": "Es público a propósito: solo permite enviar eventos a tu proyecto, no leerlos. El secreto es el token que sube los source maps, y ese nunca va en el código del navegador."
+    },
+    {
+      "mito": "Con Sentry ya no necesito error boundaries",
+      "realidad": "Sentry te cuenta qué ha fallado; el boundary decide qué ve el usuario mientras tanto. Son dos trabajos distintos y se usan juntos."
+    }
+  ]
+}
+```
+
+### Lo que no debe viajar: datos personales
+
+Un evento es una foto del navegador de alguien en el momento del fallo, y puede llevar datos personales sin que te des cuenta. Lo probamos con un formulario de reserva (nombre y correo) escrito con descuidos típicos: un `console.log` con los datos, el correo en la URL, `Sentry.setUser({ email: correo })` y un error con el correo en el mensaje. Con la configuración de arriba, el evento llevaba el correo de la clienta en cinco sitios, y algo más:
+
+- en el mensaje: `No se pudo guardar la reserva de lucia.ferrer@correo.example`;
+- en `user.email`, por el `setUser`;
+- en `request.url` y en la miga de navegación, por el `?reserva=lucia.ferrer%40correo.example` de la URL;
+- en una miga de la consola, junto al nombre completo: el SDK guarda cada `console.log` como *breadcrumb*, las «migas» de lo que pasó antes del error;
+- y `"infer_ip": "auto"`: desde la versión 11, el SDK deja por defecto que Sentry deduzca y guarde la dirección IP de quien visita la web.
+
+Una dirección IP y un correo son datos personales según el RGPD, y en un centro de buceo los hay peores: la declaración médica de cada buceador no debe acercarse a un error. **Lo primero es no ponerlos donde no hacen falta**: un mensaje de error no necesita el correo, le basta el número de reserva. Lo segundo, que el SDK filtre lo que se escape:
+
+```laboratorio
+{
+  "tipo": "codigo-anotado",
+  "lenguaje": "jsx",
+  "codigo": "// src/instrument.js\nimport * as Sentry from '@sentry/react'\n\nconst CORREO = /[\\w.+-]+@[\\w-]+\\.[\\w.-]+/g\n\nif (import.meta.env.PROD) {\n  Sentry.init({\n    dsn: import.meta.env.VITE_SENTRY_DSN,\n    environment: import.meta.env.MODE,\n    dataCollection: { userInfo: false, urlQueryParams: false },\n    beforeBreadcrumb(miga) {\n      return miga.category === 'console' ? null : miga\n    },\n    beforeSend(evento) {\n      for (const excepcion of evento.exception?.values ?? []) {\n        excepcion.value = excepcion.value?.replace(CORREO, '[correo]')\n      }\n      return evento\n    },\n  })\n}",
+  "anotaciones": [
+    {
+      "fragmento": "userInfo: false",
+      "nota": "Que Sentry no deduzca la IP ni rellene datos del usuario por su cuenta. Comprobado: el evento pasa de infer_ip auto a never."
+    },
+    {
+      "fragmento": "urlQueryParams: false",
+      "nota": "Las direcciones llegan sin lo que va detrás del signo de interrogación: el ?reserva=… desaparece de la página del evento y de las migas de navegación."
+    },
+    {
+      "fragmento": "return miga.category === 'console' ? null : miga",
+      "nota": "beforeBreadcrumb decide qué migas se guardan; devolver null descarta una. Aquí, todas las de la consola. Las de clics, que solo guardan el selector del botón, se quedan."
+    },
+    {
+      "fragmento": "beforeSend(evento) {",
+      "nota": "La última aduana: recibe el evento ya montado, y lo que devuelvas es lo que se envía (si devuelves null, nada). Comprobado: el mensaje llega como «No se pudo guardar la reserva de [correo]»."
+    },
+    {
+      "fragmento": "const CORREO = /[\\w.+-]+@[\\w-]+\\.[\\w.-]+/g",
+      "nota": "Una expresión sencilla para correos. Un filtro así es una red de seguridad, no la solución: lo seguro es no poner el dato."
+    }
+  ]
+}
+```
+
+Lo único que esta configuración no tapó fue `user.email`: **lo que pasas a `Sentry.setUser` se envía siempre**, tal cual (lo dice su documentación y lo comprobamos). Para saber a cuántas personas afecta un fallo basta con un identificador interno: `Sentry.setUser({ id: socio.id })`.
+
+Y fuera del código: un servicio así trata datos de tus usuarios por encargo tuyo, así que tiene que figurar en tu política de privacidad. Sentry puede guardarlos en la Unión Europea (en Fráncfort), pero esa región se elige al crear la organización y después no se puede cambiar. También permite filtrar en su servidor, por si algo se escapa del navegador.
+
+### Otros servicios
+
+Sentry no es el único. **GlitchTip** es de código abierto y acepta los SDK de Sentry (el mismo `@sentry/react`, con su DSN), y Sentry también se puede instalar en tus propios servidores. Con SDK propio están **BugSnag**, **Rollbar**, **Datadog** o **PostHog**, que además de analítica registra errores. La forma de conectarlos es siempre la misma: las opciones de errores de `createRoot`, los source maps entregados y no publicados, y cuidado con lo que se envía.
+
 ## El linter: `error-boundaries`
 
 Hay una tentación muy natural cuando sabes JavaScript: si algo puede fallar, `try`/`catch`. ¿Por qué no así?
@@ -466,6 +755,10 @@ Lo comprobamos instalando el plugin en un proyecto aparte, como en las lecciones
 **Efectos en `getDerivedStateFromError`.** Se llama durante el render, varias veces en desarrollo: registrar el error ahí lo registra de más. Los efectos, en `componentDidCatch`. Y lo contrario tampoco: llamar a `setState` en `componentDidCatch` para pintar el aviso es una forma antigua que la documentación da por obsoleta.
 
 **Enseñar al usuario el mensaje técnico.** «Cannot read properties of undefined (reading 'metros')» es para tu registro de errores, no para quien quiere reservar una inmersión. Los ejemplos de esta lección lo enseñan para que veas qué ha pasado; en tu app, un aviso claro y un botón.
+
+**Publicar los source maps.** Con `build.sourcemap` activado y sin borrarlos, `dist/` lleva un `.map` por archivo con todo tu código fuente, comentarios incluidos. Entrégaselos al servicio de errores y bórralos antes de publicar.
+
+**Mandar datos personales con el error.** El correo en el mensaje, un `console.log` con el formulario o `Sentry.setUser({ email })` acaban en el servicio de errores. Usa identificadores internos y filtra en `beforeSend` lo que se escape.
 
 ## Ejercicios
 
@@ -834,6 +1127,12 @@ Lo comprobamos instalando el plugin en un proyecto aparte, como en las lecciones
       "descripcion": "El paquete que trae hecho un error boundary configurable: FallbackComponent, resetKeys, onReset y useErrorBoundary.",
       "url": "https://github.com/bvaughn/react-error-boundary",
       "etiqueta": "GitHub"
+    },
+    {
+      "titulo": "Sentry for React",
+      "descripcion": "Instalar @sentry/react, conectar las opciones de errores de createRoot con reactErrorHandler, Sentry.ErrorBoundary y la subida de source maps.",
+      "url": "https://docs.sentry.io/platforms/javascript/guides/react/",
+      "etiqueta": "Sentry"
     }
   ]
 }
