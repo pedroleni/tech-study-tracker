@@ -516,7 +516,15 @@ Lo propio de esta ficha:
     o cualquier parámetro de búsqueda. Navegar a la misma URL exacta cuenta
     como recargar: se repiten todos.
   - En el modo framework con SSR, se revalida también al navegar.
-  - Un envío que responde 4xx o 5xx no revalida nada.
+  - Un envío que falla depende de **cómo** falla (comprobado en 8.5.0 al
+    escribir la lección 8):
+    - `return data(…, 409)`: no revalida nada;
+    - `throw data(…, { status })` o un `Error`: vuelven a ejecutarse los
+      `loader` que quedan por encima del límite de error;
+    - `throw new Response(…, { status })`: no revalida nada.
+
+    La documentación lo resume como «un 4xx o 5xx no revalida»: la lección
+    cuenta los tres casos.
 
   Después, `shouldRevalidate` con `defaultShouldRevalidate`, y
   `useRevalidator` para revalidar al volver a la pestaña. En vivo, el
