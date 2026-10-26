@@ -20,6 +20,7 @@ export async function prepararDocumento(
     conEfectos?: boolean
     api?: Record<string, unknown[]>
     red?: { latencia?: number; desordenar: boolean }
+    urlInicial?: string
   },
 ): Promise<DocumentoPreparado> {
   let resultado: Awaited<ReturnType<typeof transformarArchivos>>
@@ -50,6 +51,7 @@ export async function prepararDocumento(
       conEfectos: opciones.conEfectos,
       api: opciones.api,
       red: opciones.red,
+      urlInicial: opciones.urlInicial,
     }),
   }
 }

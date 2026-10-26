@@ -2,6 +2,10 @@ import { Atom } from 'lucide-react'
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 
 import { ArbolDeRenders } from '@/components/bloques-laboratorio/ArbolDeRenders'
+import {
+  BarraDirecciones,
+  type AccionNavegador,
+} from '@/components/bloques-laboratorio/BarraDirecciones'
 import { ConsolaReact } from '@/components/bloques-laboratorio/ConsolaReact'
 import { PanelRed, type AjustesRed } from '@/components/bloques-laboratorio/PanelRed'
 import { RegistroEfectos } from '@/components/bloques-laboratorio/RegistroEfectos'
@@ -43,12 +47,17 @@ export function ReactAnotado({
   mostrarEfectos = false,
   api,
   red,
+  urlInicial,
+  barraDeDirecciones = true,
+  lenguaje = 'jsx',
   // Fuera del esquema de la lección, como en GitAnotado: solo para no
   // repetir el nombre de la región en la página de referencia.
   etiquetaSeccion = 'React anotado',
-}: Omit<DatosReactAnotado, 'mostrarArbol' | 'mostrarEfectos'> & {
+}: Omit<DatosReactAnotado, 'mostrarArbol' | 'mostrarEfectos' | 'barraDeDirecciones' | 'lenguaje'> & {
   mostrarArbol?: boolean
   mostrarEfectos?: boolean
+  barraDeDirecciones?: boolean
+  lenguaje?: 'jsx' | 'tsx'
   etiquetaSeccion?: string
 }) {
   const idNota = useId()
@@ -64,6 +73,16 @@ export function ReactAnotado({
   const [anotacionActiva, setAnotacionActiva] = useState(0)
   const activa = anotacionesValidas[anotacionActiva]
   const [srcDoc, setSrcDoc] = useState<string | null>(null)
+  const [ubicacion, setUbicacion] = useState<
+    Extract<MensajeReactEnVivo, { tipo: 'ubicacion' }> | null
+  >(null)
+  const urlActualRef = useRef<string | null>(null)
+  const [ordenNavegador, setOrdenNavegador] = useState<{
+    id: number
+    accion: AccionNavegador
+    url?: string
+  }>()
+  const siguienteOrdenNavegadorRef = useRef(0)
   const [error, setError] = useState<string | null>(null)
   const { entradas, recibirMensaje, limpiar } = useEntradasConsola()
   const [arbol, setArbol] = useState<MensajeArbol | null>(null)
@@ -87,6 +106,10 @@ export function ReactAnotado({
     (mensaje: MensajeReactEnVivo) => {
       recibirMensaje(mensaje)
       if (mensaje.tipo === 'montado') documentoMontadoRef.current = true
+      if (mensaje.tipo === 'ubicacion') {
+        urlActualRef.current = mensaje.url
+        setUbicacion(mensaje)
+      }
       if (mensaje.tipo === 'arbol' && documentoMontadoRef.current) setArbol(mensaje)
       if (mensaje.tipo === 'peticion' && documentoMontadoRef.current) {
         recibirPeticion(mensaje)
@@ -106,7 +129,7 @@ export function ReactAnotado({
   useEffect(() => {
     let cancelado = false
     const archivos = [
-      { nombre: 'App.jsx', codigo },
+      { nombre: lenguaje === 'tsx' ? 'App.tsx' : 'App.jsx', codigo },
       ...(css ? [{ nombre: 'estilos.css', codigo: css }] : []),
     ]
     void prepararDocumento(archivos, {
@@ -117,10 +140,12 @@ export function ReactAnotado({
       conEfectos: mostrarEfectos,
       api: apiEstable,
       red: redActualRef.current,
+      urlInicial: urlActualRef.current ?? urlInicial,
     }).then((preparado) => {
       if (cancelado) return
       if (preparado.ok) {
         documentoMontadoRef.current = false
+        setUbicacion(null)
         setArbol(null)
         limpiarPeticiones()
         limpiarEfectos()
@@ -132,7 +157,22 @@ export function ReactAnotado({
     return () => {
       cancelado = true
     }
-  }, [apiEstable, codigo, css, strictMode, mostrarArbol, mostrarEfectos, limpiar, limpiarEfectos, limpiarPeticiones])
+  }, [apiEstable, codigo, css, strictMode, mostrarArbol, mostrarEfectos, limpiar, limpiarEfectos, limpiarPeticiones, lenguaje, urlInicial])
+
+  const actuarEnNavegador = useCallback(
+    (accion: AccionNavegador, url?: string) => {
+      if (accion === 'recargar' || accion === 'ir') {
+        limpiar()
+        setArbol(null)
+        limpiarPeticiones()
+        limpiarEfectos()
+        setFalloPendiente(false)
+      }
+      siguienteOrdenNavegadorRef.current += 1
+      setOrdenNavegador({ id: siguienteOrdenNavegadorRef.current, accion, ...(url ? { url } : {}) })
+    },
+    [limpiar, limpiarEfectos, limpiarPeticiones],
+  )
 
   return (
     <section
@@ -155,12 +195,16 @@ export function ReactAnotado({
 
       <CodigoResaltado
         codigo={codigo}
-        lenguaje="jsx"
+        lenguaje={lenguaje}
         numerarLineas
         lineasDestacadas={activa ? [activa.linea] : []}
         // Distinta de la de CodigoAnotado ("Código JSX anotado"): las dos
         // pueden convivir en una lección y una región no debe repetir nombre.
-        etiqueta="Código de React anotado"
+        etiqueta={
+          etiquetaSeccion === 'React anotado'
+            ? 'Código de React anotado'
+            : `${etiquetaSeccion}: código anotado`
+        }
       />
 
       {anotacionesValidas.length > 0 && (
@@ -208,12 +252,18 @@ export function ReactAnotado({
           <p className="text-sm text-muted-foreground">Preparando React…</p>
         )}
         {srcDoc !== null && (
-          <VistaPreviaReact
-            srcDoc={srcDoc}
-            onMensaje={recibir}
-            red={api ? redActual : undefined}
-            fallosSolicitados={fallosSolicitados}
-          />
+          <>
+            {barraDeDirecciones && ubicacion && (
+              <BarraDirecciones ubicacion={ubicacion} onAccion={actuarEnNavegador} />
+            )}
+            <VistaPreviaReact
+              srcDoc={srcDoc}
+              onMensaje={recibir}
+              red={api ? redActual : undefined}
+              fallosSolicitados={fallosSolicitados}
+              ordenNavegador={ordenNavegador}
+            />
+          </>
         )}
       </div>
 

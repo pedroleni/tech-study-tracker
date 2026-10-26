@@ -736,6 +736,63 @@ export function AdminReferenciaContenidoPage() {
           />
         </Referencia>
 
+        <Referencia nombre="ReactEnVivoRouter">
+          <ReactEnVivo
+            tipo="react-en-vivo"
+            titulo="React Router con loaders y actions"
+            consigna="Navega entre el inicio y las recetas, añade una y prueba la recarga en memoria."
+            archivos={[
+              {
+                nombre: 'App.tsx',
+                codigo:
+                  "import { createMemoryRouter, Form, Link, useLoaderData } from 'react-router'\nimport { RouterProvider } from 'react-router/dom'\n\ntype Receta = { id: number; nombre: string }\n\nasync function loader() {\n  const respuesta = await fetch('/api/recetas')\n  return respuesta.json() as Promise<Receta[]>\n}\n\nasync function action({ request }: { request: Request }) {\n  const datos = await request.formData()\n  await fetch('/api/recetas', {\n    method: 'POST',\n    body: JSON.stringify({ nombre: datos.get('nombre') }),\n  })\n  return null\n}\n\nfunction Inicio() {\n  return <main><h1>Recetario</h1><Link to=\"/recetas\">Ver recetas</Link></main>\n}\n\nfunction Recetas() {\n  const recetas = useLoaderData<typeof loader>()\n  return (\n    <main>\n      <h1>Recetas</h1>\n      <ul>{recetas.map((receta) => <li key={receta.id}>{receta.nombre}</li>)}</ul>\n      <Form method=\"post\"><label>Nueva receta <input name=\"nombre\" /></label><button>Guardar</button></Form>\n      <Link to=\"/\">Inicio</Link>\n    </main>\n  )\n}\n\nconst router = createMemoryRouter([\n  { path: '/', Component: Inicio },\n  { path: '/recetas', loader, action, Component: Recetas },\n])\n\nexport default function App() {\n  return <RouterProvider router={router} />\n}",
+              },
+            ]}
+            urlInicial="/"
+            strictMode
+            mostrarConsola
+            mostrarJsGenerado={false}
+            api={{ recetas: [{ id: 1, nombre: 'Migas' }, { id: 2, nombre: 'Pisto' }] }}
+            red={{ latencia: 300, desordenar: false }}
+            comprobaciones={[
+              {
+                descripcion: 'Navega a la lista de recetas',
+                pasos: [{ navegar: '/recetas' }],
+                espera: { url: '/recetas' },
+              },
+              {
+                descripcion: 'Recargar conserva la página actual',
+                urlInicial: '/recetas',
+                pasos: [{ recargar: true }],
+                espera: { texto: 'Migas' },
+              },
+            ]}
+            etiquetaSeccion="React en vivo — React Router"
+            etiquetaPanelTipos="Errores de tipos de React Router"
+          />
+        </Referencia>
+
+        <Referencia nombre="ReactAnotadoRouter">
+          <ReactAnotado
+            tipo="react-anotado"
+            titulo="El alias de BrowserRouter en la vista previa"
+            codigo={
+              "import { createBrowserRouter } from 'react-router'\nimport { RouterProvider } from 'react-router/dom'\n\nconst router = createBrowserRouter([\n  { path: '/', Component: () => <h1>Inicio</h1> },\n])\n\nexport default function App() {\n  return <RouterProvider router={router} />\n}"
+            }
+            css=""
+            anotaciones={[
+              {
+                fragmento: 'createBrowserRouter',
+                nota: 'En la vista previa usa un historial en memoria; en un proyecto real usa la dirección del navegador.',
+              },
+            ]}
+            lenguaje="tsx"
+            strictMode
+            mostrarConsola
+            etiquetaSeccion="React anotado — React Router"
+          />
+        </Referencia>
+
         <Referencia nombre="ReactEnVivoLint">
           <ReactEnVivo
             tipo="react-en-vivo"

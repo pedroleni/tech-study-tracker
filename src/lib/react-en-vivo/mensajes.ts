@@ -62,6 +62,21 @@ export const esquemaMensajeReactEnVivo = z.discriminatedUnion('tipo', [
   z.object({ canal, tipo: z.literal('error'), texto }),
   z.object({
     canal,
+    tipo: z.literal('ubicacion'),
+    url: z.string().max(500).regex(/^\/(?!\/)\S*$/),
+    puedeAtras: z.boolean(),
+    puedeAdelante: z.boolean(),
+    origen: z.enum([
+      'createMemoryRouter',
+      'createBrowserRouter',
+      'createHashRouter',
+      'MemoryRouter',
+      'BrowserRouter',
+      'HashRouter',
+    ]),
+  }),
+  z.object({
+    canal,
     tipo: z.literal('efecto'),
     commit: entero,
     componente: z.string().max(60),
@@ -102,6 +117,7 @@ export type MensajeReactEnVivo = z.infer<typeof esquemaMensajeReactEnVivo>
 export type MensajeArbol = Extract<MensajeReactEnVivo, { tipo: 'arbol' }>
 export type MensajePeticion = Extract<MensajeReactEnVivo, { tipo: 'peticion' }>
 export type MensajeEfecto = Extract<MensajeReactEnVivo, { tipo: 'efecto' }>
+export type MensajeUbicacion = Extract<MensajeReactEnVivo, { tipo: 'ubicacion' }>
 export type NodoArbolRender = MensajeArbol['nodos'][number]
 export type MotivoRender = NodoArbolRender['motivos'][number]
 

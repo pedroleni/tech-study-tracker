@@ -21,6 +21,70 @@ const archivoApp = { nombre: 'App.jsx', codigo: 'export default function App() {
 const minimoEnVivo = { tipo: 'react-en-vivo', archivos: [archivoApp] }
 
 describe('esquemaReactEnVivo', () => {
+  it('acepta urlInicial y barraDeDirecciones, y barraDeDirecciones vale true por defecto', () => {
+    expect(esquemaReactEnVivo.parse({ ...minimoEnVivo, urlInicial: '/recetas?q=pan#lista' })).toMatchObject({
+      urlInicial: '/recetas?q=pan#lista',
+      barraDeDirecciones: true,
+    })
+    expect(
+      esquemaReactEnVivo.parse({ ...minimoEnVivo, barraDeDirecciones: false }).barraDeDirecciones,
+    ).toBe(false)
+  })
+
+  it('rechaza una urlInicial sin / inicial, con espacios, con // o de más de 200 caracteres', () => {
+    for (const urlInicial of ['pistas', '/a b', '//otro.example', `/${'a'.repeat(200)}`]) {
+      expect(esquemaReactEnVivo.safeParse({ ...minimoEnVivo, urlInicial }).success).toBe(false)
+    }
+  })
+
+  it('las comprobaciones admiten urlInicial, navegar, atras, adelante, recargar y la espera url', () => {
+    const comprobaciones = [
+      { descripcion: 'Navega', urlInicial: '/a', pasos: [{ navegar: '/b' }], espera: { url: '/b' } },
+      { descripcion: 'Atrás', pasos: [{ atras: true }], espera: { url: '/a' } },
+      { descripcion: 'Adelante', pasos: [{ adelante: true }], espera: { url: '/b' } },
+      { descripcion: 'Recarga', pasos: [{ recargar: true }], espera: { url: '/b' } },
+    ]
+    const resultado = esquemaReactEnVivo.safeParse({
+      ...minimoEnVivo,
+      archivos: [{ ...archivoApp, codigo: "import { Link } from 'react-router'\n" + archivoApp.codigo }],
+      comprobaciones,
+    })
+
+    expect(resultado.success).toBe(true)
+    if (resultado.success) expect(resultado.data.comprobaciones).toEqual(comprobaciones)
+  })
+
+  it('rechaza { atras: false } y un paso con dos claves', () => {
+    const base = { descripcion: 'Navega', espera: { texto: 'Lista' } }
+    expect(
+      esquemaComprobacionReact.safeParse({ ...base, pasos: [{ atras: false }] }).success,
+    ).toBe(false)
+    expect(
+      esquemaComprobacionReact.safeParse({
+        ...base,
+        pasos: [{ navegar: '/b', recargar: true }],
+      }).success,
+    ).toBe(false)
+  })
+
+  it('pide que algún archivo importe react-router si hay comprobaciones con URL', () => {
+    const comprobaciones = [{ descripcion: 'Navega', pasos: [{ navegar: '/b' }], espera: { url: '/b' } }]
+    const sinRouter = esquemaReactEnVivo.safeParse({ ...minimoEnVivo, comprobaciones })
+    const conRouter = esquemaReactEnVivo.safeParse({
+      ...minimoEnVivo,
+      archivos: [{ ...archivoApp, codigo: "import { createMemoryRouter } from 'react-router'\n" + archivoApp.codigo }],
+      comprobaciones,
+    })
+
+    expect(sinRouter.success).toBe(false)
+    if (!sinRouter.success) {
+      expect(sinRouter.error.issues.map((issue) => issue.message)).toContain(
+        'Las comprobaciones con URL necesitan que algún archivo importe react-router',
+      )
+    }
+    expect(conRouter.success).toBe(true)
+  })
+
   it('acepta el mínimo y aplica los valores por defecto', () => {
     const datos = esquemaReactEnVivo.parse(minimoEnVivo)
     expect(datos).toMatchObject({
@@ -182,6 +246,16 @@ describe('esquemaCompiladorReact', () => {
 })
 
 describe('esquemaReactAnotado', () => {
+  it('acepta lenguaje tsx y usa jsx por defecto', () => {
+    const base = {
+      tipo: 'react-anotado',
+      codigo: archivoApp.codigo,
+      anotaciones: [{ fragmento: 'App', nota: 'n' }],
+    }
+    expect(esquemaReactAnotado.parse(base).lenguaje).toBe('jsx')
+    expect(esquemaReactAnotado.parse({ ...base, lenguaje: 'tsx' }).lenguaje).toBe('tsx')
+  })
+
   it('acepta el mínimo con sus valores por defecto', () => {
     const datos = esquemaReactAnotado.parse({ tipo: 'react-anotado', codigo: archivoApp.codigo, anotaciones: [{ fragmento: 'App', nota: 'n' }] })
     expect(datos).toMatchObject({ css: '', strictMode: true, mostrarConsola: false })

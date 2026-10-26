@@ -278,7 +278,7 @@ export default function Tarjeta({ n, onSumar }: Props) {
       expect.objectContaining({
         tipo: 'error-render',
         texto: expect.stringContaining(
-          'solo se puede importar React y tus propios archivos',
+          'solo se puede importar React, React Router y tus propios archivos',
         ),
       }),
     )

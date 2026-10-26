@@ -20,6 +20,111 @@ const app = (codigo: string, extras: ArchivoReact[] = []): ArchivoReact[] => [
 ]
 
 describe('diagnosticarTiposReact', () => {
+  it('un App.tsx con createMemoryRouter, RouterProvider de react-router/dom y useLoaderData<typeof loader> no tiene errores', async () => {
+    const diagnosticos = await diagnosticarTiposReact(
+      app(`import { createMemoryRouter, useLoaderData } from 'react-router'
+import { RouterProvider } from 'react-router/dom'
+type Usuario = { nombre: string }
+export async function loader(): Promise<Usuario> { return { nombre: 'Ada' } }
+function Inicio() { const usuario = useLoaderData<typeof loader>(); return <p>{usuario.nombre}</p> }
+const router = createMemoryRouter([{ path: '/', loader, Component: Inicio }])
+export default function App() { return <RouterProvider router={router} /> }`),
+      cargarDesdeDisco,
+    )
+    expect(diagnosticos).toEqual([])
+  })
+
+  it('params.id es string | undefined: asignarlo a un string da error', async () => {
+    const diagnosticos = await diagnosticarTiposReact(
+      app(`import type { LoaderFunctionArgs } from 'react-router'
+export function loader({ params }: LoaderFunctionArgs) { const id: string = params.id; return id }
+export default function App() { return <p /> }`),
+      cargarDesdeDisco,
+    )
+    expect(diagnosticos.map((d) => d.mensaje)).toContain(
+      "Type 'string | undefined' is not assignable to type 'string'.\n  Type 'undefined' is not assignable to type 'string'.",
+    )
+  })
+
+  it('createContext<Usuario>: un set con otro tipo da error', async () => {
+    const diagnosticos = await diagnosticarTiposReact(
+      app(`import { createContext, RouterContextProvider } from 'react-router'
+type Usuario = { nombre: string }
+const contexto = createContext<Usuario>()
+new RouterContextProvider().set(contexto, 123)
+export default function App() { return <p /> }`),
+      cargarDesdeDisco,
+    )
+    expect(diagnosticos.map((d) => d.mensaje)).toContain(
+      "Argument of type 'number' is not assignable to parameter of type 'Usuario'.",
+    )
+  })
+
+  it('useLoaderData<typeof loader> conoce las propiedades', async () => {
+    const diagnosticos = await diagnosticarTiposReact(
+      app(`import { useLoaderData } from 'react-router'
+type Usuario = { nombre: string }
+export async function loader(): Promise<Usuario> { return { nombre: 'Ada' } }
+export default function App() { const usuario = useLoaderData<typeof loader>(); return <p>{usuario.apellido}</p> }`),
+      cargarDesdeDisco,
+    )
+    expect(diagnosticos.map((d) => d.mensaje)).toContain(
+      "Property 'apellido' does not exist on type 'Usuario'.",
+    )
+  })
+
+  it('sin importar react-router no pide tipos.json', async () => {
+    const cargarArchivo = vi.fn(cargarDesdeDisco)
+    await crearSesionTiposReact(cargarArchivo).diagnosticar(
+      app("import { useState } from 'react'\nexport default function App() { const [n] = useState(0); return <p>{n}</p> }"),
+    )
+    expect(cargarArchivo).not.toHaveBeenCalledWith(
+      '/vendor/react-en-vivo/react-router/8.5.0/tipos.json',
+    )
+  })
+
+  it('un import type de react-router también carga sus tipos', async () => {
+    const cargarArchivo = vi.fn(cargarDesdeDisco)
+    await crearSesionTiposReact(cargarArchivo).diagnosticar(
+      app("import type { Params } from 'react-router'\nconst params: Params = {}\nexport default function App() { return <p>{Object.keys(params).length}</p> }"),
+    )
+    expect(cargarArchivo).toHaveBeenCalledWith(
+      '/vendor/react-en-vivo/react-router/8.5.0/tipos.json',
+    )
+  })
+
+  it('pide tipos.json una sola vez por sesión', async () => {
+    const cargarArchivo = vi.fn(cargarDesdeDisco)
+    const sesion = crearSesionTiposReact(cargarArchivo)
+    const codigo = "import type { Params } from 'react-router'\nconst params: Params = {}\nexport default function App() { return <p>{Object.keys(params).length}</p> }"
+    await sesion.diagnosticar(app(codigo))
+    await sesion.diagnosticar(app(codigo.replace('params).length', 'params).length + 1')))
+    expect(
+      cargarArchivo.mock.calls.filter(([ruta]) => ruta.endsWith('/react-router/8.5.0/tipos.json')),
+    ).toHaveLength(1)
+  })
+
+  it('un tipos.json con otra versión o mal formado da un error, y la sesión se recupera con uno bueno', async () => {
+    const tiposBuenos = await cargarDesdeDisco('/vendor/react-en-vivo/react-router/8.5.0/tipos.json')
+    let intento = 0
+    const cargarArchivo = vi.fn(async (ruta: string) => {
+      if (!ruta.endsWith('/tipos.json')) return cargarDesdeDisco(ruta)
+      intento += 1
+      if (intento === 1) return JSON.stringify({ version: '8.4.0', archivos: {} })
+      if (intento === 2) return JSON.stringify({ version: '8.5.0', archivos: { '../fuera.d.ts': 'x' } })
+      return tiposBuenos
+    })
+    const codigo = "import type { Params } from 'react-router'\nconst params: Params = {}\nexport default function App() { return <p>{Object.keys(params).length}</p> }"
+
+    await expect(crearSesionTiposReact(cargarArchivo).diagnosticar(app(codigo))).rejects.toThrow(
+      'Los tipos de React Router no tienen el formato esperado',
+    )
+    await expect(crearSesionTiposReact(cargarArchivo).diagnosticar(app(codigo))).rejects.toThrow(
+      'Los tipos de React Router no tienen el formato esperado',
+    )
+    await expect(crearSesionTiposReact(cargarArchivo).diagnosticar(app(codigo))).resolves.toEqual([])
+  })
+
   it('un App.tsx correcto con tipos de React no produce diagnósticos', async () => {
     const diagnosticos = await diagnosticarTiposReact(
       app(`import { useState } from 'react'

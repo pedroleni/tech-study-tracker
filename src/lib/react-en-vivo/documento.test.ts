@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { construirDocumentoReact } from './documento'
+import { transformarArchivos } from './transformar'
 
 const base = {
   origen: 'https://ejemplo.test',
@@ -12,6 +13,51 @@ const base = {
 }
 
 describe('construirDocumentoReact', () => {
+  it('no carga React Router si ningún módulo lo pide', () => {
+    expect(construirDocumentoReact(base)).not.toContain('/react-router/8.5.0/react-router.js')
+  })
+
+  it("carga react-router.js después de react.js y el runtime del router antes del montaje si un módulo hace require('react-router')", () => {
+    const doc = construirDocumentoReact({
+      ...base,
+      modulos: { './App.jsx': "require('react-router')" },
+    })
+
+    expect(doc.indexOf('/19.3.1/react.js')).toBeLessThan(doc.indexOf('/react-router/8.5.0/react-router.js'))
+    expect(doc.indexOf('/react-router/8.5.0/react-router.js')).toBeLessThan(doc.indexOf('window.__routerEnVivo'))
+    expect(doc.indexOf('const LIBRERIA = window.__reactRouterEnVivo')).toBeLessThan(
+      doc.indexOf('const R = window.__reactEnVivo'),
+    )
+  })
+
+  it('también lo carga con require("react-router/dom") entre comillas dobles', () => {
+    const doc = construirDocumentoReact({
+      ...base,
+      modulos: { './App.jsx': 'require("react-router/dom")' },
+    })
+    expect(doc).toContain('/react-router/8.5.0/react-router.js')
+  })
+
+  it('un import type de react-router no lo carga', async () => {
+    const resultado = await transformarArchivos([
+      {
+        nombre: 'App.tsx',
+        codigo: "import type { Params } from 'react-router'\nexport default function App() { return <p /> }",
+      },
+    ])
+    expect(resultado.ok).toBe(true)
+    if (!resultado.ok) return
+    expect(construirDocumentoReact({ ...base, modulos: resultado.modulos })).not.toContain(
+      '/react-router/8.5.0/react-router.js',
+    )
+  })
+
+  it('urlInicial va en la configuración con < escapado', () => {
+    const doc = construirDocumentoReact({ ...base, urlInicial: '/buscar?q=<b>' })
+    expect(doc).not.toContain('/buscar?q=<b>')
+    expect(doc).toContain('/buscar?q=\\u003cb>')
+  })
+
   it('carga el runtime propio después del puente y sin Testing Library por defecto', () => {
     const doc = construirDocumentoReact(base)
 
