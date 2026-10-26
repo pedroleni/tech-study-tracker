@@ -244,3 +244,54 @@ describe('mensaje arbol', () => {
     expect(leer(arbol({}, [{ ...nodo, motivos: [{ tipo: 'prop' }] }]))).toBeNull()
   })
 })
+
+describe('mensajes del registro del router', () => {
+  const paso = {
+    tipo: 'loader',
+    ruta: 'recetas',
+    fase: 'revalidacion',
+    inicio: 6,
+    duracion: 42,
+    estado: 'ok',
+  }
+  const operacion = {
+    canal: 'react-en-vivo',
+    tipo: 'router-operacion',
+    id: 2,
+    clase: 'envio',
+    metodo: 'POST',
+    destino: '/recetas',
+    estado: 'terminada',
+    duracion: 47,
+    urlFinal: '/recetas?guardada=1',
+    pasos: [paso],
+    truncado: false,
+    sinEjecutar: ['/'],
+    errores: [{ ruta: 'raiz', texto: '404 No existe' }],
+  }
+  const leer = (datos: unknown) => {
+    const { iframe, evento } = prepararIframe()
+    return leerMensajeReactEnVivo(evento(datos), iframe.contentWindow)
+  }
+
+  it('acepta una router-operacion completa y router-lleno', () => {
+    expect(leer(operacion)).toEqual(operacion)
+    expect(leer({ canal: 'react-en-vivo', tipo: 'router-lleno' })).toEqual({
+      canal: 'react-en-vivo',
+      tipo: 'router-lleno',
+    })
+  })
+
+  it('rechaza más de 40 pasos, un id 0, una clase o fase desconocidas, un destino de más de 200 caracteres y un error de más de 200', () => {
+    for (const mensaje of [
+      { ...operacion, pasos: Array.from({ length: 41 }, () => paso) },
+      { ...operacion, id: 0 },
+      { ...operacion, clase: 'prefetch' },
+      { ...operacion, pasos: [{ ...paso, fase: 'hidratacion' }] },
+      { ...operacion, destino: `/${'a'.repeat(200)}` },
+      { ...operacion, pasos: [{ ...paso, error: 'a'.repeat(201) }] },
+    ]) {
+      expect(leer(mensaje)).toBeNull()
+    }
+  })
+})

@@ -21,6 +21,7 @@ import {
 import { PanelLint } from '@/components/bloques-laboratorio/PanelLint'
 import { PanelRed, type AjustesRed } from '@/components/bloques-laboratorio/PanelRed'
 import { RegistroEfectos } from '@/components/bloques-laboratorio/RegistroEfectos'
+import { RegistroRouter } from '@/components/bloques-laboratorio/RegistroRouter'
 import {
   ResultadosComprobaciones,
   type ResultadoComprobacion,
@@ -41,6 +42,7 @@ import type {
   MensajeEfecto,
   MensajePeticion,
   MensajeReactEnVivo,
+  MensajeRouterOperacion,
 } from '@/lib/react-en-vivo/mensajes'
 import { prepararDocumento } from '@/lib/react-en-vivo/preparar'
 import { transformarParaMostrar } from '@/lib/react-en-vivo/transformar'
@@ -72,6 +74,20 @@ const incorporarEfectos = (actuales: MensajeEfecto[], nuevos: MensajeEfecto[]) =
   ...actuales,
   ...nuevos,
 ]
+
+function incorporarOperaciones(
+  actuales: MensajeRouterOperacion[],
+  nuevas: MensajeRouterOperacion[],
+) {
+  // Un Map conserva el orden y sustituye en su sitio. Recortar en cada paso, y
+  // no al final del lote, evita copiar el array entero por cada id nuevo.
+  const porId = new Map(actuales.map((operacion) => [operacion.id, operacion]))
+  for (const nueva of nuevas) {
+    porId.set(nueva.id, nueva)
+    if (porId.size > 100) porId.delete(porId.keys().next().value!)
+  }
+  return [...porId.values()]
+}
 
 type EstadoComprobacion =
   | { estado: 'inactivo' }
@@ -122,6 +138,7 @@ export function ReactEnVivo({
   mostrarJsGenerado,
   mostrarArbol = false,
   mostrarEfectos = false,
+  mostrarRouter = false,
   mostrarLint = false,
   compilador = false,
   exigirLintLimpio = false,
@@ -140,6 +157,7 @@ export function ReactEnVivo({
   DatosReactEnVivo,
   | 'mostrarArbol'
   | 'mostrarEfectos'
+  | 'mostrarRouter'
   | 'mostrarLint'
   | 'compilador'
   | 'exigirLintLimpio'
@@ -148,6 +166,7 @@ export function ReactEnVivo({
 > & {
   mostrarArbol?: boolean
   mostrarEfectos?: boolean
+  mostrarRouter?: boolean
   mostrarLint?: boolean
   compilador?: boolean
   exigirLintLimpio?: boolean
@@ -221,6 +240,12 @@ export function ReactEnVivo({
     useRegistroAgrupado(20, incorporarPeticiones)
   const { entradas: efectos, recibir: recibirEfecto, limpiar: limpiarEfectos } =
     useRegistroAgrupado(200, incorporarEfectos)
+  const {
+    entradas: operacionesRouter,
+    recibir: recibirOperacionRouter,
+    limpiar: limpiarOperacionesRouter,
+  } = useRegistroAgrupado(100, incorporarOperaciones)
+  const [registroRouterLleno, setRegistroRouterLleno] = useState(false)
   const [falloPendiente, setFalloPendiente] = useState(false)
   const [fallosSolicitados, setFallosSolicitados] = useState(0)
   const [redActual, setRedActual] = useState<AjustesRed>({
@@ -247,8 +272,12 @@ export function ReactEnVivo({
         if (mensaje.codigo === 500) setFalloPendiente(false)
       }
       if (mensaje.tipo === 'efecto' && documentoMontadoRef.current) recibirEfecto(mensaje)
+      if (mensaje.tipo === 'router-operacion' && documentoMontadoRef.current) {
+        recibirOperacionRouter(mensaje)
+      }
+      if (mensaje.tipo === 'router-lleno') setRegistroRouterLleno(true)
     },
-    [recibirEfecto, recibirMensaje, recibirPeticion],
+    [recibirEfecto, recibirMensaje, recibirOperacionRouter, recibirPeticion],
   )
   const versionRef = useRef(0)
   const primeraVezRef = useRef(true)
@@ -284,6 +313,7 @@ export function ReactEnVivo({
             conPruebas: false,
             conArbol: mostrarArbol,
             conEfectos: mostrarEfectos,
+            conRegistroRouter: mostrarRouter,
             api: apiEstable,
             red: redActualRef.current,
             urlInicial: urlActualRef.current ?? urlInicial,
@@ -315,6 +345,8 @@ export function ReactEnVivo({
         setArbol(null)
         limpiarPeticiones()
         limpiarEfectos()
+        limpiarOperacionesRouter()
+        setRegistroRouterLleno(false)
         setFalloPendiente(false)
         setSrcDoc(preparado.srcDoc)
       })()
@@ -324,7 +356,7 @@ export function ReactEnVivo({
       if (version === versionRef.current) versionRef.current += 1
       if (compilador) sesionCompiladorVista.descartar()
     }
-  }, [apiEstable, archivos, compilador, sesionCompiladorVista, strictMode, mostrarJsGenerado, mostrarArbol, mostrarEfectos, limpiar, limpiarEfectos, limpiarPeticiones, reinicios, urlInicial])
+  }, [apiEstable, archivos, compilador, sesionCompiladorVista, strictMode, mostrarJsGenerado, mostrarArbol, mostrarEfectos, mostrarRouter, limpiar, limpiarEfectos, limpiarOperacionesRouter, limpiarPeticiones, reinicios, urlInicial])
 
   useEffect(() => {
     if (!usaTypeScript) return
@@ -511,6 +543,8 @@ export function ReactEnVivo({
     setArbol(null)
     limpiarPeticiones()
     limpiarEfectos()
+    limpiarOperacionesRouter()
+    setRegistroRouterLleno(false)
     setFalloPendiente(false)
     setFallosSolicitados(0)
     limpiar()
@@ -523,12 +557,14 @@ export function ReactEnVivo({
         setArbol(null)
         limpiarPeticiones()
         limpiarEfectos()
+        limpiarOperacionesRouter()
+        setRegistroRouterLleno(false)
         setFalloPendiente(false)
       }
       siguienteOrdenNavegadorRef.current += 1
       setOrdenNavegador({ id: siguienteOrdenNavegadorRef.current, accion, ...(url ? { url } : {}) })
     },
-    [limpiar, limpiarEfectos, limpiarPeticiones],
+    [limpiar, limpiarEfectos, limpiarOperacionesRouter, limpiarPeticiones],
   )
 
   const pestanas = [
@@ -719,6 +755,21 @@ export function ReactEnVivo({
         </div>
 
         {mostrarArbol && <ArbolDeRenders arbol={arbol} />}
+
+        {mostrarRouter && (
+          <RegistroRouter
+            operaciones={operacionesRouter}
+            lleno={registroRouterLleno}
+            soloDeclarativo={
+              ubicacion !== null &&
+              ['MemoryRouter', 'BrowserRouter', 'HashRouter'].includes(ubicacion.origen)
+            }
+            onLimpiar={() => {
+              limpiarOperacionesRouter()
+              setRegistroRouterLleno(false)
+            }}
+          />
+        )}
 
         {api && (
           <PanelRed

@@ -388,6 +388,7 @@ export const esquemaReactEnVivo = z
     // Árbol de renders (fase 2): qué se renderiza en cada commit y por qué.
     mostrarArbol: z.boolean().default(false),
     mostrarEfectos: z.boolean().default(false),
+    mostrarRouter: z.boolean().default(false),
     mostrarLint: z.boolean().default(false),
     compilador: z.boolean().default(false),
     exigirLintLimpio: z.boolean().default(false),
@@ -431,26 +432,41 @@ export const esquemaReactEnVivo = z
     },
     { message: 'Las comprobaciones con URL necesitan que algún archivo importe react-router' },
   )
+  .refine(
+    (datos) =>
+      !datos.mostrarRouter ||
+      datos.archivos.some((archivo) =>
+        /\bfrom\s*['"]react-router(?:\/dom)?['"]/.test(archivo.codigo),
+      ),
+    { message: 'mostrarRouter necesita que algún archivo importe react-router' },
+  )
 
-export const esquemaReactAnotado = z.object({
-  tipo: z.literal('react-anotado'),
-  titulo: z.string().min(1).max(140).optional(),
-  codigo: z.string().min(1).max(4000),
-  css: z.string().max(4000).default(''),
-  anotaciones: z
-    .array(z.object({ fragmento: z.string().min(1), nota: z.string().min(1).max(500) }))
-    .min(1)
-    .max(8),
-  strictMode: z.boolean().default(true),
-  urlInicial: esquemaUrlRouter.optional(),
-  barraDeDirecciones: z.boolean().default(true),
-  lenguaje: z.enum(['jsx', 'tsx']).default('jsx'),
-  mostrarConsola: z.boolean().default(false),
-  mostrarArbol: z.boolean().default(false),
-  mostrarEfectos: z.boolean().default(false),
-  api: esquemaApiReact.optional(),
-  red: esquemaRedReact.optional(),
-})
+export const esquemaReactAnotado = z
+  .object({
+    tipo: z.literal('react-anotado'),
+    titulo: z.string().min(1).max(140).optional(),
+    codigo: z.string().min(1).max(4000),
+    css: z.string().max(4000).default(''),
+    anotaciones: z
+      .array(z.object({ fragmento: z.string().min(1), nota: z.string().min(1).max(500) }))
+      .min(1)
+      .max(8),
+    strictMode: z.boolean().default(true),
+    urlInicial: esquemaUrlRouter.optional(),
+    barraDeDirecciones: z.boolean().default(true),
+    lenguaje: z.enum(['jsx', 'tsx']).default('jsx'),
+    mostrarConsola: z.boolean().default(false),
+    mostrarArbol: z.boolean().default(false),
+    mostrarEfectos: z.boolean().default(false),
+    mostrarRouter: z.boolean().default(false),
+    api: esquemaApiReact.optional(),
+    red: esquemaRedReact.optional(),
+  })
+  .refine(
+    (datos) =>
+      !datos.mostrarRouter || /\bfrom\s*['"]react-router(?:\/dom)?['"]/.test(datos.codigo),
+    { message: 'mostrarRouter necesita que el código importe react-router' },
+  )
 
 export const esquemaCompiladorReact = z.strictObject({
   tipo: z.literal('compilador-react'),

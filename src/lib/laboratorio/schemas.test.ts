@@ -298,6 +298,51 @@ describe('registro de efectos en los bloques de React', () => {
   })
 })
 
+describe('registro del router en los bloques de React', () => {
+  const anotado = {
+    tipo: 'react-anotado' as const,
+    codigo: archivoApp.codigo,
+    anotaciones: [{ fragmento: 'App', nota: 'n' }],
+  }
+
+  it('mostrarRouter vale false por defecto en react-en-vivo y react-anotado', () => {
+    expect(esquemaReactEnVivo.parse(minimoEnVivo).mostrarRouter).toBe(false)
+    expect(esquemaReactAnotado.parse(anotado).mostrarRouter).toBe(false)
+  })
+
+  it('mostrarRouter sin importar react-router no valida', () => {
+    const vivo = esquemaReactEnVivo.safeParse({ ...minimoEnVivo, mostrarRouter: true })
+    const explicado = esquemaReactAnotado.safeParse({ ...anotado, mostrarRouter: true })
+
+    expect(vivo.success).toBe(false)
+    expect(explicado.success).toBe(false)
+    if (!vivo.success) {
+      expect(vivo.error.issues.map((issue) => issue.message)).toContain(
+        'mostrarRouter necesita que algún archivo importe react-router',
+      )
+    }
+    if (!explicado.success) {
+      expect(explicado.error.issues.map((issue) => issue.message)).toContain(
+        'mostrarRouter necesita que el código importe react-router',
+      )
+    }
+  })
+
+  it('mostrarRouter con import de react-router valida', () => {
+    const codigo = "import { createMemoryRouter } from 'react-router'\n" + archivoApp.codigo
+    expect(
+      esquemaReactEnVivo.safeParse({
+        ...minimoEnVivo,
+        archivos: [{ ...archivoApp, codigo }],
+        mostrarRouter: true,
+      }).success,
+    ).toBe(true)
+    expect(esquemaReactAnotado.safeParse({ ...anotado, codigo, mostrarRouter: true }).success).toBe(
+      true,
+    )
+  })
+})
+
 describe('esquemaArbolDeComponentes', () => {
   const nodos = [
     { nombre: 'App', nivel: 0, etiqueta: 'estado: tareas' },
