@@ -9,10 +9,10 @@
 
 ## Qué es y para qué sirve
 
-Turrones El Panal vende por internet a toda España. Su web está en castellano, pero a una clienta de Bilbao le gustaría leerla en euskera, una tienda de Girona la pide en catalán, otra de Lugo en gallego, y los pedidos de empresas del Reino Unido llegan en inglés. Traducir las frases es solo una parte del trabajo:
+Turrones El Panal vende por internet a toda España. Su web está en castellano, pero una tienda de Girona la pide en catalán y los pedidos de empresas del Reino Unido llegan en inglés. En España también se escribe en euskera y en gallego, y de ellos verás aquí cómo escribe `Intl` los números y las fechas; los textos de la tienda, de momento, van en castellano, catalán e inglés. Traducir las frases es solo una parte del trabajo:
 
 - **Los números, las fechas y las listas cambian de forma.** «1234,50 €» en castellano, «1.234,50 €» en catalán y «€1,234.50» en inglés; «jueves, 29 de octubre» en castellano y «Thursday 29 October» en inglés.
-- **Los plurales no siguen la misma regla en todas las lenguas.** En euskera el número cambia de sitio («Tableta 1», «3 tableta»), y en castellano un millón pide un «de»: «1.000.000 de tabletas».
+- **Los plurales no siguen la misma regla en todas las lenguas.** En castellano un millón pide un «de» («1.000.000 de tabletas»), y el árabe tiene seis formas de plural.
 - **El idioma tiene que estar en algún sitio** que el navegador, el servidor y los buscadores sepan leer.
 
 Preparar una aplicación para todo eso se llama **internacionalización**, y se abrevia **i18n**: una i, dieciocho letras y una n. Adaptarla después a cada idioma y región, con sus traducciones y sus formatos, es la **localización** (l10n). Esta lección recorre las tres piezas, de la que ya trae el navegador a la que decides tú:
@@ -35,13 +35,13 @@ Preparar una aplicación para todo eso se llama **internacionalización**, y se 
     {
       "etiqueta": "La URL",
       "rol": "El idioma",
-      "descripcion": "/eu/cesta dice en qué idioma está la página: se comparte, se recarga, la lee el servidor y la indexan los buscadores."
+      "descripcion": "/ca/cesta dice en qué idioma está la página: se comparte, se recarga, la lee el servidor y la indexan los buscadores."
     }
   ]
 }
 ```
 
-Cada idioma se nombra con una **etiqueta de idioma** (el estándar se llama BCP 47): el idioma y, si importa, la región. En esta lección salen cinco: `es-ES`, `ca-ES`, `eu-ES`, `gl-ES` y `en-GB`. La región cambia detalles: `en-GB` escribe «29 October» y `en-US`, «October 29». También hay variantes registradas, como `ca-ES-valencia` para el valenciano. En las URL basta con el idioma (`/eu/`); para formatear, mejor la etiqueta completa.
+Cada idioma se nombra con una **etiqueta de idioma** (el estándar se llama BCP 47): el idioma y, si importa, la región. En esta lección salen cinco: `es-ES`, `ca-ES`, `eu-ES`, `gl-ES` y `en-GB`. La región cambia detalles: `en-GB` escribe «29 October» y `en-US`, «October 29». También hay variantes registradas, como `ca-ES-valencia` para el valenciano. En las URL basta con el idioma (`/ca/`); para formatear, mejor la etiqueta completa.
 
 ```laboratorio
 {
@@ -56,17 +56,17 @@ Cada idioma se nombra con una **etiqueta de idioma** (el estándar se llama BCP 
 
 En la carta de la lección 14 usaste `Intl.NumberFormat` para escribir los precios en euros, y en la lección 66 mediste lo que cuesta crear un formateador en cada fila. `Intl` es una familia de constructores, uno por tipo de dato. Todos reciben el idioma y unas opciones, y devuelven un objeto con un método `format()`.
 
-Este es el lote para empresas de la tienda, con los mismos datos en los cinco idiomas. Los datos llegan como llegarían del servidor, sin formato: `1234.5`, `1200`, una fecha. Todo lo demás lo pone `Intl`.
+Este es el lote para empresas de la tienda, con los mismos datos en los cinco idiomas. Los datos llegan como llegarían del servidor, sin formato: `1234.5`, `[250, 500, 1000]`, una fecha. Todo lo demás lo pone `Intl`.
 
 ```laboratorio
 {
   "tipo": "react-en-vivo",
   "titulo": "Los mismos datos en cinco idiomas",
-  "consigna": "Cambia de idioma y compara: el punto de los miles, dónde va el símbolo del porcentaje en euskera, «anteayer» en cada lengua y la palabra que une la lista. Mira la consola: cada idioma crea sus formateadores la primera vez y, al volver a él, ya no. La última línea dice qué datos de idioma ha usado de verdad tu navegador: fíjate en ella con Euskara y Galego.",
+  "consigna": "Cambia de idioma y compara: el punto de los miles, dónde va el símbolo del porcentaje con eu-ES, «anteayer» en cada lengua y la palabra que une los tamaños. Mira la consola: cada idioma crea sus formateadores la primera vez y, al volver a él, ya no. La última línea dice qué datos de idioma ha usado de verdad tu navegador: fíjate en ella con eu-ES y gl-ES.",
   "archivos": [
     {
       "nombre": "App.jsx",
-      "codigo": "import { useState } from 'react'\nimport { formatos } from './formatos'\nimport './estilos.css'\n\nconst IDIOMAS = [\n  ['es-ES', 'Español'],\n  ['ca-ES', 'Català'],\n  ['eu-ES', 'Euskara'],\n  ['gl-ES', 'Galego'],\n  ['en-GB', 'English'],\n]\n\n// Lo que llega del servidor: números y fechas, sin ningún formato\nconst LOTE = {\n  precio: 1234.5,\n  gramos: 1200,\n  iva: 0.1,\n  entrega: new Date('2026-10-29T10:00:00+01:00'),\n  diasDesdeElPedido: -2,\n}\n\n// Las palabras sí hay que traducirlas: Intl solo sabe unirlas\nconst INGREDIENTES = {\n  'es-ES': ['almendra', 'miel', 'huevo'],\n  'ca-ES': ['ametlla', 'mel', 'ou'],\n  'eu-ES': ['almendra', 'eztia', 'arrautza'],\n  'gl-ES': ['améndoa', 'mel', 'ovo'],\n  'en-GB': ['almonds', 'honey', 'egg'],\n}\n\nexport default function App() {\n  const [idioma, setIdioma] = useState('es-ES')\n  const f = formatos(idioma)\n  const usado = f.dia.resolvedOptions().locale\n\n  return (\n    <main>\n      <h1>Lote para empresas · Turrones El Panal</h1>\n      <div className=\"idiomas\" role=\"group\" aria-label=\"Idioma\">\n        {IDIOMAS.map(([codigo, nombre]) => (\n          <button\n            key={codigo}\n            lang={codigo}\n            aria-pressed={codigo === idioma}\n            onClick={() => setIdioma(codigo)}\n          >\n            {nombre}\n          </button>\n        ))}\n      </div>\n      <dl className=\"ficha\">\n        <dt>Precio</dt>\n        <dd lang={idioma}>{f.euros.format(LOTE.precio)}</dd>\n        <dt>Peso</dt>\n        <dd lang={idioma}>{f.peso.format(LOTE.gramos)}</dd>\n        <dt>IVA</dt>\n        <dd lang={idioma}>{f.porcentaje.format(LOTE.iva)}</dd>\n        <dt>Entrega</dt>\n        <dd lang={idioma}>{f.dia.format(LOTE.entrega)}</dd>\n        <dt>Pedido</dt>\n        <dd lang={idioma}>{f.haceCuanto.format(LOTE.diasDesdeElPedido, 'day')}</dd>\n        <dt>Ingredientes</dt>\n        <dd lang={idioma}>{f.lista.format(INGREDIENTES[idioma])}</dd>\n      </dl>\n      <p className=\"usado\">\n        Datos de idioma que ha usado tu navegador: <code>{usado}</code>\n      </p>\n    </main>\n  )\n}\n"
+      "codigo": "import { useState } from 'react'\nimport { formatos } from './formatos'\nimport './estilos.css'\n\n// Las etiquetas de idioma: es lo único que necesita Intl\nconst IDIOMAS = ['es-ES', 'ca-ES', 'eu-ES', 'gl-ES', 'en-GB']\n\n// Lo que llega del servidor: números y fechas, sin ningún formato\nconst LOTE = {\n  precio: 1234.5,\n  tamanos: [250, 500, 1000],\n  iva: 0.1,\n  entrega: new Date('2026-10-29T10:00:00+01:00'),\n  diasDesdeElPedido: -2,\n}\n\nexport default function App() {\n  const [idioma, setIdioma] = useState('es-ES')\n  const f = formatos(idioma)\n  const usado = f.dia.resolvedOptions().locale\n\n  return (\n    <main>\n      <h1>Lote para empresas · Turrones El Panal</h1>\n      <div className=\"idiomas\" role=\"group\" aria-label=\"Idioma\">\n        {IDIOMAS.map((codigo) => (\n          <button key={codigo} aria-pressed={codigo === idioma} onClick={() => setIdioma(codigo)}>\n            {codigo}\n          </button>\n        ))}\n      </div>\n      <dl className=\"ficha\">\n        <dt>Precio</dt>\n        <dd lang={idioma}>{f.euros.format(LOTE.precio)}</dd>\n        <dt>Tamaños</dt>\n        <dd lang={idioma}>{f.lista.format(LOTE.tamanos.map((gramos) => f.peso.format(gramos)))}</dd>\n        <dt>IVA</dt>\n        <dd lang={idioma}>{f.porcentaje.format(LOTE.iva)}</dd>\n        <dt>Entrega</dt>\n        <dd lang={idioma}>{f.dia.format(LOTE.entrega)}</dd>\n        <dt>Pedido</dt>\n        <dd lang={idioma}>{f.haceCuanto.format(LOTE.diasDesdeElPedido, 'day')}</dd>\n      </dl>\n      <p className=\"usado\">\n        Datos de idioma que ha usado tu navegador: <code>{usado}</code>\n      </p>\n    </main>\n  )\n}\n"
     },
     {
       "nombre": "formatos.jsx",
@@ -100,8 +100,8 @@ Hay otras dos formas de conseguirlo:
 Con `style` eliges qué es el número:
 
 - **`currency`**, con `currency: 'EUR'`: «12,50 €». La moneda no sale del idioma: un cliente británico que paga en euros ve «€12.50».
-- **`unit`**, con `unit: 'gram'` o `'kilogram'`: «300 g» o, con `unitDisplay: 'long'`, «300 gramos», «300 grams» y, en euskera, «300 gramo», porque detrás de un número el nombre va en singular.
-- **`percent`**: `0.1` se escribe «10 %» en castellano y «% 10» en euskera, con el símbolo delante.
+- **`unit`**, con `unit: 'gram'` o `'kilogram'`: «300 g» o, con `unitDisplay: 'long'`, «300 gramos», «300 grams» y, con `eu-ES`, «300 gramo».
+- **`percent`**: `0.1` se escribe «10 %» en castellano y, con `eu-ES`, «% 10», con el símbolo delante.
 
 Entre el número y el «€» o el «%» va un espacio duro, U+00A0: ya lo viste en las lecciones 14 y 83. Y una pregunta sobre los miles:
 
@@ -127,21 +127,21 @@ Con `dateStyle: 'full'` y la entrega del lote:
 
 - castellano: «jueves, 29 de octubre de 2026»
 - catalán: «dijous, 29 d’octubre del 2026»
-- euskera: «2026(e)ko urriaren 29(a), osteguna»
-- gallego: «xoves, 29 de outubro de 2026»
+- `eu-ES`: «2026(e)ko urriaren 29(a), osteguna»
+- `gl-ES`: «xoves, 29 de outubro de 2026»
 - inglés británico: «Thursday, 29 October 2026»
 
-Tres detalles. **El orden y las partes cambian** de un idioma a otro, y no tienes que saberlo: lo sabe `Intl`. Los sufijos entre paréntesis del euskera están ahí porque la terminación depende de cómo se pronuncia el número. **El apóstrofo del catalán es el tipográfico** (’, U+2019), no el recto: si comparas fechas en un test, no las escribas a mano. Y **la zona horaria se fija** con `timeZone`, como en el proyecto 98: la tienda reparte desde España, así que la fecha de entrega se escribe en `'Europe/Madrid'` aunque el servidor esté en UTC o el cliente en Londres.
+Tres detalles. **El orden y las partes cambian** de un idioma a otro, y no tienes que saberlo: lo sabe `Intl`. **El apóstrofo del catalán es el tipográfico** (’, U+2019), no el recto: si comparas fechas en un test, no las escribas a mano. Y **la zona horaria se fija** con `timeZone`, como en el proyecto 98: la tienda reparte desde España, así que la fecha de entrega se escribe en `'Europe/Madrid'` aunque el servidor esté en UTC o el cliente en Londres.
 
 Los motores tampoco coinciden en todo. Con `dateStyle: 'medium'` y `timeStyle: 'short'`, Chrome escribe «29 Oct 2026, 10:00» en inglés británico y Safari, «29 Oct 2026 at 10:00». Los dos son correctos; por eso un test no debería esperar un texto escrito a mano.
 
 ### «Anteayer» y «hace 2 días»: `RelativeTimeFormat`
 
-`RelativeTimeFormat` no calcula nada: tú le das la cantidad y la unidad, `format(-2, 'day')`, y él lo escribe. Calcular la diferencia y elegir la unidad era el trabajo de `haceCuanto` en el proyecto 98. Sin opciones escribe «hace 2 días», «fa 2 dies», «duela 2 egun», «hai 2 días» y «2 days ago». Con `numeric: 'auto'` usa las palabras de cada idioma cuando las hay: «anteayer», «abans-d’ahir», «herenegun», «antonte»… y en inglés sigue siendo «2 days ago», porque no tiene una palabra para eso.
+`RelativeTimeFormat` no calcula nada: tú le das la cantidad y la unidad, `format(-2, 'day')`, y él lo escribe. Calcular la diferencia y elegir la unidad era el trabajo de `haceCuanto` en el proyecto 98. Sin opciones escribe, en el orden de la demostración (`es-ES`, `ca-ES`, `eu-ES`, `gl-ES` y `en-GB`), «hace 2 días», «fa 2 dies», «duela 2 egun», «hai 2 días» y «2 days ago». Con `numeric: 'auto'` usa las palabras de cada idioma cuando las hay: «anteayer», «abans-d’ahir», «herenegun», «antonte»… y en inglés sigue siendo «2 days ago», porque no tiene una palabra para eso.
 
 ### Listas: `ListFormat`
 
-«almendra, miel y huevo», «ametlla, mel i ou», «almendra, eztia eta arrautza», «améndoa, mel e ovo» y «almonds, honey and egg». El inglés británico no pone coma antes de «and»; el estadounidense, sí («almonds, honey, and egg»). Con `type: 'disjunction'` une con «o», «edo», «ou» u «or». Y sabe algo más:
+Los tamaños del lote, cada uno con `NumberFormat` y unidos con `ListFormat`: «250 gramos, 500 gramos y 1000 gramos», «250 grams, 500 grams i 1.000 grams», «250 gramo, 500 gramo eta 1.000 gramo» con `eu-ES`, «250 gramos, 500 gramos e 1.000 gramos» con `gl-ES` y «250 grams, 500 grams and 1,000 grams». El inglés británico no pone coma antes de «and»; el estadounidense, sí («almonds, honey, and egg»). Con `type: 'disjunction'` une con «o», «edo», «ou» u «or». Y sabe algo más:
 
 ```laboratorio
 {
@@ -173,7 +173,7 @@ Los motores tampoco coinciden en todo. Con `dateStyle: 'medium'` y `timeStyle: '
     },
     {
       "titulo": "Euskera, gallego e inglés: one y other",
-      "texto": "Solo singular y plural. En euskera lo que cambia es el orden: «Tableta 1 saskian» y «3 tableta saskian», sin plural en el nombre."
+      "texto": "Solo dos categorías: one para el 1 y other para todo lo demás, incluidos el 0, el 1,5 y el millón."
     },
     {
       "titulo": "Árabe: seis",
@@ -198,11 +198,11 @@ Los motores tampoco coinciden en todo. Con `dateStyle: 'medium'` y `timeStyle: '
   "tipo": "callout",
   "variante": "aviso",
   "titulo": "Sin error y sin aviso",
-  "contenido": "Comprobado en Chrome 156 y en Chromium: sus datos de Intl no incluyen el euskera ni el gallego. No da ningún error: usa el idioma por defecto del navegador. Con Chrome en castellano, eu-ES escribe «jueves, 29 de octubre»; con Chrome en euskera, fallan hasta los números: i18next escribió «1,000,000 tableta salduta», con comas a la inglesa, y el total de la cesta en gallego salió «€ 34.90». Safari y Node sí los tienen. PluralRules sí funciona en euskera y gallego en Chrome."
+  "contenido": "Comprobado en Chrome 156 y en Chromium: sus datos de Intl no incluyen el euskera ni el gallego. No da ningún error: usa el idioma por defecto del navegador. Con Chrome en castellano, eu-ES escribe «jueves, 29 de octubre»; con Chrome en euskera, fallan hasta los números: i18next escribió el millón como «1,000,000», con comas a la inglesa, y un total en euros con gl-ES salió «€ 34.90». Safari y Node sí los tienen. PluralRules sí funciona en euskera y gallego en Chrome."
 }
 ```
 
-Es lo que te enseñaba la última línea de la primera demostración: `resolvedOptions().locale` dice qué datos se han usado de verdad. Si la abres en un Chrome en castellano y pulsas «Euskara», esa línea dice `es-ES`, la fecha sale en castellano y la lista, «almendra, eztia y arrautza»: palabras en euskera unidas con la «y» del castellano. En Safari, «almendra, eztia eta arrautza». Con `Intl.DateTimeFormat.supportedLocalesOf(['eu'])` lo sabes antes de formatear: en Chrome devuelve `[]`. Si tu web tiene que escribir fechas y unidades en euskera o gallego también en Chrome, los **polyfills de FormatJS** cargan los datos que faltan, y solo en el navegador que los necesita:
+Es lo que te enseñaba la última línea de la primera demostración: `resolvedOptions().locale` dice qué datos se han usado de verdad. Si la abres en un Chrome en castellano y pulsas `eu-ES`, esa línea dice `es-ES`, y todo sale como en castellano: «jueves, 29 de octubre», «250 gramos, 500 gramos y 1000 gramos». En Safari, «250 gramo, 500 gramo eta 1.000 gramo». Con `Intl.DateTimeFormat.supportedLocalesOf(['eu'])` lo sabes antes de formatear: en Chrome devuelve `[]`. Si tu web tiene que escribir fechas y unidades en euskera o gallego también en Chrome, los **polyfills de FormatJS** cargan los datos que faltan, y solo en el navegador que los necesita:
 
 ```laboratorio
 {
@@ -212,7 +212,7 @@ Es lo que te enseñaba la última línea de la primera demostración: `resolvedO
   "anotaciones": [
     {
       "fragmento": "const falta = shouldPolyfill(idioma)",
-      "nota": "Devuelve el idioma cuyos datos hay que cargar, o undefined si el navegador ya lo sabe. Comprobado con @formatjs/intl-datetimeformat 7.8.2: en Chrome 156 devuelve eu para eu-ES y gl para gl-ES; en Safari, undefined para los cinco idiomas de la tienda."
+      "nota": "Devuelve el idioma cuyos datos hay que cargar, o undefined si el navegador ya lo sabe. Comprobado con @formatjs/intl-datetimeformat 7.8.2: en Chrome 156 devuelve eu para eu-ES y gl para gl-ES; en Safari, undefined para los cinco idiomas de la primera demostración."
     },
     {
       "fragmento": "await import('@formatjs/intl-datetimeformat/polyfill-force.js')",
@@ -238,7 +238,7 @@ La lista de errores de hidratación de la lección 87 incluía «fechas y númer
 
 - **Sin idioma, `Intl` usa el del sitio donde se ejecuta.** En Node 22, en el ordenador donde se escribió esta lección, `(1234.5).toLocaleString()` da «1,234.5»: su idioma por defecto es `en-US`. En Chrome en castellano, la misma línea da «1234,5». Pasa siempre el idioma, y la zona horaria en las fechas.
 - **Incluso con el idioma, servidor y navegador pueden no coincidir.** Con `eu-ES`, Node escribe «2026(e)ko urriaren 29(a)»; Chrome, al hidratar, calcula «29 de octubre de 2026», y React responde con el error de la lección 98: `Hydration failed because the server rendered text didn't match the client`. Safari hidrata sin problemas. Comprobado con React 19.3.1. Para idiomas que no todos los navegadores tienen, carga el polyfill antes de hidratar o manda el texto ya formateado como un dato más, como hacía la revista de la lección 98 con sus fechas.
-- **El servidor tiene que saber el idioma antes de pintar.** Si está en la URL (`/eu/cesta`), lo sabe desde la primera petición. La cabecera `Accept-Language` es la versión del servidor de `navigator.languages`: sirve para decidir adónde mandar a quien entra por `/`, no para cambiar el idioma de `/eu/`.
+- **El servidor tiene que saber el idioma antes de pintar.** Si está en la URL (`/ca/cesta`), lo sabe desde la primera petición. La cabecera `Accept-Language` es la versión del servidor de `navigator.languages`: sirve para decidir adónde mandar a quien entra por `/`, no para cambiar el idioma de `/ca/`.
 
 ## Traducir textos: un `t()` hecho a mano
 
@@ -250,11 +250,11 @@ Antes de ver la librería, este es un `t()` de unas cincuenta líneas que hace l
 {
   "tipo": "react-en-vivo",
   "titulo": "Un t() hecho a mano, con plurales y respaldo",
-  "consigna": "Cambia de idioma y usa los botones de la cesta. Fíjate en el euskera: «Tableta 1 saskian» y «2 tableta saskian», el número cambia de sitio. En catalán, el envío sale en castellano: falta la clave y se usa el respaldo. «cesta.cupon» no existe en ningún idioma: sale la clave tal cual y un aviso en la consola, repetido por StrictMode. Después borra campana.vendidas_many del castellano en traducciones.jsx y mira qué pasa con el millón.",
+  "consigna": "Cambia de idioma y usa los botones de la cesta: con 1, singular, y con 0 o 2, plural, en los tres idiomas. En catalán, el envío sale en castellano: falta la clave y se usa el respaldo. «cesta.cupon» no existe en ningún idioma: sale la clave tal cual y un aviso en la consola, repetido por StrictMode. Después borra campana.vendidas_many del castellano en traducciones.jsx y mira qué pasa con el millón.",
   "archivos": [
     {
       "nombre": "App.jsx",
-      "codigo": "import { useState } from 'react'\nimport { IdiomaProvider, useT } from './idioma'\nimport './estilos.css'\n\nconst IDIOMAS = { es: 'Español', ca: 'Català', eu: 'Euskara', gl: 'Galego', en: 'English' }\n\nfunction Cabecera() {\n  const { t } = useT()\n  return (\n    <header>\n      <h1>Turrones El Panal</h1>\n      <p>{t('tienda.lema')}</p>\n      <p className=\"vendidas\">{t('campana.vendidas', { count: 1000000 })}</p>\n    </header>\n  )\n}\n\nfunction Producto() {\n  const { t, euros } = useT()\n  const [unidades, setUnidades] = useState(1)\n\n  return (\n    <article className=\"producto\">\n      <h2>{t('producto.nombre')}</h2>\n      <p>{t('cesta.unidades', { count: unidades })}</p>\n      <div className=\"botones\">\n        <button onClick={() => setUnidades(unidades + 1)}>{t('producto.anadir')}</button>\n        <button onClick={() => setUnidades(unidades - 1)} disabled={unidades === 0}>\n          {t('producto.quitar')}\n        </button>\n      </div>\n      <p>{t('cesta.envio', { importe: euros(50) })}</p>\n      <p>{t('cesta.cupon')}</p>\n    </article>\n  )\n}\n\nexport default function App() {\n  const [idioma, setIdioma] = useState('es')\n\n  return (\n    <IdiomaProvider idioma={idioma}>\n      <div className=\"idiomas\" role=\"group\" aria-label=\"Idioma\">\n        {Object.entries(IDIOMAS).map(([codigo, nombre]) => (\n          <button\n            key={codigo}\n            lang={codigo}\n            aria-pressed={codigo === idioma}\n            onClick={() => setIdioma(codigo)}\n          >\n            {nombre}\n          </button>\n        ))}\n      </div>\n      <div lang={idioma}>\n        <Cabecera />\n        <Producto />\n      </div>\n    </IdiomaProvider>\n  )\n}\n"
+      "codigo": "import { useState } from 'react'\nimport { IdiomaProvider, useT } from './idioma'\nimport './estilos.css'\n\nconst IDIOMAS = { es: 'Español', ca: 'Català', en: 'English' }\n\nfunction Cabecera() {\n  const { t } = useT()\n  return (\n    <header>\n      <h1>Turrones El Panal</h1>\n      <p>{t('tienda.lema')}</p>\n      <p className=\"vendidas\">{t('campana.vendidas', { count: 1000000 })}</p>\n    </header>\n  )\n}\n\nfunction Producto() {\n  const { t, euros } = useT()\n  const [unidades, setUnidades] = useState(1)\n\n  return (\n    <article className=\"producto\">\n      <h2>{t('producto.nombre')}</h2>\n      <p>{t('cesta.unidades', { count: unidades })}</p>\n      <div className=\"botones\">\n        <button onClick={() => setUnidades(unidades + 1)}>{t('producto.anadir')}</button>\n        <button onClick={() => setUnidades(unidades - 1)} disabled={unidades === 0}>\n          {t('producto.quitar')}\n        </button>\n      </div>\n      <p>{t('cesta.envio', { importe: euros(50) })}</p>\n      <p>{t('cesta.cupon')}</p>\n    </article>\n  )\n}\n\nexport default function App() {\n  const [idioma, setIdioma] = useState('es')\n\n  return (\n    <IdiomaProvider idioma={idioma}>\n      <div className=\"idiomas\" role=\"group\" aria-label=\"Idioma\">\n        {Object.entries(IDIOMAS).map(([codigo, nombre]) => (\n          <button\n            key={codigo}\n            lang={codigo}\n            aria-pressed={codigo === idioma}\n            onClick={() => setIdioma(codigo)}\n          >\n            {nombre}\n          </button>\n        ))}\n      </div>\n      <div lang={idioma}>\n        <Cabecera />\n        <Producto />\n      </div>\n    </IdiomaProvider>\n  )\n}\n"
     },
     {
       "nombre": "idioma.jsx",
@@ -262,7 +262,7 @@ Antes de ver la librería, este es un `t()` de unas cincuenta líneas que hace l
     },
     {
       "nombre": "traducciones.jsx",
-      "codigo": "// Un diccionario por idioma, con las mismas claves en todos.\n// Al catalán le falta «cesta.envio», y «cesta.cupon» no la tiene nadie.\nexport const TRADUCCIONES = {\n  es: {\n    'tienda.lema': 'Turrón artesano desde 1952',\n    'producto.nombre': 'Turrón blando de almendra',\n    'producto.anadir': 'Añadir a la cesta',\n    'producto.quitar': 'Quitar una',\n    'cesta.unidades_one': '{{count}} tableta en la cesta',\n    'cesta.unidades_other': '{{count}} tabletas en la cesta',\n    'cesta.envio': 'Envío gratis a partir de {{importe}}',\n    'campana.vendidas_one': '{{count}} tableta vendida esta campaña',\n    'campana.vendidas_many': '{{count}} de tabletas vendidas esta campaña',\n    'campana.vendidas_other': '{{count}} tabletas vendidas esta campaña',\n  },\n  ca: {\n    'tienda.lema': 'Torró artesà des de 1952',\n    'producto.nombre': 'Torró tou d’ametlla',\n    'producto.anadir': 'Afegeix a la cistella',\n    'producto.quitar': 'Treu-ne una',\n    'cesta.unidades_one': '{{count}} tauleta a la cistella',\n    'cesta.unidades_other': '{{count}} tauletes a la cistella',\n    'campana.vendidas_one': '{{count}} tauleta venuda aquesta campanya',\n    'campana.vendidas_many': '{{count}} de tauletes venudes aquesta campanya',\n    'campana.vendidas_other': '{{count}} tauletes venudes aquesta campanya',\n  },\n  eu: {\n    'tienda.lema': 'Turroi artisaua 1952tik',\n    'producto.nombre': 'Almendrazko turroi biguna',\n    'producto.anadir': 'Gehitu saskira',\n    'producto.quitar': 'Kendu bat',\n    'cesta.unidades_one': 'Tableta {{count}} saskian',\n    'cesta.unidades_other': '{{count}} tableta saskian',\n    'cesta.envio': 'Doako bidalketa {{importe}}-tik aurrera',\n    'campana.vendidas_one': 'Tableta {{count}} salduta kanpaina honetan',\n    'campana.vendidas_other': '{{count}} tableta salduta kanpaina honetan',\n  },\n  gl: {\n    'tienda.lema': 'Turrón artesán desde 1952',\n    'producto.nombre': 'Turrón brando de améndoa',\n    'producto.anadir': 'Engadir á cesta',\n    'producto.quitar': 'Quitar unha',\n    'cesta.unidades_one': '{{count}} tableta na cesta',\n    'cesta.unidades_other': '{{count}} tabletas na cesta',\n    'cesta.envio': 'Envío gratuíto a partir de {{importe}}',\n    'campana.vendidas_one': 'Tableta vendida nesta campaña: {{count}}',\n    'campana.vendidas_other': 'Tabletas vendidas nesta campaña: {{count}}',\n  },\n  en: {\n    'tienda.lema': 'Handmade turrón since 1952',\n    'producto.nombre': 'Soft almond turrón',\n    'producto.anadir': 'Add to basket',\n    'producto.quitar': 'Remove one',\n    'cesta.unidades_one': '{{count}} bar in your basket',\n    'cesta.unidades_other': '{{count}} bars in your basket',\n    'cesta.envio': 'Free delivery on orders over {{importe}}',\n    'campana.vendidas_one': '{{count}} bar sold this season',\n    'campana.vendidas_other': '{{count}} bars sold this season',\n  },\n}\n"
+      "codigo": "// Un diccionario por idioma, con las mismas claves en todos.\n// Al catalán le falta «cesta.envio», y «cesta.cupon» no la tiene nadie.\nexport const TRADUCCIONES = {\n  es: {\n    'tienda.lema': 'Turrón artesano desde 1952',\n    'producto.nombre': 'Turrón blando de almendra',\n    'producto.anadir': 'Añadir a la cesta',\n    'producto.quitar': 'Quitar una',\n    'cesta.unidades_one': '{{count}} tableta en la cesta',\n    'cesta.unidades_other': '{{count}} tabletas en la cesta',\n    'cesta.envio': 'Envío gratis a partir de {{importe}}',\n    'campana.vendidas_one': '{{count}} tableta vendida esta campaña',\n    'campana.vendidas_many': '{{count}} de tabletas vendidas esta campaña',\n    'campana.vendidas_other': '{{count}} tabletas vendidas esta campaña',\n  },\n  ca: {\n    'tienda.lema': 'Torró artesà des de 1952',\n    'producto.nombre': 'Torró tou d’ametlla',\n    'producto.anadir': 'Afegeix a la cistella',\n    'producto.quitar': 'Treu-ne una',\n    'cesta.unidades_one': '{{count}} pastilla a la cistella',\n    'cesta.unidades_other': '{{count}} pastilles a la cistella',\n    'campana.vendidas_one': '{{count}} pastilla venuda aquesta campanya',\n    'campana.vendidas_many': '{{count}} de pastilles venudes aquesta campanya',\n    'campana.vendidas_other': '{{count}} pastilles venudes aquesta campanya',\n  },\n  en: {\n    'tienda.lema': 'Handmade turrón since 1952',\n    'producto.nombre': 'Soft almond turrón',\n    'producto.anadir': 'Add to basket',\n    'producto.quitar': 'Remove one',\n    'cesta.unidades_one': '{{count}} bar in your basket',\n    'cesta.unidades_other': '{{count}} bars in your basket',\n    'cesta.envio': 'Free delivery on orders over {{importe}}',\n    'campana.vendidas_one': '{{count}} bar sold this season',\n    'campana.vendidas_other': '{{count}} bars sold this season',\n  },\n}\n"
     },
     {
       "nombre": "estilos.css",
@@ -290,7 +290,7 @@ Este `t()` ya hace cinco cosas: busca la clave, sustituye los `{{valores}}`, for
     },
     {
       "titulo": "Una cadena de respaldo completa",
-      "texto": "De eu-ES a eu y de eu a es, con la región, el idioma y uno o varios idiomas de respaldo. Aquí solo hay un salto, al castellano."
+      "texto": "De ca-ES a ca y de ca a es, con la región, el idioma y uno o varios idiomas de respaldo. Aquí solo hay un salto, al castellano."
     },
     {
       "titulo": "Marcado dentro de una frase",
@@ -324,12 +324,10 @@ Cada idioma tiene una carpeta y, dentro, un JSON por **espacio de nombres** (nam
 src/traducciones/
   es/comun.json   es/cesta.json
   ca/comun.json   ca/cesta.json
-  eu/comun.json   eu/cesta.json
-  gl/comun.json   gl/cesta.json
   en/comun.json   en/cesta.json
 ```
 
-Las claves pueden ir anidadas, y entonces `t('portada.titulo')` busca `titulo` dentro de `portada`, o planas, como en `es/cesta.json` y su pareja en euskera:
+Las claves pueden ir anidadas, y entonces `t('portada.titulo')` busca `titulo` dentro de `portada`, o planas, como en `es/cesta.json` y su pareja en catalán:
 
 ```json
 {
@@ -343,11 +341,11 @@ Las claves pueden ir anidadas, y entonces `t('portada.titulo')` busca `titulo` d
 
 ```json
 {
-  "titulo": "Zure saskia",
-  "vacia": "Zure saskia hutsik dago.",
-  "unidades_one": "Produktu {{count}}",
-  "unidades_other": "{{count}} produktu",
-  "total": "Guztira: {{total, currency(EUR)}}"
+  "titulo": "La teva cistella",
+  "vacia": "La teva cistella és buida.",
+  "unidades_one": "{{count}} producte",
+  "unidades_other": "{{count}} productes",
+  "total": "Total: {{total, currency(EUR)}}"
 }
 ```
 
@@ -357,7 +355,7 @@ La configuración va en un archivo propio, `src/i18n.js`. Usa `idiomas.js`, que 
 {
   "tipo": "codigo-anotado",
   "lenguaje": "jsx",
-  "codigo": "import i18n from 'i18next'\nimport resourcesToBackend from 'i18next-resources-to-backend'\nimport { initReactI18next } from 'react-i18next'\nimport { IDIOMAS, IDIOMA_POR_DEFECTO, elegirIdioma } from './idiomas.js'\n\n// '/eu/cesta' → 'eu'. En '/', el que prefiera el navegador\nconst primerTramo = location.pathname.split('/')[1]\nconst inicial = IDIOMAS.includes(primerTramo) ? primerTramo : elegirIdioma(navigator.languages)\n\ni18n\n  .use(initReactI18next)\n  .use(resourcesToBackend((idioma, espacio) => import(`./traducciones/${idioma}/${espacio}.json`)))\n  .init({\n    lng: inicial,\n    supportedLngs: IDIOMAS,\n    fallbackLng: IDIOMA_POR_DEFECTO,\n    ns: ['comun'],\n    defaultNS: 'comun',\n    interpolation: { escapeValue: false },\n  })\n\nexport default i18n",
+  "codigo": "import i18n from 'i18next'\nimport resourcesToBackend from 'i18next-resources-to-backend'\nimport { initReactI18next } from 'react-i18next'\nimport { IDIOMAS, IDIOMA_POR_DEFECTO, elegirIdioma } from './idiomas.js'\n\n// '/ca/cesta' → 'ca'. En '/', el que prefiera el navegador\nconst primerTramo = location.pathname.split('/')[1]\nconst inicial = IDIOMAS.includes(primerTramo) ? primerTramo : elegirIdioma(navigator.languages)\n\ni18n\n  .use(initReactI18next)\n  .use(resourcesToBackend((idioma, espacio) => import(`./traducciones/${idioma}/${espacio}.json`)))\n  .init({\n    lng: inicial,\n    supportedLngs: IDIOMAS,\n    fallbackLng: IDIOMA_POR_DEFECTO,\n    ns: ['comun'],\n    defaultNS: 'comun',\n    interpolation: { escapeValue: false },\n  })\n\nexport default i18n",
   "anotaciones": [
     {
       "fragmento": ".use(initReactI18next)",
@@ -365,7 +363,7 @@ La configuración va en un archivo propio, `src/i18n.js`. Usa `idiomas.js`, que 
     },
     {
       "fragmento": "import(`./traducciones/${idioma}/${espacio}.json`)",
-      "nota": "Cada diccionario se pide la primera vez que hace falta. Vite convierte cada JSON en un archivo aparte: en el build de prueba salieron diez, de 0,2 a 0,4 kB cada uno. Admite variables en la ruta porque empieza por ./, dentro de tu proyecto."
+      "nota": "Cada diccionario se pide la primera vez que hace falta. Vite convierte cada JSON en un archivo aparte: en el build de prueba salieron seis, de 0,3 a 0,4 kB cada uno. Admite variables en la ruta porque empieza por ./, dentro de tu proyecto."
     },
     {
       "fragmento": "lng: inicial,",
@@ -373,7 +371,7 @@ La configuración va en un archivo propio, `src/i18n.js`. Usa `idiomas.js`, que 
     },
     {
       "fragmento": "supportedLngs: IDIOMAS,",
-      "nota": "Los idiomas que existen. Si piden otro, i18next elige el más parecido de la lista: con eu-ES usa eu, y con fr, el de respaldo."
+      "nota": "Los idiomas que existen. Si piden otro, i18next elige el más parecido de la lista: con ca-ES usa ca, y con eu o fr, el de respaldo."
     },
     {
       "fragmento": "fallbackLng: IDIOMA_POR_DEFECTO,",
@@ -427,7 +425,7 @@ Cada componente pide la función `t` a `useTranslation`, con el espacio de nombr
     },
     {
       "fragmento": "t('unidades', { count: unidades })",
-      "nota": "Con count, i18next elige el plural: unidades_one o unidades_other en castellano. Comprobado: con 3 escribe «3 productos», y en euskera, «3 produktu»."
+      "nota": "Con count, i18next elige el plural: unidades_one o unidades_other en castellano. Comprobado: con 3 escribe «3 productos», y en catalán, «3 productes»."
     },
     {
       "fragmento": "t('total', { total })",
@@ -441,13 +439,13 @@ Cada componente pide la función `t` a `useTranslation`, con el espacio de nombr
 }
 ```
 
-`useTranslation` devuelve también la instancia, `i18n`, por si necesitas el idioma (`i18n.resolvedLanguage`) o cambiarlo: `i18n.changeLanguage('eu')` devuelve una promesa que se cumple cuando el nuevo idioma ya está cargado, y en ese momento **vuelven a renderizarse todos los componentes que usan `useTranslation`**. Con el idioma en la URL, como verás, no llamarás a `changeLanguage` desde un botón, sino al cambiar la ruta.
+`useTranslation` devuelve también la instancia, `i18n`, por si necesitas el idioma (`i18n.resolvedLanguage`) o cambiarlo: `i18n.changeLanguage('ca')` devuelve una promesa que se cumple cuando el nuevo idioma ya está cargado, y en ese momento **vuelven a renderizarse todos los componentes que usan `useTranslation`**. Con el idioma en la URL, como verás, no llamarás a `changeLanguage` desde un botón, sino al cambiar la ruta.
 
 Si usas TypeScript, verás que la documentación escribe `t($ => $.titulo)` en vez de `t('titulo')`. Es la API de selectores, que permite al editor autocompletar las claves y marcar las que no existen. Se activa con la opción de tipos `enableSelector`; en la versión 26.5.11 viene desactivada, y las claves como cadena siguen funcionando.
 
 ## `<Trans>`: frases con marcado dentro
 
-La cesta quiere decir «Envío **gratis** a partir de 50 €. Condiciones», con «gratis» en negrita y «Condiciones» como enlace. La tentación es pegar trozos traducidos: `{t('envio')} <strong>{t('gratis')}</strong> {t('aPartirDe')} {importe}`. En euskera no funciona, porque la frase va en otro orden: «**Doako bidalketa** 50 €-tik gorako erosketetan». **El traductor necesita la frase entera**, con marcas para los elementos. Y meter HTML en la traducción y pintarlo con `dangerouslySetInnerHTML` es justo lo que la lección 82 te pidió no hacer.
+La cesta quiere decir «Envío **gratis** a partir de 50 €. Condiciones», con «gratis» en negrita y «Condiciones» como enlace. La tentación es pegar trozos traducidos: `{t('envio')} <strong>{t('gratis')}</strong> {t('aPartirDe')} {importe}`. En inglés no funciona, porque la frase va en otro orden: «**Free delivery** on orders over 50 €». Lo que va en negrita pasa al principio, y el importe, al final. **El traductor necesita la frase entera**, con marcas para los elementos. Y meter HTML en la traducción y pintarlo con `dangerouslySetInnerHTML` es justo lo que la lección 82 te pidió no hacer.
 
 Para eso está `<Trans>`. La frase lleva etiquetas inventadas, y el componente dice qué elemento de React va en cada una:
 
@@ -459,7 +457,7 @@ Para eso está `<Trans>`. La frase lleva etiquetas inventadas, y el componente d
 
 ```json
 {
-  "envioGratis": "<fuerte>Doako bidalketa</fuerte> {{importe}}-tik gorako erosketetan. <enlace>Baldintzak</enlace>"
+  "envioGratis": "<fuerte>Free delivery</fuerte> on orders over {{importe}}. <enlace>Terms</enlace>"
 }
 ```
 
@@ -495,10 +493,10 @@ Comprobado con react-i18next 17.1.9 y React Router 8.5.0 en Chrome y Safari, el 
 <p class="aviso">Envío <strong>gratis</strong> a partir de 50 €. <a href="/es/envios" data-discover="true">Condiciones</a></p>
 ```
 
-Y el euskera, con el orden cambiado:
+Y el inglés, con el orden cambiado:
 
 ```html
-<p class="aviso"><strong>Doako bidalketa</strong> 50 €-tik gorako erosketetan. <a href="/eu/envios" data-discover="true">Baldintzak</a></p>
+<p class="aviso"><strong>Free delivery</strong> on orders over 50 €. <a href="/en/envios" data-discover="true">Terms</a></p>
 ```
 
 Y si una traducción trae etiquetas que no están en `components`, como un `<img onerror>` o un `<script>`, `<Trans>` las pinta como texto: no crea elementos que no le hayas dado.
@@ -568,9 +566,9 @@ Si empiezas con i18next, su formato es más sencillo. ICU compensa cuando los tr
 
 Con `resourcesToBackend` y `import()`, **cada diccionario se descarga la primera vez que un componente lo pide**. Comprobado en el build de producción con Chrome y la red a la vista:
 
-- Al entrar en `/eu/`, se descargó `comun` en euskera… y también en castellano, el idioma de respaldo. i18next carga siempre el respaldo, por si falta alguna frase.
-- `cesta` no se descargó hasta entrar en `/eu/cesta`. Abriendo una cesta directamente, con la red lenta, se vio el `fallback` del `<Suspense>` hasta que llegaron `comun` y `cesta`, uno detrás de otro. Pero al ir de la portada a la cesta con un enlace, el `fallback` no apareció: se siguió viendo la portada hasta que llegó el diccionario. El `BrowserRouter` de React Router 8.5.0 cambia la ubicación dentro de `startTransition`, y en una transición React mantiene lo que ya se ve (lección 51).
-- Al cambiar al gallego, i18next **esperó a tener el gallego antes de cambiar**. Con un retraso de 800 ms en la red, la URL ya decía `/gl/` y el texto siguió en euskera esos 800 ms. El efecto es el mismo que el de una transición: lo que se ve no cambia hasta que lo nuevo está listo.
+- Al entrar en `/ca/`, se descargó `comun` en catalán… y también en castellano, el idioma de respaldo. i18next carga siempre el respaldo, por si falta alguna frase.
+- `cesta` no se descargó hasta entrar en `/ca/cesta`. Abriendo una cesta directamente, con la red lenta, se vio el `fallback` del `<Suspense>` hasta que llegaron `comun` y `cesta`, uno detrás de otro. Pero al ir de la portada a la cesta con un enlace, el `fallback` no apareció: se siguió viendo la portada hasta que llegó el diccionario. El `BrowserRouter` de React Router 8.5.0 cambia la ubicación dentro de `startTransition`, y en una transición React mantiene lo que ya se ve (lección 51).
+- Al cambiar al inglés, i18next **esperó a tener el inglés antes de cambiar**. Con un retraso de 800 ms en la red, la URL ya decía `/en/` y el texto siguió en catalán esos 800 ms. El efecto es el mismo que el de una transición: lo que se ve no cambia hasta que lo nuevo está listo.
 
 Si prefieres no usar `<Suspense>`, `useTranslation('cesta', { useSuspense: false })` devuelve además `ready`, y eres tú quien pinta algo mientras es `false`. Y si los JSON están en una carpeta pública en lugar de en `src`, `i18next-http-backend` los pide por la red con una ruta como `/locales/{{lng}}/{{ns}}.json`.
 
@@ -580,9 +578,9 @@ Organiza los espacios de nombres como el código: uno común con lo que se usa e
 
 Es el fallo más frecuente de una app traducida, así que conviene saber exactamente qué hace i18next (comprobado con la 26.5.11):
 
-- **Primero recorre la cadena de respaldo.** Si la frase no está en euskera, la busca en el idioma de respaldo: el cliente lee esa línea en castellano. No hay ningún aviso.
+- **Primero recorre la cadena de respaldo.** Si la frase no está en catalán, la busca en el idioma de respaldo: el cliente lee esa línea en castellano. No hay ningún aviso.
 - **Si no está en ninguno, devuelve la clave.** `t('cupon')` pinta «cupon» y `t('carrito.vacio')`, «carrito.vacio». No lanza ningún error: la página sigue funcionando, con una palabra rara en medio.
-- **Con `debug: true`, lo cuenta en la consola**, con el idioma, el espacio de nombres, la clave y lo que ha devuelto: `i18next::translator: missingKey eu cesta cupon cupon`.
+- **Con `debug: true`, lo cuenta en la consola**, con el idioma, el espacio de nombres, la clave y lo que ha devuelto: `i18next::translator: missingKey ca cesta cupon cupon`.
 - **Puedes marcarlas mientras desarrollas.** La opción `parseMissingKeyHandler` decide qué se pinta en su lugar: con `parseMissingKeyHandler: (clave) => '⟦' + clave + '⟧'`, la clave que falta sale como «⟦cesta.cupon⟧» y salta a la vista. Y con `saveMissing: true` y `missingKeyHandler`, i18next te avisa de cada una para que las recojas.
 - **Una cadena vacía cuenta como traducida.** Si un JSON tiene `"vacia": ""`, se pinta vacío; con `returnEmptyString: false`, i18next la trata como si faltara.
 
@@ -590,7 +588,7 @@ En los tests (lección 83), el idioma especial `cimode` hace que `t()` devuelva 
 
 ## El idioma en la URL
 
-¿Dónde se guarda el idioma actual? En el `t()` hecho a mano era un estado de `App`: al recargar, vuelta al castellano. Guardarlo en `localStorage` lo hace sobrevivir a la recarga, pero se queda corto. La lección 77 te dio la pregunta: **¿tiene que sobrevivir a una recarga, compartirse en un enlace o deshacerse con Atrás?** Con el idioma, sí a las tres, y además lo necesitan el servidor y los buscadores. Por eso va **en la URL**: `/eu/cesta`, `/ca/cesta`.
+¿Dónde se guarda el idioma actual? En el `t()` hecho a mano era un estado de `App`: al recargar, vuelta al castellano. Guardarlo en `localStorage` lo hace sobrevivir a la recarga, pero se queda corto. La lección 77 te dio la pregunta: **¿tiene que sobrevivir a una recarga, compartirse en un enlace o deshacerse con Atrás?** Con el idioma, sí a las tres, y además lo necesitan el servidor y los buscadores. Por eso va **en la URL**: `/ca/cesta`, `/en/cesta`.
 
 ```laboratorio
 {
@@ -598,7 +596,7 @@ En los tests (lección 83), el idioma especial `cimode` hace que `t()` devuelva 
   "items": [
     {
       "titulo": "El enlace lleva el idioma",
-      "texto": "Si una clienta comparte /eu/cesta, quien lo abre lo ve en euskera. Con el idioma en localStorage, cada persona vería el suyo, y «mira esta frase» dejaría de tener sentido."
+      "texto": "Si una clienta comparte /ca/cesta, quien lo abre lo ve en catalán. Con el idioma en localStorage, cada persona vería el suyo, y «mira esta frase» dejaría de tener sentido."
     },
     {
       "titulo": "El servidor lo sabe desde la primera petición",
@@ -610,7 +608,7 @@ En los tests (lección 83), el idioma especial `cimode` hace que `t()` devuelva 
     },
     {
       "titulo": "localStorage, como preferencia",
-      "texto": "Puede recordar el último idioma elegido para decidir adónde mandar a quien vuelve a entrar por /. Pero si la URL dice /eu/, manda la URL."
+      "texto": "Puede recordar el último idioma elegido para decidir adónde mandar a quien vuelve a entrar por /. Pero si la URL dice /ca/, manda la URL."
     }
   ]
 }
@@ -618,15 +616,15 @@ En los tests (lección 83), el idioma especial `cimode` hace que `t()` devuelva 
 
 ### La primera visita: `navigator.languages`
 
-Quien entra por `/` no ha elegido idioma. El navegador sí tiene una lista, la de su configuración: `navigator.languages`, por ejemplo `['eu-ES', 'es-ES', 'en']`, y `navigator.language` es la primera. Lo habitual es elegir **el primero de esa lista que la tienda tenga**, comparando por el idioma base: `eu-ES` encaja con `eu`, y `ca-ES-valencia`, con `ca`. Si no hay ninguno, el de por defecto.
+Quien entra por `/` no ha elegido idioma. El navegador sí tiene una lista, la de su configuración: `navigator.languages`, por ejemplo `['fr-FR', 'ca-ES', 'es']`, y `navigator.language` es la primera. Lo habitual es elegir **el primero de esa lista que la tienda tenga**, comparando por el idioma base: aquí, `ca-ES` encaja con `ca`, igual que `ca-ES-valencia`. Si no hay ninguno, el de por defecto: con `['eu-ES', 'fr-FR']`, castellano.
 
-Y solo en `/`. La guía de Google para webs en varios idiomas pide **no redirigir según el idioma que creas que tiene el usuario**: alguien con el navegador en euskera que abre un enlace a `/es/cesta` quiere ver esa página, y un buscador también. Si la URL dice el idioma, se respeta, y el selector de idiomas está ahí para cambiarlo.
+Y solo en `/`. La guía de Google para webs en varios idiomas pide **no redirigir según el idioma que creas que tiene el usuario**: alguien con el navegador en inglés que abre un enlace a `/es/cesta` quiere ver esa página, y un buscador también. Si la URL dice el idioma, se respeta, y el selector de idiomas está ahí para cambiarlo.
 
 La redirección desde `/` **reemplaza** la entrada del historial, como `navigate(…, { replace: true })` en la lección 77 (o el componente `<Navigate replace>`, que hace lo mismo al pintarse). Si no, Atrás volvería a `/`, que redirigiría otra vez, y el usuario no podría salir.
 
 ### `lang` y `dir` en el `<html>`
 
-El atributo `lang` del `<html>` (lo viste en la lección 3 del temario de HTML) dice en qué idioma está la página. No es decoración: **el lector de pantalla elige con él la voz y la pronunciación**, y sin él leería el euskera con reglas del castellano. El navegador lo usa también para ofrecer la traducción, partir palabras con `hyphens: auto` o revisar la ortografía, y el CSS, para `:lang()`. Al cambiar de idioma, `lang` tiene que cambiar con él.
+El atributo `lang` del `<html>` (lo viste en la lección 3 del temario de HTML) dice en qué idioma está la página. No es decoración: **el lector de pantalla elige con él la voz y la pronunciación**, y sin él leería el catalán con las reglas del castellano. El navegador lo usa también para ofrecer la traducción, partir palabras con `hyphens: auto` o revisar la ortografía, y el CSS, para `:lang()`. Al cambiar de idioma, `lang` tiene que cambiar con él.
 
 En una app de Vite, React pinta dentro de `#root`; el `<html>` está fuera. Se sincroniza con un efecto (lección 38), porque es justo eso: poner algo de fuera de React al día con un valor de React. Con él va **`dir`**: `rtl` para los idiomas que se escriben de derecha a izquierda, como el árabe, el hebreo, el persa o el urdu, y `ltr` para los demás. i18next lo sabe con `i18n.dir('ar')`, que devuelve `'rtl'`.
 
@@ -635,7 +633,7 @@ En una app de Vite, React pinta dentro de `#root`; el `<html>` está fuera. Se s
 Por último, cada página puede decir dónde están sus versiones en los demás idiomas, con un `<link rel="alternate" hreflang>` por idioma. Ya sabes de la lección 81 que un `<link>` pintado en un componente acaba en el `<head>`. Las reglas de Google:
 
 - Cada versión enlaza **a todas, incluida ella misma**, y el conjunto es el mismo en todas las versiones.
-- Los enlaces tienen que ser **recíprocos**: si `/es/cesta` apunta a `/eu/cesta` y no al revés, se ignoran.
+- Los enlaces tienen que ser **recíprocos**: si `/es/cesta` apunta a `/ca/cesta` y no al revés, se ignoran.
 - Las URL van **completas**, con `https://`.
 - `hreflang="x-default"` señala la página para quien no tenga ninguno de esos idiomas: aquí, `/`, la que elige por él.
 
@@ -653,7 +651,7 @@ Todo junto, en una página: pulsa los idiomas y mira el documento. El árabe no 
 {
   "tipo": "react-anotado",
   "titulo": "lang, dir y hreflang de la cesta",
-  "codigo": "import { useEffect, useState } from 'react'\n\nconst WEB = 'https://turroneselpanal.example'\nconst IDIOMAS = ['es', 'ca', 'eu', 'gl', 'en']\nconst NOMBRES = { es: 'Español', ca: 'Català', eu: 'Euskara', gl: 'Galego', en: 'English', ar: 'العربية' }\nconst TITULOS = {\n  es: 'Tu cesta',\n  ca: 'La teva cistella',\n  eu: 'Zure saskia',\n  gl: 'A túa cesta',\n  en: 'Your basket',\n  ar: 'سلة التسوق',\n}\nconst DE_DERECHA_A_IZQUIERDA = ['ar', 'he', 'fa', 'ur']\n\n// Las versiones de esta página en cada idioma, y la que elige por ti\nfunction Alternativas({ resto }) {\n  return (\n    <>\n      {IDIOMAS.map((otro) => (\n        <link key={otro} rel=\"alternate\" hrefLang={otro} href={`${WEB}/${otro}${resto}`} />\n      ))}\n      <link rel=\"alternate\" hrefLang=\"x-default\" href={`${WEB}/`} />\n    </>\n  )\n}\n\nexport default function App() {\n  const [idioma, setIdioma] = useState('es')\n  const [foto, setFoto] = useState('')\n\n  // El <html> no lo pinta React: se sincroniza con un efecto\n  useEffect(() => {\n    document.documentElement.lang = idioma\n    document.documentElement.dir = DE_DERECHA_A_IZQUIERDA.includes(idioma) ? 'rtl' : 'ltr'\n  }, [idioma])\n\n  function mirar() {\n    const { lang, dir } = document.documentElement\n    const enlaces = document.querySelectorAll('link[rel=\"alternate\"]')\n    const lineas = [...enlaces].map((l) => `<link hreflang=\"${l.hreflang}\" href=\"${l.getAttribute('href')}\">`)\n    setFoto([`<html lang=\"${lang}\" dir=\"${dir}\">`, ...lineas].join('\\n'))\n  }\n\n  return (\n    <main>\n      <Alternativas resto=\"/cesta\" />\n      <nav className=\"idiomas\" aria-label=\"Idiomas\">\n        {Object.entries(NOMBRES).map(([codigo, nombre]) => (\n          <button\n            key={codigo}\n            lang={codigo}\n            aria-pressed={codigo === idioma}\n            onClick={() => setIdioma(codigo)}\n          >\n            {nombre}\n          </button>\n        ))}\n      </nav>\n      <h1>{TITULOS[idioma]}</h1>\n      <p className=\"ruta\">/{idioma}/cesta</p>\n      <button onClick={mirar}>Mirar el documento</button>\n      {foto && <pre>{foto}</pre>}\n    </main>\n  )\n}",
+  "codigo": "import { useEffect, useState } from 'react'\n\nconst WEB = 'https://turroneselpanal.example'\nconst IDIOMAS = ['es', 'ca', 'en']\nconst NOMBRES = { es: 'Español', ca: 'Català', en: 'English', ar: 'العربية' }\nconst TITULOS = {\n  es: 'Tu cesta',\n  ca: 'La teva cistella',\n  en: 'Your basket',\n  ar: 'سلة التسوق',\n}\nconst DE_DERECHA_A_IZQUIERDA = ['ar', 'he', 'fa', 'ur']\n\n// Las versiones de esta página en cada idioma, y la que elige por ti\nfunction Alternativas({ resto }) {\n  return (\n    <>\n      {IDIOMAS.map((otro) => (\n        <link key={otro} rel=\"alternate\" hrefLang={otro} href={`${WEB}/${otro}${resto}`} />\n      ))}\n      <link rel=\"alternate\" hrefLang=\"x-default\" href={`${WEB}/`} />\n    </>\n  )\n}\n\nexport default function App() {\n  const [idioma, setIdioma] = useState('es')\n  const [foto, setFoto] = useState('')\n\n  // El <html> no lo pinta React: se sincroniza con un efecto\n  useEffect(() => {\n    document.documentElement.lang = idioma\n    document.documentElement.dir = DE_DERECHA_A_IZQUIERDA.includes(idioma) ? 'rtl' : 'ltr'\n  }, [idioma])\n\n  function mirar() {\n    const { lang, dir } = document.documentElement\n    const enlaces = document.querySelectorAll('link[rel=\"alternate\"]')\n    const lineas = [...enlaces].map((l) => `<link hreflang=\"${l.hreflang}\" href=\"${l.getAttribute('href')}\">`)\n    setFoto([`<html lang=\"${lang}\" dir=\"${dir}\">`, ...lineas].join('\\n'))\n  }\n\n  return (\n    <main>\n      <Alternativas resto=\"/cesta\" />\n      <nav className=\"idiomas\" aria-label=\"Idiomas\">\n        {Object.entries(NOMBRES).map(([codigo, nombre]) => (\n          <button\n            key={codigo}\n            lang={codigo}\n            aria-pressed={codigo === idioma}\n            onClick={() => setIdioma(codigo)}\n          >\n            {nombre}\n          </button>\n        ))}\n      </nav>\n      <h1>{TITULOS[idioma]}</h1>\n      <p className=\"ruta\">/{idioma}/cesta</p>\n      <button onClick={mirar}>Mirar el documento</button>\n      {foto && <pre>{foto}</pre>}\n    </main>\n  )\n}",
   "css": "main {\n  font-family: system-ui, sans-serif;\n}\n\n.idiomas {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 0.4rem;\n}\n\nbutton {\n  padding: 0.3rem 0.75rem;\n  border: 1px solid #b45309;\n  border-radius: 999px;\n  background: white;\n  font: inherit;\n  cursor: pointer;\n}\n\n.idiomas button[aria-pressed='true'] {\n  background: #b45309;\n  color: white;\n}\n\nh1 {\n  margin: 0.75rem 0 0;\n  color: #7c2d12;\n  font-size: 1.3rem;\n}\n\n.ruta {\n  margin: 0.2rem 0 0.75rem;\n  color: #57534e;\n  font-family: ui-monospace, monospace;\n}\n\npre {\n  padding: 0.5rem;\n  border-radius: 6px;\n  background: #f5f5f4;\n  font-size: 0.75rem;\n  white-space: pre-wrap;\n  overflow-wrap: anywhere;\n}",
   "anotaciones": [
     {
@@ -666,7 +664,7 @@ Todo junto, en una página: pulsa los idiomas y mira el documento. El árabe no 
     },
     {
       "fragmento": "document.documentElement.lang = idioma",
-      "nota": "El html no lo pinta React: se pone al día con un efecto cada vez que cambia el idioma. Pulsa Euskara y «Mirar el documento»: lang pasa a eu."
+      "nota": "El html no lo pinta React: se pone al día con un efecto cada vez que cambia el idioma. Pulsa Català y «Mirar el documento»: lang pasa a ca."
     },
     {
       "fragmento": "? 'rtl' : 'ltr'",
@@ -674,7 +672,7 @@ Todo junto, en una página: pulsa los idiomas y mira el documento. El árabe no 
     },
     {
       "fragmento": "lang={codigo}",
-      "nota": "El W3C recomienda escribir cada idioma en su propia lengua («Euskara», no «Euskera», que es su nombre en castellano) y marcar con lang lo que está en otro idioma que la página. Así un lector de pantalla puede leer cada nombre con la voz de su idioma."
+      "nota": "El W3C recomienda escribir cada idioma en su propia lengua («Català», no «Catalán», que es su nombre en castellano) y marcar con lang lo que está en otro idioma que la página. Así un lector de pantalla puede leer cada nombre con la voz de su idioma."
     },
     {
       "fragmento": "document.querySelectorAll('link[rel=\"alternate\"]')",
@@ -694,10 +692,10 @@ En el proyecto de Vite, el idioma es el primer tramo de la ruta, `:idioma`, y un
 `idiomas.js`, el que usaba `i18n.js`:
 
 ```js
-export const IDIOMAS = ['es', 'ca', 'eu', 'gl', 'en']
+export const IDIOMAS = ['es', 'ca', 'en']
 export const IDIOMA_POR_DEFECTO = 'es'
 
-// ['eu-ES', 'es-ES', 'en'] → 'eu'. El primero que tengamos, en el orden del usuario.
+// ['fr-FR', 'ca-ES', 'es'] → 'ca'. El primero que tengamos, en el orden del usuario.
 export function elegirIdioma(preferidos) {
   for (const etiqueta of preferidos) {
     const base = etiqueta.toLowerCase().split('-')[0]
@@ -713,15 +711,15 @@ Y `App.jsx`:
 {
   "tipo": "codigo-anotado",
   "lenguaje": "jsx",
-  "codigo": "import { useEffect } from 'react'\nimport { useTranslation } from 'react-i18next'\nimport { Navigate, Outlet, Route, Routes, useLocation, useParams } from 'react-router'\nimport Cabecera from './Cabecera.jsx'\nimport { IDIOMAS, elegirIdioma } from './idiomas.js'\nimport Cesta from './paginas/Cesta.jsx'\nimport NoEncontrada from './paginas/NoEncontrada.jsx'\nimport Portada from './paginas/Portada.jsx'\n\nconst WEB = 'https://turroneselpanal.example'\n\n// En / no hay idioma: se elige uno y se sustituye la entrada del historial\nfunction SinIdioma() {\n  return <Navigate to={`/${elegirIdioma(navigator.languages)}/`} replace />\n}\n\nfunction ConIdioma() {\n  const { idioma } = useParams()\n  const { pathname } = useLocation()\n  const { i18n } = useTranslation()\n  const valido = IDIOMAS.includes(idioma)\n\n  // 1. La URL manda: i18next se pone al día con ella\n  useEffect(() => {\n    if (valido) i18n.changeLanguage(idioma)\n  }, [i18n, idioma, valido])\n\n  // 2. El <html> dice el idioma del texto que se ve, cuando ya ha cambiado\n  const enPantalla = i18n.resolvedLanguage\n  useEffect(() => {\n    document.documentElement.lang = enPantalla\n    document.documentElement.dir = i18n.dir(enPantalla)\n  }, [i18n, enPantalla])\n\n  if (!valido) return <NoEncontrada />\n\n  const resto = pathname.slice(idioma.length + 1) // '/eu/cesta' → '/cesta'\n  return (\n    <>\n      {IDIOMAS.map((otro) => (\n        <link key={otro} rel=\"alternate\" hrefLang={otro} href={`${WEB}/${otro}${resto}`} />\n      ))}\n      <link rel=\"alternate\" hrefLang=\"x-default\" href={`${WEB}/`} />\n      <Cabecera />\n      <main>\n        <Outlet />\n      </main>\n    </>\n  )\n}\n\nexport default function App() {\n  return (\n    <Routes>\n      <Route index element={<SinIdioma />} />\n      <Route path=\":idioma\" element={<ConIdioma />}>\n        <Route index element={<Portada />} />\n        <Route path=\"cesta\" element={<Cesta />} />\n      </Route>\n    </Routes>\n  )\n}",
+  "codigo": "import { useEffect } from 'react'\nimport { useTranslation } from 'react-i18next'\nimport { Navigate, Outlet, Route, Routes, useLocation, useParams } from 'react-router'\nimport Cabecera from './Cabecera.jsx'\nimport { IDIOMAS, elegirIdioma } from './idiomas.js'\nimport Cesta from './paginas/Cesta.jsx'\nimport NoEncontrada from './paginas/NoEncontrada.jsx'\nimport Portada from './paginas/Portada.jsx'\n\nconst WEB = 'https://turroneselpanal.example'\n\n// En / no hay idioma: se elige uno y se sustituye la entrada del historial\nfunction SinIdioma() {\n  return <Navigate to={`/${elegirIdioma(navigator.languages)}/`} replace />\n}\n\nfunction ConIdioma() {\n  const { idioma } = useParams()\n  const { pathname } = useLocation()\n  const { i18n } = useTranslation()\n  const valido = IDIOMAS.includes(idioma)\n\n  // 1. La URL manda: i18next se pone al día con ella\n  useEffect(() => {\n    if (valido) i18n.changeLanguage(idioma)\n  }, [i18n, idioma, valido])\n\n  // 2. El <html> dice el idioma del texto que se ve, cuando ya ha cambiado\n  const enPantalla = i18n.resolvedLanguage\n  useEffect(() => {\n    document.documentElement.lang = enPantalla\n    document.documentElement.dir = i18n.dir(enPantalla)\n  }, [i18n, enPantalla])\n\n  if (!valido) return <NoEncontrada />\n\n  const resto = pathname.slice(idioma.length + 1) // '/ca/cesta' → '/cesta'\n  return (\n    <>\n      {IDIOMAS.map((otro) => (\n        <link key={otro} rel=\"alternate\" hrefLang={otro} href={`${WEB}/${otro}${resto}`} />\n      ))}\n      <link rel=\"alternate\" hrefLang=\"x-default\" href={`${WEB}/`} />\n      <Cabecera />\n      <main>\n        <Outlet />\n      </main>\n    </>\n  )\n}\n\nexport default function App() {\n  return (\n    <Routes>\n      <Route index element={<SinIdioma />} />\n      <Route path=\":idioma\" element={<ConIdioma />}>\n        <Route index element={<Portada />} />\n        <Route path=\"cesta\" element={<Cesta />} />\n      </Route>\n    </Routes>\n  )\n}",
   "anotaciones": [
     {
       "fragmento": "<Navigate to={`/${elegirIdioma(navigator.languages)}/`} replace />",
-      "nota": "Solo en /, que no dice ningún idioma. Con replace, la entrada de / se sustituye: comprobado, Atrás desde /eu/ salió de la web en vez de volver a / y rebotar."
+      "nota": "Solo en /, que no dice ningún idioma. Con replace, la entrada de / se sustituye: comprobado, Atrás desde /ca/ salió de la web en vez de volver a / y rebotar."
     },
     {
       "fragmento": "<Route path=\":idioma\" element={<ConIdioma />}>",
-      "nota": "El idioma es un parámetro (lección 77). /eu/cesta encaja con :idioma y cesta, y ConIdioma envuelve a todas las páginas."
+      "nota": "El idioma es un parámetro (lección 77). /ca/cesta encaja con :idioma y cesta, y ConIdioma envuelve a todas las páginas."
     },
     {
       "fragmento": "if (valido) i18n.changeLanguage(idioma)",
@@ -733,19 +731,19 @@ Y `App.jsx`:
     },
     {
       "fragmento": "document.documentElement.dir = i18n.dir(enPantalla)",
-      "nota": "i18next sabe qué idiomas se escriben de derecha a izquierda: dir('ar') devuelve rtl y dir('eu'), ltr."
+      "nota": "i18next sabe qué idiomas se escriben de derecha a izquierda: dir('ar') devuelve rtl y dir('ca'), ltr."
     },
     {
       "fragmento": "if (!valido) return <NoEncontrada />",
       "nota": "/fr/ encaja con :idioma, pero no es un idioma de la tienda. Después de los Hooks, como siempre (lección 44)."
     },
     {
-      "fragmento": "const resto = pathname.slice(idioma.length + 1) // '/eu/cesta' → '/cesta'",
-      "nota": "Lo que va detrás del idioma. Sirve para los hreflang y para que el selector de Cabecera lleve de /eu/cesta a /ca/cesta, no a la portada."
+      "fragmento": "const resto = pathname.slice(idioma.length + 1) // '/ca/cesta' → '/cesta'",
+      "nota": "Lo que va detrás del idioma. Sirve para los hreflang y para que el selector de Cabecera lleve de /ca/cesta a /en/cesta, no a la portada."
     },
     {
       "fragmento": "<link rel=\"alternate\" hrefLang=\"x-default\" href={`${WEB}/`} />",
-      "nota": "Los mismos enlaces que en la demostración, generados para cada página. Comprobado en el head de /gl/cesta: cinco versiones más x-default."
+      "nota": "Los mismos enlaces que en la demostración, generados para cada página. Comprobado en el head de /ca/cesta: tres versiones más x-default."
     }
   ]
 }
@@ -816,7 +814,7 @@ Lo demás de esta lección no depende de la librería: `Intl`, las categorías d
     },
     {
       "mito": "Para los plurales basta con count === 1",
-      "realidad": "El castellano tiene una forma para los millones, el árabe tiene seis y el euskera cambia el orden. Intl.PluralRules sabe las reglas de cada idioma."
+      "realidad": "El castellano y el catalán tienen una forma para los millones, y el árabe tiene seis. Intl.PluralRules sabe las reglas de cada idioma."
     }
   ]
 }
@@ -828,7 +826,7 @@ Lo demás de esta lección no depende de la librería: `Intl`, las categorías d
 
 **Crear el formateador en cada render.** Funciona, pero cuesta unas cincuenta veces más que reutilizarlo. Con una lista larga que se vuelve a renderizar en cada tecla, se nota. Un juego por idioma, en un `Map`.
 
-**Pegar trozos traducidos.** `t('envio') + ' ' + importe + ' ' + t('gratis')` funciona en castellano y se rompe en euskera, que pone las palabras en otro orden. Una frase entera con `{{huecos}}`, y `<Trans>` si lleva marcado.
+**Pegar trozos traducidos.** `t('envio') + ' ' + importe + ' ' + t('gratis')` funciona en castellano y se rompe en inglés, que pone las palabras en otro orden. Una frase entera con `{{huecos}}`, y `<Trans>` si lleva marcado.
 
 **Traducir fuera de un componente.**
 
@@ -856,23 +854,23 @@ Lo demás de esta lección no depende de la librería: `Intl`, las categorías d
 
 **Guardar el idioma solo en un estado o en `localStorage`.** Los enlaces compartidos se abren en el idioma de quien los recibe, el servidor no sabe en qué idioma pintar y los buscadores solo ven una versión.
 
-**Redirigir según el navegador en cualquier página.** Si alguien abre `/es/cesta`, quiere `/es/cesta`, aunque su navegador esté en euskera. Detecta solo en `/`, y reemplazando la entrada del historial.
+**Redirigir según el navegador en cualquier página.** Si alguien abre `/es/cesta`, quiere `/es/cesta`, aunque su navegador esté en inglés. Detecta solo en `/`, y reemplazando la entrada del historial.
 
-**Olvidar `lang`.** La página cambia de idioma, pero el `<html>` sigue diciendo `es`: el lector de pantalla lee el euskera con la voz del castellano. Un efecto que lo ponga al día con el idioma que se ve.
+**Olvidar `lang`.** La página cambia de idioma, pero el `<html>` sigue diciendo `es`: el lector de pantalla lee el catalán con la voz del castellano. Un efecto que lo ponga al día con el idioma que se ve.
 
 ## Ejercicios
 
-**1. La ficha en cinco idiomas.** La tienda pinta los precios, los pesos y los ingredientes a mano: «12.5 €», «300 g», «almendra, miel, huevo».
+**1. La ficha en tres idiomas.** La tienda pinta los precios, los pesos y los ingredientes a mano: «12.5 €», «300 g», «almendra, miel, huevo».
 
 ```laboratorio
 {
   "tipo": "react-en-vivo",
   "titulo": "Precios, pesos e ingredientes con Intl",
-  "consigna": "En formatos.jsx, devuelve un juego de formateadores por idioma creados con Intl: euros (moneda, EUR), peso (unidad gram, con unitDisplay long) y lista (conjunción). Créalos la primera vez que se pide cada idioma y guárdalos en un Map para reutilizarlos. Las comprobaciones usan castellano, catalán e inglés, que todos los navegadores tienen; prueba también Euskara y Galego, y compara con lo que viste en la lección.",
+  "consigna": "En formatos.jsx, devuelve un juego de formateadores por idioma creados con Intl: euros (moneda, EUR), peso (unidad gram, con unitDisplay long) y lista (conjunción). Créalos la primera vez que se pide cada idioma y guárdalos en un Map para reutilizarlos. Prueba los tres idiomas antes de pulsar «Comprobar».",
   "archivos": [
     {
       "nombre": "App.jsx",
-      "codigo": "import { useState } from 'react'\nimport { formatos } from './formatos'\nimport './estilos.css'\n\nconst IDIOMAS = { 'es-ES': 'Español', 'ca-ES': 'Català', 'eu-ES': 'Euskara', 'gl-ES': 'Galego', 'en-GB': 'English' }\n\nconst PRODUCTOS = [\n  {\n    id: 'tableta',\n    precio: 12.5,\n    gramos: 300,\n    nombre: {\n      'es-ES': 'Turrón blando',\n      'ca-ES': 'Torró tou',\n      'eu-ES': 'Turroi biguna',\n      'gl-ES': 'Turrón brando',\n      'en-GB': 'Soft turrón',\n    },\n  },\n  {\n    id: 'cesta',\n    precio: 34.9,\n    gramos: 1500,\n    nombre: {\n      'es-ES': 'Cesta de Navidad',\n      'ca-ES': 'Panera de Nadal',\n      'eu-ES': 'Gabon-saskia',\n      'gl-ES': 'Cesta de Nadal',\n      'en-GB': 'Christmas hamper',\n    },\n  },\n]\n\nconst INGREDIENTES = {\n  'es-ES': ['almendra', 'miel', 'huevo'],\n  'ca-ES': ['ametlla', 'mel', 'ou'],\n  'eu-ES': ['almendra', 'eztia', 'arrautza'],\n  'gl-ES': ['améndoa', 'mel', 'ovo'],\n  'en-GB': ['almonds', 'honey', 'egg'],\n}\n\nexport default function App() {\n  const [idioma, setIdioma] = useState('es-ES')\n  const f = formatos(idioma)\n\n  return (\n    <main>\n      <h1>Turrones El Panal</h1>\n      <label className=\"idioma\">\n        Idioma\n        <select value={idioma} onChange={(e) => setIdioma(e.target.value)}>\n          {Object.entries(IDIOMAS).map(([codigo, nombre]) => (\n            <option key={codigo} value={codigo}>\n              {nombre}\n            </option>\n          ))}\n        </select>\n      </label>\n      <ul className=\"productos\" lang={idioma}>\n        {PRODUCTOS.map((producto) => (\n          <li key={producto.id}>\n            <h2>{producto.nombre[idioma]}</h2>\n            <p className=\"precio\">{f.euros.format(producto.precio)}</p>\n            <p>{f.peso.format(producto.gramos)}</p>\n          </li>\n        ))}\n      </ul>\n      <p lang={idioma}>Ingredientes: {f.lista.format(INGREDIENTES[idioma])}</p>\n    </main>\n  )\n}\n"
+      "codigo": "import { useState } from 'react'\nimport { formatos } from './formatos'\nimport './estilos.css'\n\nconst IDIOMAS = { 'es-ES': 'Español', 'ca-ES': 'Català', 'en-GB': 'English' }\n\nconst PRODUCTOS = [\n  {\n    id: 'tableta',\n    precio: 12.5,\n    gramos: 300,\n    nombre: {\n      'es-ES': 'Turrón blando',\n      'ca-ES': 'Torró tou',\n      'en-GB': 'Soft turrón',\n    },\n  },\n  {\n    id: 'cesta',\n    precio: 34.9,\n    gramos: 1500,\n    nombre: {\n      'es-ES': 'Cesta de Navidad',\n      'ca-ES': 'Panera de Nadal',\n      'en-GB': 'Christmas hamper',\n    },\n  },\n]\n\nconst INGREDIENTES = {\n  'es-ES': ['almendra', 'miel', 'huevo'],\n  'ca-ES': ['ametlla', 'mel', 'ou'],\n  'en-GB': ['almonds', 'honey', 'egg'],\n}\n\nexport default function App() {\n  const [idioma, setIdioma] = useState('es-ES')\n  const f = formatos(idioma)\n\n  return (\n    <main>\n      <h1>Turrones El Panal</h1>\n      <label className=\"idioma\">\n        Idioma\n        <select value={idioma} onChange={(e) => setIdioma(e.target.value)}>\n          {Object.entries(IDIOMAS).map(([codigo, nombre]) => (\n            <option key={codigo} value={codigo}>\n              {nombre}\n            </option>\n          ))}\n        </select>\n      </label>\n      <ul className=\"productos\" lang={idioma}>\n        {PRODUCTOS.map((producto) => (\n          <li key={producto.id}>\n            <h2>{producto.nombre[idioma]}</h2>\n            <p className=\"precio\">{f.euros.format(producto.precio)}</p>\n            <p>{f.peso.format(producto.gramos)}</p>\n          </li>\n        ))}\n      </ul>\n      <p lang={idioma}>Ingredientes: {f.lista.format(INGREDIENTES[idioma])}</p>\n    </main>\n  )\n}\n"
     },
     {
       "nombre": "formatos.jsx",
@@ -972,15 +970,15 @@ Lo demás de esta lección no depende de la librería: `Intl`, las categorías d
   "archivos": [
     {
       "nombre": "App.jsx",
-      "codigo": "import { useEffect, useState } from 'react'\nimport Navegador, { useNavegador } from './Navegador'\nimport { Enlace, Rutas, useParametros } from './router'\nimport { IDIOMAS, IdiomaProvider, NOMBRES, direccion, elegirIdioma, useT } from './idioma'\nimport MirarDocumento from './MirarDocumento'\nimport './estilos.css'\n\nconst WEB = 'https://turroneselpanal.example'\n\n// '/' no dice el idioma\nfunction SinIdioma({ preferidos }) {\n  // 4. Elige el idioma con elegirIdioma(preferidos) y redirige a /<idioma>/\n  //    reemplazando la entrada del historial, para que Atrás no vuelva aquí.\n  return (\n    <p>\n      Elige un idioma: <Enlace a=\"/es/\">Español</Enlace>\n    </p>\n  )\n}\n\nfunction ConIdioma({ pagina }) {\n  // 1. El idioma tiene que salir de la URL (useParametros), no estar fijo.\n  //    Si no es uno de IDIOMAS, pinta <h1>Página no encontrada</h1>.\n  const idioma = 'es'\n  const { url } = useNavegador()\n\n  // 2. Pon lang y dir en document.documentElement cuando cambie el idioma.\n\n  const resto = url.slice(idioma.length + 1) // '/eu/cesta' → '/cesta'\n  return (\n    <IdiomaProvider idioma={idioma}>\n      {/* 5. Un <link rel=\"alternate\" hrefLang> por idioma, con la URL completa\n             de esta misma página en ese idioma, y otro para x-default. */}\n      <SelectorIdioma resto={resto} />\n      <main>\n        <Pagina pagina={pagina} />\n      </main>\n    </IdiomaProvider>\n  )\n}\n\nfunction SelectorIdioma({ resto }) {\n  const { t } = useT()\n  return (\n    <nav className=\"selector\" aria-label={t('idiomas')}>\n      {IDIOMAS.map((otro) => (\n        // 3. Cada enlace tiene que llevar a esta misma página en el otro\n        //    idioma (de /eu/cesta a /gl/cesta), no a la portada. Y dile al\n        //    lector de pantalla en qué idioma está escrito su nombre.\n        <Enlace key={otro} a={`/${otro}/`}>\n          {NOMBRES[otro]}\n        </Enlace>\n      ))}\n    </nav>\n  )\n}\n\nfunction Pagina({ pagina }) {\n  const { idioma, t } = useT()\n  if (pagina === 'cesta') return <h1>{t('cesta')}</h1>\n  return (\n    <>\n      <h1>{t('portada')}</h1>\n      <Enlace a={`/${idioma}/cesta`}>{t('verCesta')}</Enlace>\n    </>\n  )\n}\n\nexport default function App() {\n  const [preferidos, setPreferidos] = useState('navegador')\n  const lista = preferidos === 'navegador' ? navigator.languages : preferidos.split(', ')\n\n  return (\n    <>\n      <label className=\"preferidos\">\n        Idiomas de tu navegador\n        <select value={preferidos} onChange={(e) => setPreferidos(e.target.value)}>\n          <option value=\"navegador\">Los tuyos: {navigator.languages.join(', ')}</option>\n          <option>eu-ES, es-ES</option>\n          <option>ca-ES-valencia, es</option>\n          <option>fr-FR, fr</option>\n        </select>\n      </label>\n      <Navegador inicio=\"/\" marcadores={['/', '/eu/cesta', '/fr/']}>\n        <Rutas\n          rutas={{\n            '/': <SinIdioma preferidos={lista} />,\n            '/:idioma': <ConIdioma pagina=\"portada\" />,\n            '/:idioma/cesta': <ConIdioma pagina=\"cesta\" />,\n            '*': <h1>Página no encontrada</h1>,\n          }}\n        />\n      </Navegador>\n      <MirarDocumento />\n    </>\n  )\n}\n"
+      "codigo": "import { useEffect, useState } from 'react'\nimport Navegador, { useNavegador } from './Navegador'\nimport { Enlace, Rutas, useParametros } from './router'\nimport { IDIOMAS, IdiomaProvider, NOMBRES, direccion, elegirIdioma, useT } from './idioma'\nimport MirarDocumento from './MirarDocumento'\nimport './estilos.css'\n\nconst WEB = 'https://turroneselpanal.example'\n\n// '/' no dice el idioma\nfunction SinIdioma({ preferidos }) {\n  // 4. Elige el idioma con elegirIdioma(preferidos) y redirige a /<idioma>/\n  //    reemplazando la entrada del historial, para que Atrás no vuelva aquí.\n  return (\n    <p>\n      Elige un idioma: <Enlace a=\"/es/\">Español</Enlace>\n    </p>\n  )\n}\n\nfunction ConIdioma({ pagina }) {\n  // 1. El idioma tiene que salir de la URL (useParametros), no estar fijo.\n  //    Si no es uno de IDIOMAS, pinta <h1>Página no encontrada</h1>.\n  const idioma = 'es'\n  const { url } = useNavegador()\n\n  // 2. Pon lang y dir en document.documentElement cuando cambie el idioma.\n\n  const resto = url.slice(idioma.length + 1) // '/ca/cesta' → '/cesta'\n  return (\n    <IdiomaProvider idioma={idioma}>\n      {/* 5. Un <link rel=\"alternate\" hrefLang> por idioma, con la URL completa\n             de esta misma página en ese idioma, y otro para x-default. */}\n      <SelectorIdioma resto={resto} />\n      <main>\n        <Pagina pagina={pagina} />\n      </main>\n    </IdiomaProvider>\n  )\n}\n\nfunction SelectorIdioma({ resto }) {\n  const { t } = useT()\n  return (\n    <nav className=\"selector\" aria-label={t('idiomas')}>\n      {IDIOMAS.map((otro) => (\n        // 3. Cada enlace tiene que llevar a esta misma página en el otro\n        //    idioma (de /ca/cesta a /en/cesta), no a la portada. Y dile al\n        //    lector de pantalla en qué idioma está escrito su nombre.\n        <Enlace key={otro} a={`/${otro}/`}>\n          {NOMBRES[otro]}\n        </Enlace>\n      ))}\n    </nav>\n  )\n}\n\nfunction Pagina({ pagina }) {\n  const { idioma, t } = useT()\n  if (pagina === 'cesta') return <h1>{t('cesta')}</h1>\n  return (\n    <>\n      <h1>{t('portada')}</h1>\n      <Enlace a={`/${idioma}/cesta`}>{t('verCesta')}</Enlace>\n    </>\n  )\n}\n\nexport default function App() {\n  const [preferidos, setPreferidos] = useState('navegador')\n  const lista = preferidos === 'navegador' ? navigator.languages : preferidos.split(', ')\n\n  return (\n    <>\n      <label className=\"preferidos\">\n        Idiomas de tu navegador\n        <select value={preferidos} onChange={(e) => setPreferidos(e.target.value)}>\n          <option value=\"navegador\">Los tuyos: {navigator.languages.join(', ')}</option>\n          <option>en-GB, en</option>\n          <option>fr-FR, ca-ES</option>\n          <option>ca-ES-valencia, es</option>\n          <option>eu-ES, fr-FR</option>\n        </select>\n      </label>\n      <Navegador inicio=\"/\" marcadores={['/', '/ca/cesta', '/fr/']}>\n        <Rutas\n          rutas={{\n            '/': <SinIdioma preferidos={lista} />,\n            '/:idioma': <ConIdioma pagina=\"portada\" />,\n            '/:idioma/cesta': <ConIdioma pagina=\"cesta\" />,\n            '*': <h1>Página no encontrada</h1>,\n          }}\n        />\n      </Navegador>\n      <MirarDocumento />\n    </>\n  )\n}\n"
     },
     {
       "nombre": "idioma.jsx",
-      "codigo": "import { createContext, useContext } from 'react'\n\nexport const IDIOMAS = ['es', 'ca', 'eu', 'gl', 'en']\nexport const NOMBRES = { es: 'Español', ca: 'Català', eu: 'Euskara', gl: 'Galego', en: 'English' }\n\n// ['eu-ES', 'es-ES', 'en'] → 'eu': el primero que tengamos, en el orden del usuario\nexport function elegirIdioma(preferidos) {\n  for (const etiqueta of preferidos) {\n    const base = etiqueta.toLowerCase().split('-')[0]\n    if (IDIOMAS.includes(base)) return base\n  }\n  return 'es'\n}\n\n// Árabe, hebreo, persa y urdu se escriben de derecha a izquierda\nconst DE_DERECHA_A_IZQUIERDA = ['ar', 'he', 'fa', 'ur']\nexport function direccion(idioma) {\n  return DE_DERECHA_A_IZQUIERDA.includes(idioma) ? 'rtl' : 'ltr'\n}\n\nconst TEXTOS = {\n  es: { portada: 'Turrón artesano', cesta: 'Tu cesta', verCesta: 'Ver la cesta', idiomas: 'Idiomas' },\n  ca: { portada: 'Torró artesà', cesta: 'La teva cistella', verCesta: 'Mostra la cistella', idiomas: 'Idiomes' },\n  eu: { portada: 'Turroi artisaua', cesta: 'Zure saskia', verCesta: 'Ikusi saskia', idiomas: 'Hizkuntzak' },\n  gl: { portada: 'Turrón artesán', cesta: 'A túa cesta', verCesta: 'Ver a cesta', idiomas: 'Idiomas' },\n  en: { portada: 'Handmade turrón', cesta: 'Your basket', verCesta: 'View basket', idiomas: 'Languages' },\n}\n\nconst IdiomaContext = createContext('es')\nIdiomaContext.displayName = 'Idioma'\n\nexport function IdiomaProvider({ idioma, children }) {\n  return <IdiomaContext value={idioma}>{children}</IdiomaContext>\n}\n\n// Un t() mínimo: aquí no hacen falta plurales ni valores\nexport function useT() {\n  const idioma = useContext(IdiomaContext)\n  return { idioma, t: (clave) => TEXTOS[idioma]?.[clave] ?? TEXTOS.es[clave] ?? clave }\n}\n"
+      "codigo": "import { createContext, useContext } from 'react'\n\nexport const IDIOMAS = ['es', 'ca', 'en']\nexport const NOMBRES = { es: 'Español', ca: 'Català', en: 'English' }\n\n// ['fr-FR', 'ca-ES', 'es'] → 'ca': el primero que tengamos, en el orden del usuario\nexport function elegirIdioma(preferidos) {\n  for (const etiqueta of preferidos) {\n    const base = etiqueta.toLowerCase().split('-')[0]\n    if (IDIOMAS.includes(base)) return base\n  }\n  return 'es'\n}\n\n// Árabe, hebreo, persa y urdu se escriben de derecha a izquierda\nconst DE_DERECHA_A_IZQUIERDA = ['ar', 'he', 'fa', 'ur']\nexport function direccion(idioma) {\n  return DE_DERECHA_A_IZQUIERDA.includes(idioma) ? 'rtl' : 'ltr'\n}\n\nconst TEXTOS = {\n  es: { portada: 'Turrón artesano', cesta: 'Tu cesta', verCesta: 'Ver la cesta', idiomas: 'Idiomas' },\n  ca: { portada: 'Torró artesà', cesta: 'La teva cistella', verCesta: 'Mostra la cistella', idiomas: 'Idiomes' },\n  en: { portada: 'Handmade turrón', cesta: 'Your basket', verCesta: 'View basket', idiomas: 'Languages' },\n}\n\nconst IdiomaContext = createContext('es')\nIdiomaContext.displayName = 'Idioma'\n\nexport function IdiomaProvider({ idioma, children }) {\n  return <IdiomaContext value={idioma}>{children}</IdiomaContext>\n}\n\n// Un t() mínimo: aquí no hacen falta plurales ni valores\nexport function useT() {\n  const idioma = useContext(IdiomaContext)\n  return { idioma, t: (clave) => TEXTOS[idioma]?.[clave] ?? TEXTOS.es[clave] ?? clave }\n}\n"
     },
     {
       "nombre": "router.jsx",
-      "codigo": "import { createContext, useContext } from 'react'\nimport { useNavegador } from './Navegador'\n\nconst ParametrosContext = createContext({})\nParametrosContext.displayName = 'Parametros'\n\n// '/:idioma/cesta' encaja con '/eu/cesta' y da { idioma: 'eu' }; si no, null\nfunction encajar(patron, camino) {\n  const partes = patron.split('/').filter(Boolean)\n  const trozos = camino.split('/').filter(Boolean)\n  if (partes.length !== trozos.length) return null\n  const parametros = {}\n  for (let i = 0; i < partes.length; i++) {\n    if (partes[i].startsWith(':')) parametros[partes[i].slice(1)] = trozos[i]\n    else if (partes[i] !== trozos[i]) return null\n  }\n  return parametros\n}\n\n// Pinta la primera ruta que encaja y deja sus parámetros en un contexto\nexport function Rutas({ rutas }) {\n  const { url } = useNavegador()\n  for (const [patron, elemento] of Object.entries(rutas)) {\n    const parametros = patron === '*' ? {} : encajar(patron, url)\n    if (parametros) return <ParametrosContext value={parametros}>{elemento}</ParametrosContext>\n  }\n  return null\n}\n\n// Como useParams: los parámetros de la ruta que se está pintando\nexport function useParametros() {\n  return useContext(ParametrosContext)\n}\n\n// Cambia de página sin recargar; las demás props (lang, hrefLang...) van al <a>\nexport function Enlace({ a, children, ...props }) {\n  const { url, navegar } = useNavegador()\n\n  function manejarClic(e) {\n    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return\n    e.preventDefault()\n    navegar(a)\n  }\n\n  return (\n    <a href={a} aria-current={url === a ? 'page' : undefined} onClick={manejarClic} {...props}>\n      {children}\n    </a>\n  )\n}\n"
+      "codigo": "import { createContext, useContext } from 'react'\nimport { useNavegador } from './Navegador'\n\nconst ParametrosContext = createContext({})\nParametrosContext.displayName = 'Parametros'\n\n// '/:idioma/cesta' encaja con '/ca/cesta' y da { idioma: 'ca' }; si no, null\nfunction encajar(patron, camino) {\n  const partes = patron.split('/').filter(Boolean)\n  const trozos = camino.split('/').filter(Boolean)\n  if (partes.length !== trozos.length) return null\n  const parametros = {}\n  for (let i = 0; i < partes.length; i++) {\n    if (partes[i].startsWith(':')) parametros[partes[i].slice(1)] = trozos[i]\n    else if (partes[i] !== trozos[i]) return null\n  }\n  return parametros\n}\n\n// Pinta la primera ruta que encaja y deja sus parámetros en un contexto\nexport function Rutas({ rutas }) {\n  const { url } = useNavegador()\n  for (const [patron, elemento] of Object.entries(rutas)) {\n    const parametros = patron === '*' ? {} : encajar(patron, url)\n    if (parametros) return <ParametrosContext value={parametros}>{elemento}</ParametrosContext>\n  }\n  return null\n}\n\n// Como useParams: los parámetros de la ruta que se está pintando\nexport function useParametros() {\n  return useContext(ParametrosContext)\n}\n\n// Cambia de página sin recargar; las demás props (lang, hrefLang...) van al <a>\nexport function Enlace({ a, children, ...props }) {\n  const { url, navegar } = useNavegador()\n\n  function manejarClic(e) {\n    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return\n    e.preventDefault()\n    navegar(a)\n  }\n\n  return (\n    <a href={a} aria-current={url === a ? 'page' : undefined} onClick={manejarClic} {...props}>\n      {children}\n    </a>\n  )\n}\n"
     },
     {
       "nombre": "Navegador.jsx",
@@ -1001,18 +999,18 @@ Lo demás de esta lección no depende de la librería: `Intl`, las categorías d
   "mostrarJsGenerado": false,
   "comprobaciones": [
     {
-      "descripcion": "Abrir /eu/cesta enseña la cesta en euskera",
+      "descripcion": "Abrir /ca/cesta enseña la cesta en catalán",
       "pasos": [
         {
           "pulsar": {
             "rol": "button",
-            "nombre": "/eu/cesta"
+            "nombre": "/ca/cesta"
           }
         }
       ],
       "espera": {
         "rol": "heading",
-        "nombre": "Zure saskia"
+        "nombre": "La teva cistella"
       }
     },
     {
@@ -1031,39 +1029,39 @@ Lo demás de esta lección no depende de la librería: `Intl`, las categorías d
       }
     },
     {
-      "descripcion": "Desde la cesta en euskera, «Galego» lleva a la cesta en gallego",
+      "descripcion": "Desde la cesta en catalán, «English» lleva a la cesta en inglés",
       "pasos": [
         {
           "pulsar": {
             "rol": "button",
-            "nombre": "/eu/cesta"
+            "nombre": "/ca/cesta"
           }
         },
         {
           "pulsar": {
             "rol": "link",
-            "nombre": "Galego"
+            "nombre": "English"
           }
         }
       ],
       "espera": {
         "rol": "heading",
-        "nombre": "A túa cesta"
+        "nombre": "Your basket"
       }
     },
     {
-      "descripcion": "Después de cambiar al gallego, el html dice lang=\"gl\" y dir=\"ltr\"",
+      "descripcion": "Después de cambiar al inglés, el html dice lang=\"en\" y dir=\"ltr\"",
       "pasos": [
         {
           "pulsar": {
             "rol": "button",
-            "nombre": "/eu/cesta"
+            "nombre": "/ca/cesta"
           }
         },
         {
           "pulsar": {
             "rol": "link",
-            "nombre": "Galego"
+            "nombre": "English"
           }
         },
         {
@@ -1074,16 +1072,16 @@ Lo demás de esta lección no depende de la librería: `Intl`, las categorías d
         }
       ],
       "espera": {
-        "texto": "<html lang=\"gl\" dir=\"ltr\">"
+        "texto": "<html lang=\"en\" dir=\"ltr\">"
       }
     },
     {
-      "descripcion": "La cesta en euskera enlaza su versión en catalán con hreflang y la URL completa",
+      "descripcion": "La cesta en catalán enlaza su versión en inglés con hreflang y la URL completa",
       "pasos": [
         {
           "pulsar": {
             "rol": "button",
-            "nombre": "/eu/cesta"
+            "nombre": "/ca/cesta"
           }
         },
         {
@@ -1095,16 +1093,16 @@ Lo demás de esta lección no depende de la librería: `Intl`, las categorías d
       ],
       "espera": {
         "rol": "listitem",
-        "texto": "hreflang=\"ca\" → https://turroneselpanal.example/ca/cesta"
+        "texto": "hreflang=\"en\" → https://turroneselpanal.example/en/cesta"
       }
     },
     {
-      "descripcion": "En /, con el navegador en euskera, la tienda se abre en euskera",
+      "descripcion": "En /, con el navegador en inglés, la tienda se abre en inglés",
       "pasos": [
         {
           "seleccionar": {
             "etiqueta": "Idiomas de tu navegador",
-            "opcion": "eu-ES, es-ES"
+            "opcion": "en-GB, en"
           }
         },
         {
@@ -1116,16 +1114,16 @@ Lo demás de esta lección no depende de la librería: `Intl`, las categorías d
       ],
       "espera": {
         "rol": "heading",
-        "nombre": "Turroi artisaua"
+        "nombre": "Handmade turrón"
       }
     },
     {
-      "descripcion": "En /, ca-ES-valencia elige el catalán",
+      "descripcion": "En /, con fr-FR y después ca-ES, se salta el francés y elige el catalán",
       "pasos": [
         {
           "seleccionar": {
             "etiqueta": "Idiomas de tu navegador",
-            "opcion": "ca-ES-valencia, es"
+            "opcion": "fr-FR, ca-ES"
           }
         },
         {
@@ -1141,12 +1139,12 @@ Lo demás de esta lección no depende de la librería: `Intl`, las categorías d
       }
     },
     {
-      "descripcion": "En /, con un idioma que la tienda no tiene, se abre en castellano",
+      "descripcion": "En /, si la tienda no tiene ninguno de los idiomas del navegador, se abre en castellano",
       "pasos": [
         {
           "seleccionar": {
             "etiqueta": "Idiomas de tu navegador",
-            "opcion": "fr-FR, fr"
+            "opcion": "eu-ES, fr-FR"
           }
         },
         {
@@ -1167,10 +1165,10 @@ Lo demás de esta lección no depende de la librería: `Intl`, las categorías d
 
 **Retos para seguir practicando** (sin comprobación automática):
 
-1. En el ejercicio 1, añade a cada producto la fecha de entrega con `DateTimeFormat` (`weekday`, `day` y `month`, y `timeZone: 'Europe/Madrid'`) y cuánto hace del pedido con `RelativeTimeFormat` y `numeric: 'auto'`. Ábrelo en Chrome y en Safari con «Euskara» y compara.
+1. En el ejercicio 1, añade a cada producto la fecha de entrega con `DateTimeFormat` (`weekday`, `day` y `month`, y `timeZone: 'Europe/Madrid'`) y cuánto hace del pedido con `RelativeTimeFormat` y `numeric: 'auto'`. Después añade `eu-ES` al selector, con los nombres en castellano mientras no tengas traducción, y compara en Chrome y en Safari lo que escribe `Intl`.
 2. En el `t()` hecho a mano, añade el valenciano: `ca-ES-valencia` en el selector, con un diccionario que solo tenga las frases que cambian («Afig a la cistella») y que, para todo lo demás, caiga al catalán antes que al castellano.
 3. En el ejercicio 2, añade el árabe con dos frases y comprueba con «Mirar el documento» que `dir` pasa a `rtl`. Después cambia en `estilos.css` los márgenes y rellenos de un lado por propiedades lógicas (`padding-inline-start`…) y compara.
-4. En un proyecto de Vite, monta la tienda con react-i18next y React Router como en la lección: `comun` y `cesta` en JSON, `resourcesToBackend` y la ruta `:idioma`. En la pestaña Red, mira qué diccionarios se descargan al entrar y al ir a la cesta. Después activa la limitación de red «3G lenta», cambia al gallego y observa qué se ve mientras llega.
+4. En un proyecto de Vite, monta la tienda con react-i18next y React Router como en la lección: `comun` y `cesta` en JSON, `resourcesToBackend` y la ruta `:idioma`. En la pestaña Red, mira qué diccionarios se descargan al entrar y al ir a la cesta. Después activa la limitación de red «3G lenta», cambia al inglés y observa qué se ve mientras llega.
 
 ## Para profundizar
 
