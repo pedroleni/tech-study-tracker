@@ -551,6 +551,58 @@ Esta web tiene 75 archivos de pruebas, muchos con Testing Library y escritos con
 }
 ```
 
+## Si en tu trabajo usan Jest
+
+Vitest es lo natural en un proyecto de Vite, pero **Jest** sigue en muchísimos proyectos, sobre todo en los que no nacieron con Vite: la semana del 18 al 24 de octubre de 2026, npm contó casi 29 millones de descargas de `jest` (y 86 millones de `vitest`). Si llegas a uno, **todo lo que esta lección cuenta de Testing Library te sirve tal cual**: `render`, `screen`, las consultas por rol y etiqueta, `user-event` y los comprobadores de `jest-dom`. Lo comprobé el 26 de octubre de 2026 con los tres tests de la reserva en Jest 30.5.2: pasan cambiando solo `vi.fn()` por `jest.fn()` y quitando el `import` de `vitest`.
+
+Lo que cambia es el entorno. En Jest no hay Vite que traduzca el JSX: lo hace Babel. Esta es la configuración típica de un proyecto con Jest y React (la que usé en la prueba):
+
+```bash
+npm install -D jest jest-environment-jsdom @babel/core @babel/preset-env @babel/preset-react @testing-library/react @testing-library/dom @testing-library/user-event @testing-library/jest-dom
+```
+
+```laboratorio
+{
+  "tipo": "codigo-anotado",
+  "lenguaje": "jsx",
+  "codigo": "// jest.config.js\nmodule.exports = {\n  testEnvironment: 'jsdom',\n  setupFilesAfterEnv: ['<rootDir>/src/setup.js'],\n}\n\n// babel.config.js\nmodule.exports = {\n  presets: [\n    ['@babel/preset-env', { targets: { node: 'current' } }],\n    ['@babel/preset-react', { runtime: 'automatic' }],\n  ],\n}\n\n// src/setup.js\nimport '@testing-library/jest-dom'\n",
+  "anotaciones": [
+    {
+      "fragmento": "// jest.config.js",
+      "nota": "Los dos archivos de configuración están en CommonJS, como en la documentación de Jest. En un proyecto con \"type\": \"module\" en el package.json, como los de Vite, Jest se para con ReferenceError: module is not defined."
+    },
+    {
+      "fragmento": "testEnvironment: 'jsdom'",
+      "nota": "En Jest el entorno por defecto es node, sin document. jsdom va en un paquete aparte desde Jest 28, jest-environment-jsdom, que trae su propio jsdom (la versión 26). Si te olvidas de esta línea, el error no menciona jsdom: user-event falla con «Cannot read properties of undefined (reading 'Symbol(Node prepared with document state workarounds)')»."
+    },
+    {
+      "fragmento": "setupFilesAfterEnv: ['<rootDir>/src/setup.js']",
+      "nota": "El equivalente del setupFiles de Vitest: se ejecuta antes de cada archivo de tests, cuando expect ya existe."
+    },
+    {
+      "fragmento": "['@babel/preset-react', { runtime: 'automatic' }]",
+      "nota": "Jest pasa cada archivo .js, .jsx, .ts y .tsx por babel-jest, que usa tu configuración de Babel. Sin este preset, el archivo de tests ni arranca: «Support for the experimental syntax 'jsx' isn't currently enabled». Con TypeScript se añade @babel/preset-typescript, que quita los tipos sin comprobarlos, o se usa ts-jest."
+    },
+    {
+      "fragmento": "targets: { node: 'current' }",
+      "nota": "Babel convierte también los import en require. El soporte de módulos ES de Jest sigue siendo experimental, según su documentación, así que lo normal es que el código llegue a Jest como CommonJS."
+    },
+    {
+      "fragmento": "import '@testing-library/jest-dom'",
+      "nota": "La misma librería que en Vitest, sin el /vitest del final: así registra sus comprobadores en el expect de Jest."
+    }
+  ]
+}
+```
+
+En los tests cambia poco:
+
+- **`jest` en lugar de `vi`**: `jest.fn()`, `jest.spyOn()`, `jest.mock()`.
+- **Los globales vienen de serie.** Jest pone `describe`, `it` y `expect` sin importarlos, así que la limpieza automática de Testing Library funciona sin el `globals: true` que necesitaba Vitest.
+- **Los `import` de CSS necesitan configuración.** Un `import './estilos.css'` en un componente rompe el test con `SyntaxError: Unexpected token '{'`, porque Jest intenta leer el CSS como JavaScript. Se arregla con la opción `moduleNameMapper`, que cambia los `.css` por un módulo vacío. Vitest los sustituye por un CSS vacío sin configurar nada.
+
+**¿Y migrar?** De Jest a Vitest suele ser barato en tests como los de esta lección, porque Vitest imita la API de Jest: cambiar `jest.` por `vi.`, decidir qué haces con los globales y sustituir la configuración. Lo que cuesta son los casos en que Vitest se comporta distinto: la fábrica de `vi.mock` tiene que devolver un objeto con cada exportación, `jest.requireActual` pasa a ser `await vi.importActual`, y no admite ni los tests con el callback `done` ni los temporizadores antiguos de Jest. Lo detalla la guía oficial [Migrating from Jest](https://vitest.dev/guide/migration/jest). Al revés no compensa: la [documentación de Jest](https://jestjs.io/docs/getting-started) dice que Jest no es compatible con Vite y propone Vitest como alternativa.
+
 ## Errores típicos
 
 **1. Pedir con `getBy` que algo no esté.** `getBy` lanza un error cuando no encuentra el elemento, así que no sirve para comprobar una ausencia. Para eso, `queryBy`, que devuelve `null`. Pruébalo: ¿qué hace este test, que quiere comprobar que no hay ningún aviso de error al abrir el formulario?

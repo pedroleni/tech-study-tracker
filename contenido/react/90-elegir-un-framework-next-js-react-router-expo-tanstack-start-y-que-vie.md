@@ -464,7 +464,7 @@ Casi al final del temario, un mapa de dónde seguir, por lo que quieras llegar a
     },
     {
       "titulo": "Mantenerte al día",
-      "texto": "Lee el blog de React y las notas de versión de lo que uses (React 19.3 salió el 9 de septiembre de 2026), activa los avisos de seguridad de tus dependencias y ejecuta npm audit de vez en cuando (lección 89)."
+      "texto": "Lee el blog de React y las notas de versión de lo que uses (React 19.3 salió el 9 de septiembre de 2026). Los avisos de seguridad, en cambio, síguelos en la lista de avisos del repositorio de React en GitHub (la tienes en Para profundizar): de los seis de 2026, el blog solo recogió el de enero. Activa también las alertas de seguridad de tus dependencias y ejecuta npm audit de vez en cuando (lección 89)."
     }
   ]
 }
@@ -551,6 +551,12 @@ Esta lección es una **elección**, no una técnica, así que no hay un ejercici
       "descripcion": "La puerta de entrada a React Native y a lo que cambia respecto al React del navegador.",
       "url": "https://reactnative.dev/docs/getting-started",
       "etiqueta": "React Native"
+    },
+    {
+      "titulo": "Avisos de seguridad de React",
+      "descripcion": "La lista oficial del repositorio de React, con cada aviso, sus paquetes, las versiones afectadas y las corregidas. Aquí salen avisos que el blog no publica (lección 89).",
+      "url": "https://github.com/react/react/security/advisories",
+      "etiqueta": "GitHub"
     }
   ]
 }

@@ -149,7 +149,8 @@ Project* y *Editor Setup* (2); *React calls Components and Hooks* (12);
   `<ViewTransition>` cubre el caso.
 - **Testing general** (teoría, cobertura, Playwright E2E): el temario
   de JavaScript ya decidió que "testing merece su propio temario
-  transversal". Aquí solo lo específico de React (83-84).
+  transversal". Aquí solo lo específico de React (83-84). Desde el
+  2026-10-26 es una ficha decidida (ver "Revisión de cobertura").
 - **Server Components en práctica**: en React Router siguen siendo
   experimentales (*"experimental and subject to breaking changes in
   minor/patch releases"*, verificado en su documentación) y Next.js es
@@ -685,9 +686,58 @@ Leyendo el código real de Tech Study Tracker para la lección 86:
   admin incluido, van en el mismo bundle. Las dos cosas pueden ser la
   "mejora real" de la lección 86, como el PR #44 lo fue de `git/55`.
 
+## Revisión de cobertura (2026-10-26)
+
+El 26 de octubre de 2026 se publicaron las 98 lecciones y React pasó a «Completado». Ese mismo día se revisó si el temario estaba completo, contrastándolo con el estado de React y su ecosistema a esa fecha:
+- React 19.3.1 y React Router 8.5.0;
+- TanStack Start 1.0 y Next.js 16.4;
+- State of React 2025 y descargas de npm.
+
+### Corrección de seguridad (ya publicada)
+
+Las lecciones 82 y 89 daban como seguras las versiones 19.0.4, 19.1.5 y 19.2.4 de `react-server-dom-*`.
+
+- **El aviso:** el 14 de octubre de 2026 React publicó [GHSA-xqc2-xf4c-x3h3](https://github.com/react/react/security/advisories/GHSA-xqc2-xf4c-x3h3), ejecución remota de código, crítico, con 9,5. Afecta hasta 19.0.8, 19.1.9, 19.2.8 y 19.3.0.
+- **Lo corregido en las lecciones 82, 88 y 89:**
+  - las versiones seguras son ahora 19.0.9, 19.1.10, 19.2.9 y 19.3.1;
+  - la cronología recoge los avisos de 2026;
+  - el alumno aprende a mirar la lista de avisos del repositorio, porque el blog no los publica.
+
+### Decisión: el ecosistema grande, en fichas propias
+
+Las librerías con temario propio y versiones propias no se meten en React: tienen su ficha en la web, como SQL y PostgreSQL. Por orden:
+
+1. **React Router**: modo datos y modo framework a fondo, SSR, middleware y despliegue.
+2. **TanStack Query**: mutaciones, actualizaciones optimistas, paginación y scroll infinito.
+3. **Testing**: Vitest, Testing Library y Playwright de extremo a extremo; sirve también para JS, TypeScript y Node.
+4. Más adelante, **Redux Toolkit** y **Next.js**.
+
+Para tener ejemplos en vivo, las fichas de React Router y TanStack Query necesitan que el runtime de la vista previa (`scripts/react-en-vivo/`) incluya esas librerías.
+
+En React entran solo cuatro lecciones cortas, intercaladas por `Orden` sin renumerar nada (el número es interno; la web numera por posición dentro de cada módulo):
+
+| # | Orden | Módulo | Lección | Entra | No entra (va a otra lección o ficha) |
+|---|---|---|---|---|---|
+| 99 | 775 | Arquitectura de una aplicación | El router también carga y envía datos: `loader`, `action` y errores de ruta | Modo datos: `createBrowserRouter` + `RouterProvider` (en la 8, desde `react-router/dom`), `loader` + `useLoaderData`, `action` + `<Form>`, `useNavigation` para la interfaz pendiente, `ErrorBoundary` por ruta con `isRouteErrorResponse` y `throw` de una respuesta 404, `redirect`, y `useFetcher` para enviar sin navegar. Es justo lo que usa el proyecto 98, que hoy lo estrena sin lección previa | Middleware, `lazy` por ruta, revalidación a fondo, modo framework y SSR, tipos generados, integración con TanStack Query: ficha React Router |
+| 100 | 805 | Arquitectura de una aplicación | Formularios grandes con React Hook Form (y cuándo te basta una Action) | `useForm`, `register`, `handleSubmit`, `formState` (`errors`, `isSubmitting`, `isDirty`), `zodResolver` con los esquemas de la 61, `Controller` para componentes controlados de Radix/shadcn (80), `useFieldArray`, `useWatch` en vez de `watch()` (el aviso `incompatible-library` del compilador, 70), y enviar con `useMutation` (78). Cuándo basta una Action con `useActionState` (57-61) y cuándo compensa la librería. TanStack Form, solo mencionado | Validación en servidor (61, 89) |
+| 101 | 815 | Calidad y producción | Internacionalización: `Intl`, react-i18next y el idioma en la URL | `Intl` en React (formateadores creados una vez, `NumberFormat`, `DateTimeFormat`, `RelativeTimeFormat`, `PluralRules`, `ListFormat`); react-i18next: `useTranslation`, `<Trans>`, interpolación, plurales, espacios de nombres y traducciones cargadas bajo demanda; el idioma en la URL (`/:idioma/...`, 77), `lang` y `dir` del documento, y `hreflang` con `<link>` (81). El caso de España: castellano, catalán, euskera, gallego e inglés. FormatJS y Lingui, solo mencionados | Traducir contenido del servidor |
+| 102 | 825 | Calidad y producción | Autenticación en una SPA: sesión, rutas protegidas y dónde guardar el token | Un `AuthProvider` (28) con sus tres estados (comprobando, anónimo, con sesión); formulario de entrada; ruta protegida que devuelve al alumno a donde iba (77, y con `loader` + `redirect` de la 99); cierre de sesión que vacía la caché de TanStack Query (78) y lo demás; un 401 en cualquier petición cierra la sesión; cookie `httpOnly` frente a `localStorage` frente a memoria + token de refresco, con el XSS de la 82 y `SameSite` contra CSRF; la autorización de verdad está en el servidor (82, 89), ocultar un botón no protege nada. Puede consumir la API con JWT del proyecto 52 de Node.js. Proveedores (Supabase Auth, que usa esta web, lección 86; Auth0; Auth.js; Clerk), solo mencionados | Implementar el servidor de autenticación (temario de Node.js) |
+
+Como en las lecciones 76-78, la vista previa en vivo solo trae React. El código de cada librería va en bloques `codigo-anotado`, y los bloques en vivo enseñan, con React puro, la idea que la librería resuelve.
+
+### Ampliaciones a lecciones existentes (después de las cuatro nuevas)
+
+- **98**: un paso con middleware (en React Router 8 siempre activo), `useFetcher` pasa de reto a paso, y `splitRouteModules` activo por defecto.
+- **53**: en qué se convierte `informar` en producción: un servicio tipo Sentry (`@sentry/react`) con source maps.
+- **85**: qué pesa en el bundle y medir INP y LCP en producción (Web Vitals, Lighthouse).
+- **55**: una sección corta de cuándo usar Motion (`AnimatePresence`, `layout`, gestos) en vez de `<ViewTransition>`.
+- **96**: Storybook como paso o reto del kit de componentes.
+- **83**: una nota para quien trabaje con Jest.
+- **86**: organizar carpetas cuando la app crece (por tipo frente a por funcionalidad).
+- **90**: los avisos de seguridad se siguen en la lista del repositorio de React, no solo en el blog.
+- **68**: el compilador en Rust (Next.js 16.3, Oxc), experimental y no apto para producción.
+
 ## Pendiente
 
-- Aprobación de este plan, sobre todo de las decisiones de alcance, los
-  nueve componentes y los trece proyectos.
-- Tras aprobarlo: commit de este documento y la especificación de las
-  fases 0 y 1 en `specs/features/react-en-vivo.md`.
+- Escribir las lecciones 99–102 y las ampliaciones de arriba. Cada una nace como borrador, con captura y enlace para el visto bueno antes de publicarla.
+- El temario de la ficha React Router (`contenido/react-router/TEMARIO.md`), para revisarlo antes de escribir lecciones.
