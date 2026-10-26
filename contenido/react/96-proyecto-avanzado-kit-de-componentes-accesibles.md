@@ -1269,13 +1269,13 @@ https://dequeuniversity.com/rules/axe/4.14/color-contrast?application=axeAPI
 
 Es decir: el texto de ayuda tiene un contraste de 2,5 a 1 con el fondo, y para un texto de ese tamaño el mínimo es 4,5 a 1 (criterio 1.4.3 de las WCAG). **Los 36 tests de jsdom siguen en verde**, y caen las tres historias que pintan texto con ese gris: «Con Ayuda», «Sin Resultados» y el diálogo «Abierto». La de «Sin Resultados» enseña cuándo mira axe: ese texto no existe hasta que el `play` teclea.
 
-**Una línea que tienes que cambiar tú.** El asistente deja en `.storybook/preview.tsx` `a11y: { test: 'todo' }`, y con `'todo'` los problemas de accesibilidad solo salen como avisos en la interfaz de Storybook: con el mismo gris, `npx vitest run --project=storybook` da 8 de 8 en verde. Para que paren la terminal y la integración continua, pon `'error'`:
+**Una línea que tienes que cambiar tú.** El asistente deja en `.storybook/preview.tsx` `a11y: { test: 'todo' }`, y con `'todo'` los problemas de accesibilidad solo salen como avisos en la interfaz de Storybook: con el mismo gris, `npx vitest run --project=storybook` da 8 de 8 en verde. Para que paren la terminal y la integración continua, pon `'error'` (los comentarios del asistente, traducidos):
 
 ```tsx
 a11y: {
-  // 'todo' - show a11y violations in the test UI only
-  // 'error' - fail CI on a11y violations
-  // 'off' - skip a11y checks entirely
+  // 'todo': los fallos de accesibilidad solo salen en la interfaz de tests
+  // 'error': los fallos de accesibilidad paran la integración continua
+  // 'off': no se mira la accesibilidad
   test: 'error'
 }
 ```
