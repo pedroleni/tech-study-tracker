@@ -113,17 +113,22 @@ export function PrediceElResultado({
                 </p>
               )}
             </div>
-            <div className="space-y-1.5">
-              <p className="text-xs font-medium text-muted-foreground">Así se ve de verdad</p>
-              <div className="flex justify-center rounded-lg border bg-muted/40 p-3">
-                <iframe
-                  className="block h-24 w-full max-w-64 rounded-md border bg-white"
-                  sandbox=""
-                  srcDoc={codigo}
-                  title="Resultado real del código HTML"
-                />
+            {/* La vista real interpreta el código como HTML: con JSX o TSX
+                pintaría el código fuente roto, y la explicación ya cuenta el
+                resultado. */}
+            {lenguaje === 'html' && (
+              <div className="space-y-1.5">
+                <p className="text-xs font-medium text-muted-foreground">Así se ve de verdad</p>
+                <div className="flex justify-center rounded-lg border bg-muted/40 p-3">
+                  <iframe
+                    className="block h-24 w-full max-w-64 rounded-md border bg-white"
+                    sandbox=""
+                    srcDoc={codigo}
+                    title="Resultado real del código HTML"
+                  />
+                </div>
               </div>
-            </div>
+            )}
           </div>
         )}
       </div>

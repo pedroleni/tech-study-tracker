@@ -20,8 +20,14 @@ a lo que se suele encontrar en tutoriales:
   de forma condicional.
   [Post oficial](https://react.dev/blog/2026/09/09/react-19-3) ·
   [CHANGELOG](https://github.com/facebook/react/blob/main/CHANGELOG.md).
-- **19.3.1 (2026-10-14)**: solo mejora el protocolo de transporte de
-  Server Components ([release](https://github.com/facebook/react/releases/tag/v19.3.1)).
+- **19.3.1 (2026-10-14)**: sus notas solo dicen «Improve transport
+  protocol», pero es la versión que corrige un fallo crítico de ejecución
+  remota de código y una denegación de servicio en los paquetes de Server
+  Components ([GHSA-xqc2-xf4c-x3h3](https://github.com/react/react/security/advisories/GHSA-xqc2-xf4c-x3h3),
+  [GHSA-h3gv-c5rc-p453](https://github.com/react/react/security/advisories/GHSA-h3gv-c5rc-p453);
+  [release](https://github.com/facebook/react/releases/tag/v19.3.1)). Los
+  avisos de 2026 no salen en el blog de React: están en la
+  [lista de avisos del repositorio](https://github.com/react/react/security/advisories).
 - **19.2 (2025-10-01)** trajo `<Activity>`, `useEffectEvent`,
   `cacheSignal` y las *Performance tracks* de las DevTools del
   navegador.
