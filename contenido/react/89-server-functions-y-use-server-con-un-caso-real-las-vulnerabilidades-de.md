@@ -483,7 +483,7 @@ Los paquetes afectados son `react-server-dom-webpack`, `react-server-dom-parcel`
       "descripcion": "CVE-2025-55182, puntuación 10: las del aviso del 3 de diciembre de 2025. También les afecta todo lo que vino después."
     },
     {
-      "etiqueta": "19.0.1-8, 19.1.2-9, 19.2.1-8, 19.3.0",
+      "etiqueta": "19.0.1‑8, 19.1.2‑9, 19.2.1‑8, 19.3.0",
       "rol": "Vulnerables a la ejecución remota de octubre de 2026",
       "descripcion": "Cierran React2Shell, pero no el aviso crítico del 14 de octubre de 2026 (9,5) y, según la versión, tampoco las denegaciones de servicio anteriores."
     },
