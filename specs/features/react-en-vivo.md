@@ -2000,9 +2000,18 @@ La revisión independiente encontró que las operaciones **sintéticas** (las qu
 - **Redirecciones.** Las sintéticas abiertas también reciben la fase `redireccion`. La redirección de un middleware en la carga inicial queda en la misma operación.
 - **Cancelación.** Una navegación nueva cancela cualquier operación abierta que no sea de un fetcher, incluidas la carga inicial y una revalidación.
 - **`getContext` del alumno.** Si lanza, su error se propaga como sin registro. Solo `contexto.set(marca, …)` va protegido.
+- **`lazy` como objeto.** El registro deja de instrumentar
+  `lazy.loader`, `lazy.action` y `lazy.middleware`. React Router 8.5.0
+  convierte esas instrumentaciones en un `updates.lazy` parcial y, al
+  resolverse una propiedad, lo asigna sobre la ruta reemplazando el objeto
+  `route.lazy` completo. Si otra propiedad rechaza a la vez, cambia la ruta a
+  la que se atribuye el error y puede pintar un `ErrorBoundary` que sin
+  registro no se pintaría. No hay forma de observar esas cargas mediante la
+  API pública sin sustituir lo que el router espera, así que solo se conserva
+  la instrumentación `lazy` de la forma función; los `loader`, `action` y
+  `middleware` ya resueltos siguen registrándose por sus claves normales.
 - **El panel.**
   - En una carga dice «Se ejecutó»; solo en una revalidación dice «Se volvió a ejecutar».
   - Las barras ya no llevan `sm:col-start-2`, que las desalineaba.
   - La fusión de operaciones recorta a 100 en cada paso.
 - **Sin test automático para `useBlocker`.** En el entorno jsdom de los tests, `useBlocker` no bloquea (tampoco sin registro), así que ese caso se verifica en el navegador.
-

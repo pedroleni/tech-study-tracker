@@ -211,7 +211,7 @@ export function RegistroRouter({
               const acaboEn =
                 operacion.urlFinal &&
                 operacion.urlFinal !== operacion.destino &&
-                !['atras', 'adelante'].includes(operacion.clase)
+                !['atras', 'adelante', 'fetcher-carga', 'fetcher-envio'].includes(operacion.clase)
                   ? ` · acabó en ${operacion.urlFinal}`
                   : ''
               return (
