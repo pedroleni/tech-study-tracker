@@ -122,6 +122,7 @@
         llamadaTerminada: false,
         sintetica,
         ejecutados: new Set(),
+        requestInicialVista: false,
         ultimaPublicacion: 0,
         temporizador: null,
         cerrada: false,
@@ -164,6 +165,8 @@
         })
       if (errores.length > 0) {
         operacion.errores = errores
+        // Tras un error, un loader ausente puede haberse omitido por el corte del
+        // flujo y no por shouldRevalidate; no lo presentamos como «no revalidado».
         return
       }
       if (operacion.clase === 'fetcher-carga') return
@@ -287,7 +290,12 @@
       }
       fase = referencia.fase || fase
       if (info && info.request) {
-        if (!operacion.destino) operacion.destino = urlDeRequest(info.request)
+        if (!operacion.requestInicialVista) {
+          operacion.requestInicialVista = true
+          if (operacion.metodo === 'GET' || !operacion.destino) {
+            operacion.destino = urlDeRequest(info.request)
+          }
+        }
         if (String(info.request.method).toUpperCase() !== 'GET') fase = 'envio'
       }
       paso = {
@@ -424,6 +432,7 @@
               { clase: claseSintetica(registro), metodo: 'GET', destino: destinoSintetico(registro) },
               true,
             )
+            if (operacion && operacion.clase === 'revalidacion') fase = 'revalidacion'
           }
         } catch {
           operacion = null
