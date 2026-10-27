@@ -145,6 +145,30 @@ export default function App() { return <RouterProvider router={router} /> }`)
     expect(envio.pasos).not.toContainEqual(expect.objectContaining({ tipo: 'loader', ruta: 'raiz' }))
   })
 
+  it('un Form con GET usa como destino la URL enviada con su búsqueda', async () => {
+    const enviar = await instalar(`import { createMemoryRouter, Form } from 'react-router'
+import { RouterProvider } from 'react-router/dom'
+function Reservas() { return <Form method="get"><input aria-label="Día" name="dia" defaultValue="2026-11-05" /><button>Buscar</button></Form> }
+const router = createMemoryRouter([{ path: '/reservas', loader: () => null, Component: Reservas }], { initialEntries: ['/reservas?dia=2026-11-04'] })
+export default function App() { return <RouterProvider router={router} /> }`)
+    ;((await within(document.body).findByRole('button', { name: 'Buscar' })).closest('form') as HTMLFormElement).requestSubmit()
+    const operacion = await esperarOperacion(enviar, (op) => op.clase === 'navegacion')
+    expect(operacion).toMatchObject({
+      metodo: 'GET',
+      destino: '/reservas?dia=2026-11-05',
+      urlFinal: '/reservas?dia=2026-11-05',
+    })
+
+    const panel = render(createElement(RegistroRouter, {
+      operaciones: [operacion],
+      lleno: false,
+      soloDeclarativo: false,
+      onLimpiar: () => {},
+    }))
+    expect(panel.container).toHaveTextContent('Navegación → /reservas?dia=2026-11-05')
+    expect(panel.queryByText(/acabó en/)).not.toBeInTheDocument()
+  })
+
   it('un fetcher con POST incluye su action y la revalidación en la misma operación', async () => {
     const enviar = await instalar(`import { createMemoryRouter, useFetcher } from 'react-router'; import { RouterProvider } from 'react-router/dom'; const loader = () => null; const action = async () => null; function AppRuta() { const f = useFetcher(); return <f.Form method="post"><button>Enviar fetcher</button></f.Form> }; const router = createMemoryRouter([{ id: 'raiz', path: '/', loader, action, Component: AppRuta }]); export default function App() { return <RouterProvider router={router} /> }`)
     ;((await within(document.body).findByRole('button', { name: 'Enviar fetcher' })).closest('form') as HTMLFormElement).requestSubmit()

@@ -122,6 +122,7 @@
         llamadaTerminada: false,
         sintetica,
         ejecutados: new Set(),
+        requestInicialVista: false,
         ultimaPublicacion: 0,
         temporizador: null,
         cerrada: false,
@@ -289,7 +290,12 @@
       }
       fase = referencia.fase || fase
       if (info && info.request) {
-        if (!operacion.destino) operacion.destino = urlDeRequest(info.request)
+        if (!operacion.requestInicialVista) {
+          operacion.requestInicialVista = true
+          if (operacion.metodo === 'GET' || !operacion.destino) {
+            operacion.destino = urlDeRequest(info.request)
+          }
+        }
         if (String(info.request.method).toUpperCase() !== 'GET') fase = 'envio'
       }
       paso = {
