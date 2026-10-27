@@ -20,7 +20,7 @@ Funciona, y está escrita como se escribía entonces, como la que te vas a encon
 - **un `RutaProtegida`** que envuelve las rutas del personal y redirige a `/entrar?volver=…`, el de la lección 102 de React;
 - **formularios con `onSubmit` y `fetch`**, y un `navigate()` al terminar.
 
-Vas a llevarla a **React Router 8.5.0 en modo datos** sin romper nada por el camino, y lo vas a saber porque la app trae **29 tests de caracterización** que no se pueden poner en rojo en ningún momento. Al final mides lo que has ganado: código borrado y peticiones que dejan de ir en cascada.
+Vas a llevarla a **React Router 8.5.0 en modo datos** sin romper nada por el camino, y lo vas a saber porque la app trae **30 tests de caracterización** que no se pueden poner en rojo en ningún momento. Al final mides lo que has ganado: código borrado y peticiones que dejan de ir en cascada.
 
 Hay además un motivo que no es de gusto. Con la app recién instalada, `npm audit` dice esto:
 
@@ -124,8 +124,8 @@ Tres paquetes de React Router con avisos de severidad alta. `npm audit --json` d
 4. **Pasa los tests**: `npm test`. Al revés que en otros proyectos, aquí empiezan todos en verde, y tu trabajo es que sigan así:
 
 ```text
- Test Files  6 passed (6)
-      Tests  29 passed (29)
+ Test Files  7 passed (7)
+      Tests  35 passed (35)
 ```
 
 5. **Haz un commit** antes de tocar nada. Es tu red.
@@ -152,10 +152,10 @@ src/
 ├── destino.ts                el ?volver= validado
 └── formato.ts, tipos.ts, estilos.css
 servidor/                     la API en memoria y su plugin de Vite            (no se toca)
-pruebas/                      los 29 tests de caracterización                  (no se tocan)
+pruebas/                      30 tests de caracterización y 5 de la cookie     (no se tocan)
 ```
 
-No hay un servidor aparte: `servidor/plugin.ts` es un plugin de Vite que sirve la API (`/api/libros`, `/api/prestamos`, `/api/sesion`…) en `npm run dev` y en `npm run preview`, con los datos en memoria y una cookie de sesión. **Cada respuesta tarda 300 ms**, como una red de verdad, para que las peticiones en cascada se noten; `LATENCIA_API=0 npm run dev` la quita.
+No hay un servidor aparte: `servidor/plugin.ts` es un plugin de Vite que sirve la API (`/api/libros`, `/api/prestamos`, `/api/sesion`…) en `npm run dev` y en `npm run preview`, con los datos en memoria y una cookie de sesión. La cookie es `HttpOnly` y `SameSite=Lax`, y si la petición llega por HTTPS (o con `COOKIE_SEGURA=1`) lleva además `Secure` y se llama `__Host-sesion`, un prefijo que el navegador solo acepta con `Secure`, `Path=/` y sin `Domain`. La vigilan 5 tests de `pruebas/servidor/`, que levantan un servidor HTTP de Node con el middleware de la API y comprueban la cabecera `Set-Cookie` exacta, por HTTP y por HTTPS (con la cabecera `X-Forwarded-Proto` que pondría un proxy). Si quitas `Secure` o escribes mal el prefijo, se ponen rojos tres de los cinco. **Cada respuesta tarda 300 ms**, como una red de verdad, para que las peticiones en cascada se noten; `LATENCIA_API=0 npm run dev` la quita.
 
 Estas son las rutas, tal como las declara la app en la 6:
 
@@ -227,7 +227,7 @@ Estas son las rutas, tal como las declara la app en la 6:
 
 ### Los tests que no se pueden poner en rojo
 
-Un **test de caracterización** no comprueba lo que la app *debería* hacer, sino lo que **hace hoy**. Lo escribes antes de tocar código antiguo, para que te avise de cualquier cambio de comportamiento, también de los que nadie había pensado. Aquí hay 29: el catálogo y su búsqueda (también con espacios de más o vacía), la ficha y su 404, entrar y volver adonde ibas, que Atrás no te devuelva al formulario después de entrar, el `?volver=` que no saca de la web ni rompe nada si viene mal formado, cerrar sesión, devolver un libro, registrar uno nuevo con sus errores, y qué pasa cuando la API falla.
+Un **test de caracterización** no comprueba lo que la app *debería* hacer, sino lo que **hace hoy**. Lo escribes antes de tocar código antiguo, para que te avise de cualquier cambio de comportamiento, también de los que nadie había pensado. Aquí hay 30: el catálogo y su búsqueda (también con espacios de más o vacía), la ficha y su 404, entrar y volver adonde ibas, que Atrás no te devuelva al formulario después de entrar, el `?volver=` que no saca de la web ni rompe nada si viene mal formado, cerrar sesión (también cuando la API falla), devolver un libro, registrar uno nuevo con sus errores, y qué pasa cuando la API falla.
 
 El truco para que sirvan durante toda la migración está en **lo que no saben**. No saben qué router usa la app, ni si pide sus datos en un efecto o en un `loader`. Solo conocen tres cosas, y ninguna cambia en toda la lección: la función con la que la app se monta, la URL y lo que se ve en la página.
 
@@ -235,7 +235,7 @@ El truco para que sirvan durante toda la migración está en **lo que no saben**
 {
   "tipo": "codigo-anotado",
   "lenguaje": "tsx",
-  "codigo": "// Antes de cada test: la API con sus datos de partida, «hoy» fijo y sin sesión.\nexport function prepararRed() {\n  api = crearApi({ hoy: () => '2026-10-26' })\n  sesion = null\n  vi.stubGlobal('fetch', async (entrada: string | URL, init: RequestInit = {}) => {\n    const url = new URL(String(entrada), window.location.href)\n    init.signal?.throwIfAborted()\n    const respuesta = api.manejar({\n      metodo: (init.method ?? 'GET').toUpperCase(),\n      ruta: url.pathname + url.search,\n      cuerpo: typeof init.body === 'string' ? JSON.parse(init.body) : undefined,\n      sesion,\n    })\n    // La cookie de sesión, como haría el navegador.\n    if (respuesta.sesion !== undefined) sesion = respuesta.sesion\n    // Como en la red, la respuesta llega después, no en el mismo instante.\n    await new Promise((resolver) => setTimeout(resolver, 0))\n    init.signal?.throwIfAborted()\n    return new Response(respuesta.cuerpo === undefined ? null : JSON.stringify(respuesta.cuerpo), {\n      status: respuesta.estado,\n      headers: { 'Content-Type': 'application/json' },\n    })\n  })\n}\n\n// Después de cada test.\nexport function cerrar() {\n  if (desmontar) act(() => desmontar!())\n  desmontar = null\n  document.body.innerHTML = ''\n  vi.unstubAllGlobals()\n}\n\n// Abre la app en una dirección, como si la escribieras en la barra.\nexport async function abrir(direccion: string) {\n  window.history.replaceState(null, '', direccion)\n  const contenedor = document.createElement('div')\n  document.body.append(contenedor)\n  await act(async () => {\n    desmontar = iniciarApp(contenedor)\n  })\n  return userEvent.setup()\n}",
+  "codigo": "// Antes de cada test: la API con sus datos de partida, «hoy» fijo y sin sesión.\nexport function prepararRed() {\n  api = crearApi({ hoy: () => '2026-10-26' })\n  sesion = null\n  vi.stubGlobal('fetch', async (entrada: string | URL, init: RequestInit = {}) => {\n    const url = new URL(String(entrada), window.location.href)\n    init.signal?.throwIfAborted()\n    const respuesta = api.manejar({\n      metodo: (init.method ?? 'GET').toUpperCase(),\n      ruta: url.pathname + url.search,\n      cuerpo: typeof init.body === 'string' ? JSON.parse(init.body) : undefined,\n      sesion,\n    })\n    // La cookie de sesión, como haría el navegador.\n    if (respuesta.sesion !== undefined) sesion = respuesta.sesion\n    // Como en la red, la respuesta llega después, no en el mismo instante.\n    await new Promise((resolver) => setTimeout(resolver, 0))\n    init.signal?.throwIfAborted()\n    return new Response(respuesta.cuerpo === undefined ? null : JSON.stringify(respuesta.cuerpo), {\n      status: respuesta.estado,\n      headers: { 'Content-Type': 'application/json' },\n    })\n  })\n}\n\n// Después de cada test.\nexport function cerrar() {\n  if (desmontar) act(() => desmontar!())\n  desmontar = null\n  // Los tests del servidor (pruebas/servidor) corren en Node, sin documento.\n  if (typeof document !== 'undefined') document.body.innerHTML = ''\n  vi.unstubAllGlobals()\n}\n\n// Abre la app en una dirección, como si la escribieras en la barra.\nexport async function abrir(direccion: string) {\n  window.history.replaceState(null, '', direccion)\n  const contenedor = document.createElement('div')\n  document.body.append(contenedor)\n  await act(async () => {\n    desmontar = iniciarApp(contenedor)\n  })\n  return userEvent.setup()\n}",
   "anotaciones": [
     {
       "fragmento": "vi.stubGlobal('fetch'",
@@ -294,7 +294,7 @@ Así es uno de los tests. No hay ni un `MemoryRouter` ni un `render(<App />)`: s
   "tipo": "callout",
   "variante": "exito",
   "titulo": "La regla de esta lección",
-  "contenido": "Los 29 tests de caracterización y la carpeta servidor no se tocan en ningún paso. Si un cambio te obliga a modificarlos, el cambio está mal. Lo que sí puedes hacer es añadir tests nuevos para lo que la app hace mejor que antes, en su propia carpeta: el paso 3.2 añade dos en pruebas/nuevos. Al terminar, git diff entre el primer commit y el último no tiene ni una línea en los tests de partida ni en servidor."
+  "contenido": "Los 30 tests de caracterización y la carpeta servidor no se tocan en ningún paso. Si un cambio te obliga a modificarlos, el cambio está mal. Lo que sí puedes hacer es añadir tests nuevos para lo que la app hace mejor que antes, en su propia carpeta: el paso 3.2 añade uno en pruebas/nuevos. Al terminar, git diff entre el primer commit y el último no tiene ni una línea en los tests de partida ni en servidor."
 }
 ```
 
@@ -310,7 +310,7 @@ Las *flags* más nuevas y sus avisos solo están en la última 6. La app está e
 npm install react-router-dom@6
 ```
 
-El repositorio trae un `.npmrc` con `save-exact=true`, así que `package.json` apunta la versión exacta, `6.30.6`. Pasa los tests: siguen los 29 en verde, pero ahora la salida trae avisos que antes no estaban, uno por cada archivo de tests:
+El repositorio trae un `.npmrc` con `save-exact=true`, así que `package.json` apunta la versión exacta, `6.30.6`. Pasa los tests: siguen los 35 en verde, pero ahora la salida trae avisos que antes no estaban, uno por cada archivo de tests:
 
 ```text
 ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
@@ -361,13 +361,13 @@ La 7 actualiza el estado del router dentro de `startTransition` (lección 51 de 
 <BrowserRouter future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
 ```
 
-Los 29 tests, en verde, y ningún aviso en la salida. Parece hecho. **Ahora abre la app en el navegador**, entra, ve a «Préstamos» y pulsa «Cerrar sesión». En vez de quedarte en el catálogo, acabas en `/entrar?volver=%2Fprestamos`, como si hubieras intentado entrar en préstamos sin sesión.
+Los 35 tests, en verde, y ningún aviso en la salida. Parece hecho. **Ahora abre la app en el navegador**, entra, ve a «Préstamos» y pulsa «Cerrar sesión». En vez de quedarte en el catálogo, acabas en `/entrar?volver=%2Fprestamos`, como si hubieras intentado entrar en préstamos sin sesión.
 
 ```laboratorio
 {
   "tipo": "predice-el-resultado",
   "lenguaje": "tsx",
-  "codigo": "  const { usuario, salir } = useSesion()\n  const navigate = useNavigate()\n\n  async function manejarSalir() {\n    await salir()\n    navigate('/catalogo')\n  }\n\n// salir() pide DELETE /api/sesion y después hace setUsuario(null).\n// RutaProtegida, que envuelve /prestamos, hace esto:\n//   if (!usuario) return <Navigate to={`/entrar?volver=${volver}`} replace />\n//\n// Con v7_startTransition activada, estás en /prestamos\n// y pulsas «Cerrar sesión». ¿Dónde acabas?",
+  "codigo": "  const { usuario, salir } = useSesion()\n  const navigate = useNavigate()\n  const [errorAlSalir, setErrorAlSalir] = useState(false)\n\n  async function manejarSalir() {\n    setErrorAlSalir(false)\n    try {\n      await salir()\n      navigate('/catalogo')\n    } catch {\n      // La sesión sigue abierta: se queda a la vista, y el botón, para reintentar.\n      setErrorAlSalir(true)\n    }\n  }\n\n// salir() pide DELETE /api/sesion y, si va bien, hace setUsuario(null).\n// RutaProtegida, que envuelve /prestamos, hace esto:\n//   if (!usuario) return <Navigate to={`/entrar?volver=${volver}`} replace />\n//\n// Con v7_startTransition activada, estás en /prestamos\n// y pulsas «Cerrar sesión». ¿Dónde acabas?",
   "opciones": [
     "En /catalogo, porque navigate se llama al final",
     "En /entrar?volver=%2Fprestamos: el cambio de sesión se pinta antes que la navegación",
@@ -397,7 +397,7 @@ El arreglo es cambiar el orden: primero sales de la ruta protegida y después bo
 {
   "tipo": "codigo-anotado",
   "lenguaje": "tsx",
-  "codigo": "  // Primero se sale de la ruta protegida y después se borra la sesión. Con\n  // v7_startTransition, la navegación va en una transición y setUsuario(null)\n  // no: React pinta antes la sesión vacía, todavía en /prestamos, y\n  // RutaProtegida manda a /entrar en lugar de dejarte en el catálogo.\n  async function manejarSalir() {\n    navigate('/catalogo')\n    await salir()\n  }",
+  "codigo": "  // Primero se sale de la ruta protegida y después se borra la sesión. Con\n  // v7_startTransition, la navegación va en una transición y setUsuario(null)\n  // no: React pinta antes la sesión vacía, todavía en /prestamos, y\n  // RutaProtegida manda a /entrar en lugar de dejarte en el catálogo.\n  async function manejarSalir() {\n    setErrorAlSalir(false)\n    navigate('/catalogo')\n    try {\n      await salir()\n    } catch {\n      // La sesión sigue abierta: se queda a la vista, y el botón, para reintentar.\n      setErrorAlSalir(true)\n    }\n  }",
   "anotaciones": [
     {
       "fragmento": "navigate('/catalogo')",
@@ -542,7 +542,7 @@ Esta app no tiene `RouterProvider` todavía, así que no hay ningún `react-rout
 npm install react-router@8
 ```
 
-Se instala la 8.5.0, y los 29 tests, el typecheck y el build siguen en verde **sin tocar ni una línea**. El modo declarativo de la 8 es el de la 7: `<BrowserRouter>`, `<Routes>`, `useNavigate` y `<Navigate>` funcionan igual. Lo que la 8 cambió (el middleware siempre activo, `context` como `RouterContextProvider`, los paquetes solo ESM, lo que contó la lección 1) toca al modo datos y al modo framework, y esta app todavía no usa ninguno.
+Se instala la 8.5.0, y los 35 tests, el typecheck y el build siguen en verde **sin tocar ni una línea**. El modo declarativo de la 8 es el de la 7: `<BrowserRouter>`, `<Routes>`, `useNavigate` y `<Navigate>` funcionan igual. Lo que la 8 cambió (el middleware siempre activo, `context` como `RouterContextProvider`, los paquetes solo ESM, lo que contó la lección 1) toca al modo datos y al modo framework, y esta app todavía no usa ninguno.
 
 Ya estás en la 8, con Node 24 y React 19, y `npm audit` limpio. Podrías parar aquí. Pero la app sigue pidiendo sus datos en efectos, y eso es lo que arregla el paso 3.
 
@@ -608,7 +608,7 @@ El orden importa. En esta app hay una pieza que comparten muchas rutas: **la ses
 }
 ```
 
-Los 29 tests, en verde. `iniciarApp` sigue teniendo la misma firma, y por eso los tests no se han enterado de que debajo hay otro router. Commit.
+Los 35 tests, en verde. `iniciarApp` sigue teniendo la misma firma, y por eso los tests no se han enterado de que debajo hay otro router. Commit.
 
 ### 3.2. La sesión, al router (`sesion.ts`, `rutas/raiz.tsx`, `rutas/entrar.tsx` y `rutas/salir.ts`)
 
@@ -701,10 +701,9 @@ Ese `replace` lo pide un test. Con `redirect`, el que había en el primer borrad
  FAIL  pruebas/sesion.test.tsx > La sesión > después de entrar, Atrás no vuelve al formulario
 Expected: "/catalogo"
 Received: "/entrar?volver=%2Fprestamos"
-      Tests  1 failed | 28 passed (29)
 ```
 
-Al cerrar sesión desaparece la carrera del paso 1c: la `action` borra la sesión y devuelve `redirect('/catalogo')`, y el router cambia de ruta y vuelve a ejecutar el `loader` de la raíz **en la misma actualización**. Ya no hay un momento con la sesión vacía y la ruta vieja. Y comprueba lo que la 6 no comprobaba: que la API haya cerrado la sesión de verdad.
+Al cerrar sesión desaparece la carrera del paso 1c: la `action` borra la sesión y devuelve `redirect('/catalogo')`, y el router cambia de ruta y vuelve a ejecutar el `loader` de la raíz **en la misma actualización**. Ya no hay un momento con la sesión vacía y la ruta vieja. Y comprueba, como la 6, que la API haya cerrado la sesión de verdad.
 
 ```laboratorio
 {
@@ -718,7 +717,7 @@ Al cerrar sesión desaparece la carrera del paso 1c: la `action` borra la sesió
     },
     {
       "fragmento": "if (!respuesta.ok) throw new ErrorApi(respuesta.status)",
-      "nota": "La 6 daba por cerrada la sesión pasara lo que pasara con DELETE /api/sesion. Aquí, si la API falla, no se olvida la sesión ni se redirige: la cabecera sigue diciendo quién ha entrado, porque en el servidor sigue abierta."
+      "nota": "Si la API no ha cerrado la sesión, no se olvida ni se redirige: la cabecera sigue diciendo quién ha entrado, porque en el servidor sigue abierta. Es lo que hacía la 6 con su try y su catch, y lo vigila el test si cerrar sesión falla, la sesión sigue abierta."
     },
     {
       "fragmento": "return redirect('/catalogo')",
@@ -752,7 +751,7 @@ Un fallo de la sesión, en cambio, no tiene una página a la que pertenecer: lo 
 }
 ```
 
-Estos dos comportamientos son nuevos: en la 6, un fallo de `/api/sesion` te dejaba como anónimo, y cerrar sesión borraba el usuario aunque la API fallara. No son de caracterización, porque en la 6 fallarían, así que van en su propia carpeta, `pruebas/nuevos/`, con la ayuda `fallar('GET /api/sesion', 1)`, que hace fallar solo la próxima petición. Los 29 de partida siguen sin cambiar, y la suite pasa a tener 31.
+Este comportamiento es nuevo: en la 6, un fallo de `/api/sesion` te dejaba como anónimo hasta recargar. No es de caracterización, porque en la 6 fallaría, así que su test va en su propia carpeta, `pruebas/nuevos/`, con la ayuda `fallar('GET /api/sesion', 1)`, que hace fallar solo la próxima petición. Los 30 de partida siguen sin cambiar, y la suite pasa de 35 a 36 tests.
 
 `RutaProtegida` sigue en `RutasAntiguas` hasta el 3.5, pero ya no tiene un contexto del que leer. Mientras tanto, lee el usuario del `loader` de la raíz con `useRouteLoaderData('raiz')` (lección 2), y pierde su estado «Comprobando la sesión…»: cuando se pinta, el `loader` de la raíz ya ha terminado.
 
@@ -762,7 +761,6 @@ Aquí se pone rojo un test, «la dirección raíz lleva al catálogo»:
      × la dirección raíz lleva al catálogo 1027ms
  FAIL  pruebas/catalogo.test.tsx > El catálogo > la dirección raíz lleva al catálogo
 TestingLibraryElementError: Unable to find role="heading" and name "Catálogo"
-      Tests  1 failed | 30 passed (31)
 ```
 
 Es decir: en `/` no aparece el catálogo. La raíz tiene ahora `path: '/'`, y `/` encaja con ella **sola**, sin ninguna hija: el comodín `*` no hace falta para casar con `/`, así que el router no lo elige y el `<Outlet>` queda vacío. El `<Navigate>` de la ruta índice, que estaba dentro de `RutasAntiguas`, no llega a pintarse. Hay que sacar también la ruta índice, y en el modo datos se redirige en el `loader`, antes de pintar nada:
@@ -802,7 +800,6 @@ Received: "/catalogo?q=++delibes+"
  FAIL  pruebas/catalogo.test.tsx > El catálogo > buscar sin texto vuelve al catálogo entero
 Expected: "/catalogo"
 Received: "/catalogo?q="
-      Tests  2 failed | 29 passed (31)
 ```
 
 `?q=++delibes+` no encuentra nada, porque la API busca « delibes » con sus espacios. El `loader` recorta la búsqueda y, si la URL no es la limpia, redirige a la que dejaba la 6:
@@ -1110,12 +1107,12 @@ Tests en verde, typecheck limpio, build. Y en Chromium, con la sonda que recorre
 
 ### El código
 
-Entre el primer commit y el último, `git diff --shortstat` sobre `src/` da **20 archivos cambiados, 567 líneas añadidas, 622 borradas**, y `src/` pasa de **747 a 692 líneas** de TypeScript. Lo que se ha ido, contado con `grep`:
+Entre el primer commit y el último, `git diff --shortstat` sobre `src/` da **20 archivos cambiados, 567 líneas añadidas, 637 borradas**, y `src/` pasa de **762 a 692 líneas** de TypeScript. Lo que se ha ido, contado con `grep`:
 
 ```text
                          antes   después
 useEffect                    7         0
-useState                    18         0
+useState                    19         0
 banderas «let ignorar»       7         0
 manejadores onSubmit=        3         0
 useNavigate()                3         0
@@ -1163,7 +1160,7 @@ Y el escenario que no mejora también enseña algo. En `/prestamos`, el middlewa
   "tipo": "callout",
   "variante": "aviso",
   "titulo": "Lo que ha crecido: el JavaScript",
-  "contenido": "El JavaScript del build pasa de 175,95 kB (57,19 kB con gzip) en el punto de partida a 326,68 kB (102,42 kB con gzip) al final. Casi todo llega en dos pasos: React 19 en el 2b (de 192,54 a 271,49 kB) y el router de datos en el 3.1 (de 270,09 a 328,44 kB). La app en sí apenas cambia de tamaño. Si te importa la primera carga, el reto 3 parte las rutas con lazy, y en el paso 4 el framework lo hace solo."
+  "contenido": "El JavaScript del build pasa de 176,17 kB (57,21 kB con gzip) en el punto de partida a 326,68 kB (102,42 kB con gzip) al final. Casi todo llega en dos pasos: React 19 en el 2b (de 192,76 a 271,70 kB) y el router de datos en el 3.1 (de 270,30 a 328,65 kB). La app en sí apenas cambia de tamaño. Si te importa la primera carga, el reto 3 parte las rutas con lazy, y en el paso 4 el framework lo hace solo."
 }
 ```
 
@@ -1264,7 +1261,7 @@ Lo que estos tests ya no cubren es la entrada del framework: `entry.client.tsx`,
 
 `npm run build` termina con *«SPA Mode: Generated build/client/index.html»*. Ese `index.html` no llega vacío: su `<body>` trae ya el `HydrateFallback` de la raíz, «Cargando la biblioteca…», que se ve mientras llega el JavaScript y se ejecuta el `clientLoader` de la sesión. La cabecera no puede ir dentro, porque depende de ese `clientLoader`, que no se ejecuta al construir. Y cada ruta sale partida en trozos (`splitRouteModules`, activo por defecto en la 8, lección 16): `ficha-client-loader-….js` (0,40 kB) aparte de `ficha-main-….js` (1,60 kB), para que el router empiece a pedir los datos mientras se descarga el componente.
 
-Con `npm run dev` (`react-router dev`) y con el build servido por `vite preview --outDir build/client`, la sonda de Chromium pasa sus diez comprobaciones con la consola vacía, y `npm test` sigue en 31 de 31.
+Con `npm run dev` (`react-router dev`) y con el build servido por `vite preview --outDir build/client`, la sonda de Chromium pasa sus diez comprobaciones con la consola vacía, y `npm test` sigue en 36 de 36.
 
 ## Antes de darlo por terminado
 
@@ -1363,7 +1360,7 @@ Comprueba con `grep -rl react-router-dom src` que no queda ninguno antes de desi
 
 ## Retos para ampliarlo
 
-Sin comprobación automática, salvo la que escribas tú. Con los 29 tests de caracterización en verde en cada uno.
+Sin comprobación automática, salvo la que escribas tú. Con los 30 tests de caracterización en verde en cada uno.
 
 1. **«Devolver» sin navegar.** Cambia el `<Form>` de cada fila por un `fetcher.Form` (lección 5) y quita la fila al momento leyendo `fetcher.formData`, sin esperar a la API. ¿Qué tiene que pasar si la API falla?
 2. **Que la raíz no vuelva a pedir nada.** Con la sesión compartida, el `loader` de la raíz no hace peticiones de más, pero se vuelve a ejecutar en cada búsqueda del catálogo porque cambia `?q=`. Escribe su `shouldRevalidate` (lección 4) para que solo se ejecute tras un envío, y comprueba con la pestaña Red que no cambia nada visible.
@@ -1379,7 +1376,7 @@ Sin comprobación automática, salvo la que escribas tú. Con los 29 tests de ca
   "recursos": [
     {
       "titulo": "react-router-proyectos/prestamo-biblioteca (rama main, punto de partida)",
-      "descripcion": "La app en react-router-dom 6.26.2 y React 18.3.1, con sus 29 tests de caracterización en verde y un TODO en cada sitio que cambia.",
+      "descripcion": "La app en react-router-dom 6.26.2 y React 18.3.1, con sus 30 tests de caracterización en verde y un TODO en cada sitio que cambia.",
       "url": "https://github.com/pedroleni/react-router-proyectos/tree/main/prestamo-biblioteca",
       "etiqueta": "GitHub"
     },
