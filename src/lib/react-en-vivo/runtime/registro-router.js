@@ -164,6 +164,8 @@
         })
       if (errores.length > 0) {
         operacion.errores = errores
+        // Tras un error, un loader ausente puede haberse omitido por el corte del
+        // flujo y no por shouldRevalidate; no lo presentamos como «no revalidado».
         return
       }
       if (operacion.clase === 'fetcher-carga') return
@@ -424,6 +426,7 @@
               { clase: claseSintetica(registro), metodo: 'GET', destino: destinoSintetico(registro) },
               true,
             )
+            if (operacion && operacion.clase === 'revalidacion') fase = 'revalidacion'
           }
         } catch {
           operacion = null

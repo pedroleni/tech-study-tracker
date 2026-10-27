@@ -1,6 +1,9 @@
 import { fireEvent, waitFor, within } from '@testing-library/dom'
+import { render } from '@testing-library/react'
+import { createElement } from 'react'
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 
+import { RegistroRouter } from '@/components/bloques-laboratorio/RegistroRouter'
 import type { ArchivoReact } from '@/lib/laboratorio/schemas'
 import type { MensajeRouterOperacion } from '@/lib/react-en-vivo/mensajes'
 
@@ -176,10 +179,23 @@ export default function App() { return <RouterProvider router={router} /> }`)
     expect(lenta.pasos).toContainEqual(expect.objectContaining({ tipo: 'loader', ruta: 'lento', tarde: true }))
   })
 
-  it('revalidate() es una operación revalidacion', async () => {
+  it('revalidate() registra sus loader como revalidación y el panel lo explica así', async () => {
     const enviar = await instalar(`import { createMemoryRouter, useRevalidator } from 'react-router'; import { RouterProvider } from 'react-router/dom'; function Inicio() { const r = useRevalidator(); return <button onClick={() => r.revalidate()}>Revalidar</button> }; const router = createMemoryRouter([{ path: '/', loader: () => null, Component: Inicio }]); export default function App() { return <RouterProvider router={router} /> }`)
     fireEvent.click(await within(document.body).findByRole('button', { name: 'Revalidar' }))
-    expect(await esperarOperacion(enviar, (op) => op.clase === 'revalidacion')).toMatchObject({ metodo: 'GET' })
+    const revalidacion = await esperarOperacion(enviar, (op) => op.clase === 'revalidacion')
+    expect(revalidacion).toMatchObject({ metodo: 'GET' })
+    expect(revalidacion.pasos).toContainEqual(
+      expect.objectContaining({ tipo: 'loader', fase: 'revalidacion' }),
+    )
+
+    const panel = render(createElement(RegistroRouter, {
+      operaciones: [revalidacion],
+      lleno: false,
+      soloDeclarativo: false,
+      onLimpiar: () => {},
+    }))
+    expect(panel.getByText('Se volvió a ejecutar: /.')).toBeInTheDocument()
+    expect(panel.queryByText('Se ejecutó: /.')).not.toBeInTheDocument()
   })
 
   it('un envío cuya action redirige muestra la fase redireccion y urlFinal', async () => {
