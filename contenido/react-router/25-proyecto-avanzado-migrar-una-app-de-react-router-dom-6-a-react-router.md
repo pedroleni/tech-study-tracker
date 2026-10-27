@@ -20,7 +20,7 @@ Funciona, y está escrita como se escribía entonces, como la que te vas a encon
 - **un `RutaProtegida`** que envuelve las rutas del personal y redirige a `/entrar?volver=…`, el de la lección 102 de React;
 - **formularios con `onSubmit` y `fetch`**, y un `navigate()` al terminar.
 
-Vas a llevarla a **React Router 8.5.0 en modo datos** sin romper nada por el camino, y lo vas a saber porque la app trae **25 tests de caracterización** que no se pueden poner en rojo en ningún momento. Al final mides lo que has ganado: código borrado y peticiones que dejan de ir en cascada.
+Vas a llevarla a **React Router 8.5.0 en modo datos** sin romper nada por el camino, y lo vas a saber porque la app trae **29 tests de caracterización** que no se pueden poner en rojo en ningún momento. Al final mides lo que has ganado: código borrado y peticiones que dejan de ir en cascada.
 
 Hay además un motivo que no es de gusto. Con la app recién instalada, `npm audit` dice esto:
 
@@ -103,7 +103,7 @@ Tres paquetes de React Router con avisos de severidad alta. `npm audit --json` d
   "tipo": "callout",
   "variante": "info",
   "titulo": "Un commit por paso",
-  "contenido": "Las dos guías oficiales de actualización piden lo mismo: haz un commit después de cada paso, y si puedes, publícalo, en vez de hacerlo todo de golpe. Aquí cada paso deja los 25 tests en verde, el typecheck limpio y el build funcionando. Si un paso te los rompe, vuelves al commit anterior y lo intentas de otra manera."
+  "contenido": "Las dos guías oficiales de actualización piden lo mismo: haz un commit después de cada paso, y si puedes, publícalo, en vez de hacerlo todo de golpe. Aquí cada paso deja los tests en verde, el typecheck limpio y el build funcionando. Si un paso te los rompe, vuelves al commit anterior y lo intentas de otra manera."
 }
 ```
 
@@ -125,7 +125,7 @@ Tres paquetes de React Router con avisos de severidad alta. `npm audit --json` d
 
 ```text
  Test Files  6 passed (6)
-      Tests  25 passed (25)
+      Tests  29 passed (29)
 ```
 
 5. **Haz un commit** antes de tocar nada. Es tu red.
@@ -152,7 +152,7 @@ src/
 ├── destino.ts                el ?volver= validado
 └── formato.ts, tipos.ts, estilos.css
 servidor/                     la API en memoria y su plugin de Vite            (no se toca)
-pruebas/                      los 25 tests de caracterización                  (no se toca)
+pruebas/                      los 29 tests de caracterización                  (no se tocan)
 ```
 
 No hay un servidor aparte: `servidor/plugin.ts` es un plugin de Vite que sirve la API (`/api/libros`, `/api/prestamos`, `/api/sesion`…) en `npm run dev` y en `npm run preview`, con los datos en memoria y una cookie de sesión. **Cada respuesta tarda 300 ms**, como una red de verdad, para que las peticiones en cascada se noten; `LATENCIA_API=0 npm run dev` la quita.
@@ -227,7 +227,7 @@ Estas son las rutas, tal como las declara la app en la 6:
 
 ### Los tests que no se pueden poner en rojo
 
-Un **test de caracterización** no comprueba lo que la app *debería* hacer, sino lo que **hace hoy**. Lo escribes antes de tocar código antiguo, para que te avise de cualquier cambio de comportamiento, también de los que nadie había pensado. Aquí hay 25: el catálogo y su búsqueda, la ficha y su 404, entrar y volver adonde ibas, el `?volver=` que no saca de la web, cerrar sesión, devolver un libro, registrar uno nuevo con sus errores, y qué pasa cuando la API falla.
+Un **test de caracterización** no comprueba lo que la app *debería* hacer, sino lo que **hace hoy**. Lo escribes antes de tocar código antiguo, para que te avise de cualquier cambio de comportamiento, también de los que nadie había pensado. Aquí hay 29: el catálogo y su búsqueda (también con espacios de más o vacía), la ficha y su 404, entrar y volver adonde ibas, que Atrás no te devuelva al formulario después de entrar, el `?volver=` que no saca de la web ni rompe nada si viene mal formado, cerrar sesión, devolver un libro, registrar uno nuevo con sus errores, y qué pasa cuando la API falla.
 
 El truco para que sirvan durante toda la migración está en **lo que no saben**. No saben qué router usa la app, ni si pide sus datos en un efecto o en un `loader`. Solo conocen tres cosas, y ninguna cambia en toda la lección: la función con la que la app se monta, la URL y lo que se ve en la página.
 
@@ -294,7 +294,7 @@ Así es uno de los tests. No hay ni un `MemoryRouter` ni un `render(<App />)`: s
   "tipo": "callout",
   "variante": "exito",
   "titulo": "La regla de esta lección",
-  "contenido": "Las carpetas pruebas y servidor no se tocan en ningún paso. Si un cambio te obliga a modificarlas, el cambio está mal. Al terminar, git diff entre el primer commit y el último no tiene ni una línea en esas dos carpetas."
+  "contenido": "Los 29 tests de caracterización y la carpeta servidor no se tocan en ningún paso. Si un cambio te obliga a modificarlos, el cambio está mal. Lo que sí puedes hacer es añadir tests nuevos para lo que la app hace mejor que antes, en su propia carpeta: el paso 3.2 añade dos en pruebas/nuevos. Al terminar, git diff entre el primer commit y el último no tiene ni una línea en los tests de partida ni en servidor."
 }
 ```
 
@@ -310,7 +310,7 @@ Las *flags* más nuevas y sus avisos solo están en la última 6. La app está e
 npm install react-router-dom@6
 ```
 
-El repositorio trae un `.npmrc` con `save-exact=true`, así que `package.json` apunta la versión exacta, `6.30.6`. Pasa los tests: siguen los 25 en verde, pero ahora la salida trae avisos que antes no estaban, uno por cada archivo de tests:
+El repositorio trae un `.npmrc` con `save-exact=true`, así que `package.json` apunta la versión exacta, `6.30.6`. Pasa los tests: siguen los 29 en verde, pero ahora la salida trae avisos que antes no estaban, uno por cada archivo de tests:
 
 ```text
 ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
@@ -361,7 +361,7 @@ La 7 actualiza el estado del router dentro de `startTransition` (lección 51 de 
 <BrowserRouter future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
 ```
 
-Los 25 tests, en verde, y ningún aviso en la salida. Parece hecho. **Ahora abre la app en el navegador**, entra, ve a «Préstamos» y pulsa «Cerrar sesión». En vez de quedarte en el catálogo, acabas en `/entrar?volver=%2Fprestamos`, como si hubieras intentado entrar en préstamos sin sesión.
+Los 29 tests, en verde, y ningún aviso en la salida. Parece hecho. **Ahora abre la app en el navegador**, entra, ve a «Préstamos» y pulsa «Cerrar sesión». En vez de quedarte en el catálogo, acabas en `/entrar?volver=%2Fprestamos`, como si hubieras intentado entrar en préstamos sin sesión.
 
 ```laboratorio
 {
@@ -389,7 +389,6 @@ FAIL  pruebas/sesion.test.tsx > La sesión > cerrar sesión lleva al catálogo y
 AssertionError: expected '/entrar?volver=%2Fprestamos' to be '/catalogo' // Object.is equality
 Expected: "/catalogo"
 Received: "/entrar?volver=%2Fprestamos"
-      Tests  1 failed | 24 passed (25)
 ```
 
 El arreglo es cambiar el orden: primero sales de la ruta protegida y después borras la sesión. Cuando `setUsuario(null)` llega, `RutaProtegida` ya no está en pantalla:
@@ -543,7 +542,7 @@ Esta app no tiene `RouterProvider` todavía, así que no hay ningún `react-rout
 npm install react-router@8
 ```
 
-Se instala la 8.5.0, y los 25 tests, el typecheck y el build siguen en verde **sin tocar ni una línea**. El modo declarativo de la 8 es el de la 7: `<BrowserRouter>`, `<Routes>`, `useNavigate` y `<Navigate>` funcionan igual. Lo que la 8 cambió (el middleware siempre activo, `context` como `RouterContextProvider`, los paquetes solo ESM, lo que contó la lección 1) toca al modo datos y al modo framework, y esta app todavía no usa ninguno.
+Se instala la 8.5.0, y los 29 tests, el typecheck y el build siguen en verde **sin tocar ni una línea**. El modo declarativo de la 8 es el de la 7: `<BrowserRouter>`, `<Routes>`, `useNavigate` y `<Navigate>` funcionan igual. Lo que la 8 cambió (el middleware siempre activo, `context` como `RouterContextProvider`, los paquetes solo ESM, lo que contó la lección 1) toca al modo datos y al modo framework, y esta app todavía no usa ninguno.
 
 Ya estás en la 8, con Node 24 y React 19, y `npm audit` limpio. Podrías parar aquí. Pero la app sigue pidiendo sus datos en efectos, y eso es lo que arregla el paso 3.
 
@@ -609,7 +608,7 @@ El orden importa. En esta app hay una pieza que comparten muchas rutas: **la ses
 }
 ```
 
-Los 25 tests, en verde. `iniciarApp` sigue teniendo la misma firma, y por eso los tests no se han enterado de que debajo hay otro router. Commit.
+Los 29 tests, en verde. `iniciarApp` sigue teniendo la misma firma, y por eso los tests no se han enterado de que debajo hay otro router. Commit.
 
 ### 3.2. La sesión, al router (`sesion.ts`, `rutas/raiz.tsx`, `rutas/entrar.tsx` y `rutas/salir.ts`)
 
@@ -619,7 +618,7 @@ La sesión de la 6 se pedía **una vez** al arrancar y se guardaba en un context
 {
   "tipo": "codigo-anotado",
   "lenguaje": "tsx",
-  "codigo": "// Quién ha entrado. Se pide una vez por arranque de la app y la comparten\n// todas las navegaciones, como hacía el SesionProvider de la versión 6.\n// Entrar y salir la olvidan, y la siguiente lectura vuelve a pedirla.\nexport function crearSesion() {\n  let pendiente: Promise<Usuario | null> | null = null\n  return {\n    usuario() {\n      pendiente ??= pedirJson<{ usuario: Usuario | null }>('/api/sesion')\n        .then((datos) => datos.usuario)\n        .catch(() => null)\n      return pendiente\n    },\n    olvidar() {\n      pendiente = null\n    },\n  }\n}\n\nexport type Sesion = ReturnType<typeof crearSesion>\n\n// La sesión llega a los loader, las action y el middleware por el contexto del\n// router: iniciarApp la pone con getContext.\nexport const sesionContext = createContext<Sesion>()",
+  "codigo": "// Quién ha entrado. Se pide una vez por arranque de la app y la comparten\n// todas las navegaciones, como hacía el SesionProvider de la versión 6.\n// Entrar y salir la olvidan, y la siguiente lectura vuelve a pedirla. Si la\n// API falla, no se guarda nada: el error sube y la próxima lectura reintenta.\nexport function crearSesion() {\n  let pendiente: Promise<Usuario | null> | null = null\n  return {\n    usuario() {\n      pendiente ??= pedirJson<{ usuario: Usuario | null }>('/api/sesion')\n        .then((datos) => datos.usuario)\n        .catch((error: unknown) => {\n          // Un 500 o un fallo de red no es «sin sesión»: no lo guardes.\n          pendiente = null\n          throw error\n        })\n      return pendiente\n    },\n    olvidar() {\n      pendiente = null\n    },\n  }\n}\n\nexport type Sesion = ReturnType<typeof crearSesion>\n\n// La sesión llega a los loader, las action y el middleware por el contexto del\n// router: iniciarApp la pone con getContext.\nexport const sesionContext = createContext<Sesion>()",
   "anotaciones": [
     {
       "fragmento": "export function crearSesion() {",
@@ -630,8 +629,8 @@ La sesión de la 6 se pedía **una vez** al arrancar y se guardaba en un context
       "nota": "La primera lectura pide /api/sesion y guarda la promesa; las siguientes la reutilizan. Es lo que hacía el SesionProvider con su useEffect: una sola petición, aunque la lean el loader de la raíz y el middleware en la misma navegación."
     },
     {
-      "fragmento": ".catch(() => null)",
-      "nota": "Si la API falla, se trata como sin sesión, igual que en la 6."
+      "fragmento": "pendiente = null\n          throw error",
+      "nota": "Un 500 o un fallo de red no es estar sin sesión. La 6 los confundía: su catch dejaba el usuario a null hasta recargar. Aquí el fallo no se guarda (la próxima lectura vuelve a preguntar) y sube al ErrorBoundary de la raíz."
     },
     {
       "fragmento": "olvidar() {",
@@ -673,7 +672,7 @@ Con eso, la raíz (lo que era `Marco`) pide la sesión en su `loader`, cerrar se
 {
   "tipo": "codigo-anotado",
   "lenguaje": "tsx",
-  "codigo": "export async function action({ request, context }: ActionFunctionArgs) {\n  const datos = await request.formData()\n  const respuesta = await enviarJson(\n    '/api/sesion',\n    'POST',\n    { usuario: datos.get('usuario'), clave: datos.get('clave') },\n    request.signal,\n  )\n  if (respuesta.status === 401) return data({ error: 'Usuario o contraseña incorrectos.' }, { status: 401 })\n  if (!respuesta.ok) return data({ error: 'No se ha podido iniciar sesión. Inténtalo de nuevo.' }, { status: 500 })\n  // La sesión ha cambiado: que la próxima lectura la vuelva a pedir.\n  context.get(sesionContext).olvidar()\n  const url = new URL(request.url)\n  return redirect(destinoSeguro(url.searchParams.get('volver'), url.origin))\n}",
+  "codigo": "export async function action({ request, context }: ActionFunctionArgs) {\n  const datos = await request.formData()\n  const respuesta = await enviarJson(\n    '/api/sesion',\n    'POST',\n    { usuario: datos.get('usuario'), clave: datos.get('clave') },\n    request.signal,\n  )\n  if (respuesta.status === 401) return data({ error: 'Usuario o contraseña incorrectos.' }, { status: 401 })\n  if (!respuesta.ok) return data({ error: 'No se ha podido iniciar sesión. Inténtalo de nuevo.' }, { status: 500 })\n  // La sesión ha cambiado: que la próxima lectura la vuelva a pedir.\n  context.get(sesionContext).olvidar()\n  const url = new URL(request.url)\n  // replace, no redirect: el formulario de entrar no se queda en el historial,\n  // como hacía navigate(volver, { replace: true }) en la 6.\n  return replace(destinoSeguro(url.searchParams.get('volver'), url.origin))\n}",
   "anotaciones": [
     {
       "fragmento": "const datos = await request.formData()",
@@ -688,42 +687,82 @@ Con eso, la raíz (lo que era `Marco`) pide la sesión en su `loader`, cerrar se
       "nota": "La sesión ha cambiado. Tras la action, el router vuelve a ejecutar el loader de la raíz, que ahora pedirá /api/sesion de nuevo, y la cabecera dirá quién ha entrado."
     },
     {
-      "fragmento": "return redirect(destinoSeguro(url.searchParams.get('volver'), url.origin))",
-      "nota": "El navigate(volver, { replace: true }) de antes. request.url es la dirección del formulario, con su ?volver= incluido, y destinoSeguro no ha cambiado: solo acepta rutas de esta misma web."
+      "fragmento": "return replace(destinoSeguro(url.searchParams.get('volver'), url.origin))",
+      "nota": "replace, no redirect. Las dos devuelven una redirección, pero replace sustituye la entrada del historial, como el navigate(volver, { replace: true }) de la 6: al pulsar Atrás no vuelves al formulario. destinoSeguro no ha cambiado: solo acepta rutas de esta web, y una mal formada lleva a /prestamos."
     }
   ]
 }
 ```
 
-Cerrar sesión es aún más corto, y desaparece la carrera del paso 1c: la `action` borra la sesión y devuelve `redirect('/catalogo')`, y el router cambia de ruta y vuelve a ejecutar el `loader` de la raíz **en la misma actualización**. Ya no hay un momento con la sesión vacía y la ruta vieja.
+Ese `replace` lo pide un test. Con `redirect`, el que había en el primer borrador de esta migración, se pone rojo «después de entrar, Atrás no vuelve al formulario»: en la 6, `navigate(…, { replace: true })` cambiaba la entrada de `/entrar` por la de `/prestamos`, y `redirect` añade una nueva.
+
+```text
+     × después de entrar, Atrás no vuelve al formulario 1119ms
+ FAIL  pruebas/sesion.test.tsx > La sesión > después de entrar, Atrás no vuelve al formulario
+Expected: "/catalogo"
+Received: "/entrar?volver=%2Fprestamos"
+      Tests  1 failed | 28 passed (29)
+```
+
+Al cerrar sesión desaparece la carrera del paso 1c: la `action` borra la sesión y devuelve `redirect('/catalogo')`, y el router cambia de ruta y vuelve a ejecutar el `loader` de la raíz **en la misma actualización**. Ya no hay un momento con la sesión vacía y la ruta vieja. Y comprueba lo que la 6 no comprobaba: que la API haya cerrado la sesión de verdad.
 
 ```laboratorio
 {
   "tipo": "codigo-anotado",
   "lenguaje": "tsx",
-  "codigo": "import { redirect, type ActionFunctionArgs } from 'react-router'\nimport { enviarJson } from '../api'\nimport { sesionContext } from '../sesion'\n\n// Solo una action: el botón «Cerrar sesión» de la cabecera envía aquí.\nexport async function action({ context }: ActionFunctionArgs) {\n  await enviarJson('/api/sesion', 'DELETE')\n  context.get(sesionContext).olvidar()\n  return redirect('/catalogo')\n}",
+  "codigo": "import { redirect, type ActionFunctionArgs } from 'react-router'\nimport { enviarJson, ErrorApi } from '../api'\nimport { sesionContext } from '../sesion'\n\n// Solo una action: el botón «Cerrar sesión» de la cabecera envía aquí.\nexport async function action({ context }: ActionFunctionArgs) {\n  const respuesta = await enviarJson('/api/sesion', 'DELETE')\n  // Si la API no ha cerrado la sesión, no se hace como que sí: ni se olvida\n  // la sesión ni se redirige.\n  if (!respuesta.ok) throw new ErrorApi(respuesta.status)\n  context.get(sesionContext).olvidar()\n  return redirect('/catalogo')\n}\n\nexport function ErrorBoundary() {\n  return (\n    <p role=\"alert\" className=\"aviso-error\">\n      No se ha podido cerrar la sesión. Inténtalo de nuevo.\n    </p>\n  )\n}",
   "anotaciones": [
     {
       "fragmento": "export async function action({ context }: ActionFunctionArgs) {",
       "nota": "Una ruta sin componente: el botón Cerrar sesión de la cabecera envía aquí con Form method post y action /salir."
     },
     {
+      "fragmento": "if (!respuesta.ok) throw new ErrorApi(respuesta.status)",
+      "nota": "La 6 daba por cerrada la sesión pasara lo que pasara con DELETE /api/sesion. Aquí, si la API falla, no se olvida la sesión ni se redirige: la cabecera sigue diciendo quién ha entrado, porque en el servidor sigue abierta."
+    },
+    {
       "fragmento": "return redirect('/catalogo')",
       "nota": "La redirección y la revalidación van juntas. El arreglo de orden del paso 1c ya no hace falta, y se va con Marco."
+    },
+    {
+      "fragmento": "export function ErrorBoundary() {",
+      "nota": "El aviso de que no se ha podido cerrar la sesión. La ruta no pinta nada más."
     }
   ]
 }
 ```
+
+Un fallo de la sesión, en cambio, no tiene una página a la que pertenecer: lo recoge el `ErrorBoundary` de la raíz, que sustituye a la página entera y deja reintentar sin recargar.
+
+```laboratorio
+{
+  "tipo": "codigo-anotado",
+  "lenguaje": "tsx",
+  "codigo": "export function ErrorBoundary() {\n  const revalidador = useRevalidator()\n  return (\n    <main className=\"contenido\">\n      <h1>Algo ha fallado</h1>\n      <p role=\"alert\" className=\"aviso-error\">\n        No se ha podido abrir la biblioteca.\n      </p>\n      <button type=\"button\" onClick={() => revalidador.revalidate()} disabled={revalidador.state === 'loading'}>\n        Reintentar\n      </button>\n    </main>\n  )\n}",
+  "anotaciones": [
+    {
+      "fragmento": "const revalidador = useRevalidator()",
+      "nota": "useRevalidator (lección 4) vuelve a ejecutar los loader de la página: el de la raíz pedirá /api/sesion otra vez, porque crearSesion no guardó el fallo."
+    },
+    {
+      "fragmento": "No se ha podido abrir la biblioteca.",
+      "nota": "Sin cabecera ni menú: la raíz es la que ha fallado, así que no hay Component de la raíz que pintar."
+    }
+  ]
+}
+```
+
+Estos dos comportamientos son nuevos: en la 6, un fallo de `/api/sesion` te dejaba como anónimo, y cerrar sesión borraba el usuario aunque la API fallara. No son de caracterización, porque en la 6 fallarían, así que van en su propia carpeta, `pruebas/nuevos/`, con la ayuda `fallar('GET /api/sesion', 1)`, que hace fallar solo la próxima petición. Los 29 de partida siguen sin cambiar, y la suite pasa a tener 31.
 
 `RutaProtegida` sigue en `RutasAntiguas` hasta el 3.5, pero ya no tiene un contexto del que leer. Mientras tanto, lee el usuario del `loader` de la raíz con `useRouteLoaderData('raiz')` (lección 2), y pierde su estado «Comprobando la sesión…»: cuando se pinta, el `loader` de la raíz ya ha terminado.
 
 Aquí se pone rojo un test, «la dirección raíz lleva al catálogo»:
 
 ```text
-     × la dirección raíz lleva al catálogo 1029ms
+     × la dirección raíz lleva al catálogo 1027ms
  FAIL  pruebas/catalogo.test.tsx > El catálogo > la dirección raíz lleva al catálogo
 TestingLibraryElementError: Unable to find role="heading" and name "Catálogo"
-      Tests  1 failed | 24 passed (25)
+      Tests  1 failed | 30 passed (31)
 ```
 
 Es decir: en `/` no aparece el catálogo. La raíz tiene ahora `path: '/'`, y `/` encaja con ella **sola**, sin ninguna hija: el comodín `*` no hace falta para casar con `/`, así que el router no lo elige y el `<Outlet>` queda vacío. El `<Navigate>` de la ruta índice, que estaba dentro de `RutasAntiguas`, no llega a pintarse. Hay que sacar también la ruta índice, y en el modo datos se redirige en el `loader`, antes de pintar nada:
@@ -752,15 +791,35 @@ Falta una pieza que el modo declarativo no tenía. En la primera carga, el route
 
 La primera página. Cada ruta que sale de `RutasAntiguas` se convierte en un **módulo de ruta**: un archivo que exporta las piezas de un objeto de ruta con sus nombres de siempre (`loader`, `action`, `Component`, `ErrorBoundary`). Así, en `rutas.tsx` basta con esparcirlo, `{ path: 'catalogo', ...catalogo }`, y en el paso 4 el salto al modo framework es casi un cambio de nombres.
 
+El buscador pasa a ser un `<Form method="get">`, y con eso desaparece su manejador. Pero el manejador hacía algo más que poner `?q=` en la URL: **recortaba los espacios**, y si el campo quedaba vacío, quitaba `?q=`. Un formulario GET manda el campo tal cual, y dos tests lo cazan:
+
+```text
+     × la búsqueda no tiene en cuenta los espacios de los lados 1088ms
+     × buscar sin texto vuelve al catálogo entero 1053ms
+ FAIL  pruebas/catalogo.test.tsx > El catálogo > la búsqueda no tiene en cuenta los espacios de los lados
+Expected: "/catalogo?q=delibes"
+Received: "/catalogo?q=++delibes+"
+ FAIL  pruebas/catalogo.test.tsx > El catálogo > buscar sin texto vuelve al catálogo entero
+Expected: "/catalogo"
+Received: "/catalogo?q="
+      Tests  2 failed | 29 passed (31)
+```
+
+`?q=++delibes+` no encuentra nada, porque la API busca « delibes » con sus espacios. El `loader` recorta la búsqueda y, si la URL no es la limpia, redirige a la que dejaba la 6:
+
 ```laboratorio
 {
   "tipo": "codigo-anotado",
   "lenguaje": "tsx",
-  "codigo": "export async function loader({ request }: LoaderFunctionArgs) {\n  const q = new URL(request.url).searchParams.get('q') ?? ''\n  const libros = await pedirJson<Libro[]>(`/api/libros?q=${encodeURIComponent(q)}`, { signal: request.signal })\n  return { q, libros }\n}\n\nexport function Component() {\n  const { q, libros } = useLoaderData<typeof loader>()\n\n  return (\n    <section>\n      <h1>Catálogo</h1>\n      <Buscador q={q} />\n      {/* …la lista, igual que antes… */}\n    </section>\n  )\n}\n\nfunction Buscador({ q }: { q: string }) {\n  return (\n    <Form method=\"get\" role=\"search\" className=\"busqueda\">\n      <label htmlFor=\"q\">Título o autor</label>\n      <input id=\"q\" name=\"q\" type=\"search\" defaultValue={q} key={q} />\n      <button type=\"submit\">Buscar</button>\n    </Form>\n  )\n}\n\n// Si el loader falla, el router pinta esto en lugar del Component, dentro de la raíz.\nexport function ErrorBoundary() {\n  return (\n    <section>\n      <h1>Catálogo</h1>\n      <p role=\"alert\" className=\"aviso-error\">\n        No se ha podido cargar el catálogo.\n      </p>\n    </section>\n  )\n}",
+  "codigo": "export async function loader({ request }: LoaderFunctionArgs) {\n  const url = new URL(request.url)\n  const enLaUrl = url.searchParams.get('q')\n  const q = (enLaUrl ?? '').trim()\n  // El formulario GET manda el campo tal cual («?q=++delibes+», o «?q=» si\n  // está vacío). La 6 lo recortaba en su onSubmit; aquí se recorta y se\n  // redirige a la dirección limpia, la misma que dejaba la 6.\n  if (enLaUrl !== null && (enLaUrl !== q || q === '')) {\n    throw redirect(q ? `/catalogo?q=${encodeURIComponent(q)}` : '/catalogo')\n  }\n  const libros = await pedirJson<Libro[]>(`/api/libros?q=${encodeURIComponent(q)}`, { signal: request.signal })\n  return { q, libros }\n}\n\nexport function Component() {\n  const { q, libros } = useLoaderData<typeof loader>()\n\n  return (\n    <section>\n      <h1>Catálogo</h1>\n      <Buscador q={q} />\n      {/* …la lista, igual que antes… */}\n    </section>\n  )\n}\n\nfunction Buscador({ q }: { q: string }) {\n  return (\n    <Form method=\"get\" role=\"search\" className=\"busqueda\">\n      <label htmlFor=\"q\">Título o autor</label>\n      <input id=\"q\" name=\"q\" type=\"search\" defaultValue={q} key={q} />\n      <button type=\"submit\">Buscar</button>\n    </Form>\n  )\n}\n\n// Si el loader falla, el router pinta esto en lugar del Component, dentro de la raíz.\nexport function ErrorBoundary() {\n  return (\n    <section>\n      <h1>Catálogo</h1>\n      <p role=\"alert\" className=\"aviso-error\">\n        No se ha podido cargar el catálogo.\n      </p>\n    </section>\n  )\n}",
   "anotaciones": [
     {
-      "fragmento": "const q = new URL(request.url).searchParams.get('q') ?? ''",
-      "nota": "La búsqueda sale de la URL, como antes salía de useSearchParams. El loader se vuelve a ejecutar cada vez que cambia ?q=."
+      "fragmento": "const q = (enLaUrl ?? '').trim()",
+      "nota": "La búsqueda sale de la URL, como antes salía de useSearchParams, y se recorta, como hacía el manejador de la 6. El loader se vuelve a ejecutar cada vez que cambia ?q=."
+    },
+    {
+      "fragmento": "throw redirect(q ? `/catalogo?q=${encodeURIComponent(q)}` : '/catalogo')",
+      "nota": "Si la URL trae espacios de más, o un ?q= vacío, a la dirección limpia: /catalogo?q=delibes, o /catalogo a secas. Así un enlace compartido es siempre el mismo."
     },
     {
       "fragmento": "{ signal: request.signal }",
@@ -945,7 +1004,7 @@ Con `prestamos/nuevo` bajo el middleware, `RutaProtegida` ya no protege nada y s
 
 ### 3.7. Sin ruta comodín (`rutas.tsx` y `rutas/raiz.tsx`)
 
-En `RutasAntiguas` solo queda la página «no existe». Pasa a ser una ruta más, `{ path: '*', ...noEncontrada }`, y `RutasAntiguas`, `<Routes>` y el comodín de la 3.1 desaparecen. La raíz gana su propio `ErrorBoundary` para lo inesperado (un error al pintar, o un fallo que sube desde un middleware). Este es el árbol final:
+En `RutasAntiguas` solo queda la página «no existe». Pasa a ser una ruta más, `{ path: '*', ...noEncontrada }`, y `RutasAntiguas`, `<Routes>` y el comodín de la 3.1 desaparecen. La raíz ya tenía su `ErrorBoundary` desde el 3.2. Este es el árbol final:
 
 ```laboratorio
 {
@@ -1051,7 +1110,7 @@ Tests en verde, typecheck limpio, build. Y en Chromium, con la sonda que recorre
 
 ### El código
 
-Entre el primer commit y el último, `git diff --shortstat` sobre `src/` da **19 archivos cambiados, 526 líneas añadidas, 611 borradas**, y `src/` pasa de **740 a 655 líneas** de TypeScript. Lo que se ha ido, contado con `grep`:
+Entre el primer commit y el último, `git diff --shortstat` sobre `src/` da **20 archivos cambiados, 567 líneas añadidas, 622 borradas**, y `src/` pasa de **747 a 692 líneas** de TypeScript. Lo que se ha ido, contado con `grep`:
 
 ```text
                          antes   después
@@ -1063,7 +1122,7 @@ useNavigate()                3         0
 textos «Cargando…»           8         2
 loader                       0         6
 action                       0         4
-ErrorBoundary                0         5
+ErrorBoundary                0         6
 ```
 
 Lo importante no es el número de líneas, sino **qué líneas**. Se ha ido todo lo que gestionaba a mano el tiempo: cuándo pedir, qué pintar mientras tanto, qué hacer con una respuesta que llega tarde y cuándo volver a pedir. Ahora lo hace el router, una vez y para todas las rutas.
@@ -1074,11 +1133,11 @@ Medido en Chromium contra el build de producción de cada versión (`vite previe
 
 ```text
                                             antes                después
-A. Abrir /catalogo/3 (sin sesión)           2 rondas · 635 ms    1 ronda  · 340 ms
-B. Del catálogo a la ficha de Marianela     2 rondas · 615 ms    1 ronda  · 306 ms
-C. Abrir /prestamos/nuevo (con sesión)      3 rondas · 946 ms    2 rondas · 649 ms
-D. De los préstamos al préstamo nuevo       2 rondas · 617 ms    1 ronda  · 313 ms
-E. Abrir /prestamos (con sesión)            2 rondas · 637 ms    2 rondas · 648 ms
+A. Abrir /catalogo/3 (sin sesión)           2 rondas · 628 ms    1 ronda  · 339 ms
+B. Del catálogo a la ficha de Marianela     2 rondas · 609 ms    1 ronda  · 306 ms
+C. Abrir /prestamos/nuevo (con sesión)      3 rondas · 931 ms    2 rondas · 652 ms
+D. De los préstamos al préstamo nuevo       2 rondas · 609 ms    1 ronda  · 312 ms
+E. Abrir /prestamos (con sesión)            2 rondas · 627 ms    2 rondas · 650 ms
 
 (medianas de cinco repeticiones; 300 ms de latencia en cada respuesta)
 ```
@@ -1087,13 +1146,13 @@ Cuatro de los cinco escenarios pierden una ronda, y con ella **300 ms**, una lat
 
 ```text
 antes (react-router-dom 6, efectos)
-  ronda 1      2 →   306 ms  GET /api/libros/3
-  ronda 2    307 →   611 ms  GET /api/libros/3/ejemplares
-  el último ejemplar aparece a los 615 ms
+  ronda 1      1 →   303 ms  GET /api/libros/3
+  ronda 2    304 →   607 ms  GET /api/libros/3/ejemplares
+  el último ejemplar aparece a los 609 ms
 
 después (React Router 8, loader)
-  ronda 1      1 →   304 ms  GET /api/libros/3
-  ronda 1      1 →   304 ms  GET /api/libros/3/ejemplares
+  ronda 1      1 →   303 ms  GET /api/libros/3
+  ronda 1      1 →   303 ms  GET /api/libros/3/ejemplares
   el último ejemplar aparece a los 306 ms
 ```
 
@@ -1104,7 +1163,7 @@ Y el escenario que no mejora también enseña algo. En `/prestamos`, el middlewa
   "tipo": "callout",
   "variante": "aviso",
   "titulo": "Lo que ha crecido: el JavaScript",
-  "contenido": "El JavaScript del build pasa de 175,93 kB (57,18 kB con gzip) en el punto de partida a 326,01 kB (102,24 kB con gzip) al final. Casi todo llega en dos pasos: React 19 en el 2b (de 192,52 a 271,47 kB) y el router de datos en el 3.1 (de 270,07 a 328,42 kB). La app en sí apenas cambia de tamaño. Si te importa la primera carga, el reto 3 parte las rutas con lazy, y en el paso 4 el framework lo hace solo."
+  "contenido": "El JavaScript del build pasa de 175,95 kB (57,19 kB con gzip) en el punto de partida a 326,68 kB (102,42 kB con gzip) al final. Casi todo llega en dos pasos: React 19 en el 2b (de 192,54 a 271,49 kB) y el router de datos en el 3.1 (de 270,09 a 328,44 kB). La app en sí apenas cambia de tamaño. Si te importa la primera carga, el reto 3 parte las rutas con lazy, y en el paso 4 el framework lo hace solo."
 }
 ```
 
@@ -1179,7 +1238,7 @@ La primera vez que ejecutas `react-router typegen`, hace algo por su cuenta: avi
 
 ### Y los tests
 
-`iniciarApp` desaparecería con `main.tsx`, y con ella el único punto que conocen los tests. La guía tiene la solución en su primer paso: una función `convert` que pasa un módulo de ruta (`default`, `clientLoader`…) a un objeto de ruta del modo datos. Si `rutas.tsx` usa esa función con los mismos módulos, `iniciarApp` sigue montando **las mismas rutas** con un router de datos, y los 25 tests no se enteran:
+`iniciarApp` desaparecería con `main.tsx`, y con ella el único punto que conocen los tests. La guía tiene la solución en su primer paso: una función `convert` que pasa un módulo de ruta (`default`, `clientLoader`…) a un objeto de ruta del modo datos. Si `rutas.tsx` usa esa función con los mismos módulos, `iniciarApp` sigue montando **las mismas rutas** con un router de datos, y los tests no se enteran:
 
 ```laboratorio
 {
@@ -1205,7 +1264,7 @@ Lo que estos tests ya no cubren es la entrada del framework: `entry.client.tsx`,
 
 `npm run build` termina con *«SPA Mode: Generated build/client/index.html»*. Ese `index.html` no llega vacío: su `<body>` trae ya el `HydrateFallback` de la raíz, «Cargando la biblioteca…», que se ve mientras llega el JavaScript y se ejecuta el `clientLoader` de la sesión. La cabecera no puede ir dentro, porque depende de ese `clientLoader`, que no se ejecuta al construir. Y cada ruta sale partida en trozos (`splitRouteModules`, activo por defecto en la 8, lección 16): `ficha-client-loader-….js` (0,40 kB) aparte de `ficha-main-….js` (1,60 kB), para que el router empiece a pedir los datos mientras se descarga el componente.
 
-Con `npm run dev` (`react-router dev`) y con el build servido por `vite preview --outDir build/client`, la sonda de Chromium pasa sus diez comprobaciones con la consola vacía, y `npm test` sigue en 25 de 25.
+Con `npm run dev` (`react-router dev`) y con el build servido por `vite preview --outDir build/client`, la sonda de Chromium pasa sus diez comprobaciones con la consola vacía, y `npm test` sigue en 31 de 31.
 
 ## Antes de darlo por terminado
 
@@ -1214,12 +1273,12 @@ Con `npm run dev` (`react-router dev`) y con el build servido por `vite preview 
   "tipo": "notas-clave",
   "items": [
     {
-      "titulo": "¿Los 25 tests, en verde, en cada commit?",
+      "titulo": "¿Los tests, en verde, en cada commit?",
       "texto": "No solo al final. Si uno se puso rojo por el camino y lo arreglaste más tarde, en ese commit la app estaba rota. Con git rebase y un npm test en cada paso lo compruebas de una vez."
     },
     {
-      "titulo": "¿Ni una línea cambiada en pruebas y en servidor?",
-      "texto": "git diff --stat entre el primer commit y el último, limitado a esas dos carpetas, tiene que salir vacío. Si has tenido que tocar un test para que pase, no has migrado: has cambiado lo que la app hace."
+      "titulo": "¿Ni una línea cambiada en los tests de partida ni en servidor?",
+      "texto": "git diff --stat entre el primer commit y el último, limitado a pruebas y servidor y sin pruebas/nuevos, tiene que salir vacío. Si has tenido que tocar un test de caracterización para que pase, no has migrado: has cambiado lo que la app hace."
     },
     {
       "titulo": "¿npm run typecheck limpio en cada paso?",
@@ -1268,6 +1327,10 @@ Comprueba con `grep -rl react-router-dom src` que no queda ninguno antes de desi
 
 **Esperar que `redirect` lleve estado.** `navigate('/prestamos', { state: { aviso } })` dejaba un mensaje en la página de destino. `redirect()` devuelve una `Response`, y una `Response` no tiene `state`. Si una app de la 6 usa `location.state` después de un formulario, al pasar a una `action` el mensaje tiene que viajar de otra forma: en la URL o en la sesión.
 
+**Convertir un error en «sin sesión».** Un `.catch(() => null)` en la lectura de la sesión parece prudente, y es lo que hacía la 6. Pero con una sesión compartida por todas las navegaciones, un 500 pasajero de `/api/sesion` te dejaría como anónimo hasta recargar la página, mandándote a `/entrar` con la sesión abierta en el servidor. Distingue la respuesta buena con `usuario: null` del error, y no guardes el error.
+
+**`redirect` donde la 6 hacía `replace`.** Las dos redirigen, pero solo `replace` sustituye la entrada del historial. Si el código de la 6 tenía `navigate(destino, { replace: true })`, la `action` que lo sustituye devuelve `replace(destino)`, o Atrás te devolverá al formulario.
+
 **Lanzar los errores de validación.** `throw data({ errores }, { status: 400 })` en la `action` del préstamo nuevo cambiaría el formulario entero por el `ErrorBoundary` (lección 8). Los errores que se pintan junto a un campo se devuelven.
 
 ```laboratorio
@@ -1300,7 +1363,7 @@ Comprueba con `grep -rl react-router-dom src` que no queda ninguno antes de desi
 
 ## Retos para ampliarlo
 
-Sin comprobación automática, salvo la que escribas tú. Con los 25 tests de caracterización en verde en cada uno.
+Sin comprobación automática, salvo la que escribas tú. Con los 29 tests de caracterización en verde en cada uno.
 
 1. **«Devolver» sin navegar.** Cambia el `<Form>` de cada fila por un `fetcher.Form` (lección 5) y quita la fila al momento leyendo `fetcher.formData`, sin esperar a la API. ¿Qué tiene que pasar si la API falla?
 2. **Que la raíz no vuelva a pedir nada.** Con la sesión compartida, el `loader` de la raíz no hace peticiones de más, pero se vuelve a ejecutar en cada búsqueda del catálogo porque cambia `?q=`. Escribe su `shouldRevalidate` (lección 4) para que solo se ejecute tras un envío, y comprueba con la pestaña Red que no cambia nada visible.
@@ -1316,7 +1379,7 @@ Sin comprobación automática, salvo la que escribas tú. Con los 25 tests de ca
   "recursos": [
     {
       "titulo": "react-router-proyectos/prestamo-biblioteca (rama main, punto de partida)",
-      "descripcion": "La app en react-router-dom 6.26.2 y React 18.3.1, con sus 25 tests de caracterización en verde y un TODO en cada sitio que cambia.",
+      "descripcion": "La app en react-router-dom 6.26.2 y React 18.3.1, con sus 29 tests de caracterización en verde y un TODO en cada sitio que cambia.",
       "url": "https://github.com/pedroleni/react-router-proyectos/tree/main/prestamo-biblioteca",
       "etiqueta": "GitHub"
     },
