@@ -49,6 +49,7 @@ const datos: DatosReactEnVivo = {
   mostrarJsGenerado: true,
   mostrarArbol: false,
   mostrarEfectos: false,
+  mostrarRouter: false,
   mostrarLint: false,
   compilador: false,
   exigirLintLimpio: false,
@@ -147,6 +148,84 @@ afterEach(() => {
 })
 
 describe('ReactEnVivo', () => {
+  const datosRouter = {
+    ...datos,
+    archivos: [
+      {
+        nombre: 'App.jsx',
+        codigo:
+          "import { createMemoryRouter } from 'react-router'\nimport { RouterProvider } from 'react-router/dom'\nconst router = createMemoryRouter([{ path: '/', Component: () => <p>Inicio</p> }])\nexport default function App() { return <RouterProvider router={router} /> }",
+      },
+    ],
+    mostrarRouter: true,
+  }
+
+  const mensajeRouter = (id: number, destino = '/') => ({
+    canal: 'react-en-vivo',
+    tipo: 'router-operacion',
+    id,
+    clase: 'carga-inicial',
+    metodo: 'GET',
+    destino,
+    estado: 'terminada',
+    duracion: 4,
+    pasos: [],
+    truncado: false,
+  })
+
+  it('con mostrarRouter, el documento de la vista previa lleva registro-router.js y el de comprobar no', async () => {
+    await renderizarListo({
+      ...datosRouter,
+      comprobaciones: [{ descripcion: 'Inicio', pasos: [], espera: { texto: 'Inicio' } }],
+    })
+    expect(vista().getAttribute('srcdoc')).toContain('window.__registroRouterEnVivo =')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Comprobar' }))
+    const oculto = (await screen.findByTitle('Comprobaciones')) as HTMLIFrameElement
+    expect(oculto.getAttribute('srcdoc')).not.toContain('window.__registroRouterEnVivo =')
+  })
+
+  it('pinta las operaciones que llegan y sustituye por id', async () => {
+    await renderizarListo(datosRouter)
+    enviarDesde(vista().contentWindow, { canal: 'react-en-vivo', tipo: 'montado', version: '19.3.1' })
+    enviarDesde(vista().contentWindow, mensajeRouter(1, '/primera'))
+    await waitFor(() => expect(screen.getByText(/Carga inicial \/primera/)).toBeInTheDocument())
+    enviarDesde(vista().contentWindow, mensajeRouter(1, '/actualizada'))
+    await waitFor(() => expect(screen.getByText(/Carga inicial \/actualizada/)).toBeInTheDocument())
+    expect(screen.queryByText(/Carga inicial \/primera/)).toBeNull()
+  })
+
+  it('vacía el registro al editar, con Recargar y con Reiniciar', async () => {
+    await renderizarListo(datosRouter)
+    enviarDesde(vista().contentWindow, { canal: 'react-en-vivo', tipo: 'montado', version: '19.3.1' })
+    enviarDesde(vista().contentWindow, mensajeRouter(1))
+    await screen.findByText(/Carga inicial \/ ·/)
+
+    fireEvent.change(screen.getByLabelText('Editor de App.jsx'), {
+      target: { value: `${datosRouter.archivos[0].codigo}\n// editado` },
+    })
+    await waitFor(() => expect(screen.getByText('Todavía no hay actividad del router.')).toBeInTheDocument(), { timeout: 3000 })
+
+    enviarDesde(vista().contentWindow, { canal: 'react-en-vivo', tipo: 'montado', version: '19.3.1' })
+    enviarDesde(vista().contentWindow, mensajeRouter(2))
+    await screen.findByText('#2')
+    enviarDesde(vista().contentWindow, { canal: 'react-en-vivo', tipo: 'ubicacion', url: '/', puedeAtras: false, puedeAdelante: false, origen: 'createMemoryRouter' })
+    fireEvent.click(screen.getByRole('button', { name: 'Recargar' }))
+    expect(screen.getByText('Todavía no hay actividad del router.')).toBeInTheDocument()
+
+    enviarDesde(vista().contentWindow, mensajeRouter(3))
+    await screen.findByText('#3')
+    fireEvent.click(screen.getByRole('button', { name: 'Reiniciar' }))
+    expect(screen.queryByText('#3')).toBeNull()
+  })
+
+  it('ignora router-operacion antes de montado', async () => {
+    await renderizarListo(datosRouter)
+    enviarDesde(vista().contentWindow, mensajeRouter(1, '/rezagada'))
+    await act(async () => new Promise((resolver) => window.setTimeout(resolver, 60)))
+    expect(screen.queryByText(/rezagada/)).toBeNull()
+  })
+
   it('compila el fixture antes de montar y el JavaScript generado enseña esa salida', async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true })
     const { clienteReactKit, workers } = prepararWorkerReactKit()

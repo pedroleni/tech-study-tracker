@@ -1451,3 +1451,558 @@ del panel.
 - Más bibliotecas en la vista previa (TanStack Query llegará con su ficha,
   reutilizando el mecanismo de R0).
 - Las comprobaciones sobre peticiones de red concretas (`{ peticion: … }`).
+
+## React Router en la vista previa: el registro del router (fase R2)
+
+Diseño aprobado con el temario de React Router
+([contenido/react-router/TEMARIO.md](../../contenido/react-router/TEMARIO.md),
+componente 5). Desbloquea la ayuda visual de las lecciones 1, 2, 4, 5, 10
+y 11 y de los proyectos en el navegador 7 y 13. Se apoya en R0, R1 y R3,
+que ya están en `main` (PR #63). Esta sección parte del código real de
+`main` (9009d9c), no de la especificación de R0–R3: `runtime/router.js`,
+`montaje.js`, `VistaPreviaReact.tsx`, `ReactEnVivo.tsx` y
+`BarraDirecciones.tsx`.
+
+**Qué ve el alumno.** Un panel «Registro del router» debajo de la vista
+previa, con una entrada por cada cosa que hace el router:
+
+- la carga inicial;
+- cada navegación, envío, Atrás y Adelante;
+- cada llamada de un fetcher;
+- cada revalidación.
+
+Dentro de cada entrada, qué `middleware`, `action`, `loader` y `lazy` se
+ejecutaron, de qué ruta, cuándo empezaron y cuánto duraron. Así se ve si
+fueron a la vez o en cadena. Las entradas se agrupan por fase («Envío»,
+«Revalidación», «Carga», «Tras redirigir»), y debajo van los `loader` que
+**no** se volvieron a ejecutar. Una navegación que otra interrumpe sale
+como cancelada, y un `loader` que sigue trabajando después se marca. Por
+ejemplo:
+
+```
+#2  Envío · POST /recetas · 47 ms                                terminado
+    Envío         middleware /     +4 ms · 1 ms
+                  action recetas   +4 ms · 1 ms
+    Revalidación  middleware /     +6 ms · 42 ms
+                  loader recetas   +6 ms · 42 ms
+    Se volvió a ejecutar: recetas. No se volvió a ejecutar: /.
+#6  Navegación → /lento                                  cancelada por #7
+    Carga         middleware /     +3 ms · 14 ms
+                  loader lento     +3 ms · 152 ms · terminó después de cancelarse
+```
+
+### Validación (2026-10-27)
+
+Prueba aislada en el *scratchpad* (`spike-r2/`: `inst.test.ts`,
+`ctx.test.ts` y `prototipo.test.ts`), con el Vitest y el jsdom de la web,
+el `react.js` 19.3.1 y el `react-router.js` 8.5.0 que ya están en
+`public/vendor/react-en-vivo/`. También se leyeron
+`node_modules/react-router/dist/development/lib/router/instrumentation.{d.ts,js}`
+y `docs/how-to/instrumentation.md` de `scripts/react-en-vivo/`.
+
+| Qué se probó | Resultado |
+|---|---|
+| Qué se puede instrumentar en un router de datos del cliente | `router.instrument({ navigate, fetch })` y `route.instrument({ loader, action, middleware, lazy, 'lazy.loader', 'lazy.action', 'lazy.middleware' })`. Cada función recibe `(llamar, info)` y debe llamar a `llamar()`, que devuelve `{ status: 'success' \| 'error', error }`. El `router` que recibe la instrumentación **solo tiene `instrument`**: no da acceso al estado |
+| Qué trae `info` | En `navigate`: `to` (texto o número), `currentUrl` y, si es un envío, `formMethod`, `formEncType` y `formData`. En `fetch`: `href`, `currentUrl`, `fetcherKey` y lo mismo del envío. En `loader`, `action` y `middleware`: `request` como `{ method, url, headers.get }` (**sin `signal`**), `url`, `pattern`, `params` y `context` como `{ get }`, que lee del contexto real. El resultado de `navigate` y `fetch` trae `meta: { url, pattern, params }` (desde 8.1) |
+| La carga inicial | **No pasa por `navigate`**: sus `middleware` y `loader` sí se instrumentan, pero sin operación que los agrupe |
+| Un `<Form method="post">` | Un solo `navigate`, que dura hasta el final, envuelve el `middleware` y la `action` del `POST` y después el `middleware` y los `loader` de la revalidación (`GET`). Un `loader` saltado por `shouldRevalidate` no aparece |
+| Un fetcher con `POST` | Igual: el `fetch` instrumentado incluye la `action` **y la revalidación** |
+| Una navegación interrumpida | La primera termina su `navigate` con `status: 'success'` en cuanto empieza la segunda. Su `loader`, si no escucha `request.signal`, sigue y termina después |
+| Atrás (`navigate(-1)`) | En 8.5, su `navigate` espera a que terminen sus `loader` (corregido tras la revisión: la prueba original decía que terminaba en el acto) |
+| Un `throw data('No existe', { status: 404 })` en un `loader` | La instrumentación lo da como **`success`** (solo marca `error` si lo lanzado es un `Error`). Sí queda en `router.state.errors` |
+| `router.revalidate()` (lo que llama `useRevalidator`) y la navegación que sigue a un `redirect()` | No pasan por `navigate` |
+| `getContext` | El router lo llama una vez por navegación (también la inicial, la revalidación y la que sigue a una redirección) y una vez por llamada de fetcher. La `action` y su revalidación **comparten** el mismo contexto. `info.context.get(marca)` lee lo que puso `getContext`. En 8.5 lo llama de forma síncrona dentro de `llamar()`, así que la cola de espera nunca tiene más de una operación (corregido tras la revisión). Se mantiene la cola, y su test, por si una versión futura lo retrasa. Una navegación a una ruta que no existe no lo llama |
+| Varias instrumentaciones | «Each instrumentation wraps the previous one»: la primera del array es la más interior. Si una función de instrumentación lanza, React Router la traga y escribe «An instrumentation function threw an error:» con `console.error`, que acabaría en la consola del alumno |
+| Prototipo completo del diseño de abajo | Atribuye bien la carga inicial, el envío con su revalidación (y el `loader` de la raíz «sin ejecutar» por su `shouldRevalidate`), el fetcher con `POST`, un `fetcher.load` y una navegación a la vez, la navegación cancelada con su `loader` «tardío», `revalidate()`, el envío que redirige, Atrás, la ruta inexistente (404 en `errores`), el 404 lanzado con `data()` y un `Error` |
+
+### Decisiones
+
+1. **Solo API pública de React Router**, sin internos de React ni del
+   router. Se captan los pasos con `instrumentations` y las operaciones se
+   identifican con `getContext`, las dos documentadas en 8.5. El estado
+   final se lee del `router.state` público: `location`, `matches` y
+   `errors`.
+2. **Una operación, un contexto.** Cada router del registro recibe un
+   `getContext` envuelto, que siembra en el contexto de cada navegación o
+   llamada de fetcher una marca privada, `{ operacion, fase }`. Cada paso
+   instrumentado lee la marca con `info.context.get(marca)`, y así sabe a
+   qué operación pertenece aunque haya varias a la vez. Las operaciones que
+   abre `navigate` o `fetch` esperan en una cola, y cada llamada a
+   `getContext` se lleva la primera (orden comprobado; ver «Riesgos»).
+3. **El runtime va aparte**, en `runtime/registro-router.js`, y solo entra
+   en el documento de la vista previa visible de un bloque con
+   `mostrarRouter`. Nunca en el iframe de las comprobaciones: allí
+   sobraría y cambiaría los tiempos.
+4. **Se envían operaciones, no eventos sueltos.** Cada mensaje es el estado
+   completo de una operación, que la página sustituye por `id`. Como mucho
+   uno por operación cada 50 ms, y siempre uno al terminar o cancelarse.
+   Como mucho 200 operaciones por carga de la app; pasado el límite, un
+   aviso.
+5. **Solo el router activo.** Cada router de datos registra sus
+   operaciones desde que se crea (la carga inicial empieza antes de que se
+   pinte), pero solo se envían las del router que pinta `RouterProvider`.
+   Al activarse, envía de golpe lo que tenía guardado.
+6. **No hay comprobación nueva.** Lo que enseñan las lecciones 4 y 5 ya se
+   puede comprobar con lo que hay: un contador de cargas en la interfaz, o
+   la espera `url` y la de texto. Ver «Fuera de alcance».
+
+### Esquemas (`src/lib/laboratorio/schemas.ts`)
+
+```ts
+// esquemaReactEnVivo y esquemaReactAnotado ganan:
+mostrarRouter: z.boolean().default(false)   // el panel «Registro del router»
+```
+
+- **`esquemaReactEnVivo`** gana un `.refine`: si `mostrarRouter`, algún
+  archivo tiene que casar con `/\bfrom\s*['"]react-router(?:\/dom)?['"]/`
+  (la misma expresión de la regla de las comprobaciones con URL). Mensaje:
+  «mostrarRouter necesita que algún archivo importe react-router».
+- **`esquemaReactAnotado`** pasa a `.refine` con la misma regla sobre su
+  `codigo`. Mensaje: «mostrarRouter necesita que el código importe
+  react-router».
+
+### Runtime en el iframe
+
+#### `documento.ts` y `preparar.ts`
+
+- `OpcionesDocumentoReact` y las opciones de `prepararDocumento` ganan
+  `conRegistroRouter?: boolean`.
+- `runtime/registro-router.js` (`?raw`, con `escaparScript`) entra solo
+  si se cumplen las tres: `conRegistroRouter`, `usaRouter` y
+  `!conPruebas`. Va justo **antes** de `runtime/router.js`:
+  `${codigoRed}${codigoEfectos}${codigoRegistroRouter}${codigoRouter}`.
+- La configuración no cambia: basta con que el script esté.
+
+#### `runtime/registro-router.js` (nuevo)
+
+Un IIFE sin dependencias, como `red.js`. Si falta
+`window.__reactRouterEnVivo`, no hace nada (ya avisa `router.js`). Si
+existe, define `window.__registroRouterEnVivo = { prepararOpciones,
+activar, desactivar, descartar, reiniciar }`. **Ninguna de sus funciones
+puede lanzar**: todo el cuerpo de cada función de instrumentación y del
+`getContext` envuelto va en `try/catch`, porque React Router escribiría el
+error en la consola del alumno.
+
+**Estado global del documento:**
+
+- `marca = ReactRouter.createContext(null)` (con valor por defecto, para
+  que `get` devuelva `null` en un contexto sin marca);
+- `siguienteId`, que crece en todo el documento, también tras «Recargar»,
+  hasta 100 000;
+- `operacionesEnCarga` y `avisadoLleno`, que vuelven a 0 y a `false` con
+  `reiniciar()`.
+
+**`prepararOpciones(opciones)`** crea el registro de un router (`{ router:
+null, activo: false, operaciones: [], esperando: [] }`) y devuelve
+`{ opciones, conectar }`:
+
+- **`opciones.instrumentations`:** `[instrumentacion(registro),
+  ...(Array.isArray(opciones.instrumentations) ? opciones.instrumentations
+  : [])]`. La nuestra va **primera** para ser la más interior: sus tiempos
+  no incluyen las instrumentaciones del alumno, y se ejecuta aunque la del
+  alumno no llame a `llamar()` (React Router lo llama por él, comprobado en
+  `recurseRight`).
+- **`opciones.getContext`:** una función `async` que:
+  1. toma la operación **antes** de cualquier `await`, para conservar el
+     orden: la primera de `registro.esperando` (fase `carga` si su método es
+     `GET`, `revalidacion` si no). Si la cola está vacía:
+     - si hay una navegación o fetcher del registro cuyo `llamar()` aún no
+       ha devuelto, se toma la más reciente, con fase `redireccion`;
+     - si no, se crea una operación sintética: `carga-inicial` si es la
+       primera del registro, `revalidacion` si no, con método `GET`;
+  2. obtiene el contexto: `await opciones.getContext()` si el alumno puso
+     uno, o `new ReactRouter.RouterContextProvider()`;
+  3. si el contexto tiene un `set` que es una función, hace `set(marca, {
+     operacion, fase })`;
+  4. lo devuelve tal cual. El alumno nunca ve la marca.
+- **`conectar(router)`:** guarda el router real en el registro. Lo llama
+  `router.js` justo después de crearlo. Antes, la carga inicial ya ha
+  empezado sin él: por eso el destino de una operación sintética sale de la
+  URL de su primer paso.
+
+**La instrumentación** (`instrumentacion(registro)`):
+
+- **`router.instrument`:**
+  - **`navigate(llamar, info)`:**
+    1. marca como `cancelada` toda navegación del registro que siga
+       abierta, con `canceladaPor` igual al `id` nuevo;
+    2. abre una operación:
+       - `clase`: `atras` si `info.to === -1`, `adelante` si es `1`, `envio`
+         si `formMethod` no es `GET`, y si no `navegacion`;
+       - `metodo`: `formMethod` en mayúsculas, o `GET`;
+       - `destino`: `info.to` si es texto (con `encodeURI` y recortado a
+         200, como la `ubicacion` de R1), y vacío si es un número;
+    3. la pone en `esperando` y hace `await llamar()`;
+    4. al volver: la quita de `esperando` si sigue ahí (nunca pidió
+       contexto: una ruta inexistente o una navegación bloqueada), la marca
+       con `llamadaTerminada` y prueba a cerrarla.
+  - **`fetch(llamar, info)`:** igual, pero:
+    - cancela solo los fetchers abiertos con el mismo `fetcherKey`;
+    - `clase` es `fetcher-envio` (método distinto de `GET`) o
+      `fetcher-carga`;
+    - lleva `fetcher: info.fetcherKey` (recortado a 60) y
+      `destino: info.href`.
+- **`route.instrument`:** para `loader`, `action`, `middleware`, `lazy`,
+  `lazy.loader`, `lazy.action` y `lazy.middleware` (estos cuatro, como
+  `tipo: 'lazy'`):
+  1. lee `info.context.get(marca)`. En `lazy` no hay `info`, y en la
+     prueba se ejecuta **antes** que el primer paso marcado de su
+     operación. Por eso se atribuye a la operación abierta más reciente del
+     registro, con fase `carga`; si no hay ninguna, no se registra;
+  2. sin marca, hace `await llamar()` y no registra nada;
+  3. con marca, añade a la operación un paso:
+     - `tipo`, y `ruta` con el nombre de la ruta;
+     - `fase`: `envio` si `info.request.method` no es `GET`, y si no la
+       fase de la marca;
+     - `inicio`: los ms desde que empezó la operación;
+     - `estado: 'en-curso'`;
+  4. sube `pendientes`, hace `await llamar()` y escribe `duracion`, y
+     `estado` `ok` o `error` (con `error` como `nombre: mensaje`, recortado
+     a 200);
+  5. si la operación ya estaba `cancelada` al terminar el paso, lo marca
+     `tarde: true`; si es un `loader` terminado, apunta su ruta en
+     `ejecutados`;
+  6. baja `pendientes` y prueba a cerrar.
+- **Nombre de una ruta:** el `id` si lo puso el alumno (no casa con
+  `/^\d+(-\d+)*$/`); si no, su `path`; si es una ruta índice sin `path`,
+  «índice»; y si nada, el `id`. Como mucho 60 caracteres.
+- **Cerrar una operación:** cuando tiene `llamadaTerminada` y
+  `pendientes === 0`. Las sintéticas nacen con `llamadaTerminada`. Una
+  cancelada se queda abierta mientras le queden pasos, para poder marcarlos
+  como tardíos. Al cerrar:
+  - `duracion`, y `estado` pasa a `terminada` si no estaba `cancelada`;
+  - si hay router conectado y no está cancelada:
+    - `urlFinal`: `createPath(router.state.location)`, con `encodeURI` y
+      recortado a 200. La página solo lo enseña si difiere del destino;
+    - `errores`: las entradas de `router.state.errors`, como mucho 8, cada
+      una `{ ruta, texto }`. `ruta` es la del `ErrorBoundary` que lo
+      recoge; `texto` es `«estado data»` si `isRouteErrorResponse`, el
+      `message` si es un `Error`, o `String(error)`; todo recortado a 200;
+    - `sinEjecutar`: las rutas de `router.state.matches` con un `loader`
+      que no está en `ejecutados`, como mucho 16. No se calcula para
+      `fetcher-carga` (su `loader` no es de la página) ni si hay `errores`.
+- **Publicar** (`publicar(operacion)`):
+  - solo si el registro está `activo`;
+  - como mucho un mensaje por operación cada 50 ms (con un temporizador
+    por operación), y siempre uno inmediato al cerrarse o cancelarse;
+  - el mensaje lleva el estado completo; `pasos` se recorta a 40, con
+    `truncado: true`.
+- **Límite:**
+  - cada operación nueva suma 1 a `operacionesEnCarga`;
+  - si ya van 200, no se crea: sus pasos no se registran, y se envía una
+    sola vez `{ tipo: 'router-lleno' }`;
+  - las operaciones abiertas siguen actualizándose.
+- **`activar(router)`:** marca activo el registro de ese router y publica,
+  en orden, todas sus operaciones. **`desactivar(router)`** lo marca
+  inactivo.
+- **`descartar(router)`:** olvida su registro y sus temporizadores.
+- **`reiniciar()`:** descarta todos los registros y pone a 0 el límite. No
+  toca `siguienteId`.
+
+#### Cambios en `runtime/router.js`
+
+- **`createMemoryRouter` y `crearRouterAlias`.** Si existe
+  `window.__registroRouterEnVivo`, pasan sus opciones finales por
+  `prepararOpciones`, crean el router con las opciones que devuelve y
+  llaman a `conectar(router)` antes de `registrarRouterDatos`. Sin
+  registro, no cambian.
+- **`RouterProviderEnVivo`.** En su `useLayoutEffect`, después de
+  `activarRouterDatos(router)`, llama a
+  `__registroRouterEnVivo?.activar(router)`; en la limpieza, a
+  `desactivar(router)`.
+- **El `dispose` envuelto** llama a `__registroRouterEnVivo?.descartar(router)`.
+- **`reiniciar()`** (lo usan «Recargar», «Ir» y cada comprobación) llama
+  a `__registroRouterEnVivo?.reiniciar()`.
+- **Los routers declarativos** (`MemoryRouter`, `BrowserRouter` y
+  `HashRouter`) no tienen datos ni instrumentación: no hay registro.
+
+### Mensajes
+
+Iframe → página, en `esquemaMensajeReactEnVivo` (`mensajes.ts`):
+
+```ts
+const nombreRuta = z.string().min(1).max(60)
+const ms = z.number().int().min(0).max(600_000)
+const pasoRouter = z.object({
+  tipo: z.enum(['middleware', 'loader', 'action', 'lazy']),
+  ruta: nombreRuta,
+  fase: z.enum(['carga', 'envio', 'revalidacion', 'redireccion']),
+  inicio: ms,                       // desde que empezó la operación
+  duracion: ms.optional(),          // sin ella, sigue en curso
+  estado: z.enum(['en-curso', 'ok', 'error']),
+  error: z.string().max(200).optional(),
+  tarde: z.boolean().optional(),    // terminó después de cancelarse la operación
+})
+
+z.object({
+  canal,
+  tipo: z.literal('router-operacion'),
+  id: z.number().int().min(1).max(100_000),
+  clase: z.enum(['carga-inicial', 'navegacion', 'envio', 'atras', 'adelante',
+                 'revalidacion', 'fetcher-carga', 'fetcher-envio']),
+  metodo: z.string().regex(/^[A-Z]{1,10}$/),
+  destino: z.string().max(200),
+  fetcher: z.string().max(60).optional(),
+  estado: z.enum(['en-curso', 'terminada', 'cancelada']),
+  canceladaPor: z.number().int().min(1).max(100_000).optional(),
+  duracion: ms.optional(),
+  urlFinal: z.string().max(200).optional(),
+  pasos: z.array(pasoRouter).max(40),
+  truncado: z.boolean(),
+  sinEjecutar: z.array(nombreRuta).max(16).optional(),
+  errores: z.array(z.object({ ruta: nombreRuta, texto: z.string().max(200) })).max(8).optional(),
+})
+
+z.object({ canal, tipo: z.literal('router-lleno') })
+```
+
+Se validan en la frontera como todos: `leerMensajeReactEnVivo` descarta
+lo que no venga del iframe esperado (`event.source`) o no pase el
+esquema, y todo se pinta como texto. Lo peor que puede falsificar el
+código del alumno es un registro falso en su propio navegador. No hay
+mensajes nuevos de la página al iframe.
+
+### Componentes (`src/components/bloques-laboratorio/`)
+
+- **`RegistroRouter.tsx`** (nuevo). Props: `{ operaciones:
+  MensajeRouterOperacion[], lleno: boolean, soloDeclarativo: boolean,
+  onLimpiar }`.
+  - **Cabecera.** «Registro del router», con su icono y el botón «Limpiar»,
+    como `RegistroEfectos`.
+  - **Contenedor.** `role="region"`, `aria-label="Registro del router"` y
+    `aria-live="off"`, en monoespaciada, con `max-h-80 overflow-auto`.
+    Dentro, un `<ol aria-label="Operaciones del router">` en orden
+    cronológico (la más nueva, abajo), con como mucho las 100 últimas.
+  - **Cada operación** es un `<li>` con una línea de resumen: `#id`, la
+    clase en español y el método y destino, la duración o «en curso», y el
+    estado **escrito**, no solo con color:
+    - «Carga inicial /recetas»;
+    - «Navegación → /lento»;
+    - «Envío · POST /recetas»;
+    - «Atrás → /recetas» (el destino sale de `urlFinal`);
+    - «Revalidación /recetas»;
+    - «Fetcher «nueva» · carga /lento» y «Fetcher «nueva» · POST /recetas».
+
+    Si `urlFinal` difiere del destino: «· acabó en /». Si está cancelada:
+    «cancelada por #7».
+  - **Debajo, sus pasos**, en un `<ul>` agrupado por fase, con el nombre de
+    la fase en un `<p>` («Envío», «Revalidación», «Carga», «Tras
+    redirigir»). Cada paso: «loader recetas · +6 ms · 42 ms», «… en curso»,
+    «… · error: Error: se rompió», y «· terminó después de cancelarse» si
+    `tarde`.
+  - **Una barra por paso**, decorativa (`aria-hidden`), con su `inicio` y
+    su `duracion` sobre la duración de la operación, para que se vea a
+    simple vista lo que va a la vez y lo que va en cadena. La información
+    ya está en el texto. Sin animación.
+  - **Al final de la operación:**
+    - «Se volvió a ejecutar: …», con los `loader` de la fase
+      `revalidacion` o `carga`;
+    - «No se volvió a ejecutar: …» (`sinEjecutar`). Nunca dice por qué: no
+      lo sabe;
+    - «Error en pantalla (ErrorBoundary de raíz): 404 No existe»
+      (`errores`);
+    - «Lista truncada: más de 40 pasos» si `truncado`.
+  - **Avisos:**
+    - con `lleno`: «El registro se ha detenido: más de 200 operaciones en
+      esta carga. ¿Hay un bucle de navegaciones?»;
+    - con `soloDeclarativo` (la `ubicacion` dice `MemoryRouter`,
+      `BrowserRouter` o `HashRouter`) y sin operaciones: «Este router no
+      carga datos: el registro necesita un router de datos
+      (createMemoryRouter o createBrowserRouter con RouterProvider).»;
+    - sin operaciones: «Todavía no hay actividad del router.».
+  - **Lector de pantalla:** un `<p role="status" className="sr-only">`
+    anuncia, como mucho una vez por segundo, la última operación terminada
+    o cancelada («Envío POST /recetas terminado en 47 ms: 1 action y 1
+    loader»). Nada más: el resto del registro no interrumpe.
+  - **Visual:** tokens de la web en claro y oscuro (los colores de
+    `RegistroEfectos` y `PanelRed`): terminado en verde, en curso en ámbar,
+    cancelado y error en rojo, siempre con su texto. A 320 px, el resumen
+    salta de línea (`break-words`) y la barra de cada paso ocupa su propia
+    fila bajo el texto.
+- **`ReactEnVivo.tsx` y `ReactAnotado.tsx`:**
+  - prop `mostrarRouter`; `prepararDocumento` recibe
+    `conRegistroRouter: mostrarRouter` en la vista previa visible, y nunca
+    en el documento de las comprobaciones;
+  - `useRegistroAgrupado(100, incorporarOperaciones)`, donde
+    `incorporarOperaciones` sustituye por `id` o añade al final;
+  - en `recibir`: `router-operacion` solo con `documentoMontadoRef.current`
+    (como `efecto` y `arbol`), y `router-lleno` pone `lleno`;
+  - el panel va después de `ArbolDeRenders` y antes de `PanelRed`: el
+    router llama a la API simulada, y así se leen de arriba abajo;
+  - `soloDeclarativo` sale de la última `ubicacion`;
+  - **se vacía** (y `lleno` vuelve a `false`) en el mismo sitio que el
+    registro de efectos: al construir un documento nuevo por una edición,
+    con «Recargar» e «Ir» (`actuarEnNavegador`), con «Reiniciar» y con
+    «Limpiar». Tras «Limpiar», las actualizaciones de una operación que se
+    había vaciado la vuelven a añadir: es lo esperado.
+- **`/admin/referencia-contenido`:** el bloque de R1 (`createMemoryRouter`
+  con API simulada) gana `mostrarRouter`, una `action` con `<Form>` y una
+  raíz con `shouldRevalidate` que no revalida tras un `POST`.
+  `specs/features/laboratorios.md` lista el campo nuevo.
+
+### Tests
+
+Los escribe y los pasa Codex. Ninguno necesita red ni navegador.
+
+**`src/lib/laboratorio/schemas.test.ts`**
+
+- «mostrarRouter vale false por defecto en react-en-vivo y react-anotado».
+- «mostrarRouter sin importar react-router no valida»: el mensaje exacto en los dos bloques.
+- «mostrarRouter con import de react-router valida».
+
+**`src/lib/react-en-vivo/documento.test.ts`**
+
+- «incluye registro-router.js antes de router.js con conRegistroRouter y un require de react-router»: el orden, con `indexOf`.
+- «no lo incluye sin conRegistroRouter, sin react-router ni en el documento de las comprobaciones».
+
+**`src/lib/react-en-vivo/mensajes.test.ts`**
+
+- «acepta una router-operacion completa y router-lleno».
+- «rechaza más de 40 pasos, un id 0, una clase o fase desconocidas, un destino de más de 200 caracteres y un error de más de 200».
+
+**`src/lib/react-en-vivo/registro-router.test.ts`** (nuevo, jsdom,
+**bundles reales**)
+
+Con el mismo `instalar(…)` que `router.test.ts`: los bundles reales con
+`new Function`, `registro-router.js` antes de `router.js` y `montaje.js`,
+y módulos TSX que pasan por `transformarArchivos`. Los mensajes se leen de
+`__enviarReactEnVivo`, quedándose con el último de cada `id`.
+
+- «la carga inicial es una operación carga-inicial con el middleware y los dos loader a la vez»: dos `loader` con `inicio` que difiere en menos de 10 ms, y el `middleware` de la raíz empieza antes y termina después.
+- «una action con `<Form>` registra el envío y la revalidación»: el caso de la lección 4. Hay una raíz con `loader` y `shouldRevalidate: ({ formMethod, defaultShouldRevalidate }) => formMethod === 'POST' ? false : defaultShouldRevalidate`, y una hija `recetas` con `loader` y `action`. Tras `requestSubmit()`, el último `router-operacion` es:
+  - `clase: 'envio'` y `metodo: 'POST'`;
+  - pasos `action recetas` en fase `envio` y `loader recetas` en fase `revalidacion`, y ningún `loader` de la raíz;
+  - `sinEjecutar: ['/']` y `estado: 'terminada'`.
+- «un fetcher con POST incluye su action y la revalidación en la misma operación».
+- «un fetcher.load y una navegación lanzados seguidos se atribuyen cada uno a su operación».
+- «una navegación interrumpida queda cancelada por la nueva y su loader lento sale tarde».
+- «revalidate() es una operación revalidacion».
+- «un envío cuya action redirige muestra la fase redireccion y urlFinal».
+- «Atrás es una operación atras que termina cuando terminan sus loader».
+- «un lazy de función se atribuye a la navegación que lo pide, antes de su loader».
+- «un throw data() de 404 sale en errores con su texto, y un Error, como paso con error».
+- «una ruta inexistente no deja la cola desordenada»: la operación siguiente se atribuye bien.
+- «las instrumentations del alumno siguen funcionando y no cambian lo registrado»: su `navigate` se llama, y los pasos son los mismos.
+- «el getContext del alumno sigue funcionando»: un `loader` lee su valor con `context.get`.
+- «una instrumentación del alumno que lanza no rompe el registro».
+- «solo se envía el router activo, y al activarse envía lo que tenía»: un router creado sin pintar no envía nada.
+- «recargar empieza un registro nuevo con ids que siguen creciendo».
+- «más de 200 operaciones envían router-lleno una sola vez».
+- «no envía más de un mensaje por operación cada 50 ms»: con temporizadores falsos.
+- «sin registro-router.js, router.js funciona igual que antes» (protege R1).
+
+**Componentes**
+
+- `RegistroRouter.test.tsx`:
+  - «enseña cada clase de operación con su texto en español»;
+  - «agrupa los pasos por fase y escribe inicio y duración»;
+  - «escribe «Se volvió a ejecutar» y «No se volvió a ejecutar»»;
+  - «marca cancelada por #N y los pasos tardíos»;
+  - «enseña los errores con su ErrorBoundary»;
+  - «el aviso de lleno, el de router declarativo y el vacío»;
+  - «las barras son aria-hidden y el estado no depende solo del color»;
+  - «el status anuncia como mucho una operación por segundo» (temporizadores falsos);
+  - «Limpiar llama a onLimpiar».
+- `ReactEnVivo.test.tsx`:
+  - «con mostrarRouter, el documento de la vista previa lleva registro-router.js y el de comprobar no»;
+  - «pinta las operaciones que llegan y sustituye por id»;
+  - «vacía el registro al editar, con Recargar y con Reiniciar»;
+  - «ignora router-operacion antes de montado».
+- `ReactAnotado.test.tsx`: «con mostrarRouter enseña el registro».
+
+### Quién hace qué
+
+1. **Antes de Codex:** nada. No hay dependencias nuevas;
+   `scripts/react-en-vivo/node_modules` ya tiene `react-router` 8.5.0 y
+   los bundles de `public/` no cambian.
+2. **Codex:** implementa esta sección y sus tests, y pasa `npm run test` y
+   `npm run lint`.
+3. **Claude, después:**
+   - revisa el diff y pasa `npm run test`, `npm run build` y
+     `npm run lint` en local;
+   - verifica con Playwright, en **Chromium y WebKit**, el bloque del
+     catálogo de referencia:
+     - la carga inicial;
+     - un envío con su revalidación y su «No se volvió a ejecutar»;
+     - un fetcher;
+     - dos clics seguidos en enlaces lentos (la cancelada, con su `loader`
+       tardío);
+     - «Recargar», «Reiniciar» y «Limpiar»;
+     - el modo oscuro y 320 px de ancho.
+
+   **Firefox no se puede probar en este entorno:** queda en «Pendiente».
+
+### Riesgos
+
+- **La atribución por orden.** Que `getContext` se llame en el mismo orden
+  en que empiezan las operaciones está comprobado, no documentado. Para no
+  romperlo por nuestra cuenta, la operación se toma **antes** de esperar
+  al `getContext` del alumno. Una navegación que nunca pide contexto (una
+  ruta inexistente, o una que bloquea `useBlocker`) sale de la cola cuando
+  vuelve su `llamar()`. Si en ese instante ya ha llegado el `getContext`
+  de otra operación, sus pasos se atribuirían mal; es un caso estrecho, y
+  solo afecta al dibujo. El test con bundles reales del orden avisa si una
+  versión nueva lo cambia.
+- **Lo que la API no cuenta:**
+  - un `throw data()` o un `throw redirect()` salen como `ok` en el paso;
+    el error se ve en `errores` (desde `router.state.errors`), en la
+    operación y no en el paso que lo lanzó;
+  - la cancelación no llega en `info` (el `request` no trae `signal`): se
+    deduce de que empiece otra navegación, u otro fetcher con la misma
+    clave.
+- **`sinEjecutar` es una deducción:** rutas de la página con `loader` que
+  no se ejecutaron en esa operación, por la regla por defecto o por
+  `shouldRevalidate`. El panel no dice por qué.
+- **Los tiempos no son un perfilador:** milisegundos enteros, con la
+  latencia de la API simulada incluida.
+- **`lazy` se atribuye por cercanía**, a la operación abierta más
+  reciente, porque su instrumentación no trae contexto. Con dos
+  operaciones a la vez puede caer en la que no es. La lección 11 lo enseña
+  con una sola navegación.
+- **`patchRoutesOnNavigation`:** no se ha comprobado si las rutas que añade
+  se instrumentan. Ninguna lección lo usa en vivo.
+- **`StrictMode`:** el `useLayoutEffect` del `RouterProvider` envuelto se
+  ejecuta dos veces; `activar` es idempotente y la página sustituye por
+  `id`.
+
+### Fuera de alcance de esta tanda
+
+- **Una comprobación sobre el registro**, como «la action no volvió a
+  ejecutar el loader de la raíz». Haría falta el registro en el iframe de
+  las comprobaciones y un lenguaje para describir operaciones. Para las
+  lecciones 4 y 5 basta con lo que hay: un contador de cargas pintado en
+  la app y las esperas de texto y de `url`.
+- El registro en el iframe de las comprobaciones.
+- Los argumentos y los valores devueltos por `loader` y `action`: ni
+  tamaño ni privacidad lo justifican. La consola ya está para eso.
+- La instrumentación de servidor (`handler`) del modo framework: no hay
+  servidor en la vista previa.
+- Exportar o copiar el registro.
+- Sacar del árbol de renders los componentes del router (sigue opcional).
+
+### Decidido el 2026-10-26 (antes de implementar)
+
+1. **Atribuir cada paso por el orden de llamada a `getContext`:** aprobado. El test del orden con los bundles reales es obligatorio: es el que avisa si una versión nueva de React Router lo cambia.
+2. **Ninguna comprobación nueva sobre el registro:** aprobado. Los ejercicios de las lecciones 4 y 5 usan un contador pintado en la app y las esperas de texto y de `url`.
+3. **`mostrarRouter` también en `react-anotado`:** aprobado, para la lección 1.
+
+### Corregido tras la revisión (2026-10-26)
+
+La revisión independiente encontró que las operaciones **sintéticas** (las que no tienen un `navigate` ni un `fetch` instrumentado: la carga inicial, `revalidate()` y seguir tras `useBlocker`) se cerraban antes de que el router confirmara su estado. Daban información falsa justo en las lecciones 4 y 10 y en el proyecto 13. El diseño cambia así:
+
+- **Cuándo se cierran.** Al conectar, el registro se suscribe al router (`router.subscribe`) y cierra las sintéticas abiertas cuando el estado está `initialized` y `navigation` y `revalidation` vuelven a `idle`. Hasta entonces no se calculan `urlFinal`, `errores` ni `sinEjecutar`. Así, un 404 lanzado en la carga inicial sale en `errores`, y una revalidación sin `loader` termina.
+- **Qué clase tienen.** Sale del estado del router al llamar a `getContext`:
+  - `carga-inicial` si aún no está `initialized`;
+  - `revalidacion` si `revalidation === 'loading'`;
+  - `navegacion` en otro caso (por ejemplo, seguir tras `useBlocker`).
+
+  Antes se usaba «es la primera operación».
+- **Redirecciones.** Las sintéticas abiertas también reciben la fase `redireccion`. La redirección de un middleware en la carga inicial queda en la misma operación.
+- **Cancelación.** Una navegación nueva cancela cualquier operación abierta que no sea de un fetcher, incluidas la carga inicial y una revalidación.
+- **`getContext` del alumno.** Si lanza, su error se propaga como sin registro. Solo `contexto.set(marca, …)` va protegido.
+- **El panel.**
+  - En una carga dice «Se ejecutó»; solo en una revalidación dice «Se volvió a ejecutar».
+  - Las barras ya no llevan `sm:col-start-2`, que las desalineaba.
+  - La fusión de operaciones recorta a 100 en cada paso.
+- **Sin test automático para `useBlocker`.** En el entorno jsdom de los tests, `useBlocker` no bloquea (tampoco sin registro), así que ese caso se verifica en el navegador.
+

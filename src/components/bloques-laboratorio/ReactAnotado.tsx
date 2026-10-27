@@ -9,6 +9,7 @@ import {
 import { ConsolaReact } from '@/components/bloques-laboratorio/ConsolaReact'
 import { PanelRed, type AjustesRed } from '@/components/bloques-laboratorio/PanelRed'
 import { RegistroEfectos } from '@/components/bloques-laboratorio/RegistroEfectos'
+import { RegistroRouter } from '@/components/bloques-laboratorio/RegistroRouter'
 import { useEntradasConsola } from '@/components/bloques-laboratorio/useEntradasConsola'
 import { useRegistroAgrupado } from '@/components/bloques-laboratorio/useRegistroAgrupado'
 import { VistaPreviaReact } from '@/components/bloques-laboratorio/VistaPreviaReact'
@@ -20,6 +21,7 @@ import type {
   MensajeEfecto,
   MensajePeticion,
   MensajeReactEnVivo,
+  MensajeRouterOperacion,
 } from '@/lib/react-en-vivo/mensajes'
 import { prepararDocumento } from '@/lib/react-en-vivo/preparar'
 import { cn } from '@/lib/utils'
@@ -35,6 +37,19 @@ function incorporarPeticiones(actuales: MensajePeticion[], nuevas: MensajePetici
   return nuevas.reduce(incorporarPeticion, actuales)
 }
 const incorporarEfectos = (actuales: MensajeEfecto[], nuevos: MensajeEfecto[]) => [...actuales, ...nuevos]
+function incorporarOperaciones(
+  actuales: MensajeRouterOperacion[],
+  nuevas: MensajeRouterOperacion[],
+) {
+  // Un Map conserva el orden y sustituye en su sitio. Recortar en cada paso, y
+  // no al final del lote, evita copiar el array entero por cada id nuevo.
+  const porId = new Map(actuales.map((operacion) => [operacion.id, operacion]))
+  for (const nueva of nuevas) {
+    porId.set(nueva.id, nueva)
+    if (porId.size > 100) porId.delete(porId.keys().next().value!)
+  }
+  return [...porId.values()]
+}
 
 export function ReactAnotado({
   titulo,
@@ -45,6 +60,7 @@ export function ReactAnotado({
   mostrarConsola,
   mostrarArbol = false,
   mostrarEfectos = false,
+  mostrarRouter = false,
   api,
   red,
   urlInicial,
@@ -53,9 +69,10 @@ export function ReactAnotado({
   // Fuera del esquema de la lección, como en GitAnotado: solo para no
   // repetir el nombre de la región en la página de referencia.
   etiquetaSeccion = 'React anotado',
-}: Omit<DatosReactAnotado, 'mostrarArbol' | 'mostrarEfectos' | 'barraDeDirecciones' | 'lenguaje'> & {
+}: Omit<DatosReactAnotado, 'mostrarArbol' | 'mostrarEfectos' | 'mostrarRouter' | 'barraDeDirecciones' | 'lenguaje'> & {
   mostrarArbol?: boolean
   mostrarEfectos?: boolean
+  mostrarRouter?: boolean
   barraDeDirecciones?: boolean
   lenguaje?: 'jsx' | 'tsx'
   etiquetaSeccion?: string
@@ -90,6 +107,12 @@ export function ReactAnotado({
     useRegistroAgrupado(20, incorporarPeticiones)
   const { entradas: efectos, recibir: recibirEfecto, limpiar: limpiarEfectos } =
     useRegistroAgrupado(200, incorporarEfectos)
+  const {
+    entradas: operacionesRouter,
+    recibir: recibirOperacionRouter,
+    limpiar: limpiarOperacionesRouter,
+  } = useRegistroAgrupado(100, incorporarOperaciones)
+  const [registroRouterLleno, setRegistroRouterLleno] = useState(false)
   const [falloPendiente, setFalloPendiente] = useState(false)
   const [fallosSolicitados, setFallosSolicitados] = useState(0)
   const [redActual, setRedActual] = useState<AjustesRed>({
@@ -116,8 +139,12 @@ export function ReactAnotado({
         if (mensaje.codigo === 500) setFalloPendiente(false)
       }
       if (mensaje.tipo === 'efecto' && documentoMontadoRef.current) recibirEfecto(mensaje)
+      if (mensaje.tipo === 'router-operacion' && documentoMontadoRef.current) {
+        recibirOperacionRouter(mensaje)
+      }
+      if (mensaje.tipo === 'router-lleno') setRegistroRouterLleno(true)
     },
-    [recibirEfecto, recibirMensaje, recibirPeticion],
+    [recibirEfecto, recibirMensaje, recibirOperacionRouter, recibirPeticion],
   )
 
   const claveApi = JSON.stringify(api)
@@ -138,6 +165,7 @@ export function ReactAnotado({
       conPruebas: false,
       conArbol: mostrarArbol,
       conEfectos: mostrarEfectos,
+      conRegistroRouter: mostrarRouter,
       api: apiEstable,
       red: redActualRef.current,
       urlInicial: urlActualRef.current ?? urlInicial,
@@ -149,6 +177,8 @@ export function ReactAnotado({
         setArbol(null)
         limpiarPeticiones()
         limpiarEfectos()
+        limpiarOperacionesRouter()
+        setRegistroRouterLleno(false)
         setFalloPendiente(false)
         limpiar()
         setSrcDoc(preparado.srcDoc)
@@ -157,7 +187,7 @@ export function ReactAnotado({
     return () => {
       cancelado = true
     }
-  }, [apiEstable, codigo, css, strictMode, mostrarArbol, mostrarEfectos, limpiar, limpiarEfectos, limpiarPeticiones, lenguaje, urlInicial])
+  }, [apiEstable, codigo, css, strictMode, mostrarArbol, mostrarEfectos, mostrarRouter, limpiar, limpiarEfectos, limpiarOperacionesRouter, limpiarPeticiones, lenguaje, urlInicial])
 
   const actuarEnNavegador = useCallback(
     (accion: AccionNavegador, url?: string) => {
@@ -166,12 +196,14 @@ export function ReactAnotado({
         setArbol(null)
         limpiarPeticiones()
         limpiarEfectos()
+        limpiarOperacionesRouter()
+        setRegistroRouterLleno(false)
         setFalloPendiente(false)
       }
       siguienteOrdenNavegadorRef.current += 1
       setOrdenNavegador({ id: siguienteOrdenNavegadorRef.current, accion, ...(url ? { url } : {}) })
     },
-    [limpiar, limpiarEfectos, limpiarPeticiones],
+    [limpiar, limpiarEfectos, limpiarOperacionesRouter, limpiarPeticiones],
   )
 
   return (
@@ -268,6 +300,21 @@ export function ReactAnotado({
       </div>
 
       {mostrarArbol && <ArbolDeRenders arbol={arbol} />}
+
+      {mostrarRouter && (
+        <RegistroRouter
+          operaciones={operacionesRouter}
+          lleno={registroRouterLleno}
+          soloDeclarativo={
+            ubicacion !== null &&
+            ['MemoryRouter', 'BrowserRouter', 'HashRouter'].includes(ubicacion.origen)
+          }
+          onLimpiar={() => {
+            limpiarOperacionesRouter()
+            setRegistroRouterLleno(false)
+          }}
+        />
+      )}
 
       {api && (
         <PanelRed

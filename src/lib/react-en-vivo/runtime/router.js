@@ -151,6 +151,11 @@
     router.dispose = () => {
       if (dispuesto) return
       dispuesto = true
+      try {
+        window.__registroRouterEnVivo?.descartar(router)
+      } catch {
+        // El registro es una ayuda visual y nunca bloquea dispose().
+      }
       cancelar()
       routersDatos.delete(router)
       const navegador = navegadoresDatos.get(router)
@@ -189,7 +194,9 @@
     const opcionesFinales = cargaPendiente
       ? { ...opciones, initialEntries: carga.entradas, initialIndex: carga.indice }
       : opciones
-    const router = ReactRouter.createMemoryRouter(rutas, opcionesFinales)
+    const preparado = window.__registroRouterEnVivo?.prepararOpciones(opcionesFinales)
+    const router = ReactRouter.createMemoryRouter(rutas, preparado?.opciones ?? opcionesFinales)
+    preparado?.conectar(router)
     const entradas = opcionesFinales.initialEntries || ['/']
     return registrarRouterDatos(router, 'createMemoryRouter', entradas, opcionesFinales.initialIndex)
   }
@@ -198,7 +205,9 @@
     const { window: _windowIgnorada, ...resto } = opciones
     const carga = resolverCarga(['/'], 0)
     const finales = { ...resto, initialEntries: carga.entradas, initialIndex: carga.indice }
-    const router = ReactRouter.createMemoryRouter(rutas, finales)
+    const preparado = window.__registroRouterEnVivo?.prepararOpciones(finales)
+    const router = ReactRouter.createMemoryRouter(rutas, preparado?.opciones ?? finales)
+    preparado?.conectar(router)
     return registrarRouterDatos(router, origen, finales.initialEntries, finales.initialIndex)
   }
 
@@ -256,7 +265,9 @@
       const router = propiedades.router
       R.React.useLayoutEffect(() => {
         const navegador = activarRouterDatos(router)
+        window.__registroRouterEnVivo?.activar(router)
         return () => {
+          window.__registroRouterEnVivo?.desactivar(router)
           if (navegadorActivo === navegador) navegadorActivo = null
         }
       }, [router])
@@ -308,6 +319,7 @@
     return { url, entradas: [url], indice: 0 }
   }
   const reiniciar = () => {
+    window.__registroRouterEnVivo?.reiniciar()
     for (const router of [...routersDatos]) router.dispose()
     routersDatos.clear()
     navegadoresDatos.clear()
