@@ -28,6 +28,16 @@ Vas a construir la web de la cooperativa con **React Router 8 en modo framework*
 
 ```laboratorio
 {
+  "tipo": "video",
+  "src": "https://www.techstudytracker.com/img/d6fce7c72cbc1050363b0654df237cd5dc4c98ce5aca3a3c0e83ab76e9e7450a.mp4",
+  "poster": "https://www.techstudytracker.com/img/f7bd3de2964d989f1b38cf990b08476a90ed62712c315e99aff1c3d352fd55c8.jpg",
+  "titulo": "La cooperativa terminada, con el build de producción",
+  "descripcion": "Entrar con una contraseña mala y la buena, una cesta que cambia sin esperar al servidor, un teléfono mal escrito, el pedido confirmado, el de otra socia que no se ve, salir y la hoja de reparto."
+}
+```
+
+```laboratorio
+{
   "tipo": "roles",
   "titulo": "Quién hace qué en una petición a la zona de socios",
   "roles": [

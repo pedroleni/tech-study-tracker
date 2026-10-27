@@ -62,6 +62,16 @@ Tres paquetes de React Router con avisos de severidad alta. `npm audit --json` d
 
 ```laboratorio
 {
+  "tipo": "video",
+  "src": "https://www.techstudytracker.com/img/9b1d355bcbaed0c397a82ff01fde62b238091646770c229e7987194983522825.mp4",
+  "poster": "https://www.techstudytracker.com/img/04cea90de89863a05f09257b86db05fa45ed00aa8aa861bd38e7dd87185a76e7.jpg",
+  "titulo": "La biblioteca, ya en React Router 8",
+  "descripcion": "Una búsqueda, una ficha con su libro y sus ejemplares, entrar al pedir los préstamos, devolver un libro vencido, un préstamo rechazado por la API y otro bueno, y cerrar sesión."
+}
+```
+
+```laboratorio
+{
   "tipo": "linea-de-tiempo",
   "titulo": "El camino, en cuatro pasos",
   "items": [
