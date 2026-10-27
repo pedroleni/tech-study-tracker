@@ -56,7 +56,7 @@ Tres paquetes de React Router con avisos de severidad alta. `npm audit --json` d
   "tipo": "callout",
   "variante": "aviso",
   "titulo": "Tu validación ayuda, pero el fallo está en el router",
-  "contenido": "La app ya comprueba el volver con new URL y el origen, como pide la lección 20, y un test lo vigila. Aun así, el aviso es sobre cómo el propio router interpreta la ruta que le pasas, y su arreglo está en el código del router. En la 6 no lo hay, ni lo habrá: la 6.30.6 es de agosto de 2026 y npm audit propone directamente la 7.18.4. Por eso esta lección no explica cómo atacar el fallo: te basta con saber que existe y que en la 6 no se cierra."
+  "contenido": "La app ya valida el volver como pide la lección 20: el origen tiene que ser el nuestro y, además, la ruta normalizada no puede empezar por dos barras, y once tests lo vigilan. Aun así, el aviso es sobre cómo el propio router interpreta la ruta que le pasas, y su arreglo está en el código del router. En la 6 no lo hay, ni lo habrá: la 6.30.6 es de agosto de 2026 y npm audit propone directamente la 7.18.4. Por eso esta lección no explica cómo atacar el fallo: te basta con saber que existe y que en la 6 no se cierra."
 }
 ```
 
@@ -114,6 +114,7 @@ Tres paquetes de React Router con avisos de severidad alta. `npm audit --json` d
 - **Node.js 22.12 o superior** para arrancar: es lo que piden Vite 8 y Vitest 5. **Desde el paso 2, 22.22 o superior**, porque React Router 8 no se instala con menos; el `.nvmrc` que añade ese paso pide la 24, la LTS actual. Compruébalo con `node --version`.
 - **Las lecciones 2, 3, 8 y 10 de esta ficha** (`loader`, `action`, errores por ruta y middleware): aquí se usan sin volver a explicarlas. Y la **23**, que cuenta cómo reconocer cada época del router y qué son las *future flags*.
 - **Las lecciones 83 y 84 de React**, para leer los tests.
+- **TypeScript 7.0.2**, el compilador nativo, que el proyecto fija en su `package.json`. Se usa igual que la 6 (`npm run typecheck` llama a `tsc --noEmit`) y funciona con el Node 22.12 del punto de partida.
 - **Un navegador con herramientas de desarrollo.** Los tests de esta app corren en jsdom, y vas a ver que hay un fallo que jsdom no ve.
 
 ### Del cero al proyecto en marcha
@@ -124,8 +125,8 @@ Tres paquetes de React Router con avisos de severidad alta. `npm audit --json` d
 4. **Pasa los tests**: `npm test`. Al revés que en otros proyectos, aquí empiezan todos en verde, y tu trabajo es que sigan así:
 
 ```text
- Test Files  7 passed (7)
-      Tests  35 passed (35)
+ Test Files  8 passed (8)
+      Tests  46 passed (46)
 ```
 
 5. **Haz un commit** antes de tocar nada. Es tu red.
@@ -152,7 +153,8 @@ src/
 ├── destino.ts                el ?volver= validado
 └── formato.ts, tipos.ts, estilos.css
 servidor/                     la API en memoria y su plugin de Vite            (no se toca)
-pruebas/                      30 tests de caracterización y 5 de la cookie     (no se tocan)
+pruebas/                      30 de caracterización, 11 de destinoSeguro       (no se tocan)
+                              y 5 de la cookie
 ```
 
 No hay un servidor aparte: `servidor/plugin.ts` es un plugin de Vite que sirve la API (`/api/libros`, `/api/prestamos`, `/api/sesion`…) en `npm run dev` y en `npm run preview`, con los datos en memoria y una cookie de sesión. La cookie es `HttpOnly` y `SameSite=Lax`, y si la petición llega por HTTPS (o con `COOKIE_SEGURA=1`) lleva además `Secure` y se llama `__Host-sesion`, un prefijo que el navegador solo acepta con `Secure`, `Path=/` y sin `Domain`. La vigilan 5 tests de `pruebas/servidor/`, que levantan un servidor HTTP de Node con el middleware de la API y comprueban la cabecera `Set-Cookie` exacta, por HTTP y por HTTPS (con la cabecera `X-Forwarded-Proto` que pondría un proxy). Si quitas `Secure` o escribes mal el prefijo, se ponen rojos tres de los cinco. **Cada respuesta tarda 300 ms**, como una red de verdad, para que las peticiones en cascada se noten; `LATENCIA_API=0 npm run dev` la quita.
@@ -310,7 +312,7 @@ Las *flags* más nuevas y sus avisos solo están en la última 6. La app está e
 npm install react-router-dom@6
 ```
 
-El repositorio trae un `.npmrc` con `save-exact=true`, así que `package.json` apunta la versión exacta, `6.30.6`. Pasa los tests: siguen los 35 en verde, pero ahora la salida trae avisos que antes no estaban, uno por cada archivo de tests:
+El repositorio trae un `.npmrc` con `save-exact=true`, así que `package.json` apunta la versión exacta, `6.30.6`. Pasa los tests: siguen los 46 en verde, pero ahora la salida trae avisos que antes no estaban, uno por cada archivo de tests:
 
 ```text
 ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
@@ -361,7 +363,7 @@ La 7 actualiza el estado del router dentro de `startTransition` (lección 51 de 
 <BrowserRouter future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
 ```
 
-Los 35 tests, en verde, y ningún aviso en la salida. Parece hecho. **Ahora abre la app en el navegador**, entra, ve a «Préstamos» y pulsa «Cerrar sesión». En vez de quedarte en el catálogo, acabas en `/entrar?volver=%2Fprestamos`, como si hubieras intentado entrar en préstamos sin sesión.
+Los 46 tests, en verde, y ningún aviso en la salida. Parece hecho. **Ahora abre la app en el navegador**, entra, ve a «Préstamos» y pulsa «Cerrar sesión». En vez de quedarte en el catálogo, acabas en `/entrar?volver=%2Fprestamos`, como si hubieras intentado entrar en préstamos sin sesión.
 
 ```laboratorio
 {
@@ -422,7 +424,7 @@ npm install react-router-dom@7
 Se instala la 7.18.4 (con `react-router` 7.18.4 por debajo: en la 7, `react-router-dom` solo reexporta `react-router`), y `npm audit` dice por fin `found 0 vulnerabilities`. Los tests, en verde. Pero `npm run typecheck`, no:
 
 ```text
-src/app.tsx(20,22): error TS2322: Type '{ children: Element; future: { v7_relativeSplatPath: boolean; v7_startTransition: boolean; }; }' is not assignable to type 'IntrinsicAttributes & BrowserRouterProps'.
+src/app.tsx(19,22): error TS2322: Type '{ future: { v7_relativeSplatPath: boolean; v7_startTransition: boolean; }; children: Element; }' is not assignable to type 'IntrinsicAttributes & BrowserRouterProps'.
   Property 'future' does not exist on type 'IntrinsicAttributes & BrowserRouterProps'.
 ```
 
@@ -542,7 +544,7 @@ Esta app no tiene `RouterProvider` todavía, así que no hay ningún `react-rout
 npm install react-router@8
 ```
 
-Se instala la 8.5.0, y los 35 tests, el typecheck y el build siguen en verde **sin tocar ni una línea**. El modo declarativo de la 8 es el de la 7: `<BrowserRouter>`, `<Routes>`, `useNavigate` y `<Navigate>` funcionan igual. Lo que la 8 cambió (el middleware siempre activo, `context` como `RouterContextProvider`, los paquetes solo ESM, lo que contó la lección 1) toca al modo datos y al modo framework, y esta app todavía no usa ninguno.
+Se instala la 8.5.0, y los 46 tests, el typecheck y el build siguen en verde **sin tocar ni una línea**. El modo declarativo de la 8 es el de la 7: `<BrowserRouter>`, `<Routes>`, `useNavigate` y `<Navigate>` funcionan igual. Lo que la 8 cambió (el middleware siempre activo, `context` como `RouterContextProvider`, los paquetes solo ESM, lo que contó la lección 1) toca al modo datos y al modo framework, y esta app todavía no usa ninguno.
 
 Ya estás en la 8, con Node 24 y React 19, y `npm audit` limpio. Podrías parar aquí. Pero la app sigue pidiendo sus datos en efectos, y eso es lo que arregla el paso 3.
 
@@ -608,7 +610,7 @@ El orden importa. En esta app hay una pieza que comparten muchas rutas: **la ses
 }
 ```
 
-Los 35 tests, en verde. `iniciarApp` sigue teniendo la misma firma, y por eso los tests no se han enterado de que debajo hay otro router. Commit.
+Los 46 tests, en verde. `iniciarApp` sigue teniendo la misma firma, y por eso los tests no se han enterado de que debajo hay otro router. Commit.
 
 ### 3.2. La sesión, al router (`sesion.ts`, `rutas/raiz.tsx`, `rutas/entrar.tsx` y `rutas/salir.ts`)
 
@@ -688,11 +690,13 @@ Con eso, la raíz (lo que era `Marco`) pide la sesión en su `loader`, cerrar se
     },
     {
       "fragmento": "return replace(destinoSeguro(url.searchParams.get('volver'), url.origin))",
-      "nota": "replace, no redirect. Las dos devuelven una redirección, pero replace sustituye la entrada del historial, como el navigate(volver, { replace: true }) de la 6: al pulsar Atrás no vuelves al formulario. destinoSeguro no ha cambiado: solo acepta rutas de esta web, y una mal formada lleva a /prestamos."
+      "nota": "replace, no redirect. Las dos devuelven una redirección, pero replace sustituye la entrada del historial, como el navigate(volver, { replace: true }) de la 6: al pulsar Atrás no vuelves al formulario. destinoSeguro no ha cambiado: acepta solo rutas de esta web, y una mal formada lleva a /prestamos."
     }
   ]
 }
 ```
+
+`destinoSeguro` es el mismo de la 6, con su test de once casos, y lo que comprueba importa más que nunca, porque ahora su resultado va directo a una redirección. Comprobar el origen no basta: `new URL('/.//evil.example', origen)` es de nuestro origen, pero su ruta normalizada es `//evil.example`, que el navegador lee como otro dominio. Lo mismo pasa con `/a/..//evil.example` o `/%2e//evil.example`. Por eso la función rechaza también cualquier ruta que, ya normalizada, empiece por `//`; sin esa línea, cinco de sus once tests se ponen rojos.
 
 Ese `replace` lo pide un test. Con `redirect`, el que había en el primer borrador de esta migración, se pone rojo «después de entrar, Atrás no vuelve al formulario»: en la 6, `navigate(…, { replace: true })` cambiaba la entrada de `/entrar` por la de `/prestamos`, y `redirect` añade una nueva.
 
@@ -751,7 +755,7 @@ Un fallo de la sesión, en cambio, no tiene una página a la que pertenecer: lo 
 }
 ```
 
-Este comportamiento es nuevo: en la 6, un fallo de `/api/sesion` te dejaba como anónimo hasta recargar. No es de caracterización, porque en la 6 fallaría, así que su test va en su propia carpeta, `pruebas/nuevos/`, con la ayuda `fallar('GET /api/sesion', 1)`, que hace fallar solo la próxima petición. Los 30 de partida siguen sin cambiar, y la suite pasa de 35 a 36 tests.
+Este comportamiento es nuevo: en la 6, un fallo de `/api/sesion` te dejaba como anónimo hasta recargar. No es de caracterización, porque en la 6 fallaría, así que su test va en su propia carpeta, `pruebas/nuevos/`, con la ayuda `fallar('GET /api/sesion', 1)`, que hace fallar solo la próxima petición. Los 30 de partida siguen sin cambiar, y la suite pasa de 46 a 47 tests.
 
 `RutaProtegida` sigue en `RutasAntiguas` hasta el 3.5, pero ya no tiene un contexto del que leer. Mientras tanto, lee el usuario del `loader` de la raíz con `useRouteLoaderData('raiz')` (lección 2), y pierde su estado «Comprobando la sesión…»: cuando se pinta, el `loader` de la raíz ya ha terminado.
 
@@ -1107,7 +1111,7 @@ Tests en verde, typecheck limpio, build. Y en Chromium, con la sonda que recorre
 
 ### El código
 
-Entre el primer commit y el último, `git diff --shortstat` sobre `src/` da **20 archivos cambiados, 567 líneas añadidas, 637 borradas**, y `src/` pasa de **762 a 692 líneas** de TypeScript. Lo que se ha ido, contado con `grep`:
+Entre el primer commit y el último, `git diff --shortstat` sobre `src/` da **20 archivos cambiados, 567 líneas añadidas, 637 borradas**, y `src/` pasa de **770 a 700 líneas** de TypeScript. Lo que se ha ido, contado con `grep`:
 
 ```text
                          antes   después
@@ -1160,7 +1164,7 @@ Y el escenario que no mejora también enseña algo. En `/prestamos`, el middlewa
   "tipo": "callout",
   "variante": "aviso",
   "titulo": "Lo que ha crecido: el JavaScript",
-  "contenido": "El JavaScript del build pasa de 176,17 kB (57,21 kB con gzip) en el punto de partida a 326,68 kB (102,42 kB con gzip) al final. Casi todo llega en dos pasos: React 19 en el 2b (de 192,76 a 271,70 kB) y el router de datos en el 3.1 (de 270,30 a 328,65 kB). La app en sí apenas cambia de tamaño. Si te importa la primera carga, el reto 3 parte las rutas con lazy, y en el paso 4 el framework lo hace solo."
+  "contenido": "El JavaScript del build pasa de 176,21 kB (57,23 kB con gzip) en el punto de partida a 326,72 kB (102,43 kB con gzip) al final. Casi todo llega en dos pasos: React 19 en el 2b (de 192,79 a 271,74 kB) y el router de datos en el 3.1 (de 270,34 a 328,69 kB). La app en sí apenas cambia de tamaño. Si te importa la primera carga, el reto 3 parte las rutas con lazy, y en el paso 4 el framework lo hace solo."
 }
 ```
 
@@ -1261,7 +1265,7 @@ Lo que estos tests ya no cubren es la entrada del framework: `entry.client.tsx`,
 
 `npm run build` termina con *«SPA Mode: Generated build/client/index.html»*. Ese `index.html` no llega vacío: su `<body>` trae ya el `HydrateFallback` de la raíz, «Cargando la biblioteca…», que se ve mientras llega el JavaScript y se ejecuta el `clientLoader` de la sesión. La cabecera no puede ir dentro, porque depende de ese `clientLoader`, que no se ejecuta al construir. Y cada ruta sale partida en trozos (`splitRouteModules`, activo por defecto en la 8, lección 16): `ficha-client-loader-….js` (0,40 kB) aparte de `ficha-main-….js` (1,60 kB), para que el router empiece a pedir los datos mientras se descarga el componente.
 
-Con `npm run dev` (`react-router dev`) y con el build servido por `vite preview --outDir build/client`, la sonda de Chromium pasa sus diez comprobaciones con la consola vacía, y `npm test` sigue en 36 de 36.
+Con `npm run dev` (`react-router dev`) y con el build servido por `vite preview --outDir build/client`, la sonda de Chromium pasa sus diez comprobaciones con la consola vacía, y `npm test` sigue en 47 de 47.
 
 ## Antes de darlo por terminado
 
