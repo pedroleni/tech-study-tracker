@@ -103,11 +103,11 @@ Para lanzar solo un archivo mientras trabajas: `npm test -- esquema`. Y `npx vit
   "tipo": "callout",
   "variante": "info",
   "titulo": "Todo lo de esta lección está ejecutado de verdad",
-  "contenido": "El proyecto usa React 19.3.1, Vite 8.3.5, TypeScript 6.0.3 y Oxlint, como la plantilla react-ts de create-vite 9.3.1, más Zod 4.6.7 y MSW 3.0.3. Para los tests, Vitest 5.0.5, Testing Library React 16.3.3, user-event 14.6.8, jest-dom 7.0.1, vitest-axe 0.1.0 (con axe-core 4.14.0) y jsdom 28.1.0. Las salidas que verás son copias de la terminal, solo recortadas, del 22 y el 23 de octubre de 2026, y lo que se dice del navegador está comprobado en Chromium."
+  "contenido": "El proyecto usa React 19.3.1, Vite 8.3.5, TypeScript 7.0.2 y Oxlint, como la plantilla react-ts de create-vite 9.3.1, más Zod 4.6.7 y MSW 3.0.3. Para los tests, Vitest 5.0.5, Testing Library React 16.3.3, user-event 14.6.8, jest-dom 7.0.1, vitest-axe 0.1.0 (con axe-core 4.14.0) y jsdom 28.1.0. Las salidas que verás son copias de la terminal, solo recortadas, del 22 y el 23 de octubre de 2026, y lo que se dice del navegador está comprobado en Chromium."
 }
 ```
 
-**Y TypeScript 7.** Desde la versión 9.3.3 de `create-vite` (27 de octubre de 2026), la plantilla `react-ts` trae `"typescript": "~7.0.2"`, que es también lo que instala hoy `npm install -D typescript`. Este proyecto se queda en la 6.0.3, la misma versión que el panel de tipos de esta web, y su código pasa `tsc` sin errores con las dos. Si creas tu proyecto desde cero, tendrás la 7: los comandos (`tsc -b`, `npm run build`) son los mismos.
+**Y TypeScript 7.** Desde la versión 9.3.3 de `create-vite` (27 de octubre de 2026), la plantilla `react-ts` trae `"typescript": "~7.0.2"`, que es también lo que instala hoy `npm install -D typescript`. Este proyecto usa la 7.0.2, fijada exacta, y su código pasa `tsc` sin errores también con la 6.0.3, la versión del panel de tipos de esta web (la 7 no se puede ejecutar dentro de un navegador). Los comandos (`tsc -b`, `npm run build`) son los mismos con una y con otra.
 
 ## Cómo está organizado
 

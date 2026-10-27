@@ -135,7 +135,7 @@ pruebas/                      Vitest y Testing Library                          
 Dockerfile                    la imagen de la plantilla                             ← paso 10
 ```
 
-Sale de la plantilla oficial (`npx create-react-router@8.5.0`), como la revista, con estos cambios: sin Tailwind, con Zod 4.6.7 y Vitest, con TypeScript 6.0.3 (el del panel de tipos de esta ficha) en vez del 5.9 de la plantilla y con el `Dockerfile` de la plantilla, que retocas en el paso 10.
+Sale de la plantilla oficial (`npx create-react-router@8.5.0`), como la revista, con estos cambios: sin Tailwind, con Zod 4.6.7 y Vitest, con TypeScript 7.0.2 (el panel de tipos de esta ficha usa la 6.0.3, porque la 7 no se puede ejecutar en un navegador) en vez del 5.9 de la plantilla y con el `Dockerfile` de la plantilla, que retocas en el paso 10.
 
 Las rutas forman dos mundos. La parte pública cuelga directamente de `root`; la zona de socios, de `zona.tsx`, una ruta con su `path` (`socio`) y un `<Outlet>`, que es donde vive el middleware:
 
