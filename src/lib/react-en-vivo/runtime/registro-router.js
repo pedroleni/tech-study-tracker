@@ -19,7 +19,9 @@
   const recortar = (valor, limite) => String(valor ?? '').slice(0, limite)
   const codificar = (valor, limite) => {
     try {
-      return encodeURI(String(valor ?? '')).slice(0, limite)
+      return encodeURI(String(valor ?? ''))
+        .replace(/%25([0-9a-f]{2})/gi, '%$1')
+        .slice(0, limite)
     } catch {
       return recortar(valor, limite)
     }
@@ -355,9 +357,6 @@
           loader: envolverPaso(registro, route, 'loader'),
           action: envolverPaso(registro, route, 'action'),
           lazy: envolverPaso(registro, route, 'lazy'),
-          'lazy.loader': envolverPaso(registro, route, 'lazy'),
-          'lazy.action': envolverPaso(registro, route, 'lazy'),
-          'lazy.middleware': envolverPaso(registro, route, 'lazy'),
         })
       } catch {
         // Instrumentación opcional.

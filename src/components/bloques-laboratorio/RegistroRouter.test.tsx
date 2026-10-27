@@ -57,6 +57,27 @@ describe('RegistroRouter', () => {
     ]) expect(within(registro).getByText(new RegExp(texto))).toBeInTheDocument()
   })
 
+  it.each(['fetcher-carga', 'fetcher-envio'] as const)(
+    'un %s no dice que acabó en la URL actual del router',
+    (clase) => {
+      render(
+        <RegistroRouter
+          operaciones={[
+            operacion({ clase, fetcher: 'detalle', destino: '/recetas/7', urlFinal: '/recetas' }),
+          ]}
+          lleno={false}
+          soloDeclarativo={false}
+          onLimpiar={() => {}}
+        />,
+      )
+
+      const registro = screen.getByRole('region', { name: 'Registro del router' })
+      expect(within(registro).getByText(/Fetcher «detalle»/)).not.toHaveTextContent(
+        'acabó en /recetas',
+      )
+    },
+  )
+
   it('agrupa los pasos por fase y escribe inicio y duración', () => {
     render(
       <RegistroRouter

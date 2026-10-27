@@ -351,6 +351,19 @@ export default function App() { return <BrowserRouter><Routes><Route path="/" el
     )
   })
 
+  it.each([
+    ['/entrar?volver=%2Fdesignaciones', '/entrar?volver=%2Fdesignaciones'],
+    ['/recetas/Tortilla%20de%20patatas', '/recetas/Tortilla%20de%20patatas'],
+    ['/porcentaje/%', '/porcentaje/%25'],
+  ])('no vuelve a codificar la ubicación %s', async (url, esperada) => {
+    const enviar = await instalar([{ nombre: 'App.tsx', codigo: `import { createMemoryRouter } from 'react-router'; import { RouterProvider } from 'react-router/dom'; const router = createMemoryRouter([{ path: '*', Component: () => <p>Ruta</p> }], { initialEntries: [${JSON.stringify(url)}] }); export default function App() { return <RouterProvider router={router} /> }` }])
+    await waitFor(() =>
+      expect(mensajesDe(enviar)).toContainEqual(
+        expect.objectContaining({ tipo: 'ubicacion', url: esperada }),
+      ),
+    )
+  })
+
   it('recargar conserva los datos de la API simulada y el almacenamiento en memoria', async () => {
     await instalar([{ nombre: 'App.tsx', codigo: `import { createMemoryRouter, useLoaderData } from 'react-router'; import { RouterProvider } from 'react-router/dom'; localStorage.setItem('tema', localStorage.getItem('tema') || 'oscuro'); const loader = async () => ({ recetas: await (await fetch('/api/recetas')).json(), tema: localStorage.getItem('tema') }); function Inicio() { const d = useLoaderData(); return <p>{d.recetas.map(r => r.nombre).join(', ')} · {d.tema}</p> }; const router = createMemoryRouter([{ path: '/', loader, Component: Inicio }]); export default function App() { return <RouterProvider router={router} /> }` }], { api: { recetas: [{ id: 1, nombre: 'Migas' }] } })
     await fetch('/api/recetas', { method: 'POST', body: JSON.stringify({ nombre: 'Pisto' }) })

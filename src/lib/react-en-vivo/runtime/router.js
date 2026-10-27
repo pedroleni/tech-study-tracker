@@ -29,6 +29,14 @@
   const crearUrl = (entrada) =>
     typeof entrada === 'string' ? entrada : ReactRouter.createPath(entrada)
 
+  const codificarUrl = (valor) => {
+    try {
+      return encodeURI(String(valor ?? '')).replace(/%25([0-9a-f]{2})/gi, '%$1')
+    } catch {
+      return String(valor ?? '')
+    }
+  }
+
   const crearHistorial = (entradas, initialIndex) => {
     const lista = (entradas && entradas.length ? entradas : ['/']).map((entrada) => ({
       clave: null,
@@ -124,7 +132,7 @@
     if (!navegadorActivo) return
     const mensaje = {
       tipo: 'ubicacion',
-      url: encodeURI(navegadorActivo.ubicacion()).slice(0, 500),
+      url: codificarUrl(navegadorActivo.ubicacion()).slice(0, 500),
       puedeAtras: navegadorActivo.puedeAtras(),
       puedeAdelante: navegadorActivo.puedeAdelante(),
       origen: navegadorActivo.origen,
