@@ -208,6 +208,31 @@ export default function App() { return <RouterProvider router={router} /> }`)
     expect(loader).toBeGreaterThan(lazy)
   })
 
+  it.each([
+    {
+      caso: 'un ErrorBoundary en una ruta madre sin path',
+      ruta: `{ ErrorBoundary: () => <p role="alert">Error madre</p>, children: [{ path: 'lazy', lazy: { loader: async () => () => null, Component: () => new Promise((_resolve, reject) => setTimeout(() => reject(new Error('descarga rota')), 20)) } }] }`,
+    },
+    {
+      caso: 'un ErrorBoundary en la propia ruta',
+      ruta: `{ path: 'lazy', ErrorBoundary: () => <p role="alert">Error propio</p>, lazy: { loader: async () => () => null, Component: () => new Promise((_resolve, reject) => setTimeout(() => reject(new Error('descarga rota')), 20)) } }`,
+    },
+  ])('un lazy de objeto que rechaza conserva el mismo DOM con y sin registro: $caso', async ({ ruta }) => {
+    const codigo = `import { createMemoryRouter, Link, Outlet, useNavigation } from 'react-router'; import { RouterProvider } from 'react-router/dom'; function Marco() { const navegacion = useNavigation(); return <><Link to="/lazy">Abrir lazy</Link><output data-testid="estado">{navegacion.state}</output><Outlet /></> }; const router = createMemoryRouter([{ path: '/', Component: Marco, ErrorBoundary: () => <p role="alert">Error general</p>, children: [{ index: true, Component: () => <p>Inicio</p> }, ${ruta}] }]); export default function App() { return <RouterProvider router={router} /> }`
+    await instalar(codigo, { conRegistro: false })
+    fireEvent.click(await within(document.body).findByRole('link', { name: 'Abrir lazy' }))
+    await waitFor(() => expect(within(document.body).getByTestId('estado')).toHaveTextContent('loading'))
+    await waitFor(() => expect(within(document.body).getByTestId('estado')).toHaveTextContent('idle'))
+    const sinRegistro = document.querySelector('#root')?.innerHTML
+
+    await instalar(codigo)
+    fireEvent.click(await within(document.body).findByRole('link', { name: 'Abrir lazy' }))
+    await waitFor(() => expect(within(document.body).getByTestId('estado')).toHaveTextContent('loading'))
+    await waitFor(() => expect(within(document.body).getByTestId('estado')).toHaveTextContent('idle'))
+
+    expect(document.querySelector('#root')?.innerHTML).toBe(sinRegistro)
+  })
+
   it('un throw data() de 404 sale en errores con su texto, y un Error, como paso con error', async () => {
     const enviar = await instalar(`import { createMemoryRouter, data, Link, Outlet } from 'react-router'; import { RouterProvider } from 'react-router/dom'; function ErrorBoundary() { return <p>Error visible</p> }; const router = createMemoryRouter([{ path: '/', Component: () => <><Link to="/404">404</Link><Link to="/error">Error</Link><Outlet /></>, ErrorBoundary, children: [{ id: 'no-existe', path: '404', loader: () => { throw data('No existe', { status: 404 }) }, Component: () => null }, { id: 'rota', path: 'error', loader: () => { throw new Error('se rompió') }, Component: () => null }] }]); export default function App() { return <RouterProvider router={router} /> }`)
     fireEvent.click(await within(document.body).findByRole('link', { name: '404' }))
@@ -301,6 +326,13 @@ describe('operaciones sin navigate instrumentado (carga inicial y revalidación)
     expect(operaciones(enviar).map((op) => op.clase)).toEqual(['carga-inicial'])
     expect(operacion.urlFinal).toBe('/entrar?volver=/panel')
     expect(operaciones(enviar)[0].pasos).toContainEqual(expect.objectContaining({ tipo: 'loader', ruta: 'entrar', fase: 'redireccion' }))
+  })
+
+  it('conserva la codificación de la URL final de un redirect', async () => {
+    const enviar = await instalar(`import { createMemoryRouter, redirect } from 'react-router'; import { RouterProvider } from 'react-router/dom'; const router = createMemoryRouter([{ path: '/designaciones', loader: () => redirect('/entrar?volver=' + encodeURIComponent('/designaciones')) }, { path: '/entrar', Component: () => <p>Entrar</p> }], { initialEntries: ['/designaciones'] }); export default function App() { return <RouterProvider router={router} /> }`)
+    await within(document.body).findByText('Entrar')
+    const operacion = await esperarOperacion(enviar, (op) => op.clase === 'carga-inicial')
+    expect(operacion.urlFinal).toBe('/entrar?volver=%2Fdesignaciones')
   })
 
   it('una revalidación interrumpida por un enlace sale cancelada por la navegación', async () => {
