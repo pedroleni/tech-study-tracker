@@ -18,6 +18,9 @@ const OPCIONES_JSON = {
   module: 'ESNext',
   lib: ['ES2020', 'DOM', 'DOM.Iterable'],
   strict: true,
+  // Iguala el orden de uniones de los diagnósticos al de TypeScript 7,
+  // que es el compilador que usa el alumno fuera del navegador.
+  stableTypeOrdering: true,
 }
 
 export interface DiagnosticoTs {
@@ -34,16 +37,14 @@ export interface ResultadoCompilacionTs {
 
 // @typescript/vfs tipa TODA su superficie (createVirtualTypeScriptEnvironment,
 // knownLibFilesForCompilerOptions, VirtualTypeScriptEnvironment.languageService
-// y los Diagnostic que devuelve...) contra `typeof import('typescript')` — el
-// nombre REAL del paquete — no contra el alias `typescript-en-vivo` que usamos
-// para no chocar con la devDependency del proyecto (ver Global Constraints del
-// plan). En tiempo de ejecución es exactamente el mismo código (mismo bin,
-// mismo tarball); TypeScript los trata como identidades nominales distintas
-// por cómo se referencian a sí mismos sus propios .d.ts (Node/NodeArray/etc.
-// son estructuralmente recursivos) — problema conocido al convivir dos
-// instalaciones de "typescript" bajo nombres de paquete distintos, no es un
-// error real de tipos. Este único cast, justo al cargar el módulo, evita
-// repetirlo en cada llamada a @typescript/vfs.
+// y los Diagnostic que devuelve...) contra `typeof import('typescript')`.
+// Ese nombre resuelve ahora al alias @typescript/typescript6@6.0.2, cuya API
+// clásica es compatible con `typescript-en-vivo` (typescript@6.0.3), pero son
+// dos instalaciones y TypeScript les asigna identidades nominales distintas
+// por cómo se referencian a sí mismos sus .d.ts recursivos (Node/NodeArray,
+// etc.). Este único cast, justo al cargar el módulo, evita repetirlo en cada
+// llamada a @typescript/vfs; el build nativo de la 7 vive por separado en
+// `@typescript/native`.
 type TsReal = typeof import('typescript')
 
 export interface EntornoTypeScript {

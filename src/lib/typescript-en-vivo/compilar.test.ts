@@ -55,6 +55,21 @@ function f(e: Estado): number {
     expect(resultado.diagnosticos.some((d) => d.severidad === 'error')).toBe(true)
   })
 
+  it('ordena las uniones de los diagnósticos como TypeScript 7', async () => {
+    const entorno = await crearEntornoTypeScript(cargarLibDesdeDisco)
+    const resultado = compilarEnEntorno(
+      entorno,
+      `type NombrePropiedad = 'nombre' | 'edad' | 'email'
+type NombreEvento = \`cambio:\${NombrePropiedad}\`
+declare function escuchar(evento: NombreEvento): void
+escuchar('cambio:telefono')`,
+    )
+
+    expect(resultado.diagnosticos[0]?.mensaje).toBe(
+      'Argument of type \'"cambio:telefono"\' is not assignable to parameter of type \'"cambio:edad" | "cambio:email" | "cambio:nombre"\'.',
+    )
+  })
+
   it('no revienta con código vacío, ni al pasar de vacío a válido y de vuelta', async () => {
     const entorno = await crearEntornoTypeScript(cargarLibDesdeDisco)
 

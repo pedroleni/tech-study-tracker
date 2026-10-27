@@ -7,6 +7,7 @@ import { RielSecciones } from '@/components/leccion/RielSecciones'
 class IntersectionObserverFalso implements IntersectionObserver {
   readonly root = null
   readonly rootMargin = '0px'
+  readonly scrollMargin = '0px'
   readonly thresholds = []
 
   disconnect() {}
