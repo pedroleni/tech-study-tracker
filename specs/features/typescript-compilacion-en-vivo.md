@@ -81,33 +81,38 @@ fragmento autocontenido).
 
 ### 3. Motor de compilación: `typescript` real + `@typescript/vfs`, cargados bajo demanda
 
-**Hallazgo importante de esta sesión, antes de fijar versiones:** el
-paquete `typescript` en npm cambió de implementación en su major 7 — pasó
-a ser el compilador nativo en Go ("tsgo"), distribuido como binarios
-nativos por plataforma (`optionalDependencies` tipo
-`@typescript/typescript-darwin-arm64`, etc.), con un `bin: { tsc }` de
-solo-CLI y **sin `main`/`types` para uso como librería JS**. Es inservible
-para este caso de uso (nada que `import()` en un bundle de navegador).
+**Compatibilidad con TypeScript 7:** el paquete `typescript` 7 es el
+compilador nativo en Go, distribuido como binarios por plataforma. Sí
+expone una API de JavaScript en `typescript/unstable/sync` y
+`typescript/unstable/async`, pero ambas variantes arrancan el binario con
+`child_process` y se comunican con él por un pipe. Por tanto no pueden
+ejecutarse dentro de un bundle de navegador. TypeScript 7.1.0-beta tampoco
+incluye un build WASM, y el Playground oficial continúa usando la 6.0.3.
 
-La última versión que sigue siendo el compilador clásico implementado en
-JS (`main: './lib/typescript.js'`, sin binarios nativos) es **`6.0.3`** —
-la misma que usa la API pública (`ts.transpileModule`, `ts.createProgram`,
-`ts.LanguageService`, etc.) sobre la que se construye el propio Playground
-oficial de TypeScript y sobre la que `@typescript/vfs` está diseñado.
-**Fijar `typescript@6.0.3` explícito (no `^`, no `latest`)** — instalar
-por accidente la v7 rompería esta feature en silencio (el import
-funcionaría en Node al bundlear, pero no habría API que llamar en
-runtime).
+La última versión que funciona como compilador autocontenido en el
+navegador es **`6.0.3`**, con la API clásica (`ts.transpileModule`,
+`ts.createProgram`, `ts.LanguageService`, etc.) para la que está diseñado
+`@typescript/vfs`. Se mantiene fijada explícitamente bajo el alias
+`typescript-en-vivo`; actualizar ese alias a la 7 rompería esta feature.
 
-- **Dependencias nuevas**: `typescript@6.0.3` + `@typescript/vfs@1.6.4`
+La web usa el montaje de compatibilidad recomendado para ejecutar ambas
+generaciones lado a lado: `typescript` resuelve a
+`@typescript/typescript6@6.0.2` para typescript-eslint, los tipos de
+`@typescript/vfs` y demás herramientas que necesitan la API de JS; el
+script `build` ejecuta `@typescript/native` (alias de `typescript@7.0.2`).
+El alias independiente `typescript-en-vivo@npm:typescript@6.0.3` sigue
+siendo el compilador descargado por el navegador.
+
+- **Dependencias del motor en vivo**:
+  `typescript-en-vivo@npm:typescript@6.0.3` + `@typescript/vfs@1.6.4`
   (peer `typescript: '*'`, compatible). Ambas oficiales de Microsoft/su
   org en npm — mismo checkpoint de supply-chain que se hizo para
   CodeMirror.
-- **Carga perezosa**: `import('typescript')` + `import('@typescript/vfs')`
+- **Carga perezosa**: `import('typescript-en-vivo')` + `import('@typescript/vfs')`
   solo la primera vez que un bloque `editor-en-vivo` de la página tiene
   contenido no vacío en `ts` (code-splitting real vía Vite) — ninguna otra
   lección paga el peso de estas dependencias.
-- **Ficheros `lib.*.d.ts`**: se copian desde `node_modules/typescript/lib/`
+- **Ficheros `lib.*.d.ts`**: se copian desde `node_modules/typescript-en-vivo/lib/`
   a `public/ts-libs/` en el propio repo (comiteados, sin depender de
   ningún CDN en runtime — a diferencia del helper `createDefaultMapFromCDN`
   de `@typescript/vfs`, pensado para demos, no para producción). Qué
@@ -117,9 +122,12 @@ runtime).
 - **Entorno virtual de un solo archivo**: `createSystem(new Map([[nombreArchivo, código]]))`
   + `createVirtualTypeScriptEnvironment(sistema, [nombreArchivo], ts, opciones)`.
   Opciones fijas y razonables para todo el temario: `target: ES2020`,
-  `module: ESNext`, `strict: true`, `lib: ['ES2020', 'DOM', 'DOM.Iterable']` —
+  `module: ESNext`, `strict: true`, `stableTypeOrdering: true`,
+  `lib: ['ES2020', 'DOM', 'DOM.Iterable']` —
   coherente con el `tsconfig.json` real ya usado en el proyecto avanzado
-  (lección 78/`buscador-personajes-ts`).
+  (lección 78/`buscador-personajes-ts`). `stableTypeOrdering` hace que el
+  orden de las uniones en los diagnósticos de la 6 coincida con el orden
+  estable de la 7 que el alumno ejecuta localmente.
 - **Salida**: `env.languageService.getSemanticDiagnostics(nombreArchivo)` +
   `getSyntacticDiagnostics(nombreArchivo)` para el panel (categoría
   `Error` → severidad `error`, categoría `Warning` → `aviso`;
@@ -248,10 +256,10 @@ Retrocompatible: los bloques ya publicados sin `ts` siguen validando
   integración con el compilador + panel de diagnósticos.
 - `src/lib/typescript-en-vivo/compilar.ts` — nuevo.
 - `public/ts-libs/` — nuevos ficheros estáticos (`.d.ts` copiados de
-  `node_modules/typescript/lib/`, el subconjunto exacto que devuelva
+  `node_modules/typescript-en-vivo/lib/`, el subconjunto exacto que devuelva
   `knownLibFilesForCompilerOptions`).
-- `package.json` — nuevas dependencias: `typescript@6.0.3` (exacto, no
-  `^`), `@typescript/vfs@1.6.4`.
+- `package.json` — `typescript-en-vivo` como alias exacto de
+  `typescript@6.0.3`, más `@typescript/vfs@1.6.4`.
 - `contenido/typescript/` — carpeta nueva, `TEMARIO.md` + lecciones.
 - `contenido/javascript/78-proyecto-avanzado-buscador-typescript.md` —
   se traslada a `contenido/typescript/` (última lección del módulo
@@ -296,9 +304,10 @@ Retrocompatible: los bloques ya publicados sin `ts` siguen validando
   (`schemas.test.ts`)
 - [x] `src/lib/typescript-en-vivo/compilar.ts` — Codex, con un fix real de
   Claude después: `@typescript/vfs` tipa toda su superficie contra
-  `typeof import('typescript')` (el nombre real del paquete), no contra el
-  alias `typescript-en-vivo` — un único cast (`TsReal`) al cargar el módulo
-  lo resuelve. Ver el comentario en el propio fichero y en el plan.
+  `typeof import('typescript')`, que ahora resuelve a
+  `@typescript/typescript6@6.0.2`, no contra la instalación separada
+  `typescript-en-vivo` — un único cast (`TsReal`) al cargar el módulo lo
+  resuelve. Ver el comentario en el propio fichero y en el plan.
 - [x] Script `scripts/dev/generar-ts-libs.mjs` para poblar `public/ts-libs/`
   desde `node_modules/typescript-en-vivo/lib/` vía
   `knownLibFilesForCompilerOptions` — Codex (60 ficheros copiados, 4
@@ -307,14 +316,13 @@ Retrocompatible: los bloques ya publicados sin `ts` siguen validando
   perezosa del compilador — Codex
 - [x] `npm install` de `typescript-en-vivo` (alias exacto de
   `typescript@6.0.3`) + `@typescript/vfs@1.6.4` — Claude (sandbox de Codex
-  sin acceso a red). Incluyó un fix real: `typescript` y `typescript-en-vivo`
-  comparten el mismo `bin: tsc`, y npm solo enlaza uno de los dos en
-  `node_modules/.bin/tsc` según el orden de instalación — el script `build`
-  ahora usa la ruta explícita `node_modules/typescript/bin/tsc` para no
-  depender de esa carrera.
+  sin acceso a red). El montaje actual reserva `typescript` para la API JS
+  de `@typescript/typescript6@6.0.2` y ejecuta el compilador nativo 7.0.2
+  mediante `node_modules/@typescript/native/bin/tsc` en el script `build`.
 - [x] Tests unitarios de `compilarEnEntorno()` con el compilador real (no
   mocks): error de tipos, código válido, tipos del DOM, exhaustividad con
-  `never`, transiciones a/desde código vacío — 5/5 en verde
+  `never`, orden estable de uniones y transiciones a/desde código vacío —
+  6/6 en verde
 - [x] Verificación visual (Playwright, credenciales reales de admin,
   `/admin/referencia-contenido`): un bloque con error de tipos muestra el
   panel en rojo con línea:columna y no ejecuta; al corregirlo en el propio
