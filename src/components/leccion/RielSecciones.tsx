@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 
+import { TituloEnLinea } from '@/components/content/TituloEnLinea'
 import type { EncabezadoH2 } from '@/lib/utils/extraerEncabezadosH2'
+import { textoPlanoDeTitulo } from '@/lib/utils/tituloEnLinea'
 
 export interface PropiedadesRielSecciones {
   secciones: EncabezadoH2[]
@@ -52,7 +54,7 @@ export function RielSecciones({ secciones }: PropiedadesRielSecciones) {
               <li key={seccion.id} className="relative pb-5.5 last:pb-0">
                 <button
                   type="button"
-                  aria-label={`Ir a ${seccion.titulo}`}
+                  aria-label={`Ir a ${textoPlanoDeTitulo(seccion.titulo)}`}
                   aria-current={activa ? 'true' : undefined}
                   onClick={() => {
                     setSeccionActiva(indice)
@@ -73,7 +75,7 @@ export function RielSecciones({ secciones }: PropiedadesRielSecciones) {
                       activa ? 'size-2.75 -translate-x-px bg-primary' : 'size-2.25 bg-border'
                     }`}
                   />
-                  {seccion.titulo}
+                  <TituloEnLinea texto={seccion.titulo} />
                 </button>
               </li>
             )

@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router-dom'
 
 import { CommentsSection } from '@/components/comment/CommentsSection'
 import { SafeMarkdown } from '@/components/content/SafeMarkdown'
+import { TituloEnLinea } from '@/components/content/TituloEnLinea'
 import { BarraNavegacionLeccion } from '@/components/leccion/BarraNavegacionLeccion'
 import { RielSecciones } from '@/components/leccion/RielSecciones'
 import { Button } from '@/components/ui/button'
@@ -87,7 +88,7 @@ export function LeccionPage() {
                   </p>
                 )}
                 <h1 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
-                  {leccion.titulo}
+                  <TituloEnLinea texto={leccion.titulo} />
                 </h1>
                 {leccion.resumen && (
                   <p className="max-w-3xl text-base text-pretty text-muted-foreground">
@@ -130,7 +131,7 @@ export function LeccionPage() {
                       {String(indice + 1).padStart(2, '0')}
                     </span>
                     <h2 className="pt-1 text-xl font-bold tracking-tight text-balance">
-                      {seccion.titulo}
+                      <TituloEnLinea texto={seccion.titulo} />
                     </h2>
                   </div>
                   {seccion.cuerpo && (
