@@ -1960,10 +1960,10 @@ Cancelar en el navegador no deshace nada en el servidor, lo decía la lección 5
 **`formMethod` en minúsculas.** En el `<fetcher.Form>` escribes `method="delete"`, pero el fetcher lo guarda en mayúsculas. Con `fetcher.formMethod === 'delete'`, el indicador no diría nunca «Cancelando…». En TSX no llegas a probarlo, porque el panel de tipos lo marca:
 
 ```text
-This comparison appears to be unintentional because the types '"POST" | "DELETE" | "GET" | "PUT" | "PATCH" | undefined' and '"delete"' have no overlap.
+This comparison appears to be unintentional because the types '"DELETE" | "GET" | "PATCH" | "POST" | "PUT" | undefined' and '"delete"' have no overlap.
 ```
 
-Es decir: «esta comparación parece un despiste, porque los tipos `"POST" | "DELETE" | …` y `"delete"` no tienen nada en común». Es el mensaje de `tsc` 6.0.3 con los tipos de React Router 8.5.0.
+Es decir: «esta comparación parece un despiste, porque los tipos `"DELETE" | "GET" | …` y `"delete"` no tienen nada en común». Es el mensaje de `tsc` 7.0.2, la versión que instala hoy `npm install -D typescript`, con los tipos de React Router 8.5.0. El orden de la unión no significa nada: TypeScript 7 la escribe siempre ordenada así, y la 6 podía escribirla en otro orden.
 
 **Una `key` de la franja sin el día.** Con `` key={`${pista.id}-${hora}`} ``, al cambiar del miércoles al jueves React conserva cada `Franja` (lección 26 de React), y con ella su fetcher. Comprobado: un «No se pudo reservar» del Frontón a las 20:00 del miércoles siguió debajo del Frontón a las 20:00 del jueves. Con el día en la `key`, cada día tiene sus franjas y sus fetchers.
 

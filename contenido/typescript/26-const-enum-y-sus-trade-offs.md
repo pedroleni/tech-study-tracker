@@ -15,7 +15,7 @@ Un `enum` normal genera un objeto JavaScript real en tiempo de ejecución, con e
 {
   "tipo": "comparador-antes-despues",
   "antes": "<script>\n// enum normal: genera un objeto real\nenum Color {\n  Rojo,\n  Verde,\n  Azul,\n}\n\nconsole.log(Color.Rojo); // 0, y Color existe como objeto real\nconsole.log(Object.keys(Color)); // se puede inspeccionar en tiempo de ejecución\n</script>",
-  "despues": "<script>\n// const enum: se elimina en la compilación, sustituido por su valor\nconst enum ColorConst {\n  Rojo,\n  Verde,\n  Azul,\n}\n\nconsole.log(ColorConst.Rojo);\n// El JavaScript generado es literalmente: console.log(0 /* Rojo */);\n// No existe ningún objeto ColorConst en tiempo de ejecución\n</script>",
+  "despues": "<script>\n// const enum: se elimina en la compilación, sustituido por su valor\nconst enum ColorConst {\n  Rojo,\n  Verde,\n  Azul,\n}\n\nconsole.log(ColorConst.Rojo);\n// El JavaScript generado es literalmente: console.log(0 /* ColorConst.Rojo */);\n// No existe ningún objeto ColorConst en tiempo de ejecución\n</script>",
   "nota": "const enum produce JavaScript más pequeño y rápido porque no crea ningún objeto — cada uso se sustituye directamente por el número o string correspondiente durante la compilación. La contrapartida: Object.keys(ColorConst) o iterar sobre sus valores no es posible, porque el objeto sencillamente no existe una vez compilado."
 }
 ```

@@ -162,7 +162,13 @@ Hecha en el *scratchpad*, sin tocar el repositorio:
 5. **Tipos.** Los `.d.ts` de React Router 8.5.0, montados en
    `/node_modules` de la misma VFS que usa el panel de errores de tipos
    (`@typescript/vfs` con TypeScript 6.0.3), dan los mismos diagnósticos
-   que `tsc`: 61 archivos y 469 KB.
+   que `tsc` salvo en un detalle: el orden en que se escriben los miembros
+   de una unión en los mensajes, que en la 6.0.3 depende del orden en que
+   se crearon los tipos y puede cambiar entre el panel y `tsc`. Con la
+   opción `stableTypeOrdering: true` en el panel, ese orden y el resto del
+   mensaje coinciden con los de `tsc` 7.0.2, la versión que instala hoy un
+   alumno (comprobado el 27-oct-2026 con los mensajes citados en React y
+   React Router). Son 61 archivos y 469 KB.
 
 **Firefox, sin verificar.** La especificación de `react-en-vivo` ya tiene
 pendiente probarlo.

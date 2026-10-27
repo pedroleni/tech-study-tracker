@@ -191,7 +191,7 @@ Con el reductor tipado, `useReducer(invitadosReducer, iniciales)` **deduce solo*
 Estos son los tres mensajes que vas a leer más a menudo con un reductor tipado:
 
 ```text
-Type '"cambiado"' is not assignable to type '"anadido" | "respondido" | "borrado"'.
+Type '"cambiado"' is not assignable to type '"anadido" | "borrado" | "respondido"'.
 ```
 Una acción cuyo `type` no existe (o con una errata). El mensaje lista los que sí.
 

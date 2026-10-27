@@ -50,7 +50,13 @@ real.
   en Go de TypeScript 7, anunciada en el
   [devblog oficial](https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/) —
   ya verificado de primera mano en `specs/features/typescript-compilacion-en-vivo.md`
-  al fijar la versión del compilador del editor en vivo).
+  al fijar la versión del compilador del editor en vivo, y otra vez el
+  2026-10-27 con `typescript@7.0.2`, que ya es lo que instala
+  `npm install -D typescript`: la 7 no tiene build para navegador, su
+  API de JavaScript lanza el binario nativo como proceso aparte, y el
+  editor en vivo sigue en la 6.0.3. Para herramientas que necesitan la
+  API clásica junto a la 7, Microsoft publica `@typescript/typescript6`.
+  Las lecciones 2, 26, 36, 50, 51 y 53 se corrigieron ese día para la 7).
 - **[Google TypeScript Style Guide](https://google.github.io/styleguide/tsguide.html)**
   (Google), segunda fuente real pero puntual, no de cobertura total: el
   Handbook enseña el lenguaje, no cuándo conviene usar cada construcción

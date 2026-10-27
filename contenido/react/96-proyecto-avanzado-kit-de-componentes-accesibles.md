@@ -103,6 +103,8 @@ Para lanzar solo los tests de un componente mientras trabajas: `npm test -- Pest
 }
 ```
 
+**Y TypeScript 7.** Desde la versión 9.3.3 de `create-vite` (27 de octubre de 2026), la plantilla `react-ts` trae `"typescript": "~7.0.2"`, que es también lo que instala hoy `npm install -D typescript`. Este proyecto se queda en la 6.0.3, la misma versión que el panel de tipos de esta web, y su código pasa `tsc` sin errores con las dos. Si creas tu proyecto desde cero, tendrás la 7: los comandos (`tsc -b`, `npm run build`) son los mismos.
+
 ## Cómo está organizado
 
 ```text
