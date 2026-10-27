@@ -122,7 +122,7 @@ Desde entonces han salido cinco versiones menores. Lo que importa de cada una, s
     {
       "fecha": "17 jun 2026 · 8.0.0",
       "titulo": "Sin react-router-dom, y con el middleware siempre activo",
-      "texto": "Todo se importa de react-router, salvo RouterProvider y HydratedRouter, que vienen de react-router/dom. El middleware deja de ser una opción, y el context de loader y action es siempre un RouterContextProvider. Las future flags de la 7 pasan a ser lo normal. Paquetes solo ESM. Mínimos: Node 22.22, React 19.2.7 y, en el framework, Vite 7."
+      "texto": "Todo se importa de react-router, salvo RouterProvider y HydratedRouter, que vienen de react-router/dom. El middleware deja de ser una opción en el modo framework (en el modo datos, la última 7 ya lo ejecuta sin activarlo), y el context de loader y action es siempre un RouterContextProvider. Las future flags de la 7 pasan a ser lo normal. Paquetes solo ESM. Mínimos: Node 22.22, React 19.2.7 y, en el framework, Vite 7."
     },
     {
       "fecha": "29 jun 2026 · 8.1.0",
@@ -215,7 +215,7 @@ Si en el código ves `<Switch>`, `useHistory` o `withRouter`, es la 5. Reconocer
     },
     {
       "mito": "La 8 es una reescritura y hay que aprenderlo todo otra vez",
-      "realidad": "Es casi la 7 con sus future flags activadas y sin react-router-dom. Lo que aprendas en esta ficha vale para la 7, salvo los import y el middleware, que en la 7 había que activar."
+      "realidad": "Es casi la 7 con sus future flags activadas y sin react-router-dom. Lo que aprendas en esta ficha vale para la 7, salvo los import y el middleware, que en el modo framework de la 7 había que activar con la flag v8_middleware."
     },
     {
       "mito": "Si usas createBrowserRouter, estás en modo framework",

@@ -424,7 +424,7 @@ En Vercel se hace con una reescritura (*rewrite*) en `vercel.json`. La lección 
     },
     {
       "mito": "El paquete se llama react-router-dom",
-      "realidad": "Se llamó así hasta la versión 7 y en la 8 desapareció: todo está en react-router. Aun así, react-router-dom se descargó casi 26 millones de veces la semana del 12 de octubre de 2026, y esta misma web usa react-router-dom 7.18.2. Lo verás en mucho código."
+      "realidad": "Se llamó así hasta la versión 7 y en la 8 desapareció: todo está en react-router. Aun así, react-router-dom se descargó 55 millones de veces la semana del 26 de septiembre al 2 de octubre de 2026, y esta misma web usa react-router-dom 7.18.2. Lo verás en mucho código."
     },
     {
       "mito": "Una SPA no puede tener URL de verdad",
