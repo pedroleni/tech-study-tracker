@@ -1,6 +1,7 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
+import { TituloEnLinea } from '@/components/content/TituloEnLinea'
 import type { Leccion } from '@/types'
 
 export interface PropiedadesBarraNavegacionLeccion {
@@ -35,7 +36,9 @@ export function BarraNavegacionLeccion({
             <ChevronLeft aria-hidden="true" className="size-3.5" />
             Lección anterior
           </span>
-          <span className="text-base font-bold text-balance">{anterior.titulo}</span>
+          <span className="text-base font-bold text-balance">
+            <TituloEnLinea texto={anterior.titulo} />
+          </span>
         </Link>
       ) : (
         <span aria-hidden="true" />
@@ -50,7 +53,9 @@ export function BarraNavegacionLeccion({
             Siguiente lección
             <ChevronRight aria-hidden="true" className="size-3.5" />
           </span>
-          <span className="text-base font-bold text-balance">{siguiente.titulo}</span>
+          <span className="text-base font-bold text-balance">
+            <TituloEnLinea texto={siguiente.titulo} />
+          </span>
         </Link>
       ) : (
         <span aria-hidden="true" />

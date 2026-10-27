@@ -10,6 +10,8 @@ const state = vi.hoisted(() => ({
   leccionStatus: 'publicado' as 'borrador' | 'publicado',
   setProgress: vi.fn(),
   setLeccionProgress: vi.fn(),
+  leccionContenido:
+    '# Efectos\n\nTexto seguro <script>alert(1)</script>\n\n![Píxel remoto](https://tracker.example/pixel.gif)',
 }))
 
 const technology = {
@@ -94,7 +96,11 @@ vi.mock('@/lib/hooks/useLecciones', () => ({
 }))
 vi.mock('@/lib/hooks/useLeccion', () => ({
   useLeccion: () => ({
-    data: { ...leccion, status: state.leccionStatus },
+    data: {
+      ...leccion,
+      contenido: state.leccionContenido,
+      status: state.leccionStatus,
+    },
     isLoading: false,
     isError: false,
   }),
@@ -136,6 +142,8 @@ describe('public and account pages', () => {
     state.leccionStatus = 'publicado'
     state.setProgress.mockClear()
     state.setLeccionProgress.mockClear()
+    state.leccionContenido =
+      '# Efectos\n\nTexto seguro <script>alert(1)</script>\n\n![Píxel remoto](https://tracker.example/pixel.gif)'
   })
 
   it('does not mix admin drafts into the public category view', () => {
@@ -192,6 +200,25 @@ describe('public and account pages', () => {
       rules: { 'color-contrast': { enabled: false } },
     })
     expect(results.violations).toEqual([])
+  })
+
+  it('renders inline Markdown in a section title without changing its anchor', () => {
+    state.leccionContenido = '## `root.tsx`: el documento\n\nContenido de la sección.'
+
+    const { container } = render(
+      <MemoryRouter initialEntries={['/tecnologias/technology-1/hooks']}>
+        <Routes>
+          <Route path="/tecnologias/:id/:leccionSlug" element={<LeccionPage />} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    const titulo = container.querySelector('#root-tsx-el-documento h2')
+    expect(titulo).toHaveTextContent('root.tsx: el documento')
+    expect(titulo?.querySelector('code')).toHaveTextContent('root.tsx')
+    expect(titulo).not.toHaveTextContent('`')
+    expect(titulo?.closest('div[id]')).toHaveAttribute('id', 'root-tsx-el-documento')
+    expect(container.querySelector('#root-tsx-el-documento')).toBeInTheDocument()
   })
 
   it('renders a public technology safely and without axe violations', async () => {
