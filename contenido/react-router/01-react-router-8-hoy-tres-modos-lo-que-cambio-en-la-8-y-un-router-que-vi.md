@@ -122,7 +122,7 @@ Desde entonces han salido cinco versiones menores. Lo que importa de cada una, s
     {
       "fecha": "17 jun 2026 · 8.0.0",
       "titulo": "Sin react-router-dom, y con el middleware siempre activo",
-      "texto": "Todo se importa de react-router, salvo RouterProvider y HydratedRouter, que vienen de react-router/dom. El middleware deja de ser una opción en el modo framework (en el modo datos, la última 7 ya lo ejecuta sin activarlo), y el context de loader y action es siempre un RouterContextProvider. Las future flags de la 7 pasan a ser lo normal. Paquetes solo ESM. Mínimos: Node 22.22, React 19.2.7 y, en el framework, Vite 7."
+      "texto": "Todo se importa de react-router, salvo RouterProvider y HydratedRouter, que vienen de react-router/dom. El middleware deja de ser opcional en el modo framework (en el modo datos, la última 7 ya lo ejecutaba), y el context de loader y action es siempre un RouterContextProvider. Las future flags de la 7 son ya lo normal. Solo ESM. Mínimos: Node 22.22, React 19.2.7 y, en el framework, Vite 7."
     },
     {
       "fecha": "29 jun 2026 · 8.1.0",
