@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
-import { act, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
+import { axe } from 'vitest-axe'
 
 import { VistaPreviaReact } from './VistaPreviaReact'
 
@@ -167,6 +168,116 @@ describe('VistaPreviaReact', () => {
     expect(
       screen.getByText('Error al renderizar: Roto — App.jsx, línea 12 del código compilado'),
     ).toBeInTheDocument()
+  })
+
+  it('explica en castellano un error de React reconocido sin sustituir el original', () => {
+    render(<VistaPreviaReact srcDoc="<p>a</p>" />)
+
+    enviarDesde(iframe().contentWindow, {
+      canal: 'react-en-vivo',
+      tipo: 'error-render',
+      texto: 'Too many re-renders. React limits the number of renders to prevent an infinite loop.',
+    })
+
+    expect(
+      screen.getByText(
+        'Error al renderizar: Too many re-renders. React limits the number of renders to prevent an infinite loop.',
+      ),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        'Qué suele significar: Un cambio de estado se ejecuta durante el propio render y lo repite sin fin. Suele ser un onClick={fn()} en vez de onClick={fn} o un set… suelto en el cuerpo del componente.',
+      ),
+    ).toBeInTheDocument()
+
+    enviarDesde(iframe().contentWindow, {
+      canal: 'react-en-vivo',
+      tipo: 'error',
+      texto: 'ReferenceError: ListaTareas is not defined',
+    })
+    expect(screen.getByText('Error: ReferenceError: ListaTareas is not defined')).toBeInTheDocument()
+    expect(
+      screen.getByText('Qué suele significar: Usas «ListaTareas» sin haberlo declarado ni importado.'),
+    ).toBeInTheDocument()
+  })
+
+  it('reintenta una vez, ofrece recarga manual y reinicia el automático al cambiar srcDoc', () => {
+    vi.useFakeTimers()
+    try {
+      const { rerender } = render(<VistaPreviaReact srcDoc="<p>a</p>" />)
+      const primero = iframe()
+
+      enviarDesde(primero.contentWindow, {
+        canal: 'react-en-vivo',
+        tipo: 'runtime-no-cargado',
+        libreria: 'react-router',
+      })
+      enviarDesde(primero.contentWindow, {
+        canal: 'react-en-vivo',
+        tipo: 'error-render',
+        texto: 'No se pudo cargar React Router en la vista previa. Pulsa «Recargar vista previa» para intentarlo de nuevo.',
+      })
+      expect(screen.queryByText(/No se pudo cargar React/)).toBeNull()
+      act(() => vi.advanceTimersByTime(799))
+      expect(iframe()).toBe(primero)
+      act(() => vi.advanceTimersByTime(1))
+      const segundo = iframe()
+      expect(segundo).not.toBe(primero)
+
+      enviarDesde(segundo.contentWindow, {
+        canal: 'react-en-vivo',
+        tipo: 'runtime-no-cargado',
+        libreria: 'react-router',
+      })
+      expect(
+        screen.getByText(
+          'No se pudo cargar React Router en la vista previa. Puede ser un corte de conexión momentáneo.',
+        ),
+      ).toBeInTheDocument()
+      const boton = screen.getByRole('button', { name: 'Recargar vista previa' })
+      fireEvent.click(boton)
+      const tercero = iframe()
+      expect(tercero).not.toBe(segundo)
+      expect(screen.queryByRole('button', { name: 'Recargar vista previa' })).toBeNull()
+
+      rerender(<VistaPreviaReact srcDoc="<p>b</p>" />)
+      const editado = iframe()
+      enviarDesde(editado.contentWindow, {
+        canal: 'react-en-vivo',
+        tipo: 'runtime-no-cargado',
+        libreria: 'react',
+      })
+      act(() => vi.advanceTimersByTime(800))
+      expect(iframe()).not.toBe(editado)
+      expect(screen.queryByText(/No se pudo cargar React/)).toBeNull()
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('no introduce problemas básicos de accesibilidad en el error recuperable', async () => {
+    vi.useFakeTimers()
+    render(<VistaPreviaReact srcDoc="<p>a</p>" />)
+    enviarDesde(iframe().contentWindow, {
+      canal: 'react-en-vivo',
+      tipo: 'runtime-no-cargado',
+      libreria: 'react',
+    })
+    act(() => vi.advanceTimersByTime(800))
+    vi.useRealTimers()
+    enviarDesde(iframe().contentWindow, {
+      canal: 'react-en-vivo',
+      tipo: 'runtime-no-cargado',
+      libreria: 'react',
+    })
+
+    const caja = screen
+      .getByText(/Puede ser un corte de conexión momentáneo/)
+      .closest('[aria-live]')
+    expect(caja).not.toBeNull()
+    expect(
+      (await axe(caja!, { rules: { 'color-contrast': { enabled: false } } })).violations,
+    ).toEqual([])
   })
 
   it('ajusta la altura entre 160 y 2400 px', () => {

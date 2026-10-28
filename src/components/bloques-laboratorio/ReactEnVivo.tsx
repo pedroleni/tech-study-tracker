@@ -45,6 +45,7 @@ import type {
   MensajeRouterOperacion,
 } from '@/lib/react-en-vivo/mensajes'
 import { prepararDocumento } from '@/lib/react-en-vivo/preparar'
+import { explicarErrorReact } from '@/lib/react-en-vivo/explicarError'
 import { transformarParaMostrar } from '@/lib/react-en-vivo/transformar'
 import {
   clienteReactKitCompartido,
@@ -572,6 +573,9 @@ export function ReactEnVivo({
     ...(mostrarJsGenerado ? [PESTANA_JS_GENERADO] : []),
   ]
   const archivoActivo = archivos.find((archivo) => archivo.nombre === pestana)
+  const explicacionErrorSintaxis = errorSintaxis
+    ? explicarErrorReact(errorSintaxis)
+    : null
 
   return (
     <section
@@ -684,9 +688,12 @@ export function ReactEnVivo({
           )}
 
           {errorSintaxis && (
-            <p className="rounded-lg bg-red-50 p-3 font-mono text-sm break-words text-red-700 dark:bg-red-950/30 dark:text-red-400">
-              {errorSintaxis}
-            </p>
+            <div className="space-y-2 rounded-lg bg-red-50 p-3 text-sm break-words text-red-700 dark:bg-red-950/30 dark:text-red-400">
+              <p className="font-mono">{errorSintaxis}</p>
+              {explicacionErrorSintaxis && (
+                <p>{`Qué suele significar: ${explicacionErrorSintaxis}`}</p>
+              )}
+            </div>
           )}
 
           {usaTypeScript && (
@@ -735,7 +742,11 @@ export function ReactEnVivo({
             </ul>
           )}
           {srcDoc === null ? (
-            <p className="text-sm text-muted-foreground">Preparando React…</p>
+            <p className="text-sm text-muted-foreground">
+              {errorSintaxis
+                ? 'La vista previa arrancará en cuanto el código compile: corrige el error de sintaxis.'
+                : 'Preparando React…'}
+            </p>
           ) : (
             <>
               {barraDeDirecciones && ubicacion && (

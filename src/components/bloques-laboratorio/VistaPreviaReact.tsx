@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { RotateCw } from 'lucide-react'
 
+import { Button } from '@/components/ui/button'
 import { leerMensajeReactEnVivo, type MensajeReactEnVivo } from '@/lib/react-en-vivo/mensajes'
 import { CANAL_REACT_EN_VIVO } from '@/lib/react-en-vivo/constantes'
+import { explicarErrorReact } from '@/lib/react-en-vivo/explicarError'
 import { cn } from '@/lib/utils'
 
 import type { AjustesRed } from './PanelRed'
@@ -34,10 +37,27 @@ export function VistaPreviaReact({
   const ordenNavegadorRef = useRef(ordenNavegador)
   const ultimaOrdenNavegadorEnviadaRef = useRef(ordenNavegador?.id ?? 0)
   const documentoRef = useRef<{ srcDoc: string; codigoCompilado: boolean } | null>(null)
+  const reintentoRef = useRef<{
+    srcDoc: string
+    fase: 'disponible' | 'pendiente' | 'agotado'
+  }>({ srcDoc, fase: 'disponible' })
+  const temporizadorRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [alto, setAlto] = useState<number | null>(null)
+  const [revision, setRevision] = useState(0)
   // El error se guarda junto al documento que lo produjo: al cambiar srcDoc
   // deja de mostrarse sin tener que borrarlo desde un efecto.
-  const [error, setError] = useState<{ srcDoc: string; texto: string } | null>(null)
+  const [error, setError] = useState<{
+    srcDoc: string
+    texto: string
+    explicacion?: string
+    runtime?: 'react' | 'react-router'
+  } | null>(null)
+
+  const remontar = useCallback(() => {
+    montadoRef.current = false
+    setError(null)
+    setRevision((actual) => actual + 1)
+  }, [])
 
   const enviarOrdenNavegador = useCallback((orden: NonNullable<typeof ordenNavegador>) => {
     const ventana = iframeRef.current?.contentWindow
@@ -99,6 +119,11 @@ export function VistaPreviaReact({
   // useEffect (después de pintar), un iframe rápido podía adelantarse y su
   // mensaje perderse.
   useLayoutEffect(() => {
+    if (reintentoRef.current.srcDoc !== srcDoc) {
+      if (temporizadorRef.current !== null) clearTimeout(temporizadorRef.current)
+      temporizadorRef.current = null
+      reintentoRef.current = { srcDoc, fase: 'disponible' }
+    }
     const documento = documentoRef.current
     if (
       !documento ||
@@ -132,7 +157,33 @@ export function VistaPreviaReact({
         }
       }
       if (mensaje.tipo === 'alto') setAlto(mensaje.alto)
+      if (mensaje.tipo === 'runtime-no-cargado') {
+        const reintento = reintentoRef.current
+        if (reintento.fase === 'disponible') {
+          reintento.fase = 'pendiente'
+          setError(null)
+          temporizadorRef.current = setTimeout(() => {
+            if (reintentoRef.current !== reintento) return
+            reintento.fase = 'agotado'
+            temporizadorRef.current = null
+            remontar()
+          }, 800)
+        } else if (reintento.fase === 'agotado') {
+          setError({
+            srcDoc,
+            texto: `No se pudo cargar ${mensaje.libreria === 'react' ? 'React' : 'React Router'} en la vista previa. Puede ser un corte de conexión momentáneo.`,
+            runtime: mensaje.libreria,
+          })
+        }
+      }
       if (mensaje.tipo === 'error-render') {
+        const esFalloDelRuntime = mensaje.texto.startsWith(
+          'No se pudo cargar React Router en la vista previa.',
+        )
+        if (esFalloDelRuntime && reintentoRef.current.fase !== 'disponible') {
+          onMensajeRef.current?.(mensaje)
+          return
+        }
         const donde = mensaje.archivo
           ? ` — ${mensaje.archivo}${
               mensaje.linea
@@ -140,21 +191,38 @@ export function VistaPreviaReact({
                 : ''
             }`
           : ''
-        setError({ srcDoc, texto: `Error al renderizar: ${mensaje.texto}${donde}` })
+        setError({
+          srcDoc,
+          texto: `Error al renderizar: ${mensaje.texto}${donde}`,
+          explicacion: explicarErrorReact(mensaje.texto) ?? undefined,
+        })
       }
-      if (mensaje.tipo === 'error') setError({ srcDoc, texto: `Error: ${mensaje.texto}` })
+      if (mensaje.tipo === 'error') {
+        setError({
+          srcDoc,
+          texto: `Error: ${mensaje.texto}`,
+          explicacion: explicarErrorReact(mensaje.texto) ?? undefined,
+        })
+      }
       onMensajeRef.current?.(mensaje)
     }
 
     window.addEventListener('message', recibir)
-    return () => window.removeEventListener('message', recibir)
-  }, [codigoCompilado, enviarOrdenNavegador, srcDoc])
+    return () => {
+      window.removeEventListener('message', recibir)
+      if (temporizadorRef.current !== null) {
+        clearTimeout(temporizadorRef.current)
+        temporizadorRef.current = null
+      }
+    }
+  }, [codigoCompilado, enviarOrdenNavegador, remontar, revision, srcDoc])
 
-  const errorVisible = error?.srcDoc === srcDoc ? error.texto : null
+  const errorVisible = error?.srcDoc === srcDoc ? error : null
 
   return (
     <div className="min-w-0 space-y-2">
       <iframe
+        key={revision}
         ref={iframeRef}
         className={cn(
           'block w-full max-w-full rounded-lg border bg-white',
@@ -168,12 +236,21 @@ export function VistaPreviaReact({
         title="Vista previa de React"
       />
       {errorVisible && (
-        <p
+        <div
           aria-live="polite"
-          className="rounded-lg bg-red-50 p-3 font-mono text-sm break-words text-red-700 dark:bg-red-950/30 dark:text-red-400"
+          className="space-y-2 rounded-lg bg-red-50 p-3 text-sm break-words text-red-700 dark:bg-red-950/30 dark:text-red-400"
         >
-          {errorVisible}
-        </p>
+          <p className={errorVisible.runtime ? undefined : 'font-mono'}>{errorVisible.texto}</p>
+          {errorVisible.explicacion && (
+            <p>{`Qué suele significar: ${errorVisible.explicacion}`}</p>
+          )}
+          {errorVisible.runtime && (
+            <Button type="button" variant="outline" size="sm" onClick={remontar}>
+              <RotateCw aria-hidden="true" />
+              Recargar vista previa
+            </Button>
+          )}
+        </div>
       )}
     </div>
   )
