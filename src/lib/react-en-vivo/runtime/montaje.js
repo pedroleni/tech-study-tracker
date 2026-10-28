@@ -12,8 +12,8 @@
   // Si react.js no llegó (red caída, versión retirada), se dice, y las
   // comprobaciones contestan en vez de dejar al comprobador esperando.
   if (!R) {
-    const motivo = 'No se pudo cargar React en la vista previa. Recarga la página para intentarlo de nuevo.'
-    enviar({ tipo: 'error-render', texto: motivo })
+    const motivo = 'No se pudo cargar React en la vista previa. Pulsa «Recargar vista previa» para intentarlo de nuevo.'
+    enviar({ tipo: 'runtime-no-cargado', libreria: 'react' })
     window.__comprobarReactEnVivo = async (comprobaciones) =>
       comprobaciones.map((comprobacion) => ({ descripcion: comprobacion.descripcion, ok: false, motivo }))
     window.addEventListener('message', async (evento) => {
@@ -49,6 +49,12 @@
     EXTERNOS['react-router'] = window.__routerEnVivo.espacios['react-router']
     EXTERNOS['react-router/dom'] = window.__routerEnVivo.espacios['react-router/dom']
   }
+  const usaReactRouter = Object.values(modulos).some((codigo) =>
+    /\brequire\((['"])react-router(?:\/dom)?\1\)/.test(codigo),
+  )
+  if (usaReactRouter && window.__routerEnVivo && window.__routerEnVivo.error) {
+    enviar({ tipo: 'runtime-no-cargado', libreria: 'react-router' })
+  }
   // hasOwnProperty y no `in`: un import de "constructor" no debe encontrar
   // nada en el prototipo de Object.
   const tiene = (objeto, clave) => Object.prototype.hasOwnProperty.call(objeto, clave)
@@ -64,7 +70,7 @@
     if (peticion === 'react-router' || peticion === 'react-router/dom') {
       throw new Error(
         (window.__routerEnVivo && window.__routerEnVivo.error) ||
-          'No se pudo cargar React Router en la vista previa. Recarga la página para intentarlo de nuevo.',
+          'No se pudo cargar React Router en la vista previa. Pulsa «Recargar vista previa» para intentarlo de nuevo.',
       )
     }
     if (!peticion.startsWith('./')) {

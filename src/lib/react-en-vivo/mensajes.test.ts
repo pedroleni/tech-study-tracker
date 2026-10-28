@@ -61,6 +61,18 @@ describe('leerMensajeReactEnVivo', () => {
     ).toEqual({ canal: 'react-en-vivo', tipo: 'commit', numero: 2 })
     expect(
       leerMensajeReactEnVivo(
+        evento({ canal: 'react-en-vivo', tipo: 'runtime-no-cargado', libreria: 'react-router' }),
+        iframe.contentWindow,
+      ),
+    ).toEqual({ canal: 'react-en-vivo', tipo: 'runtime-no-cargado', libreria: 'react-router' })
+    expect(
+      leerMensajeReactEnVivo(
+        evento({ canal: 'react-en-vivo', tipo: 'runtime-no-cargado', libreria: 'otra' }),
+        iframe.contentWindow,
+      ),
+    ).toBeNull()
+    expect(
+      leerMensajeReactEnVivo(
         evento({ canal: 'react-en-vivo', tipo: 'error-render', texto: 'Roto', archivo: 'App.jsx', linea: 3 }),
         iframe.contentWindow,
       ),

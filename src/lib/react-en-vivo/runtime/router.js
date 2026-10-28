@@ -8,7 +8,7 @@
   const LIBRERIA = window.__reactRouterEnVivo
   const R = window.__reactEnVivo
   const ERROR_CARGA =
-    'No se pudo cargar React Router en la vista previa. Recarga la página para intentarlo de nuevo.'
+    'No se pudo cargar React Router en la vista previa. Pulsa «Recargar vista previa» para intentarlo de nuevo.'
 
   if (!LIBRERIA || !R) {
     window.__routerEnVivo = { error: ERROR_CARGA }

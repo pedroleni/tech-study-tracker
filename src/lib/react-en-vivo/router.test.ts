@@ -387,7 +387,9 @@ export default function App() { return <BrowserRouter><Routes><Route path="/" el
 
   it('importar react-router sin el bundle da un error claro', async () => {
     const enviar = await instalar([{ nombre: 'App.tsx', codigo: `import { Link } from 'react-router'; export default function App() { return <Link to="/">Inicio</Link> }` }], { conBundleRouter: false })
-    expect(mensajesDe(enviar)).toContainEqual(expect.objectContaining({ tipo: 'error-render', texto: 'No se pudo cargar React Router en la vista previa. Recarga la página para intentarlo de nuevo.' }))
+    expect(mensajesDe(enviar)[0]).toEqual({ tipo: 'runtime-no-cargado', libreria: 'react-router' })
+    expect(mensajesDe(enviar)).toContainEqual({ tipo: 'runtime-no-cargado', libreria: 'react-router' })
+    expect(mensajesDe(enviar)).toContainEqual(expect.objectContaining({ tipo: 'error-render', texto: 'No se pudo cargar React Router en la vista previa. Pulsa «Recargar vista previa» para intentarlo de nuevo.' }))
   })
 
   it('un paquete desconocido dice solo React, React Router y tus propios archivos', async () => {
@@ -432,7 +434,7 @@ export default function App() { return <BrowserRouter><Routes><Route path="/" el
     it('si el bundle del router no carga usa ese error como motivo', async () => {
       await instalar([{ nombre: 'App.tsx', codigo: `import { Link } from 'react-router'; export default function App() { return <Link to="/b">B</Link> }` }], { conBundleRouter: false })
       await instalarPruebas()
-      expect(await ventana.__comprobarReactEnVivo?.([{ descripcion: 'URL', pasos: [{ navegar: '/b' }], espera: { url: '/b' } }])).toEqual([{ descripcion: 'URL', ok: false, motivo: 'No se pudo cargar React Router en la vista previa. Recarga la página para intentarlo de nuevo.' }])
+      expect(await ventana.__comprobarReactEnVivo?.([{ descripcion: 'URL', pasos: [{ navegar: '/b' }], espera: { url: '/b' } }])).toEqual([{ descripcion: 'URL', ok: false, motivo: 'No se pudo cargar React Router en la vista previa. Pulsa «Recargar vista previa» para intentarlo de nuevo.' }])
     })
 
     it('cada comprobación desecha el router de la anterior', async () => {
