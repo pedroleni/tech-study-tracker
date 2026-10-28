@@ -1,6 +1,9 @@
 import { fireEvent, waitFor, within } from '@testing-library/dom'
+import { render } from '@testing-library/react'
+import { createElement } from 'react'
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 
+import { RegistroRouter } from '@/components/bloques-laboratorio/RegistroRouter'
 import type { ArchivoReact } from '@/lib/laboratorio/schemas'
 import type { MensajeRouterOperacion } from '@/lib/react-en-vivo/mensajes'
 
@@ -142,6 +145,30 @@ export default function App() { return <RouterProvider router={router} /> }`)
     expect(envio.pasos).not.toContainEqual(expect.objectContaining({ tipo: 'loader', ruta: 'raiz' }))
   })
 
+  it('un Form con GET usa como destino la URL enviada con su búsqueda', async () => {
+    const enviar = await instalar(`import { createMemoryRouter, Form } from 'react-router'
+import { RouterProvider } from 'react-router/dom'
+function Reservas() { return <Form method="get"><input aria-label="Día" name="dia" defaultValue="2026-11-05" /><button>Buscar</button></Form> }
+const router = createMemoryRouter([{ path: '/reservas', loader: () => null, Component: Reservas }], { initialEntries: ['/reservas?dia=2026-11-04'] })
+export default function App() { return <RouterProvider router={router} /> }`)
+    ;((await within(document.body).findByRole('button', { name: 'Buscar' })).closest('form') as HTMLFormElement).requestSubmit()
+    const operacion = await esperarOperacion(enviar, (op) => op.clase === 'navegacion')
+    expect(operacion).toMatchObject({
+      metodo: 'GET',
+      destino: '/reservas?dia=2026-11-05',
+      urlFinal: '/reservas?dia=2026-11-05',
+    })
+
+    const panel = render(createElement(RegistroRouter, {
+      operaciones: [operacion],
+      lleno: false,
+      soloDeclarativo: false,
+      onLimpiar: () => {},
+    }))
+    expect(panel.container).toHaveTextContent('Navegación → /reservas?dia=2026-11-05')
+    expect(panel.queryByText(/acabó en/)).not.toBeInTheDocument()
+  })
+
   it('un fetcher con POST incluye su action y la revalidación en la misma operación', async () => {
     const enviar = await instalar(`import { createMemoryRouter, useFetcher } from 'react-router'; import { RouterProvider } from 'react-router/dom'; const loader = () => null; const action = async () => null; function AppRuta() { const f = useFetcher(); return <f.Form method="post"><button>Enviar fetcher</button></f.Form> }; const router = createMemoryRouter([{ id: 'raiz', path: '/', loader, action, Component: AppRuta }]); export default function App() { return <RouterProvider router={router} /> }`)
     ;((await within(document.body).findByRole('button', { name: 'Enviar fetcher' })).closest('form') as HTMLFormElement).requestSubmit()
@@ -176,10 +203,23 @@ export default function App() { return <RouterProvider router={router} /> }`)
     expect(lenta.pasos).toContainEqual(expect.objectContaining({ tipo: 'loader', ruta: 'lento', tarde: true }))
   })
 
-  it('revalidate() es una operación revalidacion', async () => {
+  it('revalidate() registra sus loader como revalidación y el panel lo explica así', async () => {
     const enviar = await instalar(`import { createMemoryRouter, useRevalidator } from 'react-router'; import { RouterProvider } from 'react-router/dom'; function Inicio() { const r = useRevalidator(); return <button onClick={() => r.revalidate()}>Revalidar</button> }; const router = createMemoryRouter([{ path: '/', loader: () => null, Component: Inicio }]); export default function App() { return <RouterProvider router={router} /> }`)
     fireEvent.click(await within(document.body).findByRole('button', { name: 'Revalidar' }))
-    expect(await esperarOperacion(enviar, (op) => op.clase === 'revalidacion')).toMatchObject({ metodo: 'GET' })
+    const revalidacion = await esperarOperacion(enviar, (op) => op.clase === 'revalidacion')
+    expect(revalidacion).toMatchObject({ metodo: 'GET' })
+    expect(revalidacion.pasos).toContainEqual(
+      expect.objectContaining({ tipo: 'loader', fase: 'revalidacion' }),
+    )
+
+    const panel = render(createElement(RegistroRouter, {
+      operaciones: [revalidacion],
+      lleno: false,
+      soloDeclarativo: false,
+      onLimpiar: () => {},
+    }))
+    expect(panel.getByText('Se volvió a ejecutar: /.')).toBeInTheDocument()
+    expect(panel.queryByText('Se ejecutó: /.')).not.toBeInTheDocument()
   })
 
   it('un envío cuya action redirige muestra la fase redireccion y urlFinal', async () => {

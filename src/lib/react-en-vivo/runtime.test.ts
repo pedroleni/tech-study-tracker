@@ -1003,8 +1003,9 @@ describe('runtime que no llegó a cargar', () => {
 
     new Function(montaje)()
 
-    const motivo = 'No se pudo cargar React en la vista previa. Recarga la página para intentarlo de nuevo.'
-    expect(mensajesDe(enviar)).toContainEqual({ tipo: 'error-render', texto: motivo })
+    const motivo = 'No se pudo cargar React en la vista previa. Pulsa «Recargar vista previa» para intentarlo de nuevo.'
+    expect(mensajesDe(enviar)).toContainEqual({ tipo: 'runtime-no-cargado', libreria: 'react' })
+    expect(mensajesDe(enviar)).not.toContainEqual(expect.objectContaining({ tipo: 'error-render' }))
     expect(mensajesDe(enviar)).toContainEqual(expect.objectContaining({ tipo: 'montado' }))
     expect(
       await ventana.__comprobarReactEnVivo?.([{ descripcion: 'd', pasos: [], espera: { texto: 'x' } }]),

@@ -12,6 +12,7 @@ import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
 import { SafeMarkdown } from '@/components/content/SafeMarkdown'
+import { TituloEnLinea } from '@/components/content/TituloEnLinea'
 import { difficultyLabels, priorityLabels, statusLabels } from '@/components/technology/labels'
 import { StatusBadge } from '@/components/technology/StatusBadge'
 import { TechnologyBrand } from '@/components/technology/TechnologyCard'
@@ -30,6 +31,7 @@ import {
 import { useTechnology } from '@/lib/hooks/useTechnologies'
 import { useProfile } from '@/lib/hooks/useProfile'
 import { cn } from '@/lib/utils'
+import { textoPlanoDeTitulo } from '@/lib/utils/tituloEnLinea'
 import { validateResourceUrl } from '@/lib/utils/validateResourceUrl'
 import type { Leccion, Status } from '@/types'
 
@@ -194,7 +196,7 @@ function ProgressControl({
             <option value="">Ninguna</option>
             {publishedLecciones.map((leccion) => (
               <option key={leccion.id} value={leccion.id}>
-                {leccion.titulo}
+                {textoPlanoDeTitulo(leccion.titulo)}
               </option>
             ))}
           </select>
@@ -491,7 +493,7 @@ export function TechnologyPage() {
                                             to={`/tecnologias/${technology.id}/${leccion.slug}`}
                                             className="rounded-sm decoration-foreground/30 underline-offset-4 group-hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                                           >
-                                            {leccion.titulo}
+                                            <TituloEnLinea texto={leccion.titulo} />
                                           </Link>
                                         </h4>
                                         {esActual && (
@@ -522,7 +524,7 @@ export function TechnologyPage() {
                                           name={`progress-${leccion.id}`}
                                           value={leccionProgressStatus}
                                           disabled={leccionProgressPending}
-                                          aria-label={`Estado de ${leccion.titulo}`}
+                                          aria-label={`Estado de ${textoPlanoDeTitulo(leccion.titulo)}`}
                                           className={cn(
                                             'h-6 appearance-none rounded-full py-1 pr-6 pl-2.5 text-xs font-medium outline-none disabled:cursor-not-allowed disabled:opacity-50',
                                             'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background',

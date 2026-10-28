@@ -2,6 +2,7 @@ import { ArrowUpRight, FolderKanban } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
+import { TituloEnLinea } from '@/components/content/TituloEnLinea'
 import { TechnologyBrand } from '@/components/technology/TechnologyCard'
 import { Card } from '@/components/ui/card'
 import { Pagination } from '@/components/ui/pagination'
@@ -160,7 +161,7 @@ export function ProyectosPage() {
                           to={`/tecnologias/${proyecto.technology.id}/${proyecto.slug}`}
                           className="rounded-sm hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                         >
-                          {proyecto.titulo}
+                          <TituloEnLinea texto={proyecto.titulo} />
                         </Link>
                       </h2>
                       <p className="mt-2 break-words text-sm text-pretty text-muted-foreground">

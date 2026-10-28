@@ -16,6 +16,9 @@ const OPCIONES_JSON = {
   module: 'ESNext',
   lib: ['ES2020', 'DOM', 'DOM.Iterable'],
   strict: true,
+  // Iguala el orden de uniones de los diagnósticos al de TypeScript 7,
+  // que es el compilador que usa el alumno fuera del navegador.
+  stableTypeOrdering: true,
   jsx: 'react-jsx',
   moduleResolution: 'bundler',
   skipLibCheck: true,

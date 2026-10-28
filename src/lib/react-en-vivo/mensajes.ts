@@ -54,6 +54,11 @@ const nodoArbol = z.object({
 
 export const esquemaMensajeReactEnVivo = z.discriminatedUnion('tipo', [
   z.object({ canal, tipo: z.literal('montado'), version: z.string().max(20) }),
+  z.object({
+    canal,
+    tipo: z.literal('runtime-no-cargado'),
+    libreria: z.enum(['react', 'react-router']),
+  }),
   // z.number() ya rechaza Infinity y NaN en Zod 4.
   z.object({ canal, tipo: z.literal('alto'), alto: z.number().min(0) }),
   z.object({ canal, tipo: z.literal('commit'), numero: entero }),

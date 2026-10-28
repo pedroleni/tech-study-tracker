@@ -773,6 +773,43 @@ describe('ReactEnVivo', () => {
     expect(vista().getAttribute('srcdoc')).toBe(valido)
   })
 
+  it('explica el JSX inválido inicial y no deja la vista previa preparando para siempre', async () => {
+    render(
+      <ReactEnVivo
+        {...datos}
+        archivos={[
+          {
+            nombre: 'App.jsx',
+            codigo:
+              'export default function App() { return (<h1>a</h1><p>b</p>) }',
+          },
+        ]}
+      />,
+    )
+
+    expect(await screen.findByText(/Error de sintaxis en App\.jsx/)).toHaveClass('font-mono')
+    const explicacion = screen.getByText(
+      'Qué suele significar: Suele ser JSX mal formado: dos elementos sueltos que hay que envolver en <>…</> o en otro elemento, una etiqueta sin cerrar, o una llave o un paréntesis de más o de menos.',
+    )
+    expect(explicacion.tagName).toBe('P')
+    expect(explicacion).not.toHaveClass('font-mono')
+    expect(
+      screen.getByText(
+        'La vista previa arrancará en cuanto el código compile: corrige el error de sintaxis.',
+      ),
+    ).toHaveClass('text-sm', 'text-muted-foreground')
+    expect(screen.queryByText('Preparando React…')).toBeNull()
+  })
+
+  it('sigue mostrando Preparando React mientras aún no hay resultado de compilación', () => {
+    render(<ReactEnVivo {...datos} />)
+
+    expect(screen.getByText('Preparando React…')).toHaveClass(
+      'text-sm',
+      'text-muted-foreground',
+    )
+  })
+
   it('Reiniciar devuelve los archivos originales', async () => {
     await renderizarListo()
     fireEvent.change(screen.getByLabelText('Editor de App.jsx'), { target: { value: 'otra cosa' } })
