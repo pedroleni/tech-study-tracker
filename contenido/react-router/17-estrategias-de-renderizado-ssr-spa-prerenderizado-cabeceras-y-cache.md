@@ -464,7 +464,9 @@ $ curl -s -o /dev/null -w '%{http_code} %{time_starttransfer} %{time_total}\n' \
 500 6.005702 6.005797
 ```
 
-**El segundo es un 500.** Para `isbot`, `curl` es un bot (y el Chromium sin interfaz de Playwright también: con su `User-Agent` de serie dio el mismo 500). A un bot se le espera a `onAllReady`; la promesa no llega, a los 6 segundos `abort()` corta el render, `onError` cambia el estado a 500 y entonces se responde. **El buscador que visite esa página se lleva un 500 tras seis segundos de espera**, mientras que una persona ve la página al instante y un aviso en un rincón. `streamTimeout` es la red de seguridad, no la solución: lo que puede tardar mucho debería tener su propio límite dentro del `loader`, con `AbortSignal.timeout()` en el `fetch`, por ejemplo, y un valor por defecto si no llega.
+**El segundo es un 500.** Para `isbot`, `curl` es un bot (y el Chromium sin interfaz de Playwright también: con su `User-Agent` de serie dio el mismo 500). A un bot se le espera a `onAllReady`; la promesa no llega, a los 6 segundos `abort()` corta el render, `onError` cambia el estado a 500 y entonces se responde. **El buscador que visite esa página se lleva un 500 tras seis segundos de espera**, mientras que una persona ve la página al instante y un aviso en un rincón.
+
+`streamTimeout` es la red de seguridad, no la solución: lo que puede tardar mucho debería tener su propio límite dentro del `loader`, con `AbortSignal.timeout()` en el `fetch`, por ejemplo, y un valor por defecto si no llega.
 
 ## El mapa del albergue, ruta a ruta
 
