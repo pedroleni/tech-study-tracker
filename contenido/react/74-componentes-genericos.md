@@ -236,7 +236,7 @@ Los errores de la consigna, tal cual salen:
 
 ```text
 clave: 'nombres'
-Type '"nombres"' is not assignable to type '"plazas" | "precioHora" | "id" | "nombre"'. Did you mean '"nombre"'?
+Type '"nombres"' is not assignable to type '"id" | "nombre" | "plazas" | "precioHora"'. Did you mean '"nombre"'?
 
 formatear: (euros) => euros.toUpperCase()
 Property 'toUpperCase' does not exist on type 'number'.

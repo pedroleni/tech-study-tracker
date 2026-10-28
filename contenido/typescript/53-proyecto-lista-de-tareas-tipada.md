@@ -55,9 +55,10 @@ Puedes hacer este mismo proyecto fuera del navegador, en un editor real. Aquí h
    ```
 6. **Copia el código de partida** de la pestaña TypeScript del editor en vivo de abajo dentro de `script.ts`.
 7. **Abre la terminal integrada**: menú `Terminal` → `New Terminal` (o el atajo `` Ctrl+` ``, igual en Windows, Linux y Mac).
-8. **Compila en modo vigilancia**: escribe `npx tsc script.ts --watch` y pulsa Intro — deja esta terminal abierta; cada vez que guardes `script.ts`, genera un `script.js` actualizado solo.
-9. **Abre una SEGUNDA terminal** (icono `+` en el panel), y en esa sirve la carpeta: `npx serve .` — abre en el navegador la URL que imprima.
-10. **El ciclo de trabajo**: edita `script.ts`, guarda con `Cmd`/`Ctrl` + `S` — la primera terminal recompila sola a `script.js` — y refresca el navegador para ver el cambio.
+8. **Instala TypeScript en la carpeta**: escribe `npm init -y` (crea el `package.json`) y después `npm install --save-dev typescript` (hoy instala TypeScript 7). Comprueba que está con `npx tsc -v`: debe decir `Version 7.0.2` o una posterior. Este paso no es opcional: sin `typescript` instalado, `npx tsc` no busca el compilador sino un paquete de npm que se llama `tsc`, una versión antigua y abandonada (la 2.0.4) que solo escribe «This is not the tsc command you are looking for». Si no quieres instalar nada en la carpeta, `npx -p typescript tsc` descarga el paquete correcto cada vez.
+9. **Compila en modo vigilancia**: escribe `npx tsc script.ts --watch` y pulsa Intro — deja esta terminal abierta; cada vez que guardes `script.ts`, genera un `script.js` actualizado solo. No crees un `tsconfig.json` en esta carpeta: si existe y le pasas un fichero a `tsc`, se niega con el error TS5112 (tsconfig.json is present but will not be loaded if files are specified on commandline).
+10. **Abre una SEGUNDA terminal** (icono `+` en el panel), y en esa sirve la carpeta: `npx serve .` — abre en el navegador la URL que imprima.
+11. **El ciclo de trabajo**: edita `script.ts`, guarda con `Cmd`/`Ctrl` + `S` — la primera terminal recompila sola a `script.js` — y refresca el navegador para ver el cambio.
 
 ## El tipo Tarea
 

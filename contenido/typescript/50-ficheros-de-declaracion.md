@@ -29,7 +29,27 @@ Un fichero `.d.ts` contiene SOLO tipos — ninguna implementación real, ningún
   "tipo": "callout",
   "variante": "info",
   "titulo": "DefinitelyTyped: tipos para librerías que no incluyen los suyos",
-  "contenido": "Muchas librerías de JavaScript popular no incluyen sus propios ficheros .d.ts — la comunidad mantiene tipos para ellas en el paquete DefinitelyTyped, instalable como @types/nombre-libreria (por ejemplo, npm install --save-dev @types/lodash). TypeScript los detecta automáticamente si están en node_modules/@types, sin necesidad de importarlos explícitamente en el código."
+  "contenido": "Muchas librerías de JavaScript popular no incluyen sus propios ficheros .d.ts — la comunidad mantiene tipos para ellas en el proyecto DefinitelyTyped, instalables como @types/nombre-libreria (por ejemplo, npm install --save-dev @types/lodash). Si importas la librería en tu código (import _ from 'lodash'), TypeScript encuentra sus tipos en node_modules/@types sin hacer nada más: no hace falta tocar el tsconfig.json."
+}
+```
+
+```laboratorio
+{
+  "tipo": "callout",
+  "variante": "aviso",
+  "titulo": "Los tipos globales, como @types/node, hay que pedirlos",
+  "contenido": "Algunos @types no se importan: declaran cosas globales que usas sin más, como process o Buffer (@types/node) o describe e it (los de un framework de tests). Desde TypeScript 6.0, la opción types del tsconfig.json vale [] por defecto, así que esos ya no se cargan solos aunque estén instalados. Hay que pedirlos: \"types\": [\"node\"]. Si no, el propio error te dice qué falta: TS2591: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig."
+}
+```
+
+```laboratorio
+{
+  "tipo": "codigo-anotado",
+  "lenguaje": "html",
+  "codigo": "<script>\n// tsconfig.json\n{\n  \"compilerOptions\": {\n    \"types\": [\"node\"]\n  }\n}\n</script>",
+  "anotaciones": [
+    { "fragmento": "\"types\": [\"node\"]", "nota": "Carga los tipos globales de @types/node (process, Buffer...). Solo hace falta para los @types que no importas: los de una librería que importas (import _ from 'lodash') se encuentran solos aunque no estén en esta lista. Comprobado con TypeScript 6.0.3 y 7.0.2: sin esta línea, process da TS2591; con ella, compila." }
+  ]
 }
 ```
 
@@ -40,7 +60,7 @@ Un fichero `.d.ts` contiene SOLO tipos — ninguna implementación real, ningún
   "tipo": "notas-clave",
   "items": [
     { "titulo": "Escribir implementación real dentro de un fichero .d.ts.", "texto": "Un .d.ts solo admite declaraciones (declare, interface, type) — cualquier código con cuerpo real (function f() { return 1; }) no es válido ahí." },
-    { "titulo": "Olvidar instalar los @types de una librería y usar any por defecto.", "texto": "Antes de recurrir a any para una librería sin tipos, comprobar si existe un paquete @types/nombre-libreria correspondiente evita perder toda la comprobación de tipos para ese código." }
+    { "titulo": "Olvidar instalar los @types de una librería, o instalarlos y no añadirlos a types.", "texto": "Si importas una librería sin tipos ni @types, con strict (activado por defecto) no hay any silencioso: el compilador da TS7016, Could not find a declaration file for module 'lodash', y sugiere npm i --save-dev @types/lodash. Antes de recurrir a any o a un declare module, comprueba si existe ese paquete. Y si son tipos globales, como @types/node, instalarlos no basta: hay que añadirlos a \"types\" en el tsconfig.json, o sale TS2591." }
   ]
 }
 ```
@@ -50,6 +70,7 @@ Un fichero `.d.ts` contiene SOLO tipos — ninguna implementación real, ningún
 1. Escribe un fichero de declaración (en prosa, describiendo su contenido) para una función `sumar(a, b)` de una librería JavaScript sin tipos.
 2. Explica qué diferencia hay entre un fichero `.ts` normal y uno `.d.ts`.
 3. ¿Qué es DefinitelyTyped, y cómo se instalan los tipos de una librería que forma parte de ese proyecto?
+4. Tienes `@types/node` instalado y, aun así, `process.argv` da `Cannot find name 'process'`. ¿Qué falta en el `tsconfig.json`, y por qué no le pasa lo mismo a `@types/lodash`?
 
 ## Para profundizar
 

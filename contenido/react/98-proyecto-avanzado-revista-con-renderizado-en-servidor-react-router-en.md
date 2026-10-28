@@ -146,7 +146,7 @@ public/og/                    las tarjetas de Open Graph
 pruebas/                      Vitest y Testing Library
 ```
 
-Sale de la plantilla oficial, `npx create-react-router@latest`, que hoy crea un proyecto de React Router 8.5.0 con TypeScript, Tailwind y un `Dockerfile`. Tiene tres cambios: los estilos van en un CSS normal, sin Tailwind ni la fuente de Google (para que el código de los pasos no se llene de clases), no hay `Dockerfile` (desplegar es cosa de la lección 85) y se añade Vitest. TypeScript es el 5.9 que trae la plantilla, no el 6.0 de los proyectos anteriores; la comprobación de tipos pasa limpia igual.
+Sale de la plantilla oficial, `npx create-react-router@latest`, que hoy crea un proyecto de React Router 8.5.0 con TypeScript, Tailwind y un `Dockerfile`. Tiene tres cambios: los estilos van en un CSS normal, sin Tailwind ni la fuente de Google (para que el código de los pasos no se llene de clases), no hay `Dockerfile` (desplegar es cosa de la lección 85) y se añade Vitest. TypeScript es el 7.0.2, como en los proyectos anteriores, aunque la plantilla oficial sigue trayendo el 5.9; la comprobación de tipos pasa limpia igual con las dos.
 
 Lo primero que choca viniendo de Vite: **no hay `index.html` ni `main.tsx`**. El documento entero, desde `<html>`, lo renderiza el componente `Layout` de `root.tsx`, y cada página es un **módulo de ruta**: un archivo que exporta su componente y, si los necesita, su `loader`, su `action` y su `ErrorBoundary`. Las rutas son madres e hijas, como en la lección 77, y `root.tsx` es la madre de todas:
 

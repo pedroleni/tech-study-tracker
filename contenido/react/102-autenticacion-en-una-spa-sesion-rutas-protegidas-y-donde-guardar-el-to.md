@@ -396,16 +396,21 @@ Dos diferencias con lo de antes. El estado «comprobando» ya no lo pinta la rut
 
 > This utility accepts absolute URLs and can navigate to external domains, so the application should validate any user-supplied inputs to redirects.
 
-Es decir: `redirect` acepta URL absolutas y puede llevar a otros dominios, así que tienes que validar cualquier destino que venga del usuario. Lo más seguro es dejar que el navegador interprete la dirección y quedarte solo con las de tu propio origen:
+Es decir: `redirect` acepta URL absolutas y puede llevar a otros dominios, así que tienes que validar cualquier destino que venga del usuario. Lo más seguro es dejar que el navegador interprete la dirección y quedarte solo con las de tu propio origen, y además comprobar la ruta que sale:
 
 ```js
 function destinoSeguro(volver) {
   const url = new URL(volver ?? '/reservas', window.location.origin)
-  return url.origin === window.location.origin ? url.pathname + url.search : '/reservas'
+  const ruta = url.pathname + url.search
+  // Comprobar el origen no basta: «/.//malvado.example» se resuelve dentro de
+  // tu web, pero su ruta queda en «//malvado.example», que es otro dominio
+  return url.origin === window.location.origin && !ruta.startsWith('//') ? ruta : '/reservas'
 }
 ```
 
-Comprobado: `/reservas?mes=11` pasa tal cual; `//malvado.example/x`, `/\malvado.example`, `https://malvado.example` y `javascript:alert(1)` acaban en `/reservas`. Un `startsWith('/')` no basta: las dos primeras empiezan por barra y el navegador las lee como otro dominio.
+Comprobado: `/reservas?mes=11` pasa tal cual; `//malvado.example/x`, `/\malvado.example`, `https://malvado.example`, `javascript:alert(1)` y `/.//malvado.example` acaban en `/reservas`. Un `startsWith('/')` no basta: las dos primeras empiezan por barra y el navegador las lee como otro dominio.
+
+Y comparar el origen tampoco basta, por la última. `new URL` normaliza la ruta: resuelve los `.` y los `..`. Con `/.//malvado.example`, el origen sale el tuyo, pero `url.pathname` vale `//malvado.example`. Si devolvieras esa ruta, `redirect('//malvado.example')` sacaría al usuario de tu web, porque una dirección que empieza por `//` es la de otro dominio con tu mismo protocolo. Pasa lo mismo con `/a/..//malvado.example` y con `/%2e//malvado.example`. Por eso la función mira también que la ruta, ya normalizada, no empiece por `//`.
 
 ## Cerrar sesión de verdad
 
@@ -913,7 +918,7 @@ Te ahorran lo más delicado: guardar contraseñas (el hash que enseña la lecci�
 
 **Tratar cualquier error como una sesión caducada.** Un `if (!respuesta.ok) salir()` echa a la gente cada vez que el servidor tiene un mal día. Solo el 401 cierra la sesión; un 403 explica, y un 500 avisa y deja reintentar.
 
-**Volver a un `?volver=` sin validarlo.** Si la página de vuelta viaja en la URL, cualquiera puede mandarte un enlace que, después de entrar, te lleve a una copia falsa de La Marmita. Valida el destino con `new URL` y quédate solo con tu origen.
+**Volver a un `?volver=` sin validarlo.** Si la página de vuelta viaja en la URL, cualquiera puede mandarte un enlace que, después de entrar, te lleve a una copia falsa de La Marmita. Valida el destino con `new URL`: quédate solo con tu origen, y descarta las rutas que, ya normalizadas, empiecen por `//`.
 
 **Pedir datos antes de saber quién eres.** Una consulta que sale durante «comprobando» se hace como anónimo y se guarda con la clave equivocada. La lección 86 enseña cómo lo evita esta web: `enabled: !loading`.
 

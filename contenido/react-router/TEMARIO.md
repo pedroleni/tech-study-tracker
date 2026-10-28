@@ -75,11 +75,13 @@ Component (87 y 88), y los pasos de la revista (98).
 
 ## El mercado, con datos (consultado el 2026-10-26)
 
-- **Descargas semanales en npm** (16 a 22 de octubre de 2026, API de npm):
-  `react-router` 35,6 millones; `react-router-dom` 27,5 M; `next` 44,6 M;
-  `@tanstack/react-router` 12,8 M; `@tanstack/react-start` 7,4 M;
-  `@react-router/dev` (el modo framework) 1,7 M, y `@remix-run/react`
-  (Remix 2) 384 000.
+- **Descargas semanales en npm** (26 de septiembre a 2 de octubre de 2026,
+  la última semana completa: desde el 6 de octubre, la API de npm da a cero
+  días sueltos, y las semanas posteriores salen a la mitad):
+  `react-router` 68,4 millones; `react-router-dom` 55 M; `next` 75,6 M;
+  `@tanstack/react-router` 26,1 M; `@tanstack/react-start` 17,7 M;
+  `@react-router/dev` (el modo framework) 3 M, y `@remix-run/react`
+  (Remix 2) 659 000. Comprobado el 2026-10-27.
 - **Por versión** (la última semana que publica la API de npm por
   versiones). `react-router`: la 7 el 45,4 %, la 6 el 33,7 %, **la 8 el
   11,6 %** y la 5 el 8,5 % (cuenta las instalaciones indirectas:
@@ -107,8 +109,8 @@ Component (87 y 88), y los pasos de la revista (98).
   todo el código que encontrarás en una empresa es de la 6 o de la 7. Por
   eso hay una lección para leer y migrar código antiguo (23) y un proyecto
   de migración (25).
-- El modo framework es minoritario frente a Next.js (1,7 M frente a
-  44,6 M descargas semanales), así que tiene un módulo propio, pero no se
+- El modo framework es minoritario frente a Next.js (3 M frente a
+  75,6 M descargas semanales), así que tiene un módulo propio, pero no se
   queda con toda la ficha.
 - El modo datos se usa tanto en una SPA como dentro del framework, así que
   lleva el peso de la ficha: dos módulos, practicados en vivo.
@@ -160,7 +162,13 @@ Hecha en el *scratchpad*, sin tocar el repositorio:
 5. **Tipos.** Los `.d.ts` de React Router 8.5.0, montados en
    `/node_modules` de la misma VFS que usa el panel de errores de tipos
    (`@typescript/vfs` con TypeScript 6.0.3), dan los mismos diagnósticos
-   que `tsc`: 61 archivos y 469 KB.
+   que `tsc` salvo en un detalle: el orden en que se escriben los miembros
+   de una unión en los mensajes, que en la 6.0.3 depende del orden en que
+   se crearon los tipos y puede cambiar entre el panel y `tsc`. Con la
+   opción `stableTypeOrdering: true` en el panel, ese orden y el resto del
+   mensaje coinciden con los de `tsc` 7.0.2, la versión que instala hoy un
+   alumno (comprobado el 27-oct-2026 con los mensajes citados en React y
+   React Router). Son 61 archivos y 469 KB.
 
 **Firefox, sin verificar.** La especificación de `react-en-vivo` ya tiene
 pendiente probarlo.
@@ -516,7 +524,15 @@ Lo propio de esta ficha:
     o cualquier parámetro de búsqueda. Navegar a la misma URL exacta cuenta
     como recargar: se repiten todos.
   - En el modo framework con SSR, se revalida también al navegar.
-  - Un envío que responde 4xx o 5xx no revalida nada.
+  - Un envío que falla depende de **cómo** falla (comprobado en 8.5.0 al
+    escribir la lección 8):
+    - `return data(…, 409)`: no revalida nada;
+    - `throw data(…, { status })` o un `Error`: vuelven a ejecutarse los
+      `loader` que quedan por encima del límite de error;
+    - `throw new Response(…, { status })`: no revalida nada.
+
+    La documentación lo resume como «un 4xx o 5xx no revalida»: la lección
+    cuenta los tres casos.
 
   Después, `shouldRevalidate` con `defaultShouldRevalidate`, y
   `useRevalidator` para revalidar al volver a la pestaña. En vivo, el

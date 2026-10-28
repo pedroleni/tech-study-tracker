@@ -39,7 +39,7 @@ La lección 32 mostró el atajo de parámetros de propiedad en el constructor (`
 {
   "tipo": "notas-clave",
   "items": [
-    { "titulo": "enum (no const enum).", "texto": "Un enum normal genera un objeto JavaScript real en tiempo de ejecución (lección 25) — eso es generar código, no solo borrar tipos. const enum sí se elimina por completo, así que sí es compatible." },
+    { "titulo": "enum, y también const enum.", "texto": "Un enum normal genera un objeto JavaScript real en tiempo de ejecución (lección 25) — eso es generar código, no solo borrar tipos. Un const enum tampoco pasa: aunque no deje ningún objeto en el JavaScript final, para quitarlo el compilador tiene que sustituir cada uso por su valor (ColorConst.Rojo se convierte en 0, lección 26), y eso no es borrar. Los dos dan el mismo error, TS1294: This syntax is not allowed when 'erasableSyntaxOnly' is enabled. La alternativa que sí es solo tipos es un objeto con as const (lección 27)." },
     { "titulo": "Namespaces con código dentro (namespace Foo { ... }).", "texto": "Generan un objeto contenedor real en el JavaScript de salida — código nuevo, no una simple eliminación de anotaciones." },
     { "titulo": "Parámetros de propiedad en el constructor (el caso de esta lección).", "texto": "Requieren generar una asignación (this.x = x) que no existe explícitamente en el código fuente." }
   ]
@@ -62,9 +62,9 @@ La lección 32 mostró el atajo de parámetros de propiedad en el constructor (`
 
 1. Reescribe una clase con el atajo de parámetros de constructor a su forma explícita (propiedad declarada + asignación manual).
 2. Explica con tus palabras qué significa que compilar TypeScript sea, la mayoría de las veces, "solo borrar tipos".
-3. ¿Por qué un `enum` normal no es compatible con `erasableSyntaxOnly`, pero un `const enum` sí?
+3. Un `const enum` no deja ningún objeto en el JavaScript final. ¿Por qué, aun así, `erasableSyntaxOnly` lo rechaza igual que a un `enum` normal?
 
-La otra cara de este mismo tema — por qué `const enum` sí es compatible con `erasableSyntaxOnly`, a diferencia de un `enum` normal — se explica en la lección 26 de este mismo módulo.
+Lo que hace el compilador con un `const enum` (sustituir cada uso por su valor) se explica en la lección 26. Es justo lo que lo deja fuera de `erasableSyntaxOnly`: borrar las anotaciones no basta, hay que escribir algo nuevo en su lugar. Comprobado con TypeScript 5.9.3, 6.0.3 y 7.0.2: las tres dan TS1294 tanto con `enum` como con `const enum`.
 
 ## Para profundizar
 
