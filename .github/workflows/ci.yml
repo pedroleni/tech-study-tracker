@@ -8,9 +8,14 @@ on:
     branches: [main]
   pull_request:
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     env:
       # Valores ficticios: el cliente de Supabase exige las dos variables al
       # importarse, pero los tests no llaman a ningún servidor real. Las claves
@@ -19,6 +24,9 @@ jobs:
       VITE_SUPABASE_ANON_KEY: clave-ficticia-de-ci
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          # npm ci ejecuta scripts de instalación de dependencias: sin el token en .git/config.
+          persist-credentials: false
 
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
