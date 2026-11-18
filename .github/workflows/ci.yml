@@ -1,0 +1,40 @@
+name: CI
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      # Valores ficticios: el cliente de Supabase exige las dos variables al
+      # importarse, pero los tests no llaman a ningún servidor real. Las claves
+      # de verdad nunca se ponen en el CI.
+      VITE_SUPABASE_URL: http://127.0.0.1:54321
+      VITE_SUPABASE_ANON_KEY: clave-ficticia-de-ci
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Tests
+        run: npm test
+
+      # `npm run build` ya comprueba los tipos (`tsc -b` con el compilador
+      # nativo del proyecto) antes de `vite build`.
+      - name: Build
+        run: npm run build

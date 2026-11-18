@@ -116,6 +116,10 @@ archivo:
   cada push a `main` y cada PR corre los 5 scanners de
   `scripts/security/` y falla el check si hay CRITICAL/HIGH — bloquea el
   merge independientemente de qué agente escribió el código.
+- **CI de calidad** (`.github/workflows/ci.yml`): en cada push a `main` y
+  cada PR corre `npm ci`, `npm run lint`, `npm test` y `npm run build`
+  (que incluye la comprobación de tipos). Usa valores ficticios de
+  Supabase: los tests no llaman a ningún servidor real.
 
 Sigue usando los checklists de abajo como guía *antes* de escribir código
 (evita retrabajo), pero el hook y el CI son los que de verdad impiden que
@@ -135,7 +139,8 @@ después se integra en `main`:
 4. Push de la rama y PR contra `main` (nunca push directo a `main`). El
    workflow `.github/workflows/security-scan.yml` ya corre
    automáticamente en cada PR (trigger `pull_request`), así que el gate
-   de seguridad se valida ahí antes de mergear.
+   de seguridad se valida ahí antes de mergear; `.github/workflows/ci.yml`
+   comprueba a la vez lint, tests y build.
 5. Solo se mergea a `main` una vez la rama está verde en CI y revisada.
 
 No crees una rama gigante que intente todo `specs/plan.md` de una vez.
