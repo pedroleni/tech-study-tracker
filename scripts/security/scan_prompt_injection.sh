@@ -80,7 +80,12 @@ EXCLUDE="--exclude-dir=.git --exclude-dir=node_modules --exclude-dir=vendor --ex
 #   public/ where --exclude-dir=node_modules no longer applies. Confirmed by reading
 #   generar-ts-libs.mjs: it's a straight copy from the installed typescript package, not authored
 #   here; regenerating it (npm run generar-ts-libs) reproduces the same file byte-for-byte.
-POST_EXCLUDE_FILES='^\./(security|scripts/security)/|(^|/)(package-lock\.json|yarn\.lock|pnpm-lock\.yaml|bun\.lockb|Cargo\.lock|go\.sum|composer\.lock|Gemfile\.lock|poetry\.lock):|\.claude/(agents|commands)/security-[^/:]+\.md:|^\./\.agents/skills/(supabase|supabase-postgres-best-practices|web-design-guidelines)/|^\./public/ts-libs/'
+# - public/vendor/react-kit/: minified bundles (compilador.js, lint.js) built by
+#   scripts/react-kit/construir.mjs from npm packages (Babel, ESLint…) — machine-generated
+#   third-party code, same class as public/ts-libs/. Flagged lines are minified library source
+#   that happens to contain "//" next to long identifier runs. Only this exact directory; the
+#   rest of public/vendor/ stays scanned.
+POST_EXCLUDE_FILES='^\./(security|scripts/security)/|(^|/)(package-lock\.json|yarn\.lock|pnpm-lock\.yaml|bun\.lockb|Cargo\.lock|go\.sum|composer\.lock|Gemfile\.lock|poetry\.lock):|\.claude/(agents|commands)/security-[^/:]+\.md:|^\./\.agents/skills/(supabase|supabase-postgres-best-practices|web-design-guidelines)/|^\./public/ts-libs/|^\./public/vendor/react-kit/'
 
 finding() {
     local severity="$1" category="$2" file="$3" detail="$4"
@@ -271,14 +276,17 @@ fi
 # ═══════════════════════════════════════════════
 echo -e "\n${CYAN}── [4/7] Encoded Payloads in Comments ──${NC}"
 
-# Look for suspiciously long base64 strings in comments
-results=$("$GREP" -rnP '(?://|#|/\*|\*|<!--)\s*.*(?:[A-Za-z0-9+/]{4}){15,}={0,2}' "$PROJECT_ROOT" \
+# Look for suspiciously long base64 strings in comments.
+# - "(?<!:)//": the "//" of a URL ("https://…") does not open a comment.
+# - Exclusions are applied BEFORE the head cut-off: otherwise, which findings survive depends on
+#   the order grep walks the tree (it differs between macOS/APFS and Linux/ext4), and excluded
+#   files filling the first 20 lines silently hid real findings.
+results=$("$GREP" -rnP '(?:(?<!:)//|#|/\*|\*|<!--)\s*.*(?:[A-Za-z0-9+/]{4}){15,}={0,2}' "$PROJECT_ROOT" \
     $EXCLUDE \
     --include="*.js" --include="*.ts" --include="*.py" --include="*.rb" \
     --include="*.go" --include="*.java" --include="*.rs" --include="*.sh" \
     --include="*.html" --include="*.xml" --include="*.yaml" --include="*.yml" \
-    2>/dev/null | head -20 || true)
-results=$(echo "$results" | grep -vE "$POST_EXCLUDE_FILES" || true)
+    2>/dev/null | { grep -vE "$POST_EXCLUDE_FILES" || true; } | head -20 || true)
 
 if [ -n "$results" ]; then
     echo "$results" | while IFS= read -r line; do
@@ -291,12 +299,11 @@ else
 fi
 
 # Hex-encoded strings in comments
-results=$("$GREP" -rnP '(?://|#|/\*|\*|<!--)\s*.*(?:0x[0-9a-fA-F]{2}\s*){10,}' "$PROJECT_ROOT" \
+results=$("$GREP" -rnP '(?:(?<!:)//|#|/\*|\*|<!--)\s*.*(?:0x[0-9a-fA-F]{2}\s*){10,}' "$PROJECT_ROOT" \
     $EXCLUDE \
     --include="*.js" --include="*.ts" --include="*.py" --include="*.rb" \
     --include="*.go" --include="*.java" --include="*.rs" \
-    2>/dev/null | head -10 || true)
-results=$(echo "$results" | grep -vE "$POST_EXCLUDE_FILES" || true)
+    2>/dev/null | { grep -vE "$POST_EXCLUDE_FILES" || true; } | head -10 || true)
 
 if [ -n "$results" ]; then
     echo "$results" | while IFS= read -r line; do
