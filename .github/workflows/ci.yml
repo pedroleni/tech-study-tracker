@@ -33,8 +33,10 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      # Los runners de GitHub son más lentos que un Mac: el motor de Postgres en
+      # WebAssembly de los tests de postgres-en-vivo no cabe en los 5 s por defecto.
       - name: Tests
-        run: npm test
+        run: npm test -- --testTimeout=30000
 
       # `npm run build` ya comprueba los tipos (`tsc -b` con el compilador
       # nativo del proyecto) antes de `vite build`.
