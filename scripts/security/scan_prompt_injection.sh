@@ -186,8 +186,7 @@ results=$("$GREP" -rniP "$COMBINED_PATTERN" "$PROJECT_ROOT" \
     --include="*.yml" --include="*.json" --include="*.toml" --include="*.html" \
     --include="*.svg" --include="*.xml" --include="*.sh" --include="*.css" \
     --include="*.jsx" --include="*.tsx" --include="*.php" \
-    2>/dev/null | head -50 || true)
-results=$(echo "$results" | grep -vE "$POST_EXCLUDE_FILES" || true)
+    2>/dev/null | { grep -vE "$POST_EXCLUDE_FILES" || true; } | head -50 || true)
 
 if [ -n "$results" ]; then
     echo "$results" | while IFS= read -r line; do
@@ -271,14 +270,20 @@ fi
 # ═══════════════════════════════════════════════
 echo -e "\n${CYAN}── [4/7] Encoded Payloads in Comments ──${NC}"
 
-# Look for suspiciously long base64 strings in comments
-results=$("$GREP" -rnP '(?://|#|/\*|\*|<!--)\s*.*(?:[A-Za-z0-9+/]{4}){15,}={0,2}' "$PROJECT_ROOT" \
+# Look for suspiciously long base64 strings in comments.
+# - "(?<!:)//": the "//" of a URL ("https://…") does not open a comment. But "://" still counts
+#   when what follows is whitespace or a long base64-like run right away, because JS/TS allows a
+#   real comment after ":" (object key, label, ternary, type annotation: `{ k://<payload>`).
+#   Accepted residual risk: `label://host.tld/<payload>` is indistinguishable from a URL.
+# - Exclusions are applied BEFORE the head cut-off: otherwise, which findings survive depends on
+#   the order grep walks the tree (it differs between macOS/APFS and Linux/ext4), and excluded
+#   files filling the first lines silently hid real findings. Same in section 2 above.
+results=$("$GREP" -rnP '(?:(?<!:)//|://(?=\s|[A-Za-z0-9+/]{60})|#|/\*|\*|<!--)\s*.*(?:[A-Za-z0-9+/]{4}){15,}={0,2}' "$PROJECT_ROOT" \
     $EXCLUDE \
     --include="*.js" --include="*.ts" --include="*.py" --include="*.rb" \
     --include="*.go" --include="*.java" --include="*.rs" --include="*.sh" \
     --include="*.html" --include="*.xml" --include="*.yaml" --include="*.yml" \
-    2>/dev/null | head -20 || true)
-results=$(echo "$results" | grep -vE "$POST_EXCLUDE_FILES" || true)
+    2>/dev/null | { grep -vE "$POST_EXCLUDE_FILES" || true; } | head -20 || true)
 
 if [ -n "$results" ]; then
     echo "$results" | while IFS= read -r line; do
@@ -291,12 +296,11 @@ else
 fi
 
 # Hex-encoded strings in comments
-results=$("$GREP" -rnP '(?://|#|/\*|\*|<!--)\s*.*(?:0x[0-9a-fA-F]{2}\s*){10,}' "$PROJECT_ROOT" \
+results=$("$GREP" -rnP '(?:(?<!:)//|://(?=\s|(?:0x[0-9a-fA-F]{2}\s*){10})|#|/\*|\*|<!--)\s*.*(?:0x[0-9a-fA-F]{2}\s*){10,}' "$PROJECT_ROOT" \
     $EXCLUDE \
     --include="*.js" --include="*.ts" --include="*.py" --include="*.rb" \
     --include="*.go" --include="*.java" --include="*.rs" \
-    2>/dev/null | head -10 || true)
-results=$(echo "$results" | grep -vE "$POST_EXCLUDE_FILES" || true)
+    2>/dev/null | { grep -vE "$POST_EXCLUDE_FILES" || true; } | head -10 || true)
 
 if [ -n "$results" ]; then
     echo "$results" | while IFS= read -r line; do
