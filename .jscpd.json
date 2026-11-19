@@ -1,0 +1,11 @@
+{
+  "path": ["src", "api"],
+  "format": ["typescript", "tsx"],
+  "ignore": ["**/*.test.ts", "**/*.test.tsx", "**/components/ui/**"],
+  "minTokens": 70,
+  "minLines": 8,
+  "reporters": ["json"],
+  "silent": true,
+  "absolute": false,
+  "gitignore": true
+}

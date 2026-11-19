@@ -1,0 +1,12 @@
+{
+  "components/bloques-laboratorio/CodigoAnotado.tsx ↔ components/bloques-laboratorio/GitAnotado.tsx": 1,
+  "components/bloques-laboratorio/CodigoAnotado.tsx ↔ components/bloques-laboratorio/ReactAnotado.tsx": 2,
+  "components/bloques-laboratorio/CodigoAnotado.tsx ↔ components/bloques-laboratorio/SqlAnotado.tsx": 1,
+  "components/bloques-laboratorio/EditorCodeMirror.tsx ↔ components/bloques-laboratorio/SqlEnVivo.tsx": 2,
+  "components/bloques-laboratorio/GitEnVivo.tsx ↔ components/bloques-laboratorio/SqlEnVivo.tsx": 1,
+  "components/bloques-laboratorio/ReactAnotado.tsx ↔ components/bloques-laboratorio/ReactEnVivo.tsx": 5,
+  "components/codigo/resaltador.ts ↔ components/codigo/resaltador.ts": 1,
+  "components/referencia-contenido/ContadorEnScroll.tsx ↔ components/referencia-contenido/LineaComparativaAnimada.tsx": 1,
+  "imagenes.ts ↔ imagenes.ts": 1,
+  "lib/react-en-vivo/tipos.ts ↔ lib/typescript-en-vivo/compilar.ts": 1
+}

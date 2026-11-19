@@ -1,0 +1,307 @@
+{
+  "api/imagenes-servir.ts": {
+    "complexity": {
+      "count": 1
+    }
+  },
+  "api/imagenes.ts": {
+    "complexity": {
+      "count": 1
+    },
+    "max-lines-per-function": {
+      "count": 1
+    },
+    "sonarjs/cognitive-complexity": {
+      "count": 1
+    }
+  },
+  "src/components/auth/AuthForm.tsx": {
+    "complexity": {
+      "count": 1
+    },
+    "max-lines-per-function": {
+      "count": 1
+    },
+    "sonarjs/cognitive-complexity": {
+      "count": 1
+    }
+  },
+  "src/components/bloques-laboratorio/ArbolVisual.tsx": {
+    "complexity": {
+      "count": 1
+    }
+  },
+  "src/components/bloques-laboratorio/EditorEnVivo.tsx": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "src/components/bloques-laboratorio/GitEnVivo.tsx": {
+    "complexity": {
+      "count": 1
+    }
+  },
+  "src/components/bloques-laboratorio/ReactAnotado.tsx": {
+    "complexity": {
+      "count": 1
+    },
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "src/components/bloques-laboratorio/ReactEnVivo.tsx": {
+    "complexity": {
+      "count": 2
+    },
+    "max-lines": {
+      "count": 1
+    },
+    "max-lines-per-function": {
+      "count": 1
+    },
+    "no-nested-ternary": {
+      "count": 4
+    },
+    "sonarjs/cognitive-complexity": {
+      "count": 2
+    }
+  },
+  "src/components/bloques-laboratorio/RegistroRouter.tsx": {
+    "no-nested-ternary": {
+      "count": 1
+    }
+  },
+  "src/components/bloques-laboratorio/ResultadosComprobaciones.tsx": {
+    "no-nested-ternary": {
+      "count": 1
+    }
+  },
+  "src/components/bloques-laboratorio/SqlEnVivo.tsx": {
+    "complexity": {
+      "count": 1
+    },
+    "max-lines-per-function": {
+      "count": 1
+    },
+    "no-nested-ternary": {
+      "count": 1
+    }
+  },
+  "src/components/bloques-laboratorio/VistaPreviaReact.tsx": {
+    "complexity": {
+      "count": 1
+    },
+    "max-lines-per-function": {
+      "count": 1
+    },
+    "sonarjs/cognitive-complexity": {
+      "count": 1
+    }
+  },
+  "src/components/codigo/resaltador.ts": {
+    "complexity": {
+      "count": 4
+    },
+    "max-lines": {
+      "count": 1
+    },
+    "max-lines-per-function": {
+      "count": 3
+    },
+    "max-params": {
+      "count": 1
+    },
+    "no-nested-ternary": {
+      "count": 2
+    },
+    "sonarjs/cognitive-complexity": {
+      "count": 5
+    }
+  },
+  "src/components/comment/CommentsSection.tsx": {
+    "no-nested-ternary": {
+      "count": 1
+    }
+  },
+  "src/components/laboratorio/LaboratorioV1Editor.tsx": {
+    "complexity": {
+      "count": 1
+    },
+    "max-lines": {
+      "count": 1
+    },
+    "max-lines-per-function": {
+      "count": 1
+    },
+    "max-params": {
+      "count": 2
+    },
+    "sonarjs/cognitive-complexity": {
+      "count": 1
+    }
+  },
+  "src/components/laboratorio/LaboratorioV2Anotado.tsx": {
+    "max-lines": {
+      "count": 1
+    },
+    "max-lines-per-function": {
+      "count": 1
+    },
+    "no-nested-ternary": {
+      "count": 1
+    }
+  },
+  "src/components/laboratorio/LaboratorioV3Comparativa.tsx": {
+    "max-lines": {
+      "count": 1
+    },
+    "max-lines-per-function": {
+      "count": 1
+    },
+    "no-nested-ternary": {
+      "count": 1
+    }
+  },
+  "src/components/laboratorio/LaboratorioV4Radiografia.tsx": {
+    "complexity": {
+      "count": 1
+    },
+    "max-lines": {
+      "count": 1
+    },
+    "max-lines-per-function": {
+      "count": 2
+    },
+    "sonarjs/cognitive-complexity": {
+      "count": 2
+    }
+  },
+  "src/components/laboratorio/LaboratorioV5Bloque.tsx": {
+    "no-nested-ternary": {
+      "count": 1
+    }
+  },
+  "src/components/leccion/LeccionForm.tsx": {
+    "max-lines": {
+      "count": 1
+    },
+    "max-lines-per-function": {
+      "count": 1
+    },
+    "no-nested-ternary": {
+      "count": 1
+    }
+  },
+  "src/components/referencia-contenido/CarruselAutoplay.tsx": {
+    "no-nested-ternary": {
+      "count": 1
+    }
+  },
+  "src/components/referencia-contenido/CarruselCoverflow.tsx": {
+    "no-nested-ternary": {
+      "count": 1
+    }
+  },
+  "src/components/referencia-contenido/Pasos.tsx": {
+    "no-nested-ternary": {
+      "count": 1
+    }
+  },
+  "src/components/referencia-contenido/PilaTarjetas.tsx": {
+    "no-nested-ternary": {
+      "count": 2
+    }
+  },
+  "src/components/technology/TechnologyForm.tsx": {
+    "max-lines-per-function": {
+      "count": 1
+    },
+    "no-nested-ternary": {
+      "count": 1
+    }
+  },
+  "src/lib/hooks/useAuth.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "src/lib/laboratorio/schemas.ts": {
+    "max-lines": {
+      "count": 1
+    }
+  },
+  "src/lib/react-en-vivo/documento.ts": {
+    "complexity": {
+      "count": 1
+    }
+  },
+  "src/lib/react-en-vivo/explicarError.ts": {
+    "complexity": {
+      "count": 1
+    }
+  },
+  "src/lib/react-en-vivo/tipos.ts": {
+    "max-params": {
+      "count": 2
+    },
+    "sonarjs/cognitive-complexity": {
+      "count": 1
+    }
+  },
+  "src/lib/utils/tituloEnLinea.ts": {
+    "complexity": {
+      "count": 1
+    },
+    "no-nested-ternary": {
+      "count": 1
+    },
+    "sonarjs/cognitive-complexity": {
+      "count": 1
+    }
+  },
+  "src/routes/AdminLeccionFormPage.tsx": {
+    "complexity": {
+      "count": 1
+    }
+  },
+  "src/routes/AdminReferenciaContenidoPage.tsx": {
+    "max-lines": {
+      "count": 1
+    },
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "src/routes/AdminTechnologyFormPage.tsx": {
+    "complexity": {
+      "count": 1
+    }
+  },
+  "src/routes/LeccionPage.tsx": {
+    "complexity": {
+      "count": 1
+    },
+    "no-nested-ternary": {
+      "count": 1
+    }
+  },
+  "src/routes/ProyectosPage.tsx": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "src/routes/TechnologyPage.tsx": {
+    "complexity": {
+      "count": 2
+    },
+    "max-lines": {
+      "count": 1
+    },
+    "max-lines-per-function": {
+      "count": 3
+    },
+    "no-nested-ternary": {
+      "count": 2
+    }
+  }
+}

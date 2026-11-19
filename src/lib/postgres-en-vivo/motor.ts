@@ -14,9 +14,8 @@
 // un UPDATE/DELETE de un intento no debe contaminar el siguiente.
 import { PGlite, type Extensions } from '@electric-sql/pglite'
 
-import { compararResultados, type ResultadoConsulta } from '@/lib/sql-en-vivo/comparar'
+import { type ResultadoConsulta } from '@/lib/sql-en-vivo/comparar'
 
-export { compararResultados }
 export type { ResultadoConsulta }
 
 export type ExtensionPostgres = 'pgcrypto' | 'uuid_ossp'

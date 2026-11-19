@@ -16,7 +16,10 @@
     "generar-pglite-wasm": "node scripts/dev/generar-pglite-wasm.mjs",
     "generar-wasmgit-assets": "node scripts/dev/generar-wasmgit-assets.mjs",
     "codex:task": "bash scripts/dev/codex-task.sh",
-    "codex:monitor": "node scripts/dev/codex-monitor.mjs"
+    "codex:monitor": "node scripts/dev/codex-monitor.mjs",
+    "clean-code": "bash scripts/clean-code/puerta.sh",
+    "clean-code:podar": "eslint --prune-suppressions && node scripts/clean-code/duplicados.mjs --podar",
+    "clean-code:informe": "node scripts/clean-code/informe.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "3.1126.0",
@@ -67,8 +70,11 @@
     "eslint-plugin-jsx-a11y": "6.10.2",
     "eslint-plugin-react-hooks": "7.1.1",
     "eslint-plugin-react-refresh": "0.5.4",
+    "eslint-plugin-sonarjs": "4.2.2",
     "globals": "17.9.0",
+    "jscpd": "5.4.2",
     "jsdom": "26.1.0",
+    "knip": "6.44.1",
     "shadcn": "4.16.2",
     "tailwindcss": "4.3.3",
     "typescript": "npm:@typescript/typescript6@6.0.2",
@@ -76,5 +82,13 @@
     "vite": "7.3.6",
     "vitest": "3.2.7",
     "vitest-axe": "0.1.0"
+  },
+  "overrides": {
+    "eslint-plugin-sonarjs": {
+      "minimatch": "11.0.4"
+    },
+    "eslint": {
+      "minimatch": "^3.1.5"
+    }
   }
 }
