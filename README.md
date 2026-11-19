@@ -64,7 +64,7 @@ flowchart TD
     CC -->|APROBADO| N["Claude: commit + push + PR contra main<br/>con el veredicto del agente"]
     N --> O["CI obligatoria para integrar:<br/>build (lint, tests, build) · scan (5 escáneres)<br/>clean-code · veredicto"]
     O -->|rojo| H
-    O -->|verde| P["Merge a main<br/>main protegida: GitHub no deja integrar en rojo"]
+    O -->|verde| P["Merge a main solo con confirmación<br/>explícita del usuario; main protegida:<br/>GitHub no deja integrar en rojo"]
 ```
 
 **Lo que este diagrama deja explícito y que antes solo estaba en
@@ -195,6 +195,7 @@ npm run dev            # servidor de desarrollo
 npm run test            # tests
 npm run build           # build de producción + type-check
 npm run lint             # ESLint
+npm run clean-code       # puerta de clean code (docs/clean-code.md)
 ```
 
 La `anon key` de Supabase es pública por diseño (protegida por RLS) y sí

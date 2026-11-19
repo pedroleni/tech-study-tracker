@@ -8,7 +8,8 @@ están al final) y en las convenciones que ya sigue el repo (`AGENTS.md`,
 
 ## Cómo se aplica
 
-1. **Puerta automática (CI, bloqueante).** En cada PR, en GitHub Actions y en Jenkins:
+1. **Puerta automática (CI, bloqueante).** En cada PR en GitHub Actions (y en el
+   `Jenkinsfile` cuando se lanza el Jenkins local):
    ESLint con complejidad, tamaño y legibilidad; jscpd (código duplicado) y knip (código
    muerto). En local: `npm run clean-code`.
 2. **Revisión del agente (antes de abrir la PR, bloqueante).** El agente `clean-code` revisa
@@ -49,7 +50,10 @@ línea a línea y la diferencia pasa a ser un parámetro explícito con test.
 | Legibilidad | `no-nested-ternary`, `no-else-return`, `no-lonely-if`, `sonarjs/*` | 0 |
 | React | `react-hooks/*` (con `exhaustive-deps` como error), `jsx-a11y` | 0 |
 | Duplicados | `jscpd` (`.jscpd.json`, sin tests) con base `jscpd-base.json` | 0 bloques nuevos de 70 tokens y 8 líneas |
-| Código muerto | `knip` (`knip.json`) | 0 archivos, exportaciones o dependencias sin uso |
+| Código muerto | `knip` (`knip.json`) | 0 archivos, exportaciones o dependencias sin uso (*) |
+
+(*) knip no cuenta los tipos exportados (son la API de los componentes reutilizables) ni las exportaciones que se
+usan dentro de su propio archivo (`ignoreExportsUsedInFile`).
 
 `src/components/ui/` (shadcn, generado) queda fuera de las reglas de tamaño y complejidad.
 `DifficultyBadge` y `PriorityBadge` no se usan en la app, pero son parte del design system
@@ -110,6 +114,11 @@ funcionalidad, complejidad, tests, nombres, comentarios, estilo, documentación)
 
 ## Normas generales
 
+> Estas normas vienen de la investigación hecha para los repos del Estudio OnlyDevCoding (web Next.js + API
+> Python). Los ejemplos que citan archivos de allí (`rutas_tareas.py`, `FormularioTarea`, `useLectura`,
+> `useSesionGrabacion`, `PanelShorts`…), Python, ruff o vulture son solo ilustrativos: aplica la idea a este repo
+> con sus herramientas (ESLint, jscpd, knip).
+
 ### GEN-01 · PR pequeño y cohesionado
 - **Qué**: una tarea o grupo pequeño y cohesionado por rama/PR; refactor y cambio de comportamiento, separados.
 - **Por qué**: los PR pequeños se revisan mejor y antes, y se revierten con menos riesgo (<https://google.github.io/eng-practices/review/developer/small-cls.html>); además lo exige `AGENTS.md`.
@@ -140,7 +149,7 @@ funcionalidad, complejidad, tests, nombres, comentarios, estilo, documentación)
 
 ### GEN-05 · Sin números ni cadenas mágicas repetidas; límites compartidos en un solo sitio
 - **Qué**: los valores con significado (límites de longitud, rangos de días, códigos) van en constantes con nombre. Los límites que valen en web y API (p. ej. 300 caracteres de tarea, lecciones 1–999, `^[a-z0-9-]{1,40}$`) se cambian **a la vez en los dos repos**.
-- **Por qué**: *Refactoring* "Replace Magic Literal" (<https://refactoring.com/catalog/replaceMagicLiteral.html>); el contrato web↔API está duplicado (`src/lib/limites.ts`, `src/lib/curso.ts` frente a `tareas.py`, `modelos.py`).
+- **Por qué**: *Refactoring* "Replace Magic Literal" (<https://refactoring.com/catalog/replaceMagicLiteral.html>); en este repo, los límites que comparten `src/` y `api/`, o el frontend y los `CHECK` de las migraciones de Supabase, tienen que vivir en un solo sitio o estar comprobados por un test.
 - **Malo**: `if not 1 <= len(t) <= 300` y en la web `maxLength={250}`. **Bueno**: constante con nombre en cada lado y el mismo valor.
 - **Comprobación**: DET parcial: ruff `PLR2004` (ruidoso; ignora 0, 1, "", etc.); ESLint `no-magic-numbers` (desaconsejado: demasiado ruido en JSX). La coherencia entre repos es LLM.
 - **Severidad**: BLOQUEANTE si un PR cambia un límite en un repo y no en el otro; SUGERENCIA en el resto.
@@ -192,12 +201,10 @@ funcionalidad, complejidad, tests, nombres, comentarios, estilo, documentación)
 
 > Las normas de Next.js (`NX-…`) del Estudio no aplican: esto es una SPA con Vite y React Router. Donde un ejemplo cite Server Actions o `next/*`, ignóralo.
 
-Estado actual del lint: `eslint-config-next/core-web-vitals` + `eslint-config-next/typescript`, que ya incluyen
-`eslint-plugin-react` recommended, **`eslint-plugin-react-hooks` 7.1.1 recommended** (con las reglas del compilador:
-`set-state-in-effect`, `set-state-in-render`, `refs`, `purity`, `immutability`, `static-components`, `globals`,
-`use-memo`, `preserve-manual-memoization`, `error-boundaries`, `unsupported-syntax`, `incompatible-library`, `config`,
-`gating`; comprobado en `node_modules`), `jsx-a11y`, `@next/next` y `typescript-eslint` **recommended sin tipos**.
-Fuentes: <https://nextjs.org/docs/app/api-reference/config/eslint>, <https://react.dev/reference/eslint-plugin-react-hooks>,
+Estado actual del lint (`eslint.config.js`): `@eslint/js` recommended, `typescript-eslint` **recommended sin
+tipos**, **`eslint-plugin-react-hooks` 7.1.1 recommended** (con las reglas del compilador: `set-state-in-effect`,
+`refs`, `purity`, `immutability`, `static-components`…), `react-refresh`, `jsx-a11y` y `sonarjs`, más las reglas de
+tamaño y complejidad de la puerta. Fuentes: <https://react.dev/reference/eslint-plugin-react-hooks>,
 <https://typescript-eslint.io/users/configs/>.
 
 ### TypeScript
@@ -271,7 +278,7 @@ Fuentes: <https://nextjs.org/docs/app/api-reference/config/eslint>, <https://rea
 - **Qué**: las dependencias de `useEffect` son las que lee; si un efecto debe ejecutarse "solo al abrir" pero lee valores cambiantes, la lógica no reactiva va en `useEffectEvent` (estable desde React 19.2) en lugar de `eslint-disable`.
 - **Por qué**: <https://react.dev/learn/removing-effect-dependencies>, <https://react.dev/reference/react/useEffectEvent>.
 - **Malo** (patrón real de `FormularioTarea.tsx`): `useEffect(() => { … onCerrar() … }, []) // eslint-disable-next-line react-hooks/exhaustive-deps`. **Bueno**: `const alEscape = useEffectEvent(() => onCerrar()); useEffect(() => { … alEscape() … }, []);`.
-- **Comprobación**: DET: `react-hooks/exhaustive-deps` (hoy `warn` → subir a `error`). Que la supresión esté justificada es LLM.
+- **Comprobación**: DET: `react-hooks/exhaustive-deps` (como error en la puerta). Que la supresión esté justificada es LLM.
 - **Severidad**: BLOQUEANTE para dependencias que faltan sin supresión; SUGERENCIA para migrar las supresiones existentes a `useEffectEvent`.
 
 #### RE-03 · No necesitas un efecto
@@ -442,20 +449,12 @@ convenciones del repo.
 - React: reglas <https://react.dev/reference/rules>, hooks <https://react.dev/reference/rules/rules-of-hooks>,
   efectos <https://react.dev/learn/you-might-not-need-an-effect>, `useEffectEvent`
   <https://react.dev/reference/react/useEffectEvent>, plugin <https://react.dev/reference/eslint-plugin-react-hooks>
-- Next.js 16: <https://nextjs.org/docs/app/guides/server-actions>, <https://nextjs.org/docs/app/guides/data-security>,
-  <https://nextjs.org/docs/app/getting-started/cache-components>, <https://nextjs.org/docs/app/api-reference/config/eslint>
 - TypeScript: <https://www.typescriptlang.org/tsconfig/>, Google TS Style <https://google.github.io/styleguide/tsguide.html>,
   typescript-eslint <https://typescript-eslint.io/rules/>
 - ESLint core: <https://eslint.org/docs/latest/rules/>; SonarJS <https://github.com/SonarSource/SonarJS/blob/master/packages/jsts/src/rules/README.md>;
   complejidad cognitiva <https://www.sonarsource.com/docs/CognitiveComplexity.pdf>
 - Tailwind 4: <https://tailwindcss.com/docs/theme>, <https://tailwindcss.com/docs/styling-with-utility-classes>
 - Testing Library / Vitest: <https://testing-library.com/docs/guiding-principles>, <https://vitest.dev/guide/mocking>
-- Python: PEP 8, 20, 257, 484, 649, 765 (<https://peps.python.org/>), Google Python Style
-  <https://google.github.io/styleguide/pyguide.html>, ruff <https://docs.astral.sh/ruff/rules/>
-- FastAPI <https://fastapi.tiangolo.com/>, Pydantic <https://docs.pydantic.dev/latest/>, `sqlite3`
-  <https://docs.python.org/3/library/sqlite3.html>, SQLite <https://www.sqlite.org/docs.html>, pytest <https://docs.pytest.org/en/stable/>
 - *Refactoring* (Fowler) <https://refactoring.com/catalog/>; olores de código <https://refactoring.guru/refactoring/smells>;
   *Clean Code* (Martin, 2008), adaptado: sus límites de longitud ("funciones de pocas líneas") y su postura sobre
   comentarios no se adoptan literalmente.
-- Herramientas: jscpd <https://github.com/kucherenko/jscpd>, knip <https://knip.dev>, vulture
-  <https://github.com/jendrikseipp/vulture>, radon <https://radon.readthedocs.io/>, xenon <https://github.com/rubik/xenon>

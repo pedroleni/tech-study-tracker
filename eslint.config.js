@@ -73,6 +73,7 @@ export default tseslint.config(
   // Los componentes llevan JSX: algo más de margen por función.
   {
     files: ['src/**/*.tsx'],
+    ignores: ['src/components/ui/**'],
     rules: {
       'max-lines-per-function': ['error', { max: 150, skipBlankLines: true, skipComments: true }],
     },

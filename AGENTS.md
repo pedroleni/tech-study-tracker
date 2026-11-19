@@ -118,7 +118,8 @@ archivo:
   merge independientemente de qué agente escribió el código.
 - **CI de calidad** (`.github/workflows/ci.yml`): en cada push a `main` y
   cada PR corre `npm ci`, `npm run lint`, `npm test` y `npm run build`
-  (que incluye la comprobación de tipos). Usa valores ficticios de
+  (que incluye la comprobación de tipos) en el job `build`, y la puerta de
+  clean code (`npm run clean-code`) en el job `clean-code`. Usa valores ficticios de
   Supabase: los tests no llaman a ningún servidor real.
 
 Sigue usando los checklists de abajo como guía *antes* de escribir código

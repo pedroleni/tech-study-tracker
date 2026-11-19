@@ -23,7 +23,8 @@ function paresActuales() {
     }
     const pares = {};
     for (const clon of JSON.parse(readFileSync(informe, "utf8")).duplicates) {
-      const clave = [clon.firstFile.name, clon.secondFile.name].map((f) => path.relative(raiz, path.resolve(raiz, f))).sort().join(" ↔ ");
+      // Rutas relativas a la raíz del repo (jscpd da absolutas con "absolute": true).
+      const clave = [clon.firstFile.name, clon.secondFile.name].map((f) => path.relative(raiz, f)).sort().join(" ↔ ");
       pares[clave] = (pares[clave] ?? 0) + 1;
     }
     return pares;
@@ -35,7 +36,15 @@ function paresActuales() {
 const actuales = paresActuales();
 const base = existsSync(rutaBase) ? JSON.parse(readFileSync(rutaBase, "utf8")) : {};
 
+const nuevos = Object.entries(actuales).filter(([par, n]) => n > (base[par] ?? 0));
+
 if (process.argv.includes("--podar")) {
+  // Con duplicados nuevos, jscpd puede repartir los clones entre otros pares y la poda
+  // borraría pares que siguen existiendo: primero hay que quitar lo nuevo.
+  if (nuevos.length > 0) {
+    console.log("No se poda: antes quita los duplicados nuevos (ejecuta la comprobación sin --podar).");
+    process.exit(1);
+  }
   // Solo baja: un par nuevo o con más bloques no entra en la base por esta vía.
   const podada = Object.fromEntries(
     Object.entries(base)
@@ -47,7 +56,6 @@ if (process.argv.includes("--podar")) {
   process.exit(0);
 }
 
-const nuevos = Object.entries(actuales).filter(([par, n]) => n > (base[par] ?? 0));
 const congelados = Object.values(actuales).reduce((suma, n) => suma + n, 0);
 if (nuevos.length > 0) {
   console.log("Código duplicado nuevo (no estaba en jscpd-base.json):");

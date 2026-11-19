@@ -1,11 +1,23 @@
 {
-  "path": ["src", "api"],
-  "format": ["typescript", "tsx"],
-  "ignore": ["**/*.test.ts", "**/*.test.tsx", "**/components/ui/**"],
+  "path": [
+    "src",
+    "api"
+  ],
+  "format": [
+    "typescript",
+    "tsx"
+  ],
+  "ignore": [
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/components/ui/**"
+  ],
   "minTokens": 70,
   "minLines": 8,
-  "reporters": ["json"],
+  "reporters": [
+    "json"
+  ],
   "silent": true,
-  "absolute": false,
+  "absolute": true,
   "gitignore": true
 }
