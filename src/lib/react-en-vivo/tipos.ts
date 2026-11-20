@@ -1,5 +1,6 @@
 import type { ArchivoReact } from '@/lib/laboratorio/schemas'
 import { RUTA_REACT_KIT } from '@/lib/react-kit/rutas'
+import { cargarCompiladorEnVivo, type TsReal } from '@/lib/typescript-en-vivo/cargarCompilador'
 import { z } from 'zod'
 
 import {
@@ -7,7 +8,6 @@ import {
   VERSION_REACT_ROUTER_EN_VIVO,
 } from './constantes'
 
-type TsReal = typeof import('typescript')
 type Vfs = typeof import('@typescript/vfs')
 type EntornoVirtual = import('@typescript/vfs').VirtualTypeScriptEnvironment
 
@@ -75,21 +75,18 @@ type RecursosTiposReact = {
   mapa: Map<string, string>
 }
 
-export type FabricaEntornoTiposReact = (
-  mapa: Map<string, string>,
-  archivosRaiz: string[],
-  ts: TsReal,
-  opciones: import('typescript').CompilerOptions,
-  vfs: Vfs,
-) => EntornoVirtual
+/** Lo que necesita el entorno virtual: los recursos cargados y los archivos del programa. */
+export type ParametrosEntornoTiposReact = RecursosTiposReact & { archivosRaiz: string[] }
 
-export function crearEntornoTiposReact(
-  mapa: Map<string, string>,
-  archivosRaiz: string[],
-  ts: TsReal,
-  opciones: import('typescript').CompilerOptions,
-  vfs: Vfs,
-) {
+export type FabricaEntornoTiposReact = (parametros: ParametrosEntornoTiposReact) => EntornoVirtual
+
+export function crearEntornoTiposReact({
+  mapa,
+  archivosRaiz,
+  ts,
+  opciones,
+  vfs,
+}: ParametrosEntornoTiposReact) {
   return vfs.createVirtualTypeScriptEnvironment(
     vfs.createSystem(mapa),
     archivosRaiz,
@@ -162,20 +159,7 @@ function cargarRecursos(cargarArchivo: CargarArchivoTipos) {
   if (existente) return existente
 
   const promesa = (async (): Promise<RecursosTiposReact> => {
-    const [tsModulo, vfs] = await Promise.all([
-      import('typescript-en-vivo'),
-      import('@typescript/vfs'),
-    ])
-    const ts = tsModulo as unknown as TsReal
-    const { options: opciones, errors } = ts.convertCompilerOptionsFromJson(OPCIONES_JSON, '/')
-    if (errors.length > 0) {
-      throw new Error('Opciones de compilador de TypeScript inválidas')
-    }
-
-    const nombresLib = vfs.knownLibFilesForCompilerOptions(
-      { target: ts.ScriptTarget.ES2020, lib: ['es2020', 'dom', 'dom.iterable'] },
-      ts,
-    )
+    const { ts, vfs, opciones, nombresLib } = await cargarCompiladorEnVivo(OPCIONES_JSON)
     const mapa = new Map<string, string>()
     await Promise.all([
       ...nombresLib.map(async (nombre) => {
@@ -221,6 +205,54 @@ function mapearDiagnostico(
   return { archivo: '', linea: 0, columna: 0, mensaje, severidad }
 }
 
+function esArchivoTypeScript(archivo: ArchivoReact) {
+  return archivo.nombre.endsWith('.ts') || archivo.nombre.endsWith('.tsx')
+}
+
+async function anadirTiposRouter(mapa: Map<string, string>, cargarArchivo: CargarArchivoTipos) {
+  const tiposRouter = await cargarTiposReactRouter(cargarArchivo)
+  for (const [ruta, contenido] of Object.entries(tiposRouter)) {
+    mapa.set(`/node_modules/${ruta}`, contenido)
+  }
+}
+
+/** Contenido de cada archivo del programa por su ruta virtual (el entorno no admite archivos vacíos). */
+function contenidosDelPrograma(archivosDelPrograma: ArchivoReact[]) {
+  return new Map(
+    archivosDelPrograma.map((archivo) => [
+      `/src/${archivo.nombre}`,
+      archivo.codigo === '' ? ' ' : archivo.codigo,
+    ]),
+  )
+}
+
+/** Lleva al entorno ya creado los archivos de esta pasada: borra, actualiza y crea. */
+function sincronizarArchivos(
+  entorno: EntornoVirtual,
+  nombresAnteriores: Set<string>,
+  contenidos: Map<string, string>,
+) {
+  for (const nombre of nombresAnteriores) {
+    if (!contenidos.has(nombre)) entorno.deleteFile(nombre)
+  }
+  for (const [nombre, contenido] of contenidos) {
+    if (nombresAnteriores.has(nombre)) entorno.updateFile(nombre, contenido)
+    else entorno.createFile(nombre, contenido)
+  }
+}
+
+function diagnosticosDe(entorno: EntornoVirtual, archivosTypeScript: ArchivoReact[], ts: TsReal) {
+  return archivosTypeScript
+    .flatMap((archivo) => {
+      const nombre = `/src/${archivo.nombre}`
+      return [
+        ...entorno.languageService.getSyntacticDiagnostics(nombre),
+        ...entorno.languageService.getSemanticDiagnostics(nombre),
+      ]
+    })
+    .map((diagnostico) => mapearDiagnostico(diagnostico, ts))
+}
+
 export function crearSesionTiposReact(
   cargarArchivo: CargarArchivoTipos = cargarArchivoPorFetch,
   { crearEntorno = crearEntornoTiposReact }: { crearEntorno?: FabricaEntornoTiposReact } = {},
@@ -232,55 +264,29 @@ export function crearSesionTiposReact(
 
   return {
     async diagnosticar(archivos: ArchivoReact[]): Promise<DiagnosticoTiposReact[]> {
-      const archivosTypeScript = archivos.filter(
-        (archivo) => archivo.nombre.endsWith('.ts') || archivo.nombre.endsWith('.tsx'),
-      )
+      const archivosTypeScript = archivos.filter(esArchivoTypeScript)
       if (archivosTypeScript.length === 0) return []
       const archivosDelPrograma = archivos.filter((archivo) => /\.(?:jsx|tsx|ts)$/.test(archivo.nombre))
 
       recursos ??= await cargarRecursos(cargarArchivo)
-      const { ts, vfs, opciones, mapa } = recursos
       if (necesitaTiposRouter(archivosDelPrograma) && !tiposRouterCargados) {
-        const tiposRouter = await cargarTiposReactRouter(cargarArchivo)
-        for (const [ruta, contenido] of Object.entries(tiposRouter)) {
-          mapa.set(`/node_modules/${ruta}`, contenido)
-        }
+        await anadirTiposRouter(recursos.mapa, cargarArchivo)
         tiposRouterCargados = true
         // TypeScript fija la resolución de paquetes al crear el entorno. Si
         // el programa empieza a importar el router después, hay que recrearlo.
         entorno = null
       }
-      const contenidos = new Map(
-        archivosDelPrograma.map((archivo) => [
-          `/src/${archivo.nombre}`,
-          archivo.codigo === '' ? ' ' : archivo.codigo,
-        ]),
-      )
+      const contenidos = contenidosDelPrograma(archivosDelPrograma)
 
-      if (!entorno) {
-        const mapaInicial = new Map(mapa)
-        for (const [nombre, contenido] of contenidos) mapaInicial.set(nombre, contenido)
-        entorno = crearEntorno(mapaInicial, [...contenidos.keys()], ts, opciones, vfs)
+      if (entorno) {
+        sincronizarArchivos(entorno, nombresActuales, contenidos)
       } else {
-        for (const nombre of nombresActuales) {
-          if (!contenidos.has(nombre)) entorno.deleteFile(nombre)
-        }
-        for (const [nombre, contenido] of contenidos) {
-          if (nombresActuales.has(nombre)) entorno.updateFile(nombre, contenido)
-          else entorno.createFile(nombre, contenido)
-        }
+        const mapa = new Map([...recursos.mapa, ...contenidos])
+        entorno = crearEntorno({ ...recursos, mapa, archivosRaiz: [...contenidos.keys()] })
       }
       nombresActuales = new Set(contenidos.keys())
 
-      return archivosTypeScript
-        .flatMap((archivo) => {
-          const nombre = `/src/${archivo.nombre}`
-          return [
-            ...entorno!.languageService.getSyntacticDiagnostics(nombre),
-            ...entorno!.languageService.getSemanticDiagnostics(nombre),
-          ]
-        })
-        .map((diagnostico) => mapearDiagnostico(diagnostico, ts))
+      return diagnosticosDe(entorno, archivosTypeScript, recursos.ts)
     },
   }
 }

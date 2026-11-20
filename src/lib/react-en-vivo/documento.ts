@@ -33,32 +33,36 @@ function escaparEstilo(css: string) {
   return css.replace(/<\/style/gi, '<\\/style')
 }
 
-export function construirDocumentoReact({
-  origen,
-  css,
+function scriptEnLinea(codigo: string) {
+  return `\n    <script>${escaparScript(codigo)}</script>`
+}
+
+function scriptEnLineaSi(condicion: boolean, codigo: string) {
+  return condicion ? scriptEnLinea(codigo) : ''
+}
+
+function usaReactRouter(modulos: Record<string, string>) {
+  return Object.values(modulos).some((codigo) =>
+    /\brequire\((['"])react-router(?:\/dom)?\1\)/.test(codigo),
+  )
+}
+
+// El código del alumno viaja dentro de este JSON: con < como < no
+// puede cerrar el <script> que lo contiene.
+function configuracionSerializada({
   modulos,
   archivosCss,
   strictMode,
   conPruebas,
-  conArbol = false,
-  conEfectos = false,
-  conRegistroRouter = false,
+  conEfectos,
   api,
   red,
   urlInicial,
 }: OpcionesDocumentoReact): string {
-  // En /vendor/: código de terceros empaquetado, que los escáneres de
-  // seguridad del repo tratan como tal (igual que node_modules).
-  const runtime = `${origen}/vendor/react-en-vivo/${VERSION_REACT_EN_VIVO}`
-  const usaRouter = Object.values(modulos).some((codigo) =>
-    /\brequire\((['"])react-router(?:\/dom)?\1\)/.test(codigo),
-  )
-  // El código del alumno viaja dentro de este JSON: con < como < no
-  // puede cerrar el <script> que lo contiene.
   const redDelDocumento = conPruebas
     ? { latencia: red?.latencia ?? 0, desordenar: false }
     : red ?? { latencia: 600, desordenar: false }
-  const configuracion = JSON.stringify({
+  return JSON.stringify({
     modulos,
     archivosCss,
     strictMode,
@@ -66,30 +70,54 @@ export function construirDocumentoReact({
     ...(conEfectos ? { efectos: true } : {}),
     ...(api ? { api, red: redDelDocumento } : {}),
   }).replace(/</g, '\\u003c')
-  const sinViewTransitions = conPruebas
-    ? `
+}
+
+const SIN_VIEW_TRANSITIONS = `
     <script>try {
       // Chromium no pinta el iframe fuera de pantalla y no captura la primera imagen.
       // Las comprobaciones miran el estado final, no la animación.
       delete Document.prototype.startViewTransition
       delete document.startViewTransition
     } catch {}</script>`
-    : ''
+
+/** Scripts opcionales del <head>, detrás del puente con la página. */
+function scriptsDeCabecera(origen: string, runtime: string, conPruebas: boolean, usaRouter: boolean) {
+  const sinViewTransitions = conPruebas ? SIN_VIEW_TRANSITIONS : ''
   const pruebas = conPruebas ? `\n    <script src="${runtime}/pruebas.js"></script>` : ''
   const libreriaRouter = usaRouter
     ? `\n    <script src="${origen}${RUTA_REACT_ROUTER_EN_VIVO}/react-router.js"></script>`
     : ''
+  return { sinViewTransitions, despuesDeReact: `${pruebas}${libreriaRouter}` }
+}
+
+/** Scripts opcionales del <body>, cada uno en el hueco en que tiene que ejecutarse. */
+function scriptsDelCuerpo(
+  { conPruebas, conArbol = false, conEfectos = false, conRegistroRouter = false, api }: OpcionesDocumentoReact,
+  usaRouter: boolean,
+) {
   // Después de #root (observa sus cambios) y antes del montaje (ve el primer commit).
-  const arbol = conArbol && !conPruebas ? `\n    <script>${escaparScript(CODIGO_ARBOL)}</script>` : ''
+  const arbol = scriptEnLineaSi(conArbol && !conPruebas, CODIGO_ARBOL)
   // La API tiene que existir antes de evaluar App.jsx: un módulo puede llamar
   // a fetch en su nivel superior, antes incluso del primer render.
-  const codigoRed = api ? `\n    <script>${escaparScript(CODIGO_RED)}</script>` : ''
-  const codigoEfectos = conEfectos ? `\n    <script>${escaparScript(CODIGO_EFECTOS)}</script>` : ''
-  const codigoRegistroRouter =
-    conRegistroRouter && usaRouter && !conPruebas
-      ? `\n    <script>${escaparScript(CODIGO_REGISTRO_ROUTER)}</script>`
-      : ''
-  const codigoRouter = usaRouter ? `\n    <script>${escaparScript(CODIGO_ROUTER)}</script>` : ''
+  const codigoRed = scriptEnLineaSi(Boolean(api), CODIGO_RED)
+  const codigoEfectos = scriptEnLineaSi(conEfectos, CODIGO_EFECTOS)
+  const codigoRegistroRouter = scriptEnLineaSi(
+    conRegistroRouter && usaRouter && !conPruebas,
+    CODIGO_REGISTRO_ROUTER,
+  )
+  const codigoRouter = scriptEnLineaSi(usaRouter, CODIGO_ROUTER)
+  return { arbol, antesDelMontaje: `${codigoRed}${codigoEfectos}${codigoRegistroRouter}${codigoRouter}` }
+}
+
+export function construirDocumentoReact(opciones: OpcionesDocumentoReact): string {
+  const { origen, css, conPruebas } = opciones
+  // En /vendor/: código de terceros empaquetado, que los escáneres de
+  // seguridad del repo tratan como tal (igual que node_modules).
+  const runtime = `${origen}/vendor/react-en-vivo/${VERSION_REACT_EN_VIVO}`
+  const usaRouter = usaReactRouter(opciones.modulos)
+  const configuracion = configuracionSerializada(opciones)
+  const cabecera = scriptsDeCabecera(origen, runtime, conPruebas, usaRouter)
+  const cuerpo = scriptsDelCuerpo(opciones, usaRouter)
 
   return `<!doctype html>
 <html lang="es">
@@ -98,12 +126,12 @@ export function construirDocumentoReact({
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>${escaparEstilo(css)}</style>
-    <script>${escaparScript(CODIGO_PUENTE)}</script>${sinViewTransitions}
-    <script src="${runtime}/react.js"></script>${pruebas}${libreriaRouter}
+    <script>${escaparScript(CODIGO_PUENTE)}</script>${cabecera.sinViewTransitions}
+    <script src="${runtime}/react.js"></script>${cabecera.despuesDeReact}
   </head>
   <body>
-    <div id="root"></div>${arbol}
-    <script>window.__configReactEnVivo = ${configuracion}</script>${codigoRed}${codigoEfectos}${codigoRegistroRouter}${codigoRouter}
+    <div id="root"></div>${cuerpo.arbol}
+    <script>window.__configReactEnVivo = ${configuracion}</script>${cuerpo.antesDelMontaje}
     <script>${escaparScript(CODIGO_MONTAJE)}</script>
   </body>
 </html>`
