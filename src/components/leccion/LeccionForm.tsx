@@ -4,29 +4,14 @@ import {
   useState,
 } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
-import { z } from 'zod'
 
-import { CamposLeccionForm } from '@/components/leccion/CamposLeccionForm'
-import {
-  EditorContenidoLeccion,
-  ResumenLeccionForm,
-} from '@/components/leccion/EditorContenidoLeccion'
+import { CamposLeccionForm, ResumenLeccionForm } from '@/components/leccion/CamposLeccionForm'
+import { EditorContenidoLeccion } from '@/components/leccion/EditorContenidoLeccion'
+import { leccionSchema, type LeccionFields } from '@/components/leccion/leccionFormSchema'
 import { useImagenesLeccionForm } from '@/components/leccion/useImagenesLeccionForm'
 import { Button } from '@/components/ui/button'
 import { extraerImagenesDeLaboratorio } from '@/lib/utils/extraerImagenesDeLaboratorio'
 import type { Leccion } from '@/types'
-
-const leccionSchema = z.object({
-  modulo: z.string(),
-  titulo: z.string().trim().min(1, 'Escribe un título.').max(120),
-  resumen: z.string().max(300, 'El resumen no puede superar 300 caracteres.'),
-  contenido: z.string().max(200_000, 'El contenido no puede superar 200 000 caracteres.'),
-  orden: z.number().int('El orden debe ser un número entero.'),
-  status: z.enum(['borrador', 'publicado']),
-  esProyecto: z.boolean().default(false),
-})
-
-export type LeccionFields = z.infer<typeof leccionSchema>
 
 export interface LeccionFormValues {
   slug: string
@@ -155,22 +140,14 @@ export function LeccionForm({
         errors={formState.errors}
       />
 
-      <ResumenLeccionForm register={register('resumen')} errors={formState.errors} />
+      <ResumenLeccionForm register={register} errors={formState.errors} />
 
       <EditorContenidoLeccion
         contenidoRegister={contenidoRegister}
         contenidoRef={contenidoRef}
-        textareaRef={gestionImagenes.textareaRef}
         errors={formState.errors}
-        subiendoImagen={gestionImagenes.subiendoImagen}
-        errorImagen={gestionImagenes.errorImagen}
-        mensajeImagen={gestionImagenes.mensajeImagen}
-        imagenBorrandose={gestionImagenes.imagenBorrandose}
         imagenes={imagenes}
-        manejarDragOver={gestionImagenes.manejarDragOver}
-        manejarDrop={gestionImagenes.manejarDrop}
-        manejarPaste={gestionImagenes.manejarPaste}
-        borrarImagen={gestionImagenes.borrarImagen}
+        gestionImagenes={gestionImagenes}
       />
 
       <p aria-live="polite" className="text-sm text-destructive">

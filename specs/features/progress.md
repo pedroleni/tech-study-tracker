@@ -268,7 +268,8 @@ garantiza que no se duplica sin querer).
   (React Query) + `useSetMyProgress()` (mutation), mismo patrón que
   `useFavorites`/`useAddFavorite`.
 - **`TechnologyPage.tsx`**: nueva sección "Mi progreso", visible solo
-  con sesión iniciada (mismo patrón que `FavoriteControl` — sin
+  con sesión iniciada (mismo patrón que `FavoriteControl`, hoy `ControlFavorito`
+  en `src/routes/ficha-tecnologia/ControlesFichaTecnologia.tsx` — sin
   sesión, botón "Inicia sesión para guardar tu progreso" en vez del
   control). Dos campos: un `<select>` de estado (pendiente/en
   progreso/completado) y un `<select>` de "lección actual", con las
@@ -448,7 +449,8 @@ aunque solo haya un campo realmente mutable.
 
 ### Estado de la tecnología: de manual a derivado
 
-El `<select>` de "Estado" en `ProgressControl` (`TechnologyPage.tsx`,
+El `<select>` de "Estado" en `ProgressControl` (hoy `ControlProgreso`, en
+`src/routes/ficha-tecnologia/ControlesFichaTecnologia.tsx`,
 sección "Mi progreso") **ya no es editable**. Se calcula en el cliente
 a partir del progreso real de las lecciones publicadas de esa
 tecnología, no se lee ni se escribe
@@ -488,7 +490,7 @@ tocan hasta que haga falta de verdad.
   última invalida la query tras cada escritura en vez de parchear la
   caché a mano (es un array; más simple refetchear que mantenerlo
   sincronizado a mano).
-- **`TechnologyPage.tsx`**: un `<select>` por lección publicada, en su
+- **`TechnologyPage.tsx`** (hoy en `src/routes/ficha-tecnologia/LeccionesFichaTecnologia.tsx`): un `<select>` por lección publicada, en su
   fila dentro del módulo (ver `specs/design-system.md` para el estilo
   de pastilla), visible solo con sesión iniciada; sin fila en la tabla
   = `pendiente` por defecto, tal como se pidió. Deshabilitado mientras

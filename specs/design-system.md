@@ -109,7 +109,8 @@ blanco.
 
 **Lógica compartida, no duplicada.** `TechnologyBrand`
 (`src/components/technology/TechnologyCard.tsx`, exportado y reusado
-por `TechnologyPage.tsx`) es un componente de render-prop que resuelve
+por `src/routes/ficha-tecnologia/ContenidoFichaTecnologia.tsx`, que pasa
+el resultado a `LeccionesFichaTecnologia.tsx`) es un componente de render-prop que resuelve
 una vez icono + color + clases de contraste + fallback, y expone
 `backgroundClassName`/`foregroundClassName`/`glassClassName`/`brandHex`/
 `Icon` a quien lo use. Sin entrada en el mapa (p. ej. `terminal`, que
@@ -141,7 +142,8 @@ compañía) sobre una superficie que no sea `--card`/`--background` lisos
 
 **La pastilla de progreso por lección reutiliza la paleta semántica de
 arriba**, no colores nuevos: el `<select>` de estado en cada fila de
-lección (`TechnologyPage.tsx`, ver `specs/features/progress.md`) usa
+lección (`src/routes/ficha-tecnologia/LeccionesFichaTecnologia.tsx`, ver
+`specs/features/progress.md`) usa
 exactamente `leccionProgressPillClassName` = las mismas clases de la
 tabla "Status" de esta misma sección, con `appearance-none` +
 `ChevronDown` superpuesto para que se lea como una etiqueta de estado

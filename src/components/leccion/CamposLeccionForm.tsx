@@ -1,6 +1,6 @@
 import type { FieldErrors, UseFormRegister } from 'react-hook-form'
 
-import type { LeccionFields } from '@/components/leccion/LeccionForm'
+import type { LeccionFields } from '@/components/leccion/leccionFormSchema'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import type { Leccion } from '@/types'
@@ -171,6 +171,33 @@ export function CamposLeccionForm({
         errors={errors}
       />
       <EstadoYProyectoLeccion leccion={leccion} register={register} />
+    </div>
+  )
+}
+
+export function ResumenLeccionForm({
+  register,
+  errors,
+}: {
+  register: UseFormRegister<LeccionFields>
+  errors: FieldErrors<LeccionFields>
+}) {
+  return (
+    <div className="space-y-2">
+      <Label htmlFor="leccion-resumen">Resumen</Label>
+      <textarea
+        id="leccion-resumen"
+        rows={3}
+        maxLength={300}
+        placeholder="Resume el objetivo de la lección…"
+        className="w-full resize-y rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+        aria-invalid={Boolean(errors.resumen)}
+        aria-describedby="leccion-resumen-error"
+        {...register('resumen')}
+      />
+      <p id="leccion-resumen-error" className="text-sm text-destructive">
+        {errors.resumen?.message}
+      </p>
     </div>
   )
 }

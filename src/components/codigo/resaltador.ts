@@ -52,7 +52,8 @@ export const CLASES_TOKEN: Record<TipoToken, string> = {
 
 type Tokenizador = (codigo: string, salida: Token[]) => void
 
-const TOKENIZADORES = new Map<string, Tokenizador>([
+// Con la clave tipada, TypeScript avisa si se escribe mal un lenguaje.
+const TOKENIZADORES = new Map<Lenguaje, Tokenizador>([
   ['html', tokenizarHtml],
   ['css', tokenizarCss],
   ['js', tokenizarJs],
