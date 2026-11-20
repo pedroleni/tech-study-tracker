@@ -10,7 +10,7 @@ import type { Technology } from '@/types'
 
 import { difficultyLabels, priorityLabels, statusLabels } from './labels'
 
-interface TechnologyBrandPresentation {
+export interface TechnologyBrandPresentation {
   Icon: ComponentType<{ className?: string }>
   backgroundClassName: string
   brandHex?: string

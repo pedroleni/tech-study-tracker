@@ -83,7 +83,9 @@ function cierraEn(texto: string, indice: number, marcador: Marcador) {
 
 /** El énfasis se cierra: pasa entero al segmento de abajo, que sigue tras el marcador. */
 function terminarConCierre(pila: Segmento[], marcador: Marcador) {
-  const cerrado = pila.pop()!
+  const cerrado = pila.pop()
+  // La pila nunca está vacía aquí (la raíz no se cierra); la guarda solo sustituye al `!`.
+  if (!cerrado) return
   const padre = pila[pila.length - 1]
   padre.fragmentos.push({
     tipo: marcador === '**' ? 'negrita' : 'cursiva',
@@ -98,7 +100,7 @@ function terminarConCierre(pila: Segmento[], marcador: Marcador) {
  * como texto en el segmento de abajo, que sigue justo detrás.
  */
 function terminarSinCierre(texto: string, pila: Segmento[]) {
-  const { apertura } = pila.pop()!
+  const apertura = pila.pop()?.apertura
   if (!apertura) return
   const padre = pila[pila.length - 1]
   agregarTexto(padre.fragmentos, texto[apertura.indice])

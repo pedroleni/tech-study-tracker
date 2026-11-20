@@ -2,7 +2,7 @@ import { ArrowUpRight, BookOpen, ChevronDown, PlayCircle } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import { TituloEnLinea } from '@/components/content/TituloEnLinea'
-import { TechnologyBrand } from '@/components/technology/TechnologyCard'
+import type { TechnologyBrandPresentation } from '@/components/technology/TechnologyCard'
 import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { textoPlanoDeTitulo } from '@/lib/utils/tituloEnLinea'
@@ -16,12 +16,12 @@ const leccionProgressPillClassName: Record<Status, string> = {
   completado: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300',
 }
 
-interface GrupoLecciones {
+interface GrupoDeLecciones {
   name: string | null
   lecciones: Leccion[]
 }
 
-function agruparLecciones(lecciones: Leccion[]): GrupoLecciones[] {
+function agruparLecciones(lecciones: Leccion[]): GrupoDeLecciones[] {
   const withoutModule = lecciones.filter((leccion) => !leccion.modulo?.trim())
   const modules = new Map<string, Leccion[]>()
 
@@ -44,7 +44,7 @@ function FilaLeccion({
   indice,
   technologyId,
   currentLeccionId,
-  user,
+  haySesion,
   isAdmin,
   brandHex,
   progressStatus,
@@ -55,7 +55,7 @@ function FilaLeccion({
   indice: number
   technologyId: string
   currentLeccionId?: string | null
-  user: boolean
+  haySesion: boolean
   isAdmin: boolean
   brandHex?: string
   progressStatus: Status
@@ -108,7 +108,7 @@ function FilaLeccion({
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-3">
-          {user && leccion.status === 'publicado' && (
+          {haySesion && leccion.status === 'publicado' && (
             <span className="relative inline-flex shrink-0 items-center">
               <select
                 name={`progress-${leccion.id}`}
@@ -156,7 +156,7 @@ function GrupoLecciones({
   group,
   technologyId,
   currentLeccionId,
-  user,
+  haySesion,
   isAdmin,
   brand,
   leccionProgressById,
@@ -164,17 +164,12 @@ function GrupoLecciones({
   pendingStatus,
   onCambiarProgreso,
 }: {
-  group: GrupoLecciones
+  group: GrupoDeLecciones
   technologyId: string
   currentLeccionId?: string | null
-  user: boolean
+  haySesion: boolean
   isAdmin: boolean
-  brand: {
-    backgroundClassName: string
-    foregroundClassName: string
-    glassClassName: string
-    brandHex?: string
-  }
+  brand: TechnologyBrandPresentation
   leccionProgressById: ReadonlyMap<string, Status>
   pendingLeccionId?: string
   pendingStatus?: Status
@@ -231,7 +226,7 @@ function GrupoLecciones({
                 indice={indice}
                 technologyId={technologyId}
                 currentLeccionId={currentLeccionId}
-                user={user}
+                haySesion={haySesion}
                 isAdmin={isAdmin}
                 brandHex={brand.brandHex}
                 progressStatus={progressStatus}
@@ -249,9 +244,9 @@ function GrupoLecciones({
 export function LeccionesFichaTecnologia({
   lecciones,
   technologyId,
-  iconKey,
+  brand,
   currentLeccionId,
-  user,
+  haySesion,
   isAdmin,
   leccionProgressById,
   pendingLeccionId,
@@ -260,9 +255,9 @@ export function LeccionesFichaTecnologia({
 }: {
   lecciones: Leccion[]
   technologyId: string
-  iconKey?: string | null
+  brand: TechnologyBrandPresentation
   currentLeccionId?: string | null
-  user: boolean
+  haySesion: boolean
   isAdmin: boolean
   leccionProgressById: ReadonlyMap<string, Status>
   pendingLeccionId?: string
@@ -289,27 +284,23 @@ export function LeccionesFichaTecnologia({
           </p>
         </Card>
       ) : (
-        <TechnologyBrand iconKey={iconKey}>
-          {(brand) => (
-            <div className="space-y-8">
-              {groups.map((group) => (
-                <GrupoLecciones
-                  key={group.name ?? 'sin-modulo'}
-                  group={group}
-                  technologyId={technologyId}
-                  currentLeccionId={currentLeccionId}
-                  user={user}
-                  isAdmin={isAdmin}
-                  brand={brand}
-                  leccionProgressById={leccionProgressById}
-                  pendingLeccionId={pendingLeccionId}
-                  pendingStatus={pendingStatus}
-                  onCambiarProgreso={onCambiarProgreso}
-                />
-              ))}
-            </div>
-          )}
-        </TechnologyBrand>
+        <div className="space-y-8">
+          {groups.map((group) => (
+            <GrupoLecciones
+              key={group.name ?? 'sin-modulo'}
+              group={group}
+              technologyId={technologyId}
+              currentLeccionId={currentLeccionId}
+              haySesion={haySesion}
+              isAdmin={isAdmin}
+              brand={brand}
+              leccionProgressById={leccionProgressById}
+              pendingLeccionId={pendingLeccionId}
+              pendingStatus={pendingStatus}
+              onCambiarProgreso={onCambiarProgreso}
+            />
+          ))}
+        </div>
       )}
     </section>
   )

@@ -3,12 +3,12 @@ import { Link } from 'react-router-dom'
 
 import { SafeMarkdown } from '@/components/content/SafeMarkdown'
 import { difficultyLabels, priorityLabels, statusLabels } from '@/components/technology/labels'
-import { TechnologyBrand } from '@/components/technology/TechnologyCard'
+import { TechnologyBrand, type TechnologyBrandPresentation } from '@/components/technology/TechnologyCard'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
-import { ControlFavorito, ControlProgreso } from '@/routes/ControlesFichaTecnologia'
-import { LeccionesFichaTecnologia } from '@/routes/LeccionesFichaTecnologia'
+import { ControlFavorito, ControlProgreso } from '@/routes/ficha-tecnologia/ControlesFichaTecnologia'
+import { LeccionesFichaTecnologia } from '@/routes/ficha-tecnologia/LeccionesFichaTecnologia'
 import type { Leccion, Resource, Status, Technology } from '@/types'
 
 function CabeceraFicha({
@@ -20,13 +20,7 @@ function CabeceraFicha({
   technology: Technology
   isAdmin: boolean
   isPublished: boolean
-  brand: {
-    Icon: React.ComponentType<{ className?: string }>
-    backgroundClassName: string
-    brandHex?: string
-    foregroundClassName: string
-    glassClassName: string
-  }
+  brand: TechnologyBrandPresentation
 }) {
   return (
     <header className="space-y-4">
@@ -146,7 +140,7 @@ export function ContenidoFichaTecnologia({
   lecciones,
   safeResources,
   isAdmin,
-  user,
+  haySesion,
   publishedLeccionIds,
   leccionProgressById,
   currentLeccionId,
@@ -158,7 +152,7 @@ export function ContenidoFichaTecnologia({
   lecciones: Leccion[]
   safeResources: Resource[]
   isAdmin: boolean
-  user: boolean
+  haySesion: boolean
   publishedLeccionIds: string[]
   leccionProgressById: ReadonlyMap<string, Status>
   currentLeccionId?: string | null
@@ -215,9 +209,9 @@ export function ContenidoFichaTecnologia({
             <LeccionesFichaTecnologia
               lecciones={lecciones}
               technologyId={technology.id}
-              iconKey={technology.icon}
+              brand={brand}
               currentLeccionId={currentLeccionId}
-              user={user}
+              haySesion={haySesion}
               isAdmin={isAdmin}
               leccionProgressById={leccionProgressById}
               pendingLeccionId={pendingLeccionId}

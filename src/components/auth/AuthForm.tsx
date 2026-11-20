@@ -103,7 +103,6 @@ function CampoEmail({
 
 function CampoPassword({
   mode,
-  isLogin,
   visible,
   onAlternarVisible,
   schema,
@@ -111,7 +110,6 @@ function CampoPassword({
   errors,
 }: {
   mode: AuthFormProps['mode']
-  isLogin: boolean
   visible: boolean
   onAlternarVisible: () => void
   schema: SchemaCamposAuth
@@ -126,7 +124,7 @@ function CampoPassword({
           id={`${mode}-password`}
           className="pr-10"
           type={visible ? 'text' : 'password'}
-          autoComplete={isLogin ? 'current-password' : 'new-password'}
+          autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
           aria-invalid={Boolean(errors.password)}
           aria-describedby={errors.password ? `${mode}-password-error` : undefined}
           {...register('password', {
@@ -273,7 +271,6 @@ export function AuthForm({ mode }: AuthFormProps) {
 
           <CampoPassword
             mode={mode}
-            isLogin={isLogin}
             visible={isPasswordVisible}
             onAlternarVisible={() => setIsPasswordVisible((visible) => !visible)}
             schema={authSchema}

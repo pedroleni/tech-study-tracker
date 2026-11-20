@@ -11,7 +11,7 @@ import {
 import { useProfile } from '@/lib/hooks/useProfile'
 import { useTechnology } from '@/lib/hooks/useTechnologies'
 import { validateResourceUrl } from '@/lib/utils/validateResourceUrl'
-import { ContenidoFichaTecnologia } from '@/routes/ContenidoFichaTecnologia'
+import { ContenidoFichaTecnologia } from '@/routes/ficha-tecnologia/ContenidoFichaTecnologia'
 import type { Status, UserLeccionProgress } from '@/types'
 
 function crearMapaProgreso(
@@ -100,7 +100,7 @@ export function TechnologyPage() {
       lecciones={leccionesQuery.data ?? []}
       safeResources={safeResources}
       isAdmin={isAdmin}
-      user={Boolean(user)}
+      haySesion={Boolean(user)}
       publishedLeccionIds={publishedLeccionIds}
       leccionProgressById={leccionProgressById}
       currentLeccionId={progressQuery.data?.currentLeccionId}

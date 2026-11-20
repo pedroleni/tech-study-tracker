@@ -1,71 +1,35 @@
-import type {
-  ClipboardEventHandler,
-  DragEventHandler,
-  RefObject,
-} from 'react'
 import type { FieldErrors, UseFormRegisterReturn } from 'react-hook-form'
 
-import type { LeccionFields } from '@/components/leccion/LeccionForm'
+import type { LeccionFields } from '@/components/leccion/leccionFormSchema'
+import type { GestionImagenesLeccion } from '@/components/leccion/useImagenesLeccionForm'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import type { BloqueImagenEncontrado } from '@/lib/utils/extraerImagenesDeLaboratorio'
 
-export function ResumenLeccionForm({
-  register,
-  errors,
-}: {
-  register: UseFormRegisterReturn<'resumen'>
-  errors: FieldErrors<LeccionFields>
-}) {
-  return (
-    <div className="space-y-2">
-      <Label htmlFor="leccion-resumen">Resumen</Label>
-      <textarea
-        id="leccion-resumen"
-        rows={3}
-        maxLength={300}
-        placeholder="Resume el objetivo de la lección…"
-        className="w-full resize-y rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-        aria-invalid={Boolean(errors.resumen)}
-        aria-describedby="leccion-resumen-error"
-        {...register}
-      />
-      <p id="leccion-resumen-error" className="text-sm text-destructive">
-        {errors.resumen?.message}
-      </p>
-    </div>
-  )
-}
-
 export function EditorContenidoLeccion({
   contenidoRegister,
   contenidoRef,
-  textareaRef,
   errors,
-  subiendoImagen,
-  errorImagen,
-  mensajeImagen,
-  imagenBorrandose,
   imagenes,
-  manejarDragOver,
-  manejarDrop,
-  manejarPaste,
-  borrarImagen,
+  gestionImagenes,
 }: {
   contenidoRegister: Omit<UseFormRegisterReturn<'contenido'>, 'ref'>
   contenidoRef: UseFormRegisterReturn<'contenido'>['ref']
-  textareaRef: RefObject<HTMLTextAreaElement | null>
   errors: FieldErrors<LeccionFields>
-  subiendoImagen: boolean
-  errorImagen: string
-  mensajeImagen: string
-  imagenBorrandose: string
   imagenes: BloqueImagenEncontrado[]
-  manejarDragOver: DragEventHandler<HTMLTextAreaElement>
-  manejarDrop: DragEventHandler<HTMLTextAreaElement>
-  manejarPaste: ClipboardEventHandler<HTMLTextAreaElement>
-  borrarImagen: (imagen: BloqueImagenEncontrado) => Promise<void>
+  gestionImagenes: GestionImagenesLeccion
 }) {
+  const {
+    textareaRef,
+    subiendoImagen,
+    errorImagen,
+    mensajeImagen,
+    imagenBorrandose,
+    manejarDragOver,
+    manejarDrop,
+    manejarPaste,
+    borrarImagen,
+  } = gestionImagenes
   return (
     <div className="space-y-2">
       <Label htmlFor="leccion-contenido">Contenido en Markdown</Label>

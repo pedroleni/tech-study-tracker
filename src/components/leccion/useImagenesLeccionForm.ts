@@ -9,7 +9,7 @@ import {
 } from 'react'
 import type { UseFormGetValues, UseFormSetValue } from 'react-hook-form'
 
-import type { LeccionFields } from '@/components/leccion/LeccionForm'
+import type { LeccionFields } from '@/components/leccion/leccionFormSchema'
 import { supabase } from '@/lib/supabaseClient'
 import type { BloqueImagenEncontrado } from '@/lib/utils/extraerImagenesDeLaboratorio'
 import type { Leccion } from '@/types'
@@ -28,10 +28,15 @@ function validarImagen(archivo: File) {
   return ''
 }
 
-async function subirImagen(archivo: File) {
+async function obtenerTokenSesion() {
   const { data: sesion } = await supabase.auth.getSession()
   const token = sesion.session?.access_token
   if (!token) throw new Error('No hay sesión activa.')
+  return token
+}
+
+async function subirImagen(archivo: File) {
+  const token = await obtenerTokenSesion()
 
   const respuesta = await fetch('/api/imagenes', {
     method: 'POST',
@@ -55,9 +60,7 @@ function crearBloqueImagen(archivo: File, publicUrl: string) {
 
 async function borrarImagenRemota(imagen: BloqueImagenEncontrado, leccionId?: string) {
   const clave = imagen.datos.src.slice(imagen.datos.src.lastIndexOf('/') + 1)
-  const { data: sesion } = await supabase.auth.getSession()
-  const token = sesion.session?.access_token
-  if (!token) throw new Error('No hay sesión activa.')
+  const token = await obtenerTokenSesion()
 
   const respuesta = await fetch('/api/imagenes', {
     method: 'DELETE',
@@ -207,3 +210,5 @@ export function useImagenesLeccionForm({
     manejarDragOver, manejarDrop, manejarPaste, borrarImagen,
   }
 }
+
+export type GestionImagenesLeccion = ReturnType<typeof useImagenesLeccionForm>
