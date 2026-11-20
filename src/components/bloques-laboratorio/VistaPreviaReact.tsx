@@ -2,12 +2,16 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { RotateCw } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
-import { leerMensajeReactEnVivo, type MensajeReactEnVivo } from '@/lib/react-en-vivo/mensajes'
+import type { MensajeReactEnVivo } from '@/lib/react-en-vivo/mensajes'
 import { CANAL_REACT_EN_VIVO } from '@/lib/react-en-vivo/constantes'
-import { explicarErrorReact } from '@/lib/react-en-vivo/explicarError'
 import { cn } from '@/lib/utils'
 
 import type { AjustesRed } from './PanelRed'
+import {
+  useMensajesVistaPreviaReact,
+  type ErrorVistaPreviaReact,
+  type OrdenNavegadorVistaPrevia,
+} from './useMensajesVistaPreviaReact'
 
 export function VistaPreviaReact({
   srcDoc,
@@ -22,11 +26,7 @@ export function VistaPreviaReact({
   red?: AjustesRed
   fallosSolicitados?: number
   codigoCompilado?: boolean
-  ordenNavegador?: {
-    id: number
-    accion: 'atras' | 'adelante' | 'recargar' | 'ir'
-    url?: string
-  }
+  ordenNavegador?: OrdenNavegadorVistaPrevia
 }) {
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const onMensajeRef = useRef(onMensaje)
@@ -36,22 +36,11 @@ export function VistaPreviaReact({
   const fallosSolicitadosRef = useRef(fallosSolicitados)
   const ordenNavegadorRef = useRef(ordenNavegador)
   const ultimaOrdenNavegadorEnviadaRef = useRef(ordenNavegador?.id ?? 0)
-  const documentoRef = useRef<{ srcDoc: string; codigoCompilado: boolean } | null>(null)
-  const reintentoRef = useRef<{
-    srcDoc: string
-    fase: 'disponible' | 'pendiente' | 'agotado'
-  }>({ srcDoc, fase: 'disponible' })
-  const temporizadorRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [alto, setAlto] = useState<number | null>(null)
   const [revision, setRevision] = useState(0)
   // El error se guarda junto al documento que lo produjo: al cambiar srcDoc
   // deja de mostrarse sin tener que borrarlo desde un efecto.
-  const [error, setError] = useState<{
-    srcDoc: string
-    texto: string
-    explicacion?: string
-    runtime?: 'react' | 'react-router'
-  } | null>(null)
+  const [error, setError] = useState<ErrorVistaPreviaReact | null>(null)
 
   const remontar = useCallback(() => {
     montadoRef.current = false
@@ -114,108 +103,23 @@ export function VistaPreviaReact({
     fallosEnviadosRef.current = fallosSolicitados
   }, [fallosSolicitados])
 
-  // useLayoutEffect y no useEffect: el oyente queda puesto en el mismo commit
-  // que inserta el iframe, antes de que su código pueda mandar nada. Con
-  // useEffect (después de pintar), un iframe rápido podía adelantarse y su
-  // mensaje perderse.
-  useLayoutEffect(() => {
-    if (reintentoRef.current.srcDoc !== srcDoc) {
-      if (temporizadorRef.current !== null) clearTimeout(temporizadorRef.current)
-      temporizadorRef.current = null
-      reintentoRef.current = { srcDoc, fase: 'disponible' }
-    }
-    const documento = documentoRef.current
-    if (
-      !documento ||
-      documento.srcDoc !== srcDoc ||
-      documento.codigoCompilado !== codigoCompilado
-    ) {
-      montadoRef.current = false
-      documentoRef.current = { srcDoc, codigoCompilado }
-    }
-    const recibir = (evento: MessageEvent) => {
-      const mensaje = leerMensajeReactEnVivo(evento, iframeRef.current?.contentWindow)
-      if (!mensaje) return
-      if (mensaje.tipo === 'montado') {
-        montadoRef.current = true
-        if (redRef.current) {
-          iframeRef.current?.contentWindow?.postMessage(
-            { canal: CANAL_REACT_EN_VIVO, tipo: 'red', ...redRef.current },
-            '*',
-          )
-        }
-        if (fallosSolicitadosRef.current > fallosEnviadosRef.current) {
-          iframeRef.current?.contentWindow?.postMessage(
-            { canal: CANAL_REACT_EN_VIVO, tipo: 'fallar-siguiente' },
-            '*',
-          )
-          fallosEnviadosRef.current = fallosSolicitadosRef.current
-        }
-        const orden = ordenNavegadorRef.current
-        if (orden && orden.id !== ultimaOrdenNavegadorEnviadaRef.current) {
-          enviarOrdenNavegador(orden)
-        }
-      }
-      if (mensaje.tipo === 'alto') setAlto(mensaje.alto)
-      if (mensaje.tipo === 'runtime-no-cargado') {
-        const reintento = reintentoRef.current
-        if (reintento.fase === 'disponible') {
-          reintento.fase = 'pendiente'
-          setError(null)
-          temporizadorRef.current = setTimeout(() => {
-            if (reintentoRef.current !== reintento) return
-            reintento.fase = 'agotado'
-            temporizadorRef.current = null
-            remontar()
-          }, 800)
-        } else if (reintento.fase === 'agotado') {
-          setError({
-            srcDoc,
-            texto: `No se pudo cargar ${mensaje.libreria === 'react' ? 'React' : 'React Router'} en la vista previa. Puede ser un corte de conexión momentáneo.`,
-            runtime: mensaje.libreria,
-          })
-        }
-      }
-      if (mensaje.tipo === 'error-render') {
-        const esFalloDelRuntime = mensaje.texto.startsWith(
-          'No se pudo cargar React Router en la vista previa.',
-        )
-        if (esFalloDelRuntime && reintentoRef.current.fase !== 'disponible') {
-          onMensajeRef.current?.(mensaje)
-          return
-        }
-        const donde = mensaje.archivo
-          ? ` — ${mensaje.archivo}${
-              mensaje.linea
-                ? `, línea ${mensaje.linea}${codigoCompilado ? ' del código compilado' : ''}`
-                : ''
-            }`
-          : ''
-        setError({
-          srcDoc,
-          texto: `Error al renderizar: ${mensaje.texto}${donde}`,
-          explicacion: explicarErrorReact(mensaje.texto) ?? undefined,
-        })
-      }
-      if (mensaje.tipo === 'error') {
-        setError({
-          srcDoc,
-          texto: `Error: ${mensaje.texto}`,
-          explicacion: explicarErrorReact(mensaje.texto) ?? undefined,
-        })
-      }
-      onMensajeRef.current?.(mensaje)
-    }
-
-    window.addEventListener('message', recibir)
-    return () => {
-      window.removeEventListener('message', recibir)
-      if (temporizadorRef.current !== null) {
-        clearTimeout(temporizadorRef.current)
-        temporizadorRef.current = null
-      }
-    }
-  }, [codigoCompilado, enviarOrdenNavegador, remontar, revision, srcDoc])
+  useMensajesVistaPreviaReact({
+    iframeRef,
+    onMensajeRef,
+    redRef,
+    montadoRef,
+    fallosEnviadosRef,
+    fallosSolicitadosRef,
+    ordenNavegadorRef,
+    ultimaOrdenNavegadorEnviadaRef,
+    srcDoc,
+    codigoCompilado,
+    revision,
+    setAlto,
+    setError,
+    remontar,
+    enviarOrdenNavegador,
+  })
 
   const errorVisible = error?.srcDoc === srcDoc ? error : null
 

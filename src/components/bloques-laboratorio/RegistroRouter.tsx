@@ -70,6 +70,12 @@ function textoPaso(paso: Paso) {
   }${paso.tarde ? ' · terminó después de cancelarse' : ''}`
 }
 
+function claseBarraPaso(paso: Paso) {
+  if (paso.estado === 'error') return 'bg-red-500 dark:bg-red-400'
+  if (paso.estado === 'en-curso') return 'bg-amber-500 dark:bg-amber-400'
+  return 'bg-green-500 dark:bg-green-400'
+}
+
 function BarraPaso({ paso, operacion }: { paso: Paso; operacion: MensajeRouterOperacion }) {
   const total = Math.max(
     operacion.duracion ?? 0,
@@ -85,14 +91,7 @@ function BarraPaso({ paso, operacion }: { paso: Paso; operacion: MensajeRouterOp
       className="h-1.5 min-w-0 overflow-hidden rounded-full bg-muted"
     >
       <span
-        className={cn(
-          'block h-full rounded-full',
-          paso.estado === 'error'
-            ? 'bg-red-500 dark:bg-red-400'
-            : paso.estado === 'en-curso'
-              ? 'bg-amber-500 dark:bg-amber-400'
-              : 'bg-green-500 dark:bg-green-400',
-        )}
+        className={cn('block h-full rounded-full', claseBarraPaso(paso))}
         style={{ marginLeft: `${izquierda}%`, width: `${ancho}%` }}
       />
     </div>

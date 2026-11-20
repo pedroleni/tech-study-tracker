@@ -10,75 +10,11 @@
       "count": 1
     }
   },
-  "src/components/bloques-laboratorio/ArbolVisual.tsx": {
-    "complexity": {
-      "count": 1
-    }
-  },
-  "src/components/bloques-laboratorio/EditorEnVivo.tsx": {
-    "max-lines-per-function": {
-      "count": 1
-    }
-  },
-  "src/components/bloques-laboratorio/GitEnVivo.tsx": {
-    "complexity": {
-      "count": 1
-    }
-  },
   "src/components/bloques-laboratorio/ReactAnotado.tsx": {
     "complexity": {
       "count": 1
     },
     "max-lines-per-function": {
-      "count": 1
-    }
-  },
-  "src/components/bloques-laboratorio/ReactEnVivo.tsx": {
-    "complexity": {
-      "count": 2
-    },
-    "max-lines": {
-      "count": 1
-    },
-    "max-lines-per-function": {
-      "count": 1
-    },
-    "no-nested-ternary": {
-      "count": 4
-    },
-    "sonarjs/cognitive-complexity": {
-      "count": 2
-    }
-  },
-  "src/components/bloques-laboratorio/RegistroRouter.tsx": {
-    "no-nested-ternary": {
-      "count": 1
-    }
-  },
-  "src/components/bloques-laboratorio/ResultadosComprobaciones.tsx": {
-    "no-nested-ternary": {
-      "count": 1
-    }
-  },
-  "src/components/bloques-laboratorio/SqlEnVivo.tsx": {
-    "complexity": {
-      "count": 1
-    },
-    "max-lines-per-function": {
-      "count": 1
-    },
-    "no-nested-ternary": {
-      "count": 1
-    }
-  },
-  "src/components/bloques-laboratorio/VistaPreviaReact.tsx": {
-    "complexity": {
-      "count": 1
-    },
-    "max-lines-per-function": {
-      "count": 1
-    },
-    "sonarjs/cognitive-complexity": {
       "count": 1
     }
   },

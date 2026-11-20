@@ -2,6 +2,16 @@ import { CircleCheck, CircleX } from 'lucide-react'
 
 export type ResultadoComprobacion = { descripcion: string; ok: boolean; motivo?: string }
 
+function obtenerAviso(estado: 'comprobando' | 'listo' | 'tiempo-agotado' | 'recarga') {
+  if (estado === 'tiempo-agotado') {
+    return 'La comprobación tardó demasiado. Revisa si tu código se queda en un bucle.'
+  }
+  if (estado === 'recarga') {
+    return 'La vista previa se recargó durante la comprobación. Suele pasar al enviar un formulario sin e.preventDefault().'
+  }
+  return null
+}
+
 export function ResultadosComprobaciones({
   estado,
   resultados,
@@ -10,12 +20,7 @@ export function ResultadosComprobaciones({
   resultados: ResultadoComprobacion[]
 }) {
   const superadas = resultados.filter((resultado) => resultado.ok).length
-  const aviso =
-    estado === 'tiempo-agotado'
-      ? 'La comprobación tardó demasiado. Revisa si tu código se queda en un bucle.'
-      : estado === 'recarga'
-        ? 'La vista previa se recargó durante la comprobación. Suele pasar al enviar un formulario sin e.preventDefault().'
-        : null
+  const aviso = obtenerAviso(estado)
 
   return (
     <div role="status" aria-live="polite" className="space-y-2">

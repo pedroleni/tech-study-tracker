@@ -3,6 +3,7 @@ import { html as lenguajeHtml } from '@codemirror/lang-html'
 import { javascript as lenguajeJavascript } from '@codemirror/lang-javascript'
 import { Code2, RotateCcw } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import type { Dispatch, RefObject, SetStateAction } from 'react'
 
 import { EditorCodeMirror } from '@/components/bloques-laboratorio/EditorCodeMirror'
 import {
@@ -19,6 +20,8 @@ import {
 import { cn } from '@/lib/utils'
 
 type Lenguaje = 'html' | 'css' | 'js' | 'ts'
+type CodigoEditor = Record<Lenguaje, string>
+type LenguajeDisponible = (typeof LENGUAJES)[number]
 
 const LENGUAJES: Array<{
   id: Lenguaje
@@ -59,6 +62,130 @@ ${html}
     </script>
   </body>
 </html>`
+}
+
+function CabeceraEditorEnVivo({ titulo, onReiniciar }: { titulo: string; onReiniciar: () => void }) {
+  return (
+    <div className="flex flex-wrap items-start justify-between gap-3">
+      <div className="flex min-w-0 items-start gap-3">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-purple-50 dark:bg-purple-950/40">
+          <Code2
+            aria-hidden="true"
+            className="size-4.75 text-purple-600 dark:text-purple-400"
+          />
+        </div>
+        <div className="min-w-0 space-y-0.5">
+          <p className="text-[11px] font-bold tracking-wider text-purple-600 uppercase dark:text-purple-400">
+            Editor en vivo
+          </p>
+          <h3 className="text-lg font-bold tracking-tight text-balance">{titulo}</h3>
+        </div>
+      </div>
+      <Button type="button" variant="outline" size="sm" onClick={onReiniciar}>
+        <RotateCcw aria-hidden="true" />
+        Reiniciar
+      </Button>
+    </div>
+  )
+}
+
+function PanelEdicion({
+  lenguajes,
+  lenguajeActivo,
+  pestanaActiva,
+  codigo,
+  usaTypeScript,
+  estadoCompiladorTs,
+  diagnosticosTs,
+  onCambiarPestana,
+  setCodigo,
+}: {
+  lenguajes: LenguajeDisponible[]
+  lenguajeActivo?: LenguajeDisponible
+  pestanaActiva: Lenguaje
+  codigo: CodigoEditor
+  usaTypeScript: boolean
+  estadoCompiladorTs: 'cargando' | 'listo' | 'error'
+  diagnosticosTs: DiagnosticoPanelTs[]
+  onCambiarPestana: (lenguaje: Lenguaje) => void
+  setCodigo: Dispatch<SetStateAction<CodigoEditor>>
+}) {
+  return (
+    <div className="min-w-0 space-y-2">
+      {lenguajes.length > 1 ? (
+        <div
+          role="group"
+          aria-label="Lenguaje que quieres editar"
+          className="flex max-w-full gap-1 overflow-x-auto rounded-lg border bg-muted p-1"
+        >
+          {lenguajes.map((lenguaje) => (
+            <button
+              key={lenguaje.id}
+              type="button"
+              aria-pressed={pestanaActiva === lenguaje.id}
+              onClick={() => onCambiarPestana(lenguaje.id)}
+              className={cn(
+                'min-h-10 shrink-0 touch-manipulation rounded-md px-3 py-1.5 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
+                pestanaActiva === lenguaje.id
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground',
+              )}
+            >
+              {lenguaje.etiqueta}
+            </button>
+          ))}
+        </div>
+      ) : (
+        <h4 className="text-sm font-semibold">{lenguajeActivo?.etiqueta}</h4>
+      )}
+
+      {lenguajeActivo && (
+        <EditorCodeMirror
+          key={lenguajeActivo.id}
+          etiqueta={`Editor de código ${lenguajeActivo.etiqueta}`}
+          extension={lenguajeActivo.extension}
+          valor={codigo[lenguajeActivo.id]}
+          onChange={(valor) =>
+            setCodigo((actual) => ({ ...actual, [lenguajeActivo.id]: valor }))
+          }
+        />
+      )}
+      {usaTypeScript && pestanaActiva === 'ts' && (
+        <PanelDiagnosticosTs estado={estadoCompiladorTs} diagnosticos={diagnosticosTs} />
+      )}
+    </div>
+  )
+}
+
+function VistaPreviaEditor({
+  iframeRef,
+  srcDoc,
+  altoIframe,
+}: {
+  iframeRef: RefObject<HTMLIFrameElement | null>
+  srcDoc: string
+  altoIframe: number | null
+}) {
+  return (
+    <div className="min-w-0 space-y-2">
+      <h4 className="text-sm font-semibold">Vista previa</h4>
+      <iframe
+        ref={iframeRef}
+        className={cn(
+          'block w-full max-w-full rounded-lg border bg-white',
+          altoIframe === null && 'h-40 sm:h-56',
+        )}
+        sandbox="allow-scripts allow-forms"
+        srcDoc={srcDoc}
+        style={
+          altoIframe === null
+            ? undefined
+            : { height: `${Math.min(Math.max(altoIframe + 2, 160), 2400)}px` }
+        }
+        title="Vista previa del editor en vivo"
+      />
+    </div>
+  )
 }
 
 export function EditorEnVivo({
@@ -166,92 +293,24 @@ export function EditorEnVivo({
       aria-label="Editor de código en vivo"
       className="animate-in fade-in-0 slide-in-from-bottom-2 my-6 min-w-0 space-y-4 rounded-xl border bg-card p-4 shadow-sm duration-500 motion-reduce:animate-none sm:p-5"
     >
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex min-w-0 items-start gap-3">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-purple-50 dark:bg-purple-950/40">
-            <Code2
-              aria-hidden="true"
-              className="size-4.75 text-purple-600 dark:text-purple-400"
-            />
-          </div>
-          <div className="min-w-0 space-y-0.5">
-            <p className="text-[11px] font-bold tracking-wider text-purple-600 uppercase dark:text-purple-400">
-              Editor en vivo
-            </p>
-            <h3 className="text-lg font-bold tracking-tight text-balance">{titulo}</h3>
-          </div>
-        </div>
-        <Button type="button" variant="outline" size="sm" onClick={reiniciar}>
-          <RotateCcw aria-hidden="true" />
-          Reiniciar
-        </Button>
-      </div>
+      <CabeceraEditorEnVivo titulo={titulo} onReiniciar={reiniciar} />
 
       {consigna && <p className="text-sm text-pretty text-muted-foreground">{consigna}</p>}
 
       <div className="grid min-w-0 gap-4">
-        <div className="min-w-0 space-y-2">
-          {lenguajesDisponibles.length > 1 ? (
-            <div
-              role="group"
-              aria-label="Lenguaje que quieres editar"
-              className="flex max-w-full gap-1 overflow-x-auto rounded-lg border bg-muted p-1"
-            >
-              {lenguajesDisponibles.map((lenguaje) => (
-                <button
-                  key={lenguaje.id}
-                  type="button"
-                  aria-pressed={pestanaActiva === lenguaje.id}
-                  onClick={() => setPestanaActiva(lenguaje.id)}
-                  className={cn(
-                    'min-h-10 shrink-0 touch-manipulation rounded-md px-3 py-1.5 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
-                    pestanaActiva === lenguaje.id
-                      ? 'bg-background text-foreground shadow-sm'
-                      : 'text-muted-foreground hover:text-foreground',
-                  )}
-                >
-                  {lenguaje.etiqueta}
-                </button>
-              ))}
-            </div>
-          ) : (
-            <h4 className="text-sm font-semibold">{lenguajeActivo?.etiqueta}</h4>
-          )}
+        <PanelEdicion
+          lenguajes={lenguajesDisponibles}
+          lenguajeActivo={lenguajeActivo}
+          pestanaActiva={pestanaActiva}
+          codigo={codigo}
+          usaTypeScript={usaTypeScript}
+          estadoCompiladorTs={estadoCompiladorTs}
+          diagnosticosTs={diagnosticosTs}
+          onCambiarPestana={setPestanaActiva}
+          setCodigo={setCodigo}
+        />
 
-          {lenguajeActivo && (
-            <EditorCodeMirror
-              key={lenguajeActivo.id}
-              etiqueta={`Editor de código ${lenguajeActivo.etiqueta}`}
-              extension={lenguajeActivo.extension}
-              valor={codigo[lenguajeActivo.id]}
-              onChange={(valor) =>
-                setCodigo((actual) => ({ ...actual, [lenguajeActivo.id]: valor }))
-              }
-            />
-          )}
-          {usaTypeScript && pestanaActiva === 'ts' && (
-            <PanelDiagnosticosTs estado={estadoCompiladorTs} diagnosticos={diagnosticosTs} />
-          )}
-        </div>
-
-        <div className="min-w-0 space-y-2">
-          <h4 className="text-sm font-semibold">Vista previa</h4>
-          <iframe
-            ref={iframeRef}
-            className={cn(
-              'block w-full max-w-full rounded-lg border bg-white',
-              altoIframe === null && 'h-40 sm:h-56',
-            )}
-            sandbox="allow-scripts allow-forms"
-            srcDoc={srcDoc}
-            style={
-              altoIframe === null
-                ? undefined
-                : { height: `${Math.min(Math.max(altoIframe + 2, 160), 2400)}px` }
-            }
-            title="Vista previa del editor en vivo"
-          />
-        </div>
+        <VistaPreviaEditor iframeRef={iframeRef} srcDoc={srcDoc} altoIframe={altoIframe} />
       </div>
     </section>
   )

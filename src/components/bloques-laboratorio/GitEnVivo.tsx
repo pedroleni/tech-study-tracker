@@ -1,8 +1,9 @@
-import { CircleCheck, CircleX, RotateCcw } from 'lucide-react'
+import { RotateCcw } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { GrafoCommits } from '@/components/bloques-laboratorio/GrafoCommits'
+import { IndicadorCoincidencia } from '@/components/bloques-laboratorio/IndicadorCoincidencia'
 import { SalidaTerminal } from '@/components/bloques-laboratorio/SalidaTerminal'
 import type { DatosGitEnVivo } from '@/lib/laboratorio/schemas'
 import {
@@ -15,6 +16,56 @@ import {
 } from '@/lib/git-en-vivo/motor'
 
 const RETRASO_EJECUCION_MS = 300
+
+function ContenidoGitListo({
+  comando,
+  resultado,
+  comandoSolucion,
+  coincide,
+  mostrarGrafo,
+  grafo,
+  onCambiarComando,
+}: {
+  comando: string
+  resultado: ResultadoGit | null
+  comandoSolucion?: string
+  coincide: boolean
+  mostrarGrafo: boolean
+  grafo: GrafoGit | null
+  onCambiarComando: (comando: string) => void
+}) {
+  return (
+    <>
+      <div className="flex items-center gap-2 rounded-lg bg-neutral-950 px-3 py-2 font-mono text-sm">
+        <span className="text-green-400">$</span>
+        <span className="text-neutral-400">git</span>
+        <input
+          type="text"
+          value={comando}
+          onChange={(evento) => onCambiarComando(evento.target.value)}
+          aria-label="Comando git"
+          className="min-w-0 flex-1 bg-transparent text-neutral-100 outline-none"
+        />
+      </div>
+
+      <div className="space-y-1">
+        {resultado === null && (
+          <p className="text-sm text-muted-foreground">Escribe un comando para ejecutarlo.</p>
+        )}
+        {resultado?.ok === false && (
+          <p className="rounded-lg bg-red-50 p-3 font-mono text-sm text-red-700 dark:bg-red-950/30 dark:text-red-400">
+            {resultado.mensaje}
+          </p>
+        )}
+        {resultado?.ok === true && <SalidaTerminal comando={comando} salida={resultado.salida} />}
+        {mostrarGrafo && grafo && <GrafoCommits grafo={grafo} />}
+        {comandoSolucion && resultado?.ok === true && (
+          <IndicadorCoincidencia coincide={coincide} />
+        )}
+      </div>
+    </>
+  )
+}
 
 export function GitEnVivo({
   consigna,
@@ -125,53 +176,15 @@ export function GitEnVivo({
       )}
 
       {estadoMotor === 'listo' && (
-        <>
-          <div className="flex items-center gap-2 rounded-lg bg-neutral-950 px-3 py-2 font-mono text-sm">
-            <span className="text-green-400">$</span>
-            <span className="text-neutral-400">git</span>
-            <input
-              type="text"
-              value={comando}
-              onChange={(evento) => setComando(evento.target.value)}
-              aria-label="Comando git"
-              className="min-w-0 flex-1 bg-transparent text-neutral-100 outline-none"
-            />
-          </div>
-
-          <div className="space-y-1">
-            {resultado === null && (
-              <p className="text-sm text-muted-foreground">Escribe un comando para ejecutarlo.</p>
-            )}
-            {resultado?.ok === false && (
-              <p className="rounded-lg bg-red-50 p-3 font-mono text-sm text-red-700 dark:bg-red-950/30 dark:text-red-400">
-                {resultado.mensaje}
-              </p>
-            )}
-            {resultado?.ok === true && <SalidaTerminal comando={comando} salida={resultado.salida} />}
-            {mostrarGrafo && grafo && <GrafoCommits grafo={grafo} />}
-            {comandoSolucion && resultado?.ok === true && (
-              <div
-                className={
-                  coincide
-                    ? 'inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-sm font-semibold text-green-700 dark:bg-green-950/40 dark:text-green-400'
-                    : 'inline-flex items-center gap-1.5 rounded-full bg-red-100 px-3 py-1 text-sm font-semibold text-red-700 dark:bg-red-950/40 dark:text-red-400'
-                }
-              >
-                {coincide ? (
-                  <>
-                    <CircleCheck aria-hidden="true" className="size-4" />
-                    Coincide con la solución
-                  </>
-                ) : (
-                  <>
-                    <CircleX aria-hidden="true" className="size-4" />
-                    Todavía no coincide — sigue intentándolo
-                  </>
-                )}
-              </div>
-            )}
-          </div>
-        </>
+        <ContenidoGitListo
+          comando={comando}
+          resultado={resultado}
+          comandoSolucion={comandoSolucion}
+          coincide={coincide}
+          mostrarGrafo={mostrarGrafo}
+          grafo={grafo}
+          onCambiarComando={setComando}
+        />
       )}
     </section>
   )
