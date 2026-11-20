@@ -46,6 +46,12 @@ const BOTON_REAL = /<button\s+class="boton"[^>]*>([\s\S]*?)<\/button>/i
 
 type EstadoBoton = 'div' | 'boton' | 'perdido'
 
+type AccionBoton = {
+  texto: string
+  Icono: typeof Wand2
+  principal: boolean
+}
+
 function estadoDelBoton(codigo: string): EstadoBoton {
   if (DIV_DISFRAZADO.test(codigo)) return 'div'
   if (BOTON_REAL.test(codigo)) return 'boton'
@@ -60,6 +66,16 @@ function alternarBoton(codigo: string, estado: EstadoBoton): string {
     return codigo.replace(BOTON_REAL, '<div class="boton" onclick="suscribir()">$1</div>')
   }
   return EJEMPLO_INICIAL
+}
+
+function accionPara(estado: EstadoBoton): AccionBoton {
+  if (estado === 'div') {
+    return { texto: 'Cambiarlo por un <button>', Icono: Wand2, principal: true }
+  }
+  if (estado === 'boton') {
+    return { texto: 'Volver al <div>', Icono: RotateCcw, principal: false }
+  }
+  return { texto: 'Restablecer el ejemplo', Icono: RotateCcw, principal: false }
 }
 
 // ---------------------------------------------------------------- análisis
@@ -278,12 +294,7 @@ function BloqueRecorrido() {
       ? 'Este ejemplo no tiene ningún control'
       : `${analisis.recorrido.length} de ${total} ${total === 1 ? 'control' : 'controles'} al alcance del teclado`
 
-  const accion =
-    estado === 'div'
-      ? { texto: 'Cambiarlo por un <button>', Icono: Wand2, principal: true }
-      : estado === 'boton'
-        ? { texto: 'Volver al <div>', Icono: RotateCcw, principal: false }
-        : { texto: 'Restablecer el ejemplo', Icono: RotateCcw, principal: false }
+  const accion = accionPara(estado)
 
   return (
     <section aria-labelledby={idTitulo} className={MARCO_BLOQUE}>
