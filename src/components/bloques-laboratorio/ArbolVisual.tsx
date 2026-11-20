@@ -64,6 +64,119 @@ function prefijos(nodos: { nivel: number }[]) {
   })
 }
 
+type PropiedadesFilaArbol = {
+  nodo: NodoVisual
+  guia: string
+  destello?: number
+  seleccionado?: string | number | null
+  idDetalle?: string
+  onSeleccionar?: (id: string | number) => void
+}
+
+function NombreNodo({
+  nodo,
+  seleccionado,
+  idDetalle,
+  onSeleccionar,
+}: Pick<PropiedadesFilaArbol, 'nodo' | 'seleccionado' | 'idDetalle' | 'onSeleccionar'>) {
+  const claseNombre = cn(
+    'font-semibold',
+    nodo.estado === 'desmontado' && 'line-through opacity-70',
+  )
+  if (!onSeleccionar) return <span className={claseNombre}>{nodo.nombre}</span>
+
+  return (
+    <button
+      type="button"
+      aria-expanded={seleccionado === nodo.id}
+      aria-controls={seleccionado === nodo.id ? idDetalle : undefined}
+      onClick={() => onSeleccionar(nodo.id)}
+      className={cn(
+        claseNombre,
+        '-mx-1 inline-flex min-h-6 items-center rounded px-1 underline decoration-dotted underline-offset-2 hover:decoration-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
+      )}
+    >
+      {nodo.nombre}
+    </button>
+  )
+}
+
+function FilaArbol({
+  nodo,
+  guia,
+  destello,
+  seleccionado,
+  idDetalle,
+  onSeleccionar,
+}: PropiedadesFilaArbol) {
+  const estado = nodo.estado ? ESTADOS_ARBOL[nodo.estado] : null
+  const destella =
+    destello !== undefined && (nodo.estado === 'montado' || nodo.estado === 'renderizado')
+
+  return (
+    <li
+      // La fila conserva su identidad entre commits para no sustituir el
+      // botón ni perder el foco. Solo se remonta la capa del destello.
+      className="relative flex flex-wrap items-baseline gap-x-2 gap-y-0.5 rounded px-1 py-0.5"
+    >
+      {destella && (
+        <span
+          key={destello}
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 rounded animate-[arbol-destello_900ms_ease-out] motion-reduce:animate-none"
+        />
+      )}
+      <span className="flex min-w-0 items-baseline">
+        <span aria-hidden="true" className="whitespace-pre text-muted-foreground/70">
+          {guia}
+        </span>
+        <NombreNodo
+          nodo={nodo}
+          seleccionado={seleccionado}
+          idDetalle={idDetalle}
+          onSeleccionar={onSeleccionar}
+        />
+      </span>
+      {nodo.clave !== undefined && <span className="text-muted-foreground">key={nodo.clave}</span>}
+      {nodo.renders !== undefined && (
+        <>
+          <span aria-hidden="true" className="text-muted-foreground">
+            ·{nodo.renders}
+          </span>
+          <span className="sr-only">
+            {nodo.renders === 1 ? '1 render' : `${nodo.renders} renders`}
+          </span>
+        </>
+      )}
+      {nodo.marca && (
+        <span className="rounded border px-1 text-[10px] tracking-wide text-muted-foreground uppercase">
+          {nodo.marca}
+        </span>
+      )}
+      {nodo.etiqueta && (
+        <span className="rounded bg-sky-100 px-1.5 text-[11px] text-sky-800 dark:bg-sky-950/60 dark:text-sky-300">
+          {nodo.etiqueta}
+        </span>
+      )}
+      {estado && (
+        <span className={cn('rounded px-1.5 text-[10px] font-semibold', estado.clase)}>
+          {estado.texto}
+        </span>
+      )}
+      {nodo.motivo && (
+        <span className="flex min-w-0 gap-1 font-sans text-amber-800 dark:text-amber-300">
+          <span aria-hidden="true">←</span>
+          <span className="min-w-0 break-words">{nodo.motivo}</span>
+        </span>
+      )}
+      {nodo.nota && (
+        <span className="min-w-0 font-sans break-words text-muted-foreground">{nodo.nota}</span>
+      )}
+      <span className="sr-only">, nivel {nodo.nivel}</span>
+    </li>
+  )
+}
+
 export function ArbolVisual({
   nodos,
   etiqueta,
@@ -85,78 +198,16 @@ export function ArbolVisual({
   return (
     <ul aria-label={etiqueta} className="min-w-0 space-y-0.5 font-mono text-xs">
       {nodos.map((nodo, i) => {
-        const estado = nodo.estado ? ESTADOS_ARBOL[nodo.estado] : null
-        const destella =
-          destello !== undefined && (nodo.estado === 'montado' || nodo.estado === 'renderizado')
-        const claseNombre = cn('font-semibold', nodo.estado === 'desmontado' && 'line-through opacity-70')
         return (
-          <li
-            // La fila conserva su identidad entre commits para no sustituir el
-            // botón ni perder el foco. Solo se remonta la capa del destello.
+          <FilaArbol
             key={nodo.id}
-            className="relative flex flex-wrap items-baseline gap-x-2 gap-y-0.5 rounded px-1 py-0.5"
-          >
-            {destella && (
-              <span
-                key={destello}
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-0 rounded animate-[arbol-destello_900ms_ease-out] motion-reduce:animate-none"
-              />
-            )}
-            <span className="flex min-w-0 items-baseline">
-              <span aria-hidden="true" className="whitespace-pre text-muted-foreground/70">
-                {guias[i]}
-              </span>
-              {onSeleccionar ? (
-                <button
-                  type="button"
-                  aria-expanded={seleccionado === nodo.id}
-                  aria-controls={seleccionado === nodo.id ? idDetalle : undefined}
-                  onClick={() => onSeleccionar(nodo.id)}
-                  className={cn(
-                    claseNombre,
-                    '-mx-1 inline-flex min-h-6 items-center rounded px-1 underline decoration-dotted underline-offset-2 hover:decoration-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
-                  )}
-                >
-                  {nodo.nombre}
-                </button>
-              ) : (
-                <span className={claseNombre}>{nodo.nombre}</span>
-              )}
-            </span>
-            {nodo.clave !== undefined && <span className="text-muted-foreground">key={nodo.clave}</span>}
-            {nodo.renders !== undefined && (
-              <>
-                <span aria-hidden="true" className="text-muted-foreground">
-                  ·{nodo.renders}
-                </span>
-                <span className="sr-only">
-                  {nodo.renders === 1 ? '1 render' : `${nodo.renders} renders`}
-                </span>
-              </>
-            )}
-            {nodo.marca && (
-              <span className="rounded border px-1 text-[10px] tracking-wide text-muted-foreground uppercase">
-                {nodo.marca}
-              </span>
-            )}
-            {nodo.etiqueta && (
-              <span className="rounded bg-sky-100 px-1.5 text-[11px] text-sky-800 dark:bg-sky-950/60 dark:text-sky-300">
-                {nodo.etiqueta}
-              </span>
-            )}
-            {estado && (
-              <span className={cn('rounded px-1.5 text-[10px] font-semibold', estado.clase)}>{estado.texto}</span>
-            )}
-            {nodo.motivo && (
-              <span className="flex min-w-0 gap-1 font-sans text-amber-800 dark:text-amber-300">
-                <span aria-hidden="true">←</span>
-                <span className="min-w-0 break-words">{nodo.motivo}</span>
-              </span>
-            )}
-            {nodo.nota && <span className="min-w-0 font-sans break-words text-muted-foreground">{nodo.nota}</span>}
-            <span className="sr-only">, nivel {nodo.nivel}</span>
-          </li>
+            nodo={nodo}
+            guia={guias[i]}
+            destello={destello}
+            seleccionado={seleccionado}
+            idDetalle={idDetalle}
+            onSeleccionar={onSeleccionar}
+          />
         )
       })}
     </ul>

@@ -1,10 +1,10 @@
 import { sql } from '@codemirror/lang-sql'
 import { basicSetup, EditorView } from 'codemirror'
-import { CircleCheck, CircleX, Play, RotateCcw } from 'lucide-react'
+import { Play, RotateCcw } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
+import { ContenidoSqlEnVivo } from '@/components/bloques-laboratorio/ContenidoSqlEnVivo'
 import { Button } from '@/components/ui/button'
-import { TablaResultado } from '@/components/bloques-laboratorio/TablaResultado'
 import type { DatosSqlEnVivo } from '@/lib/laboratorio/schemas'
 import {
   crearMotorPostgres,
@@ -208,15 +208,17 @@ export function SqlEnVivo({
     // continuación async, nunca directamente en el cuerpo del efecto
     // (react-hooks/set-state-in-effect lo marca como error si no).
     void (async () => {
-      const resultadoEjecucion =
-        tipoMotor === 'postgres' && motorPostgres
-          ? await ejecutarConsultaPostgres(motorPostgres, esquemaSql, consultaSolucion, {
-              extensiones,
-              identidad,
-            })
-          : motorSql
-            ? ejecutarConsulta(motorSql, esquemaSql, consultaSolucion)
-            : null
+      let resultadoEjecucion = null
+      if (tipoMotor === 'postgres' && motorPostgres) {
+        resultadoEjecucion = await ejecutarConsultaPostgres(
+          motorPostgres,
+          esquemaSql,
+          consultaSolucion,
+          { extensiones, identidad },
+        )
+      } else if (motorSql) {
+        resultadoEjecucion = ejecutarConsulta(motorSql, esquemaSql, consultaSolucion)
+      }
       if (!cancelado && resultadoEjecucion) setSolucionEjecutada(resultadoEjecucion)
     })()
     return () => {
@@ -271,77 +273,15 @@ export function SqlEnVivo({
       )}
 
       {estadoMotor === 'listo' && (
-        <>
-          {identidadSimulada && identidadSimulada.length > 0 && (
-            <div className="flex flex-wrap items-center gap-2">
-              <label htmlFor="sql-en-vivo-identidad" className="text-sm font-medium">
-                Estás conectado como
-              </label>
-              <select
-                id="sql-en-vivo-identidad"
-                value={identidad?.valor ?? ''}
-                onChange={(evento) => {
-                  const elegida = identidadSimulada.find((i) => i.valor === evento.target.value)
-                  setIdentidad(elegida)
-                }}
-                className="h-9 rounded-lg border border-input bg-background px-3 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-              >
-                {identidadSimulada.map((opcion) => (
-                  <option key={opcion.valor} value={opcion.valor}>
-                    {opcion.etiqueta}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          <EditorSql valor={consulta} onChange={setConsulta} />
-
-          <div className="space-y-1">
-            {resultado === null && (
-              <p className="text-sm text-muted-foreground">Escribe una consulta para ejecutarla.</p>
-            )}
-            {/* En error se limpia la tabla: un ejercicio de SQL es de intento
-                único ("¿funciona esta consulta, sí o no?"), a diferencia de
-                la vista previa continua de HTML/CSS/JS/TS, que sí conserva
-                el último resultado válido — aquí dejar una tabla vieja
-                confundiría más de lo que ayuda. */}
-            {resultado?.ok === false && (
-              <p className="rounded-lg bg-red-50 p-3 font-mono text-sm text-red-700 dark:bg-red-950/30 dark:text-red-400">
-                {resultado.mensaje}
-              </p>
-            )}
-            {resultado?.ok === true && (
-              <>
-                <TablaResultado columns={resultado.columns} values={resultado.values} />
-                <p className="text-xs text-muted-foreground">
-                  {resultado.values.length} fila{resultado.values.length === 1 ? '' : 's'}
-                </p>
-              </>
-            )}
-            {consultaSolucion && resultado?.ok === true && (
-              <div
-                className={
-                  coincide
-                    ? 'inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-sm font-semibold text-green-700 dark:bg-green-950/40 dark:text-green-400'
-                    : 'inline-flex items-center gap-1.5 rounded-full bg-red-100 px-3 py-1 text-sm font-semibold text-red-700 dark:bg-red-950/40 dark:text-red-400'
-                }
-              >
-                {coincide ? (
-                  <>
-                    <CircleCheck aria-hidden="true" className="size-4" />
-                    Coincide con la solución
-                  </>
-                ) : (
-                  <>
-                    <CircleX aria-hidden="true" className="size-4" />
-                    Todavía no coincide — sigue intentándolo
-                  </>
-                )}
-              </div>
-            )}
-          </div>
-        </>
+        <ContenidoSqlEnVivo
+          identidadSimulada={identidadSimulada}
+          identidad={identidad}
+          resultado={resultado}
+          consultaSolucion={consultaSolucion}
+          coincide={coincide}
+          editor={<EditorSql valor={consulta} onChange={setConsulta} />}
+          onCambiarIdentidad={setIdentidad}
+        />
       )}
     </section>
   )
