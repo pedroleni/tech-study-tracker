@@ -1,7 +1,7 @@
 import { GitBranch } from 'lucide-react'
 import { useEffect, useId, useMemo, useState } from 'react'
 
-import { Button } from '@/components/ui/button'
+import { NotasAnotadas } from '@/components/bloques-laboratorio/NotasAnotadas'
 import { GrafoCommits } from '@/components/bloques-laboratorio/GrafoCommits'
 import { SalidaTerminal } from '@/components/bloques-laboratorio/SalidaTerminal'
 import type { DatosGitAnotado } from '@/lib/laboratorio/schemas'
@@ -12,7 +12,6 @@ import {
   type GrafoGit,
   type ResultadoGit,
 } from '@/lib/git-en-vivo/motor'
-import { cn } from '@/lib/utils'
 
 export function GitAnotado({
   titulo,
@@ -31,7 +30,6 @@ export function GitAnotado({
     [anotaciones, comando],
   )
   const [anotacionActiva, setAnotacionActiva] = useState(0)
-  const activa = anotacionesValidas[anotacionActiva]
 
   const [resultado, setResultado] = useState<ResultadoGit | null>(null)
   const [grafo, setGrafo] = useState<GrafoGit | null>(null)
@@ -89,39 +87,14 @@ export function GitAnotado({
 
       {mostrarGrafo && grafo && <GrafoCommits grafo={grafo} />}
 
-      {anotacionesValidas.length > 0 && (
-        <div className="space-y-3">
-          <div className="flex flex-wrap gap-2" aria-label="Anotaciones del comando">
-            {anotacionesValidas.map((anotacion, indice) => (
-              <Button
-                key={`${anotacion.fragmento}-${indice}`}
-                type="button"
-                variant="outline"
-                size="icon"
-                aria-pressed={indice === anotacionActiva}
-                aria-controls={idNota}
-                aria-label={`Ver anotación ${indice + 1}: ${anotacion.nota}`}
-                onClick={() => setAnotacionActiva(indice)}
-                className={cn(
-                  'size-11 touch-manipulation rounded-full transition-colors',
-                  indice === anotacionActiva &&
-                    'border-orange-500 bg-orange-500 text-white hover:bg-orange-500 dark:border-orange-400 dark:bg-orange-400 dark:text-orange-950',
-                )}
-              >
-                {indice + 1}
-              </Button>
-            ))}
-          </div>
-          <p
-            key={anotacionActiva}
-            id={idNota}
-            aria-live="polite"
-            className="animate-in fade-in-0 slide-in-from-bottom-1 rounded-lg border-l-4 border-orange-500 bg-orange-50 p-3 text-sm text-pretty duration-200 motion-reduce:animate-none dark:border-orange-400 dark:bg-orange-950/30"
-          >
-            <span className="font-semibold">Nota {anotacionActiva + 1}.</span> {activa?.nota}
-          </p>
-        </div>
-      )}
+      <NotasAnotadas
+        anotaciones={anotacionesValidas}
+        activa={anotacionActiva}
+        onActivar={setAnotacionActiva}
+        idNota={idNota}
+        etiqueta="Anotaciones del comando"
+        color="orange"
+      />
     </section>
   )
 }

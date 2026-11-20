@@ -1,8 +1,9 @@
 import { Database } from 'lucide-react'
-import { useEffect, useId, useMemo, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
 
 import { CodigoResaltado } from '@/components/codigo'
-import { Button } from '@/components/ui/button'
+import { NotasAnotadas } from '@/components/bloques-laboratorio/NotasAnotadas'
+import { useAnotacionesConLinea } from '@/components/bloques-laboratorio/useAnotacionesConLinea'
 import { TablaResultado } from '@/components/bloques-laboratorio/TablaResultado'
 import type { DatosSqlAnotado } from '@/lib/laboratorio/schemas'
 import {
@@ -15,7 +16,6 @@ import {
   ejecutarConsulta,
   type ResultadoConsulta,
 } from '@/lib/sql-en-vivo/motor'
-import { cn } from '@/lib/utils'
 
 export function SqlAnotado({
   titulo,
@@ -36,21 +36,7 @@ export function SqlAnotado({
   etiquetaConsulta = 'Consulta SQL anotada',
 }: DatosSqlAnotado & { etiquetaSeccion?: string; etiquetaConsulta?: string }) {
   const idNota = useId()
-  const anotacionesValidas = useMemo(
-    () =>
-      anotaciones.flatMap((anotacion) => {
-        const posicion = consulta.indexOf(anotacion.fragmento)
-        if (posicion === -1) return []
-
-        return [
-          {
-            ...anotacion,
-            linea: consulta.slice(0, posicion).split('\n').length,
-          },
-        ]
-      }),
-    [anotaciones, consulta],
-  )
+  const anotacionesValidas = useAnotacionesConLinea(anotaciones, consulta)
   const [anotacionActiva, setAnotacionActiva] = useState(0)
   const activa = anotacionesValidas[anotacionActiva]
 
@@ -114,39 +100,14 @@ export function SqlAnotado({
         etiqueta={etiquetaConsulta}
       />
 
-      {anotacionesValidas.length > 0 && (
-        <div className="space-y-3">
-          <div className="flex flex-wrap gap-2" aria-label="Anotaciones de la consulta">
-            {anotacionesValidas.map((anotacion, indice) => (
-              <Button
-                key={`${anotacion.fragmento}-${indice}`}
-                type="button"
-                variant="outline"
-                size="icon"
-                aria-pressed={indice === anotacionActiva}
-                aria-controls={idNota}
-                aria-label={`Ver anotación ${indice + 1}: ${anotacion.nota}`}
-                onClick={() => setAnotacionActiva(indice)}
-                className={cn(
-                  'size-11 touch-manipulation rounded-full transition-colors',
-                  indice === anotacionActiva &&
-                    'border-teal-500 bg-teal-500 text-white hover:bg-teal-500 dark:border-teal-400 dark:bg-teal-400 dark:text-teal-950',
-                )}
-              >
-                {indice + 1}
-              </Button>
-            ))}
-          </div>
-          <p
-            key={anotacionActiva}
-            id={idNota}
-            aria-live="polite"
-            className="animate-in fade-in-0 slide-in-from-bottom-1 rounded-lg border-l-4 border-teal-500 bg-teal-50 p-3 text-sm text-pretty duration-200 motion-reduce:animate-none dark:border-teal-400 dark:bg-teal-950/30"
-          >
-            <span className="font-semibold">Nota {anotacionActiva + 1}.</span> {activa?.nota}
-          </p>
-        </div>
-      )}
+      <NotasAnotadas
+        anotaciones={anotacionesValidas}
+        activa={anotacionActiva}
+        onActivar={setAnotacionActiva}
+        idNota={idNota}
+        etiqueta="Anotaciones de la consulta"
+        color="teal"
+      />
 
       <div className="space-y-1">
         <h4 className="text-sm font-semibold">Resultado</h4>
