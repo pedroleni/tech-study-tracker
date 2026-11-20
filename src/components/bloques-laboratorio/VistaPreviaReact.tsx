@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { RotateCw } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -36,12 +36,6 @@ export function VistaPreviaReact({
   const fallosSolicitadosRef = useRef(fallosSolicitados)
   const ordenNavegadorRef = useRef(ordenNavegador)
   const ultimaOrdenNavegadorEnviadaRef = useRef(ordenNavegador?.id ?? 0)
-  const documentoRef = useRef<{ srcDoc: string; codigoCompilado: boolean } | null>(null)
-  const reintentoRef = useRef<{
-    srcDoc: string
-    fase: 'disponible' | 'pendiente' | 'agotado'
-  }>({ srcDoc, fase: 'disponible' })
-  const temporizadorRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [alto, setAlto] = useState<number | null>(null)
   const [revision, setRevision] = useState(0)
   // El error se guarda junto al documento que lo produjo: al cambiar srcDoc
@@ -109,29 +103,23 @@ export function VistaPreviaReact({
     fallosEnviadosRef.current = fallosSolicitados
   }, [fallosSolicitados])
 
-  const contextoMensajes = useMemo(
-    () => ({
-      iframeRef,
-      onMensajeRef,
-      redRef,
-      montadoRef,
-      fallosEnviadosRef,
-      fallosSolicitadosRef,
-      ordenNavegadorRef,
-      ultimaOrdenNavegadorEnviadaRef,
-      documentoRef,
-      reintentoRef,
-      temporizadorRef,
-      srcDoc,
-      codigoCompilado,
-      setAlto,
-      setError,
-      remontar,
-      enviarOrdenNavegador,
-    }),
-    [codigoCompilado, enviarOrdenNavegador, remontar, srcDoc],
-  )
-  useMensajesVistaPreviaReact(contextoMensajes, revision)
+  useMensajesVistaPreviaReact({
+    iframeRef,
+    onMensajeRef,
+    redRef,
+    montadoRef,
+    fallosEnviadosRef,
+    fallosSolicitadosRef,
+    ordenNavegadorRef,
+    ultimaOrdenNavegadorEnviadaRef,
+    srcDoc,
+    codigoCompilado,
+    revision,
+    setAlto,
+    setError,
+    remontar,
+    enviarOrdenNavegador,
+  })
 
   const errorVisible = error?.srcDoc === srcDoc ? error : null
 

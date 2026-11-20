@@ -1,4 +1,4 @@
-import { useLayoutEffect } from 'react'
+import { useLayoutEffect, useRef } from 'react'
 import type { Dispatch, RefObject, SetStateAction } from 'react'
 
 import { CANAL_REACT_EN_VIVO } from '@/lib/react-en-vivo/constantes'
@@ -25,7 +25,9 @@ type ReintentoRuntime = {
   fase: 'disponible' | 'pendiente' | 'agotado'
 }
 
-type ReferenciasMensajes = {
+type DocumentoVistaPrevia = { srcDoc: string; codigoCompilado: boolean }
+
+type ReferenciasVistaPrevia = {
   iframeRef: RefObject<HTMLIFrameElement | null>
   onMensajeRef: RefObject<((mensaje: MensajeReactEnVivo) => void) | undefined>
   redRef: RefObject<AjustesRed | undefined>
@@ -34,18 +36,20 @@ type ReferenciasMensajes = {
   fallosSolicitadosRef: RefObject<number>
   ordenNavegadorRef: RefObject<OrdenNavegadorVistaPrevia | undefined>
   ultimaOrdenNavegadorEnviadaRef: RefObject<number>
-  documentoRef: RefObject<{ srcDoc: string; codigoCompilado: boolean } | null>
-  reintentoRef: RefObject<ReintentoRuntime>
-  temporizadorRef: RefObject<ReturnType<typeof setTimeout> | null>
 }
 
-type ContextoMensajes = ReferenciasMensajes & {
-  srcDoc: string
-  codigoCompilado: boolean
+type EntradaMensajes = ReferenciasVistaPrevia & DocumentoVistaPrevia & {
+  revision: number
   setAlto: Dispatch<SetStateAction<number | null>>
   setError: Dispatch<SetStateAction<ErrorVistaPreviaReact | null>>
   remontar: () => void
   enviarOrdenNavegador: (orden: OrdenNavegadorVistaPrevia) => void
+}
+
+type ContextoMensajes = Omit<EntradaMensajes, 'revision'> & {
+  documentoRef: RefObject<DocumentoVistaPrevia | null>
+  reintentoRef: RefObject<ReintentoRuntime>
+  temporizadorRef: RefObject<ReturnType<typeof setTimeout> | null>
 }
 
 function procesarMontado(contexto: ContextoMensajes) {
@@ -150,12 +154,29 @@ function prepararDocumento(contexto: ContextoMensajes) {
   }
 }
 
-export function useMensajesVistaPreviaReact(contexto: ContextoMensajes, revision: number) {
+export function useMensajesVistaPreviaReact(entrada: EntradaMensajes) {
+  const { srcDoc, codigoCompilado, revision, remontar, enviarOrdenNavegador } = entrada
+  const { iframeRef, onMensajeRef, redRef, montadoRef, fallosEnviadosRef } = entrada
+  const { fallosSolicitadosRef, ordenNavegadorRef, ultimaOrdenNavegadorEnviadaRef } = entrada
+  // Las refs y los setters que llegan de VistaPreviaReact son estables
+  // (useRef/useState): el oyente solo se rehace al cambiar srcDoc,
+  // codigoCompilado, remontar, enviarOrdenNavegador o revision.
+  const { setAlto, setError } = entrada
+  const documentoRef = useRef<DocumentoVistaPrevia | null>(null)
+  const reintentoRef = useRef<ReintentoRuntime>({ srcDoc, fase: 'disponible' })
+  const temporizadorRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
   // useLayoutEffect y no useEffect: el oyente queda puesto en el mismo commit
   // que inserta el iframe, antes de que su código pueda mandar nada. Con
   // useEffect (después de pintar), un iframe rápido podía adelantarse y su
   // mensaje perderse.
   useLayoutEffect(() => {
+    const contexto: ContextoMensajes = {
+      iframeRef, onMensajeRef, redRef, montadoRef, fallosEnviadosRef,
+      fallosSolicitadosRef, ordenNavegadorRef, ultimaOrdenNavegadorEnviadaRef,
+      documentoRef, reintentoRef, temporizadorRef,
+      srcDoc, codigoCompilado, setAlto, setError, remontar, enviarOrdenNavegador,
+    }
     prepararDocumento(contexto)
     const recibir = (evento: MessageEvent) => {
       const mensaje = leerMensajeReactEnVivo(
@@ -168,10 +189,10 @@ export function useMensajesVistaPreviaReact(contexto: ContextoMensajes, revision
     window.addEventListener('message', recibir)
     return () => {
       window.removeEventListener('message', recibir)
-      if (contexto.temporizadorRef.current !== null) {
-        clearTimeout(contexto.temporizadorRef.current)
-        contexto.temporizadorRef.current = null
+      if (temporizadorRef.current !== null) {
+        clearTimeout(temporizadorRef.current)
+        temporizadorRef.current = null
       }
     }
-  }, [contexto, revision])
+  }, [codigoCompilado, enviarOrdenNavegador, remontar, revision, srcDoc, iframeRef, onMensajeRef, redRef, montadoRef, fallosEnviadosRef, fallosSolicitadosRef, ordenNavegadorRef, ultimaOrdenNavegadorEnviadaRef, setAlto, setError])
 }

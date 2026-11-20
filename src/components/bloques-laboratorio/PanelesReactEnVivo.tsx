@@ -9,7 +9,6 @@ import { PanelRed, type AjustesRed } from '@/components/bloques-laboratorio/Pane
 import { RegistroEfectos } from '@/components/bloques-laboratorio/RegistroEfectos'
 import { RegistroRouter } from '@/components/bloques-laboratorio/RegistroRouter'
 import { VistaPreviaReact } from '@/components/bloques-laboratorio/VistaPreviaReact'
-import type { DatosReactEnVivo } from '@/lib/laboratorio/schemas'
 import type {
   MensajeArbol,
   MensajeEfecto,
@@ -160,5 +159,3 @@ export function PanelesActividadReactEnVivo({
     </>
   )
 }
-
-export type ComprobacionesReact = DatosReactEnVivo['comprobaciones']

@@ -8,7 +8,6 @@ import {
   type AvisoCompiladorReact,
 } from '@/lib/react-en-vivo/compilar'
 import { ESPERA_RECONSTRUIR_MS } from '@/lib/react-en-vivo/constantes'
-import type { MensajeArbol, MensajeReactEnVivo } from '@/lib/react-en-vivo/mensajes'
 import { prepararDocumento } from '@/lib/react-en-vivo/preparar'
 import { transformarParaMostrar } from '@/lib/react-en-vivo/transformar'
 import type { SesionCompilador } from '@/lib/react-kit/cliente'
@@ -30,49 +29,16 @@ type ContextoDocumento = {
   setJsGenerado: Dispatch<SetStateAction<string>>
   setAvisosCompilador: Dispatch<SetStateAction<AvisoCompiladorReact[]>>
   setErrorSintaxis: Dispatch<SetStateAction<string | null>>
-  setUbicacion: Dispatch<
-    SetStateAction<Extract<MensajeReactEnVivo, { tipo: 'ubicacion' }> | null>
-  >
-  setArbol: Dispatch<SetStateAction<MensajeArbol | null>>
-  setRegistroRouterLleno: Dispatch<SetStateAction<boolean>>
-  setFalloPendiente: Dispatch<SetStateAction<boolean>>
   setSrcDoc: Dispatch<SetStateAction<string | null>>
-  limpiar: () => void
-  limpiarPeticiones: () => void
-  limpiarEfectos: () => void
-  limpiarOperacionesRouter: () => void
-  alInvalidarDocumento: () => void
+  limpiarRegistroDelDocumento: () => void
 }
 
 export function useDocumentoReactEnVivo(contexto: ContextoDocumento) {
-  const {
-    apiEstable,
-    archivos,
-    compilador,
-    sesionCompiladorVista,
-    strictMode,
-    mostrarJsGenerado,
-    mostrarArbol,
-    mostrarEfectos,
-    mostrarRouter,
-    urlInicial,
-    reinicios,
-    redActualRef,
-    urlActualRef,
-    setJsGenerado,
-    setAvisosCompilador,
-    setErrorSintaxis,
-    setUbicacion,
-    setArbol,
-    setRegistroRouterLleno,
-    setFalloPendiente,
-    setSrcDoc,
-    limpiar,
-    limpiarPeticiones,
-    limpiarEfectos,
-    limpiarOperacionesRouter,
-    alInvalidarDocumento,
-  } = contexto
+  const { apiEstable, archivos, compilador, sesionCompiladorVista, strictMode } = contexto
+  const { mostrarJsGenerado, mostrarArbol, mostrarEfectos, mostrarRouter } = contexto
+  const { urlInicial, reinicios, redActualRef, urlActualRef } = contexto
+  const { setJsGenerado, setAvisosCompilador, setErrorSintaxis, setSrcDoc } = contexto
+  const { limpiarRegistroDelDocumento } = contexto
   const primeraVezRef = useRef(true)
   const versionRef = useRef(0)
 
@@ -121,16 +87,7 @@ export function useDocumentoReactEnVivo(contexto: ContextoDocumento) {
         }
         setAvisosCompilador(resultadoCompilador.avisos)
         setErrorSintaxis(null)
-        limpiar()
-        // El árbol de la vista previa anterior ya no describe nada.
-        alInvalidarDocumento()
-        setUbicacion(null)
-        setArbol(null)
-        limpiarPeticiones()
-        limpiarEfectos()
-        limpiarOperacionesRouter()
-        setRegistroRouterLleno(false)
-        setFalloPendiente(false)
+        limpiarRegistroDelDocumento()
         setSrcDoc(preparado.srcDoc)
       })()
     }, espera)
@@ -139,5 +96,5 @@ export function useDocumentoReactEnVivo(contexto: ContextoDocumento) {
       if (version === versionRef.current) versionRef.current += 1
       if (compilador) sesionCompiladorVista.descartar()
     }
-  }, [apiEstable, archivos, compilador, sesionCompiladorVista, strictMode, mostrarJsGenerado, mostrarArbol, mostrarEfectos, mostrarRouter, limpiar, limpiarEfectos, limpiarOperacionesRouter, limpiarPeticiones, reinicios, urlInicial, redActualRef, urlActualRef, setJsGenerado, setAvisosCompilador, setErrorSintaxis, setUbicacion, setArbol, setRegistroRouterLleno, setFalloPendiente, setSrcDoc, alInvalidarDocumento])
+  }, [apiEstable, archivos, compilador, sesionCompiladorVista, strictMode, mostrarJsGenerado, mostrarArbol, mostrarEfectos, mostrarRouter, limpiarRegistroDelDocumento, reinicios, urlInicial, redActualRef, urlActualRef, setJsGenerado, setAvisosCompilador, setErrorSintaxis, setSrcDoc])
 }

@@ -136,7 +136,7 @@ export function useRegistroReactEnVivo(red?: DatosReactEnVivo['red']) {
   const actividad = useActividadRegistrada()
   const router = useOperacionesRouterRegistradas()
   const registroRed = useRedRegistrada(red)
-  const { registrarOrdenNavegador } = navegacion
+  const { registrarOrdenNavegador, setUbicacion } = navegacion
   const {
     limpiar,
     limpiarEfectos,
@@ -168,6 +168,18 @@ export function useRegistroReactEnVivo(red?: DatosReactEnVivo['red']) {
   const invalidarDocumentoMontado = useCallback(() => {
     documentoMontadoRef.current = false
   }, [])
+  const limpiarRegistroDelDocumento = useCallback(() => {
+    limpiar()
+    // El árbol de la vista previa anterior ya no describe nada.
+    documentoMontadoRef.current = false
+    setUbicacion(null)
+    setArbol(null)
+    limpiarPeticiones()
+    limpiarEfectos()
+    limpiarOperacionesRouter()
+    setRegistroRouterLleno(false)
+    setFalloPendiente(false)
+  }, [limpiar, limpiarEfectos, limpiarOperacionesRouter, limpiarPeticiones, setArbol, setFalloPendiente, setRegistroRouterLleno, setUbicacion])
 
   const limpiarAlNavegar = useCallback(() => {
     limpiar()
@@ -193,6 +205,6 @@ export function useRegistroReactEnVivo(red?: DatosReactEnVivo['red']) {
 
   return {
     ...navegacion, ...actividad, ...router, ...registroRed,
-    documentoMontadoRef, recibir, invalidarDocumentoMontado, actuarEnNavegador,
+    recibir, invalidarDocumentoMontado, limpiarRegistroDelDocumento, actuarEnNavegador,
   }
 }

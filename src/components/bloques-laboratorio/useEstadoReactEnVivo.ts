@@ -77,16 +77,8 @@ export function useEstadoReactEnVivo(configuracion: ConfiguracionEstado) {
     setJsGenerado,
     setAvisosCompilador,
     setErrorSintaxis,
-    setUbicacion: registro.setUbicacion,
-    setArbol: registro.setArbol,
-    setRegistroRouterLleno: registro.setRegistroRouterLleno,
-    setFalloPendiente: registro.setFalloPendiente,
     setSrcDoc,
-    limpiar: registro.limpiar,
-    limpiarPeticiones: registro.limpiarPeticiones,
-    limpiarEfectos: registro.limpiarEfectos,
-    limpiarOperacionesRouter: registro.limpiarOperacionesRouter,
-    alInvalidarDocumento: registro.invalidarDocumentoMontado,
+    limpiarRegistroDelDocumento: registro.limpiarRegistroDelDocumento,
   })
 
   const analisisTipos = useAnalisisTiposReact(archivos, usaTypeScript)

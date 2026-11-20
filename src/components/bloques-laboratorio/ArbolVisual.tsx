@@ -114,11 +114,7 @@ function FilaArbol({
     destello !== undefined && (nodo.estado === 'montado' || nodo.estado === 'renderizado')
 
   return (
-    <li
-      // La fila conserva su identidad entre commits para no sustituir el
-      // botón ni perder el foco. Solo se remonta la capa del destello.
-      className="relative flex flex-wrap items-baseline gap-x-2 gap-y-0.5 rounded px-1 py-0.5"
-    >
+    <li className="relative flex flex-wrap items-baseline gap-x-2 gap-y-0.5 rounded px-1 py-0.5">
       {destella && (
         <span
           key={destello}
@@ -200,6 +196,8 @@ export function ArbolVisual({
       {nodos.map((nodo, i) => {
         return (
           <FilaArbol
+            // La fila conserva su identidad entre commits para no sustituir el
+            // botón ni perder el foco. Solo se remonta la capa del destello.
             key={nodo.id}
             nodo={nodo}
             guia={guias[i]}
