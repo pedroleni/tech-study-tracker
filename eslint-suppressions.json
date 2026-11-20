@@ -123,64 +123,6 @@
       "count": 1
     }
   },
-  "src/components/laboratorio/LaboratorioV1Editor.tsx": {
-    "complexity": {
-      "count": 1
-    },
-    "max-lines": {
-      "count": 1
-    },
-    "max-lines-per-function": {
-      "count": 1
-    },
-    "max-params": {
-      "count": 2
-    },
-    "sonarjs/cognitive-complexity": {
-      "count": 1
-    }
-  },
-  "src/components/laboratorio/LaboratorioV2Anotado.tsx": {
-    "max-lines": {
-      "count": 1
-    },
-    "max-lines-per-function": {
-      "count": 1
-    },
-    "no-nested-ternary": {
-      "count": 1
-    }
-  },
-  "src/components/laboratorio/LaboratorioV3Comparativa.tsx": {
-    "max-lines": {
-      "count": 1
-    },
-    "max-lines-per-function": {
-      "count": 1
-    },
-    "no-nested-ternary": {
-      "count": 1
-    }
-  },
-  "src/components/laboratorio/LaboratorioV4Radiografia.tsx": {
-    "complexity": {
-      "count": 1
-    },
-    "max-lines": {
-      "count": 1
-    },
-    "max-lines-per-function": {
-      "count": 2
-    },
-    "sonarjs/cognitive-complexity": {
-      "count": 2
-    }
-  },
-  "src/components/laboratorio/LaboratorioV5Bloque.tsx": {
-    "no-nested-ternary": {
-      "count": 1
-    }
-  },
   "src/components/leccion/LeccionForm.tsx": {
     "max-lines": {
       "count": 1
