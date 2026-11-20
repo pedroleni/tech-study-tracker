@@ -85,7 +85,7 @@ export function CarruselAutoplay({
                 style={{
                   animationDuration: `${intervaloMs}ms`,
                   animationPlayState: pausado ? 'paused' : 'running',
-                  transform: indice < activo ? 'scaleX(1)' : activo === indice ? undefined : 'scaleX(0)',
+                  transform: escalaProgreso(indice, activo),
                 }}
               />
             </button>
@@ -103,4 +103,11 @@ export function CarruselAutoplay({
       </div>
     </section>
   )
+}
+
+// La barra activa no fija transform: la escala la anima catalogo-progreso.
+function escalaProgreso(indice: number, activo: number) {
+  if (indice < activo) return 'scaleX(1)'
+  if (indice === activo) return undefined
+  return 'scaleX(0)'
 }

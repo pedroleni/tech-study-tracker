@@ -19,6 +19,7 @@ export function Pasos({ pasos, pasoActivo }: PropiedadesPasos) {
         const numero = indice + 1
         const completado = numero < activo
         const actual = numero === activo
+        const clasesNumero = clasesNumeroPaso(actual, completado)
 
         return (
           <li key={`${paso.titulo}-${indice}`} className="relative flex gap-4 pb-6 last:pb-0">
@@ -30,13 +31,7 @@ export function Pasos({ pasos, pasoActivo }: PropiedadesPasos) {
             )}
             <span
               aria-hidden="true"
-              className={`relative z-10 flex size-9 shrink-0 items-center justify-center rounded-full border-2 text-sm font-bold transition-[background-color,border-color,color,transform] duration-300 motion-reduce:transition-none ${
-                actual
-                  ? 'scale-110 border-primary bg-primary text-primary-foreground'
-                  : completado
-                    ? 'border-primary bg-primary text-primary-foreground'
-                    : 'border-border bg-card text-muted-foreground'
-              }`}
+              className={`relative z-10 flex size-9 shrink-0 items-center justify-center rounded-full border-2 text-sm font-bold transition-[background-color,border-color,color,transform] duration-300 motion-reduce:transition-none ${clasesNumero}`}
             >
               {numero}
             </span>
@@ -52,4 +47,10 @@ export function Pasos({ pasos, pasoActivo }: PropiedadesPasos) {
       })}
     </ol>
   )
+}
+
+function clasesNumeroPaso(actual: boolean, completado: boolean) {
+  if (actual) return 'scale-110 border-primary bg-primary text-primary-foreground'
+  if (completado) return 'border-primary bg-primary text-primary-foreground'
+  return 'border-border bg-card text-muted-foreground'
 }

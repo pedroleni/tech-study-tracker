@@ -98,26 +98,6 @@
       "count": 1
     }
   },
-  "src/components/referencia-contenido/CarruselAutoplay.tsx": {
-    "no-nested-ternary": {
-      "count": 1
-    }
-  },
-  "src/components/referencia-contenido/CarruselCoverflow.tsx": {
-    "no-nested-ternary": {
-      "count": 1
-    }
-  },
-  "src/components/referencia-contenido/Pasos.tsx": {
-    "no-nested-ternary": {
-      "count": 1
-    }
-  },
-  "src/components/referencia-contenido/PilaTarjetas.tsx": {
-    "no-nested-ternary": {
-      "count": 2
-    }
-  },
   "src/components/technology/TechnologyForm.tsx": {
     "max-lines-per-function": {
       "count": 1
@@ -136,24 +116,8 @@
       "count": 1
     }
   },
-  "src/routes/AdminReferenciaContenidoPage.tsx": {
-    "max-lines": {
-      "count": 1
-    },
-    "max-lines-per-function": {
-      "count": 1
-    }
-  },
   "src/routes/AdminTechnologyFormPage.tsx": {
     "complexity": {
-      "count": 1
-    }
-  },
-  "src/routes/LeccionPage.tsx": {
-    "complexity": {
-      "count": 1
-    },
-    "no-nested-ternary": {
       "count": 1
     }
   },

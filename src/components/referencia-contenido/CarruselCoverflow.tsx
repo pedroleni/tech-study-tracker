@@ -43,7 +43,7 @@ export function CarruselCoverflow({
               onClick={() => setActivo(indice)}
               className="absolute top-1/2 left-1/2 w-44 touch-manipulation rounded-xl border bg-card p-4 text-left shadow-lg transition-[transform,opacity] duration-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none sm:w-56"
               style={{
-                opacity: visible ? (distancia === 0 ? 1 : 0.68) : 0,
+                opacity: opacidadCoverflow(visible, distancia),
                 pointerEvents: visible ? 'auto' : 'none',
                 transform: `translate(-50%, -50%) translateX(${distancia * 58}%) rotateY(${distancia * -48}deg) scale(${distancia === 0 ? 1 : 0.78})`,
                 transformStyle: 'preserve-3d',
@@ -84,4 +84,9 @@ export function CarruselCoverflow({
       </div>
     </section>
   )
+}
+
+function opacidadCoverflow(visible: boolean, distancia: number) {
+  if (!visible) return 0
+  return distancia === 0 ? 1 : 0.68
 }

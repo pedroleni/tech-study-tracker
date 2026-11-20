@@ -49,19 +49,12 @@ export function PilaTarjetas({
         {[2, 1, 0].map((profundidad) => {
           const indice = (primera + profundidad) % items.length
           const item = items[indice]
+          const clasesProfundidad = clasesTarjetaApilada(profundidad, saliendo)
           return (
             <article
               key={`${primera}-${profundidad}-${item.titulo}`}
               aria-hidden={profundidad !== 0}
-              className={`absolute inset-x-0 top-0 rounded-xl border bg-card p-6 shadow-lg transition-[transform,opacity] duration-300 motion-reduce:transition-none ${
-                profundidad === 0 && saliendo
-                  ? 'translate-x-full rotate-12 opacity-0'
-                  : profundidad === 0
-                    ? 'translate-y-0 rotate-0'
-                    : profundidad === 1
-                      ? 'translate-y-3 rotate-2 scale-[0.97]'
-                      : 'translate-y-6 -rotate-2 scale-[0.94]'
-              }`}
+              className={`absolute inset-x-0 top-0 rounded-xl border bg-card p-6 shadow-lg transition-[transform,opacity] duration-300 motion-reduce:transition-none ${clasesProfundidad}`}
               style={{ zIndex: 3 - profundidad }}
             >
               <p className="text-xs font-bold tracking-wider text-teal-600 uppercase dark:text-teal-400">
@@ -84,4 +77,11 @@ export function PilaTarjetas({
       </button>
     </section>
   )
+}
+
+function clasesTarjetaApilada(profundidad: number, saliendo: boolean) {
+  if (profundidad === 0 && saliendo) return 'translate-x-full rotate-12 opacity-0'
+  if (profundidad === 0) return 'translate-y-0 rotate-0'
+  if (profundidad === 1) return 'translate-y-3 rotate-2 scale-[0.97]'
+  return 'translate-y-6 -rotate-2 scale-[0.94]'
 }
