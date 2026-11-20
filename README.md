@@ -53,22 +53,26 @@ flowchart TD
     F --> G["Codex prueba y compila por su cuenta<br/>y reporta qué hizo (y qué NO pudo hacer)"]
     G --> H["Claude revisa el diff de verdad<br/>nunca se da por buena la palabra de Codex"]
     H -->|insuficiente| E
-    H -->|ok| I["Verificación local obligatoria:<br/>tests, build y lint del proyecto<br/>⚠️ el CI de este repo NO los verifica, solo seguridad"]
+    H -->|ok| I["Verificación local obligatoria:<br/>tests, build, lint y npm run clean-code<br/>(la CI lo repite, pero se llega en verde)"]
     I --> J{"¿Toca RLS, auth o datos sensibles?"}
     J -->|sí| K["Migración manual en Supabase SQL Editor<br/>(Codex y el sandbox no tienen red)"]
     K --> L["Verificación real contra Supabase<br/>anónimo / registrado / admin, peticiones HTTP directas"]
     J -->|no| M
     L --> M["Claude: revisión de seguridad<br/>/security-review (8 dominios) o fallback secuencial<br/>guardada en security/reviews/"]
-    M --> N["Claude: commit + push + PR contra main"]
-    N --> O["CI (security-scan.yml):<br/>solo los 5 scanners bash de scripts/security/"]
+    M --> CC["Agente clean-code (modo cambios)<br/>revisa el diff contra main"]
+    CC -->|bloqueantes| H
+    CC -->|APROBADO| N["Claude: commit + push + PR contra main<br/>con el veredicto del agente"]
+    N --> O["CI obligatoria para integrar:<br/>build (lint, tests, build) · scan (5 escáneres)<br/>clean-code · veredicto"]
     O -->|rojo| H
-    O -->|verde y revisado| P["Merge a main<br/>solo con confirmación explícita del usuario"]
+    O -->|verde| P["Merge a main solo con confirmación<br/>explícita del usuario; main protegida:<br/>GitHub no deja integrar en rojo"]
 ```
 
 **Lo que este diagrama deja explícito y que antes solo estaba en
-prosa repartida:** el CI de este repo **no** corre `test`/`build`/`lint`
-— eso es responsabilidad de Claude en local, cada vez, antes de dar una
-rama por terminada. Y el sandbox `workspace-write` de Codex está
+prosa repartida:** la CI (`ci.yml`, `security-scan.yml` y
+`revision-clean-code.yml`) repite lint, tests, build, escáneres de
+seguridad, la puerta de clean code y la comprobación del veredicto del
+agente, y `main` está protegida para que no se pueda integrar nada en
+rojo; aun así, Claude lo ejecuta todo en local antes de abrir la PR. Y el sandbox `workspace-write` de Codex está
 confinado al repo en el que se lanza *en teoría*, pero en la práctica
 depende del `trust_level` configurado en `~/.codex/config.toml` del
 usuario — no asumir aislamiento total entre proyectos solo por el
@@ -80,12 +84,45 @@ Ninguna feature se comitea directo a `main`:
 
 1. Rama `feat/<nombre>` (o `fix/<nombre>`) desde `main` actualizado —
    una rama por feature, no varias mezcladas.
-2. Implementación + `npm run test && npm run build && npm run lint`
-   en verde **en local** — el CI no los corre (ver diagrama arriba).
-3. Push + PR contra `main`. El workflow de GitHub Actions
-   (`.github/workflows/security-scan.yml`) corre automáticamente en
-   cada PR, pero solo los scanners de seguridad de `scripts/security/`.
-4. Merge solo cuando CI está en verde y el PR ha sido revisado.
+2. Implementación + `npm run test && npm run build && npm run lint &&
+   npm run clean-code` en verde **en local**.
+3. El agente de clean code revisa el diff y su veredicto va en la
+   descripción de la PR (sección «Revisión clean code»).
+4. Push + PR contra `main`. GitHub Actions corre `build` (lint, tests y
+   build), `scan` (escáneres de seguridad), `clean-code` y `veredicto`.
+5. `main` está protegida: el merge solo es posible con las cuatro
+   comprobaciones en verde, también para los administradores.
+
+## Clean code
+
+Las normas están en [`docs/clean-code.md`](docs/clean-code.md): las convenciones del repo,
+las normas de cada tecnología con sus fuentes, los umbrales y la checklist del revisor.
+
+```mermaid
+flowchart LR
+    cambio["Cambio en una rama"] --> puerta["Puerta automática<br/>npm run clean-code"]
+    puerta -- falla --> cambio
+    puerta --> agente["Agente clean-code<br/>modo cambios"]
+    agente -- bloqueantes --> cambio
+    agente --> veredicto["Veredicto en la PR<br/>APROBADO + commit revisado"]
+    veredicto --> ci["CI: build · scan · clean-code · veredicto"]
+    ci --> main[(main protegida)]
+    main --> informe["clean-code-semanal.yml<br/>informe completo cada lunes"]
+    informe --> auditoria["Auditoría semanal del agente<br/>propone PR pequeñas"]
+```
+
+1. **Puerta automática** (`npm run clean-code`, bloquea la PR): ESLint con complejidad
+   ciclomática y cognitiva, tamaño, anidación, parámetros y legibilidad; `jscpd` para código
+   duplicado nuevo y `knip` para archivos, exportaciones y dependencias sin uso.
+2. **Revisión del agente** (bloquea la PR): `.claude/agents/clean-code.md` revisa el diff
+   contra `main` con la suscripción de Claude Code, sin claves de API; la CI comprueba que su
+   veredicto es `APROBADO` y que corresponde al último commit.
+3. **Revisión completa periódica:** cada lunes, informe completo en GitHub Actions y
+   auditoría del agente sobre el repo entero.
+4. **Deuda congelada:** lo que ya incumplía las normas está en `eslint-suppressions.json` y
+   `jscpd-base.json` y solo puede bajar (`npm run clean-code:podar`). Ojo: bloques parecidos
+   pueden hacer cosas distintas; antes de unificarlos se comparan línea a línea y se comprueba
+   en el navegador que todo sigue funcionando.
 
 ## Los agentes de seguridad
 
@@ -158,6 +195,7 @@ npm run dev            # servidor de desarrollo
 npm run test            # tests
 npm run build           # build de producción + type-check
 npm run lint             # ESLint
+npm run clean-code       # puerta de clean code (docs/clean-code.md)
 ```
 
 La `anon key` de Supabase es pública por diseño (protegida por RLS) y sí

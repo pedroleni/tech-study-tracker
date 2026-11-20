@@ -1,0 +1,46 @@
+name: Revisión clean code
+
+# Cada PR pasa por el agente clean-code (.claude/agents/clean-code.md) antes de integrarse.
+# El agente se ejecuta en local con la suscripción de Claude Code, sin claves de API; aquí
+# solo se comprueba que su veredicto está en la descripción, que aprueba y que corresponde
+# al último commit de la PR.
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  veredicto:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Comprobar el veredicto del agente
+        env:
+          # Por variables de entorno, nunca interpolado en el script: la descripción la
+          # escribe quien abre la PR.
+          CUERPO: ${{ github.event.pull_request.body }}
+          CABEZA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          seccion="$(printf '%s\n' "${CUERPO:-}" | tr -d '\r' | sed -n '/^## Revisión clean code/,/^## /p')"
+          if [ -z "$seccion" ]; then
+            echo "::error::Falta la sección «## Revisión clean code». Ejecuta el agente clean-code sobre la rama y pega su veredicto en la descripción."
+            exit 1
+          fi
+          if ! printf '%s\n' "$seccion" | grep -qE '^Veredicto: APROBADO[[:space:]]*$'; then
+            echo "::error::El agente clean-code no ha aprobado la PR (falta «Veredicto: APROBADO»)."
+            exit 1
+          fi
+          commit="$(printf '%s\n' "$seccion" | sed -n 's/^Commit revisado: *\([0-9a-f]\{7,40\}\).*/\1/p' | head -n 1)"
+          if [ -z "$commit" ]; then
+            echo "::error::Falta «Commit revisado: <hash>» en la revisión clean code."
+            exit 1
+          fi
+          case "$CABEZA" in
+            "$commit"*) echo "Revisión clean code aprobada para ${CABEZA:0:7}." ;;
+            *)
+              echo "::error::La revisión es del commit $commit, pero la PR va por ${CABEZA:0:7}. Vuelve a pasar el agente sobre los cambios nuevos."
+              exit 1
+              ;;
+          esac

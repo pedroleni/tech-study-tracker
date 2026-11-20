@@ -1,0 +1,22 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": [
+    "api/*.ts",
+    "src/**/*.test.{ts,tsx}"
+  ],
+  "project": [
+    "src/**/*.{ts,tsx,css}",
+    "api/**/*.ts"
+  ],
+  "ignore": [
+    "src/components/technology/DifficultyBadge.tsx",
+    "src/components/technology/PriorityBadge.tsx"
+  ],
+  "ignoreExportsUsedInFile": true,
+  "ignoreDependencies": [
+    "@typescript/native"
+  ],
+  "rules": {
+    "types": "off"
+  }
+}

@@ -86,6 +86,13 @@ pipeline {
             }
         }
 
+        // Puerta automática de clean code (docs/clean-code.md), la misma que en GitHub.
+        stage('Clean code') {
+            steps {
+                sh 'npm run clean-code'
+            }
+        }
+
         // `npm run build` ya comprueba los tipos (`tsc -b`) antes de `vite build`.
         stage('Build') {
             steps {

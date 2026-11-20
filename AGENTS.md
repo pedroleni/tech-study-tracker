@@ -118,12 +118,36 @@ archivo:
   merge independientemente de qué agente escribió el código.
 - **CI de calidad** (`.github/workflows/ci.yml`): en cada push a `main` y
   cada PR corre `npm ci`, `npm run lint`, `npm test` y `npm run build`
-  (que incluye la comprobación de tipos). Usa valores ficticios de
+  (que incluye la comprobación de tipos) en el job `build`, y la puerta de
+  clean code (`npm run clean-code`) en el job `clean-code`. Usa valores ficticios de
   Supabase: los tests no llaman a ningún servidor real.
 
 Sigue usando los checklists de abajo como guía *antes* de escribir código
 (evita retrabajo), pero el hook y el CI son los que de verdad impiden que
 algo inseguro llegue a `main`.
+
+## Clean code — obligatorio antes de abrir una PR
+
+Las normas están en `docs/clean-code.md` (convenciones del repo, normas por tecnología con sus
+fuentes, umbrales y checklist del revisor). Léelas antes de escribir código.
+
+1. La puerta automática tiene que estar en verde: `npm run clean-code` (ESLint con
+   complejidad y tamaño, duplicados nuevos con jscpd y código muerto con knip).
+2. El agente `.claude/agents/clean-code.md` revisa el diff contra `main` (modo `cambios`) con
+   la suscripción de Claude Code, sin claves de API. Su bloque «## Revisión clean code» va en
+   la descripción de la PR. Si llegan más commits, se vuelve a pasar: la CI
+   (`revision-clean-code.yml`) comprueba que dice `Veredicto: APROBADO` y que es del último
+   commit.
+3. No se añade deuda: nada de `eslint-disable` ni de entradas nuevas en
+   `eslint-suppressions.json` o `jscpd-base.json` sin justificarlo en la PR. Tras refactorizar
+   código con deuda, `npm run clean-code:podar`.
+4. Bloques parecidos pueden hacer cosas distintas: antes de unificarlos, compáralos línea a
+   línea y comprueba en el navegador que todo sigue funcionando.
+5. Revisión completa: cada lunes `clean-code-semanal.yml` deja el informe completo como
+   resumen y artefacto, y una rutina de Claude hace la auditoría del repo entero.
+
+`main` está protegida: GitHub no deja integrar una PR si falla `build`, `scan`, `clean-code`
+o `veredicto`, tampoco a los administradores.
 
 ## Flujo de ramas — obligatorio, nunca commits directos a `main`
 
@@ -133,15 +157,17 @@ después se integra en `main`:
 1. Parte siempre de `main` actualizado, rama `feat/<nombre-corto>` (o
    `fix/<nombre-corto>` para bugs). Una rama = una feature del
    `specs/plan.md` sección 8, no varias mezcladas.
-2. Implementa. Corre `npm run test`, `npm run build` y `npm run lint` — la
-   rama debe quedar verde antes de darla por terminada.
+2. Implementa. Corre `npm run test`, `npm run build`, `npm run lint` y
+   `npm run clean-code` — la rama debe quedar verde antes de darla por
+   terminada — y pasa el agente `clean-code` (ver arriba).
 3. Commit(s) normales en la rama (varios está bien, no hace falta squash).
 4. Push de la rama y PR contra `main` (nunca push directo a `main`). El
    workflow `.github/workflows/security-scan.yml` ya corre
    automáticamente en cada PR (trigger `pull_request`), así que el gate
    de seguridad se valida ahí antes de mergear; `.github/workflows/ci.yml`
    comprueba a la vez lint, tests y build.
-5. Solo se mergea a `main` una vez la rama está verde en CI y revisada.
+5. Solo se mergea a `main` una vez la rama está verde en CI (incluidos
+   `clean-code` y `veredicto`) y revisada.
 
 No crees una rama gigante que intente todo `specs/plan.md` de una vez.
 Una rama por paso (o por un grupo pequeño y cohesionado de pasos) — así

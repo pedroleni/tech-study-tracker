@@ -43,7 +43,7 @@ EXCLUDE="--exclude-dir=.git --exclude-dir=node_modules --exclude-dir=vendor --ex
 #   dangerouslySetInnerHTML..."; el patrón cazó el texto del comentario, no
 #   uso real. El valor se renderiza como {String(valor)}, JSX normal,
 #   auto-escapado por React.
-# - postgres-en-vivo/motor.ts:114 — db.exec(...) es el método de PGlite
+# - postgres-en-vivo/motor.ts:113 — db.exec(...) es el método de PGlite
 #   (motor SQL real, @electric-sql/pglite) para ejecutar una sentencia SQL,
 #   no child_process.exec() — incidencia de mismo nombre de método (SQL vs.
 #   shell), no el patrón real. El valor interpolado (identidad simulada de
@@ -51,7 +51,7 @@ EXCLUDE="--exclude-dir=.git --exclude-dir=node_modules --exclude-dir=vendor --ex
 # - vite.config.ts:18 — otro comentario: la frase "index.html (HTML)" cae
 #   por casualidad en el patrón de jQuery .html(); este proyecto no usa
 #   jQuery en ningún sitio.
-POST_EXCLUDE_LINES='^\./src/components/bloques-laboratorio/TablaResultado\.tsx:37:|^\./src/lib/postgres-en-vivo/motor\.ts:114:|^\./vite\.config\.ts:18:'
+POST_EXCLUDE_LINES='^\./src/components/bloques-laboratorio/TablaResultado\.tsx:37:|^\./src/lib/postgres-en-vivo/motor\.ts:113:|^\./vite\.config\.ts:18:'
 
 scan_pattern() {
     local severity="$1" category="$2" description="$3" pattern="$4" includes="$5"

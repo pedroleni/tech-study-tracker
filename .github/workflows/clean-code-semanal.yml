@@ -1,0 +1,35 @@
+name: Informe semanal de clean code
+
+# Revisión completa periódica (docs/clean-code.md): deuda congelada, duplicados contando
+# los tests y código muerto. Queda como resumen de la ejecución y como artefacto
+# descargable; no necesita permisos de escritura.
+on:
+  schedule:
+    - cron: "0 6 * * 1" # lunes a las 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  informe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22.12.0
+          cache: npm
+      - run: npm ci
+      - name: Generar el informe
+        run: npm run -s clean-code:informe > "$RUNNER_TEMP/informe.md"
+      - name: Resumen de la ejecución
+        run: cat "$RUNNER_TEMP/informe.md" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: informe-clean-code
+          path: ${{ runner.temp }}/informe.md
+          retention-days: 90
