@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { Gauge } from 'lucide-react'
 
+import { useMarcarVisibleAlEntrar } from '@/components/referencia-contenido/useMarcarVisibleAlEntrar'
+
 export interface PropiedadesContadorEnScroll {
   valor: number
   etiqueta: string
@@ -19,22 +21,7 @@ export function ContadorEnScroll({
   const [valorVisible, setValorVisible] = useState(0)
   const formateador = new Intl.NumberFormat('es-ES')
 
-  useEffect(() => {
-    const elemento = contenedorRef.current
-    if (!elemento) return
-    if (typeof IntersectionObserver === 'undefined') return
-    const observador = new IntersectionObserver(
-      ([entrada]) => {
-        if (entrada.isIntersecting) {
-          setVisible(true)
-          observador.disconnect()
-        }
-      },
-      { threshold: 0.35 },
-    )
-    observador.observe(elemento)
-    return () => observador.disconnect()
-  }, [])
+  useMarcarVisibleAlEntrar(contenedorRef, setVisible)
 
   useEffect(() => {
     if (!visible) return

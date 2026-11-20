@@ -1,4 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
+
+import { useMarcarVisibleAlEntrar } from '@/components/referencia-contenido/useMarcarVisibleAlEntrar'
 
 export interface LadoComparativa {
   etiqueta: string
@@ -21,22 +23,7 @@ export function LineaComparativaAnimada({
   const total = Math.max(0, izquierda.valor) + Math.max(0, derecha.valor)
   const porcentajeIzquierda = total > 0 ? (Math.max(0, izquierda.valor) / total) * 100 : 50
 
-  useEffect(() => {
-    const elemento = contenedorRef.current
-    if (!elemento) return
-    if (typeof IntersectionObserver === 'undefined') return
-    const observador = new IntersectionObserver(
-      ([entrada]) => {
-        if (entrada.isIntersecting) {
-          setVisible(true)
-          observador.disconnect()
-        }
-      },
-      { threshold: 0.35 },
-    )
-    observador.observe(elemento)
-    return () => observador.disconnect()
-  }, [])
+  useMarcarVisibleAlEntrar(contenedorRef, setVisible)
 
   return (
     <section ref={contenedorRef} aria-label={titulo} className="rounded-xl border bg-card p-5 shadow-sm">
