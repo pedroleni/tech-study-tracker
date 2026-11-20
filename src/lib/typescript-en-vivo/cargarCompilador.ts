@@ -19,13 +19,17 @@ export type CompiladorEnVivo = {
   ts: TsReal
   vfs: typeof import('@typescript/vfs')
   opciones: import('typescript').CompilerOptions
-  /** Archivos lib.*.d.ts que necesitan estas opciones (pueden faltar algunos). */
+  /**
+   * Archivos lib.*.d.ts de una lib fija (ES2020 + DOM), la misma que declaran los
+   * OPCIONES_JSON de compilar.ts y react-en-vivo/tipos.ts; no se lee de
+   * `opcionesJson` (pueden faltar algunos).
+   */
   nombresLib: string[]
 }
 
 /**
  * Carga TypeScript y @typescript/vfs, resuelve `opcionesJson` y calcula los
- * archivos lib que hay que dar al entorno virtual.
+ * archivos lib (ES2020 + DOM, fijos) que hay que dar al entorno virtual.
  */
 export async function cargarCompiladorEnVivo(opcionesJson: object): Promise<CompiladorEnVivo> {
   const [tsModulo, vfs] = await Promise.all([

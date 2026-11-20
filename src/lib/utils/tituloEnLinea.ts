@@ -36,8 +36,10 @@ type Marcador = '*' | '**'
 
 /**
  * Trozo del título que se está leyendo. La raíz es el título entero; cada
- * énfasis abierto (`*` o `**`) es un segmento encima, en una pila explícita
- * y no con recursión, para que el anidamiento no desborde la pila de llamadas.
+ * énfasis abierto (`*` o `**`) es un segmento encima, en una pila explícita:
+ * el parser no usa recursión, así que el anidamiento no desborda la pila de
+ * llamadas. El árbol que sale (poco profundo en títulos reales) sí se recorre
+ * con recursión al sacar el texto plano y al pintarlo.
  */
 interface Segmento {
   fragmentos: FragmentoTitulo[]
