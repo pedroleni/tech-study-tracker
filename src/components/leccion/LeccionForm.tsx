@@ -1,23 +1,19 @@
 import {
-  useCallback,
   useEffect,
   useMemo,
-  useRef,
   useState,
-  type ClipboardEvent,
-  type DragEvent,
 } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { supabase } from '@/lib/supabaseClient'
+import { CamposLeccionForm } from '@/components/leccion/CamposLeccionForm'
 import {
-  extraerImagenesDeLaboratorio,
-  type BloqueImagenEncontrado,
-} from '@/lib/utils/extraerImagenesDeLaboratorio'
+  EditorContenidoLeccion,
+  ResumenLeccionForm,
+} from '@/components/leccion/EditorContenidoLeccion'
+import { useImagenesLeccionForm } from '@/components/leccion/useImagenesLeccionForm'
+import { Button } from '@/components/ui/button'
+import { extraerImagenesDeLaboratorio } from '@/lib/utils/extraerImagenesDeLaboratorio'
 import type { Leccion } from '@/types'
 
 const leccionSchema = z.object({
@@ -30,7 +26,7 @@ const leccionSchema = z.object({
   esProyecto: z.boolean().default(false),
 })
 
-type LeccionFields = z.infer<typeof leccionSchema>
+export type LeccionFields = z.infer<typeof leccionSchema>
 
 export interface LeccionFormValues {
   slug: string
@@ -75,6 +71,12 @@ function defaults(leccion?: Leccion): LeccionFields {
       }
 }
 
+function textoBotonSubmit(pending: boolean, editing: boolean) {
+  if (pending) return 'Guardando…'
+  if (editing) return 'Guardar cambios'
+  return 'Crear borrador'
+}
+
 export function LeccionForm({
   leccion,
   pending,
@@ -86,97 +88,7 @@ export function LeccionForm({
 }) {
   const { register, handleSubmit, setError, reset, control, formState, getValues, setValue } =
     useForm<LeccionFields>({ defaultValues: defaults(leccion) })
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null)
-  const [subiendoImagen, setSubiendoImagen] = useState(false)
-  const [errorImagen, setErrorImagen] = useState('')
-  const [mensajeImagen, setMensajeImagen] = useState('')
-  const [imagenBorrandose, setImagenBorrandose] = useState('')
-
-  const subirImagenEnCursor = useCallback(
-    async (archivo: File) => {
-      setErrorImagen('')
-      // Mismo conjunto que api/imagenes.ts — SVG queda fuera a propósito
-      // (riesgo de XSS vía script embebido si alguien visita /img/<hash>.svg
-      // directo, no como <img>).
-      const tiposPermitidos = ['image/png', 'image/jpeg', 'image/webp']
-      if (!tiposPermitidos.includes(archivo.type)) {
-        setErrorImagen('Solo se admiten imágenes PNG, JPEG o WebP.')
-        return
-      }
-      if (archivo.size > 4 * 1024 * 1024) {
-        setErrorImagen('La imagen no puede superar 4 MB.')
-        return
-      }
-
-      setSubiendoImagen(true)
-      try {
-        const { data: sesion } = await supabase.auth.getSession()
-        const token = sesion.session?.access_token
-        if (!token) throw new Error('No hay sesión activa.')
-
-        const respuesta = await fetch('/api/imagenes', {
-          method: 'POST',
-          headers: { 'content-type': archivo.type, authorization: `Bearer ${token}` },
-          body: archivo,
-        })
-        if (!respuesta.ok) {
-          throw new Error(`La función devolvió ${respuesta.status}`)
-        }
-        const { publicUrl } = await respuesta.json()
-
-        const bloque = `\`\`\`laboratorio\n${JSON.stringify(
-          { tipo: 'imagen', src: publicUrl, alt: archivo.name.replace(/\.[^.]+$/, '') },
-          null,
-          2,
-        )}\n\`\`\`\n`
-
-        const textarea = textareaRef.current
-        const valorActual = textarea?.value ?? ''
-        const inicio = textarea?.selectionStart ?? valorActual.length
-        const fin = textarea?.selectionEnd ?? valorActual.length
-        const nuevoValor = valorActual.slice(0, inicio) + bloque + valorActual.slice(fin)
-        setValue('contenido', nuevoValor, { shouldDirty: true })
-      } catch (error) {
-        setErrorImagen(error instanceof Error ? error.message : 'No se pudo subir la imagen.')
-      } finally {
-        setSubiendoImagen(false)
-      }
-    },
-    [setValue],
-  )
-
-  // El navegador solo trata este elemento como una zona de soltar válida si
-  // dragover llama a preventDefault() — sin esto, al soltar el archivo el
-  // navegador ejecuta su acción por defecto (abrir/navegar al archivo) en
-  // vez de disparar drop con los datos utilizables. jsdom no reproduce esta
-  // negociación, así que un test con fireEvent.drop no detecta su ausencia.
-  const manejarDragOver = useCallback((event: DragEvent<HTMLTextAreaElement>) => {
-    if (event.dataTransfer.types.includes('Files')) {
-      event.preventDefault()
-    }
-  }, [])
-
-  const manejarDrop = useCallback(
-    (event: DragEvent<HTMLTextAreaElement>) => {
-      const archivo = event.dataTransfer.files[0]
-      if (!archivo) return
-      event.preventDefault()
-      void subirImagenEnCursor(archivo)
-    },
-    [subirImagenEnCursor],
-  )
-
-  const manejarPaste = useCallback(
-    (event: ClipboardEvent<HTMLTextAreaElement>) => {
-      const archivo = [...event.clipboardData.items]
-        .find((item) => item.type.startsWith('image/'))
-        ?.getAsFile()
-      if (!archivo) return
-      event.preventDefault()
-      void subirImagenEnCursor(archivo)
-    },
-    [subirImagenEnCursor],
-  )
+  const gestionImagenes = useImagenesLeccionForm({ leccion, getValues, setValue })
 
   const { ref: contenidoRef, ...contenidoRegister } = register('contenido')
   const [submitError, setSubmitError] = useState('')
@@ -201,49 +113,6 @@ export function LeccionForm({
     window.addEventListener('beforeunload', warnBeforeUnload)
     return () => window.removeEventListener('beforeunload', warnBeforeUnload)
   }, [formState.isDirty])
-
-  async function borrarImagen(imagen: BloqueImagenEncontrado) {
-    if (!window.confirm(`¿Borrar la imagen "${imagen.datos.alt}"? Esta acción no se puede deshacer.`)) {
-      return
-    }
-
-    setErrorImagen('')
-    setMensajeImagen('')
-    setImagenBorrandose(imagen.bloqueCompleto)
-
-    try {
-      const clave = imagen.datos.src.slice(imagen.datos.src.lastIndexOf('/') + 1)
-      const { data: sesion } = await supabase.auth.getSession()
-      const token = sesion.session?.access_token
-      if (!token) throw new Error('No hay sesión activa.')
-
-      const respuesta = await fetch('/api/imagenes', {
-        method: 'DELETE',
-        headers: {
-          'content-type': 'application/json',
-          authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ clave, leccionId: leccion?.id }),
-      })
-      if (!respuesta.ok) {
-        throw new Error(`La función devolvió ${respuesta.status}`)
-      }
-
-      const { borradoDeR2 } = (await respuesta.json()) as { borradoDeR2: boolean }
-      const nuevoValor = getValues('contenido').replace(imagen.bloqueCompleto, '')
-      setValue('contenido', nuevoValor, { shouldDirty: true })
-
-      if (!borradoDeR2) {
-        setMensajeImagen(
-          'Imagen quitada de esta lección — sigue en uso en otra, así que no se ha borrado del almacenamiento.',
-        )
-      }
-    } catch (error) {
-      setErrorImagen(error instanceof Error ? error.message : 'No se pudo borrar la imagen.')
-    } finally {
-      setImagenBorrandose('')
-    }
-  }
 
   async function submit(values: LeccionFields) {
     const result = leccionSchema.safeParse(values)
@@ -279,228 +148,36 @@ export function LeccionForm({
 
   return (
     <form onSubmit={(event) => void handleSubmit(submit)(event)} className="space-y-8">
-      <div className="grid gap-5 sm:grid-cols-2">
-        <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="leccion-titulo">Título</Label>
-          <Input
-            id="leccion-titulo"
-            autoComplete="off"
-            maxLength={120}
-            aria-invalid={Boolean(formState.errors.titulo)}
-            aria-describedby="leccion-titulo-error"
-            {...register('titulo')}
-          />
-          <p id="leccion-titulo-error" className="text-sm text-destructive">
-            {formState.errors.titulo?.message}
-          </p>
-        </div>
+      <CamposLeccionForm
+        leccion={leccion}
+        slug={slug}
+        register={register}
+        errors={formState.errors}
+      />
 
-        <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="leccion-slug">Slug</Label>
-          <Input
-            id="leccion-slug"
-            name="slug"
-            value={slug}
-            readOnly
-            autoComplete="off"
-            aria-describedby="leccion-slug-help"
-          />
-          <p id="leccion-slug-help" className="text-xs text-muted-foreground">
-            {leccion
-              ? 'El slug queda congelado para no romper enlaces ya compartidos.'
-              : 'Se deriva automáticamente del título.'}
-          </p>
-        </div>
+      <ResumenLeccionForm register={register('resumen')} errors={formState.errors} />
 
-        <div className="space-y-2">
-          <Label htmlFor="leccion-modulo">Módulo</Label>
-          <Input
-            id="leccion-modulo"
-            autoComplete="off"
-            aria-describedby="leccion-modulo-help"
-            {...register('modulo')}
-          />
-          <p id="leccion-modulo-help" className="text-xs text-muted-foreground">
-            Opcional; agrupa lecciones en la portada.
-          </p>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="leccion-orden">Orden</Label>
-          <Input
-            id="leccion-orden"
-            type="number"
-            inputMode="numeric"
-            step={1}
-            autoComplete="off"
-            aria-invalid={Boolean(formState.errors.orden)}
-            aria-describedby="leccion-orden-help leccion-orden-error"
-            {...register('orden', { valueAsNumber: true })}
-          />
-          <p id="leccion-orden-help" className="text-xs text-muted-foreground">
-            Usa 10, 20, 30… para dejar huecos.
-          </p>
-          <p id="leccion-orden-error" className="text-sm text-destructive">
-            {formState.errors.orden?.message}
-          </p>
-        </div>
-
-        <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="leccion-status">Estado</Label>
-          {leccion ? (
-            <select
-              id="leccion-status"
-              aria-describedby="leccion-status-help"
-              className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-              {...register('status')}
-            >
-              <option value="borrador">Borrador</option>
-              <option value="publicado">Publicado</option>
-            </select>
-          ) : (
-            <>
-              <input type="hidden" value="borrador" {...register('status')} />
-              <select
-                id="leccion-status"
-                disabled
-                value="borrador"
-                aria-describedby="leccion-status-help"
-                className="h-9 w-full cursor-not-allowed rounded-lg border border-input bg-background px-3 text-sm text-foreground opacity-50"
-              >
-                <option value="borrador">Borrador</option>
-              </select>
-            </>
-          )}
-          <p id="leccion-status-help" className="text-xs text-muted-foreground">
-            {leccion
-              ? 'Publicar hace visible la lección cuando su tecnología también está publicada.'
-              : 'Toda lección se crea como borrador. Podrás publicarla desde la edición.'}
-          </p>
-        </div>
-
-        <div className="sm:col-span-2">
-          <div className="flex min-h-11 items-start gap-3 rounded-lg border bg-background p-3">
-            <input
-              id="leccion-es-proyecto"
-              type="checkbox"
-              className="mt-0.5 size-4 shrink-0 accent-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-              aria-describedby="leccion-es-proyecto-help"
-              {...register('esProyecto')}
-            />
-            <div className="space-y-1">
-              <Label htmlFor="leccion-es-proyecto" className="cursor-pointer">
-                Es un proyecto
-              </Label>
-              <p id="leccion-es-proyecto-help" className="text-xs text-muted-foreground">
-                Las lecciones publicadas con esta marca aparecen también en la sección
-                Proyectos.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="leccion-resumen">Resumen</Label>
-        <textarea
-          id="leccion-resumen"
-          rows={3}
-          maxLength={300}
-          placeholder="Resume el objetivo de la lección…"
-          className="w-full resize-y rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-          aria-invalid={Boolean(formState.errors.resumen)}
-          aria-describedby="leccion-resumen-error"
-          {...register('resumen')}
-        />
-        <p id="leccion-resumen-error" className="text-sm text-destructive">
-          {formState.errors.resumen?.message}
-        </p>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="leccion-contenido">Contenido en Markdown</Label>
-        <textarea
-          id="leccion-contenido"
-          rows={20}
-          maxLength={200_000}
-          placeholder="Escribe la lección en Markdown…"
-          className="w-full resize-y rounded-lg border border-input bg-background px-3 py-2 font-mono text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-          aria-invalid={Boolean(formState.errors.contenido)}
-          aria-describedby="leccion-contenido-error leccion-contenido-imagen-ayuda"
-          onDragOver={manejarDragOver}
-          onDrop={manejarDrop}
-          onPaste={manejarPaste}
-          ref={(el) => {
-            contenidoRef(el)
-            textareaRef.current = el
-          }}
-          {...contenidoRegister}
-        />
-        {subiendoImagen && (
-          <p role="status" className="text-sm text-muted-foreground">
-            Subiendo imagen…
-          </p>
-        )}
-        {errorImagen && (
-          <p role="alert" className="text-sm text-destructive">
-            {errorImagen}
-          </p>
-        )}
-        <p id="leccion-contenido-imagen-ayuda" className="text-xs text-muted-foreground">
-          Arrastra o pega una imagen aquí para subirla e insertar el bloque automáticamente.
-        </p>
-        {imagenes.length > 0 && (
-          <section
-            aria-labelledby="leccion-imagenes-titulo"
-            className="space-y-3 rounded-lg border bg-muted/30 p-4"
-          >
-            <h3 id="leccion-imagenes-titulo" className="text-sm font-medium">
-              Imágenes en esta lección
-            </h3>
-            <ul className="grid gap-3 sm:grid-cols-2">
-              {imagenes.map((imagen) => (
-                <li
-                  key={imagen.bloqueCompleto}
-                  className="flex min-w-0 items-center gap-3 rounded-lg border bg-background p-3"
-                >
-                  <img
-                    src={imagen.datos.src}
-                    alt={imagen.datos.alt}
-                    width={64}
-                    height={64}
-                    loading="lazy"
-                    className="h-16 w-16 shrink-0 rounded object-cover"
-                  />
-                  <p className="min-w-0 flex-1 break-words text-sm">{imagen.datos.alt}</p>
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="sm"
-                    disabled={Boolean(imagenBorrandose)}
-                    onClick={() => void borrarImagen(imagen)}
-                  >
-                    {imagenBorrandose === imagen.bloqueCompleto ? 'Borrando…' : 'Borrar'}
-                  </Button>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
-        {mensajeImagen && (
-          <p role="status" className="text-sm text-muted-foreground">
-            {mensajeImagen}
-          </p>
-        )}
-        <p id="leccion-contenido-error" className="text-sm text-destructive">
-          {formState.errors.contenido?.message}
-        </p>
-      </div>
+      <EditorContenidoLeccion
+        contenidoRegister={contenidoRegister}
+        contenidoRef={contenidoRef}
+        textareaRef={gestionImagenes.textareaRef}
+        errors={formState.errors}
+        subiendoImagen={gestionImagenes.subiendoImagen}
+        errorImagen={gestionImagenes.errorImagen}
+        mensajeImagen={gestionImagenes.mensajeImagen}
+        imagenBorrandose={gestionImagenes.imagenBorrandose}
+        imagenes={imagenes}
+        manejarDragOver={gestionImagenes.manejarDragOver}
+        manejarDrop={gestionImagenes.manejarDrop}
+        manejarPaste={gestionImagenes.manejarPaste}
+        borrarImagen={gestionImagenes.borrarImagen}
+      />
 
       <p aria-live="polite" className="text-sm text-destructive">
         {submitError}
       </p>
       <Button type="submit" size="lg" disabled={pending}>
-        {pending ? 'Guardando…' : leccion ? 'Guardar cambios' : 'Crear borrador'}
+        {textoBotonSubmit(pending, Boolean(leccion))}
       </Button>
     </form>
   )
