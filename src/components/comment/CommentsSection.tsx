@@ -208,6 +208,48 @@ function CommentItem({
   )
 }
 
+function CommentAccess({
+  writable,
+  user,
+  pending,
+  onSubmit,
+}: {
+  writable: boolean
+  user: { id: string } | null
+  pending: boolean
+  onSubmit: (body: string) => Promise<unknown>
+}) {
+  if (!writable) {
+    return (
+      <p className="rounded-lg border bg-muted/40 p-4 text-sm text-muted-foreground">
+        Los comentarios se habilitarán cuando se publique la lección.
+      </p>
+    )
+  }
+
+  if (user) {
+    return (
+      <Card>
+        <CommentComposer
+          id="new-comment"
+          submitLabel="Publicar comentario"
+          pending={pending}
+          onSubmit={(body) => onSubmit(body).then(() => undefined)}
+        />
+      </Card>
+    )
+  }
+
+  return (
+    <p className="rounded-lg border bg-muted/40 p-4 text-sm">
+      <Link to="/login" className="font-medium underline underline-offset-4">
+        Inicia sesión
+      </Link>{' '}
+      para participar en la conversación.
+    </p>
+  )
+}
+
 export function CommentsSection({
   leccionId,
   writable = true,
@@ -232,29 +274,12 @@ export function CommentsSection({
         </p>
       </div>
 
-      {!writable ? (
-        <p className="rounded-lg border bg-muted/40 p-4 text-sm text-muted-foreground">
-          Los comentarios se habilitarán cuando se publique la lección.
-        </p>
-      ) : user ? (
-        <Card>
-          <CommentComposer
-            id="new-comment"
-            submitLabel="Publicar comentario"
-            pending={createMutation.isPending}
-            onSubmit={(body) =>
-              createMutation.mutateAsync({ leccionId, body }).then(() => undefined)
-            }
-          />
-        </Card>
-      ) : (
-        <p className="rounded-lg border bg-muted/40 p-4 text-sm">
-          <Link to="/login" className="font-medium underline underline-offset-4">
-            Inicia sesión
-          </Link>{' '}
-          para participar en la conversación.
-        </p>
-      )}
+      <CommentAccess
+        writable={writable}
+        user={user}
+        pending={createMutation.isPending}
+        onSubmit={(body) => createMutation.mutateAsync({ leccionId, body })}
+      />
 
       {commentsQuery.isLoading && <p role="status">Cargando comentarios…</p>}
       {commentsQuery.isError && (

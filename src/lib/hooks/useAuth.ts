@@ -1,8 +1,74 @@
 import type { Session, User } from '@supabase/supabase-js'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, type Dispatch, type SetStateAction } from 'react'
 
 import { supabase } from '@/lib/supabaseClient'
 import { queryClient } from '@/lib/queryClient'
+
+function useAccionesAuth(
+  setIsPasswordRecovery: Dispatch<SetStateAction<boolean>>,
+) {
+  const signIn = useCallback(async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) throw error
+    return data
+  }, [])
+
+  const signUp = useCallback(async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signUp({ email, password })
+    if (error) throw error
+    return data
+  }, [])
+
+  const verifyOtp = useCallback(async (email: string, token: string) => {
+    const { data, error } = await supabase.auth.verifyOtp({ email, token, type: 'email' })
+    if (error) throw error
+    return data
+  }, [])
+
+  const resendCode = useCallback(async (email: string) => {
+    const { data, error } = await supabase.auth.resend({ type: 'signup', email })
+    if (error) throw error
+    return data
+  }, [])
+
+  const requestPasswordReset = useCallback(async (email: string) => {
+    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/nueva-password`,
+    })
+    if (error) throw error
+    return data
+  }, [])
+
+  const updatePassword = useCallback(async (password: string) => {
+    const { data, error } = await supabase.auth.updateUser({ password })
+    if (error) throw error
+    sessionStorage.removeItem('passwordRecovery')
+    setIsPasswordRecovery(false)
+    return data
+  }, [setIsPasswordRecovery])
+
+  const signOutOtherSessions = useCallback(async () => {
+    const { error } = await supabase.auth.signOut({ scope: 'others' })
+    if (error) throw error
+  }, [])
+
+  const signOut = useCallback(async () => {
+    const { error } = await supabase.auth.signOut()
+    if (error) throw error
+    queryClient.clear()
+  }, [])
+
+  return {
+    signIn,
+    signUp,
+    signOut,
+    verifyOtp,
+    resendCode,
+    requestPasswordReset,
+    updatePassword,
+    signOutOtherSessions,
+  }
+}
 
 export function useAuth() {
   const [session, setSession] = useState<Session | null>(null)
@@ -52,56 +118,7 @@ export function useAuth() {
     }
   }, [])
 
-  const signIn = useCallback(async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) throw error
-    return data
-  }, [])
-
-  const signUp = useCallback(async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signUp({ email, password })
-    if (error) throw error
-    return data
-  }, [])
-
-  const verifyOtp = useCallback(async (email: string, token: string) => {
-    const { data, error } = await supabase.auth.verifyOtp({ email, token, type: 'email' })
-    if (error) throw error
-    return data
-  }, [])
-
-  const resendCode = useCallback(async (email: string) => {
-    const { data, error } = await supabase.auth.resend({ type: 'signup', email })
-    if (error) throw error
-    return data
-  }, [])
-
-  const requestPasswordReset = useCallback(async (email: string) => {
-    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/nueva-password`,
-    })
-    if (error) throw error
-    return data
-  }, [])
-
-  const updatePassword = useCallback(async (password: string) => {
-    const { data, error } = await supabase.auth.updateUser({ password })
-    if (error) throw error
-    sessionStorage.removeItem('passwordRecovery')
-    setIsPasswordRecovery(false)
-    return data
-  }, [])
-
-  const signOutOtherSessions = useCallback(async () => {
-    const { error } = await supabase.auth.signOut({ scope: 'others' })
-    if (error) throw error
-  }, [])
-
-  const signOut = useCallback(async () => {
-    const { error } = await supabase.auth.signOut()
-    if (error) throw error
-    queryClient.clear()
-  }, [])
+  const acciones = useAccionesAuth(setIsPasswordRecovery)
 
   const user: User | null = session?.user ?? null
 
@@ -110,13 +127,6 @@ export function useAuth() {
     session,
     loading,
     isPasswordRecovery,
-    signIn,
-    signUp,
-    signOut,
-    verifyOtp,
-    resendCode,
-    requestPasswordReset,
-    updatePassword,
-    signOutOtherSessions,
+    ...acciones,
   }
 }
