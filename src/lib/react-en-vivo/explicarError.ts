@@ -3,48 +3,77 @@ const EXPLICACION_HOOKS =
 const EXPLICACION_JSX_MAL_FORMADO =
   'Suele ser JSX mal formado: dos elementos sueltos que hay que envolver en <>…</> o en otro elemento, una etiqueta sin cerrar, o una llave o un paréntesis de más o de menos.'
 
-export function explicarErrorReact(texto: string): string | null {
+/**
+ * Explicación de un error a partir de las frases de su mensaje: basta con
+ * una de `alguna`, o hacen falta todas las de `todas`. Se prueban en orden y
+ * gana la primera que encaja.
+ */
+type ReglaExplicacion = { explicacion: string } & (
+  | { alguna: readonly string[] }
+  | { todas: readonly string[] }
+)
+
+const REGLAS_EXPLICACION: readonly ReglaExplicacion[] = [
   // Sucrase 3.35.1 devuelve el mismo «Unterminated JSX contents» para una
   // etiqueta sin cerrar y otra cerrada con un nombre distinto. Al no poder
   // distinguirlas, se usa la explicación general y no una causa falsa.
-  if (
-    texto.includes('Unterminated regular expression') ||
-    texto.includes('Unterminated JSX contents') ||
-    texto.includes('Unexpected token, expected ","')
-  ) {
-    return EXPLICACION_JSX_MAL_FORMADO
-  }
-  if (
-    texto.includes('Expected corresponding JSX closing tag') ||
-    texto.includes('has no corresponding closing tag')
-  ) {
-    return 'Una etiqueta JSX no se cierra o se cierra con otro nombre. Cada <x> necesita su </x>, o escríbela como <x />.'
-  }
-  if (texto.includes('Element type is invalid') && texto.includes('got: undefined')) {
-    return 'Uno de los componentes que usas vale undefined. Casi siempre es un import que no casa con su export: llaves para un export por defecto, sin llaves para uno con nombre, o un archivo que no exporta ese componente.'
-  }
-  if (texto.includes('Element type is invalid') && texto.includes('got: object')) {
-    return 'Uno de los componentes que usas es un objeto y no una función: suele pasar al importar el módulo entero o un objeto de exports en lugar del componente.'
-  }
-  if (texto.includes('Objects are not valid as a React child')) {
-    return 'Estás pintando un objeto dentro del JSX. Muestra una de sus propiedades o conviértelo en texto.'
-  }
-  if (texto.includes('Too many re-renders')) {
-    return 'Un cambio de estado se ejecuta durante el propio render y lo repite sin fin. Suele ser un onClick={fn()} en vez de onClick={fn} o un set… suelto en el cuerpo del componente.'
-  }
-  if (texto.includes('Maximum update depth exceeded')) {
-    return 'Un efecto o un manejador actualiza el estado una y otra vez. Revisa las dependencias de useEffect y que el set… no se dispare en cada render.'
-  }
-  if (
-    texto.includes('Rendered more hooks than during the previous render') ||
-    texto.includes('Rendered fewer hooks than expected')
-  ) {
-    return EXPLICACION_HOOKS
-  }
-  if (texto.includes('Invalid hook call')) {
-    return 'Un hook se está llamando fuera del cuerpo de un componente o de otro hook.'
-  }
+  {
+    alguna: [
+      'Unterminated regular expression',
+      'Unterminated JSX contents',
+      'Unexpected token, expected ","',
+    ],
+    explicacion: EXPLICACION_JSX_MAL_FORMADO,
+  },
+  {
+    alguna: ['Expected corresponding JSX closing tag', 'has no corresponding closing tag'],
+    explicacion:
+      'Una etiqueta JSX no se cierra o se cierra con otro nombre. Cada <x> necesita su </x>, o escríbela como <x />.',
+  },
+  {
+    todas: ['Element type is invalid', 'got: undefined'],
+    explicacion:
+      'Uno de los componentes que usas vale undefined. Casi siempre es un import que no casa con su export: llaves para un export por defecto, sin llaves para uno con nombre, o un archivo que no exporta ese componente.',
+  },
+  {
+    todas: ['Element type is invalid', 'got: object'],
+    explicacion:
+      'Uno de los componentes que usas es un objeto y no una función: suele pasar al importar el módulo entero o un objeto de exports en lugar del componente.',
+  },
+  {
+    alguna: ['Objects are not valid as a React child'],
+    explicacion:
+      'Estás pintando un objeto dentro del JSX. Muestra una de sus propiedades o conviértelo en texto.',
+  },
+  {
+    alguna: ['Too many re-renders'],
+    explicacion:
+      'Un cambio de estado se ejecuta durante el propio render y lo repite sin fin. Suele ser un onClick={fn()} en vez de onClick={fn} o un set… suelto en el cuerpo del componente.',
+  },
+  {
+    alguna: ['Maximum update depth exceeded'],
+    explicacion:
+      'Un efecto o un manejador actualiza el estado una y otra vez. Revisa las dependencias de useEffect y que el set… no se dispare en cada render.',
+  },
+  {
+    alguna: [
+      'Rendered more hooks than during the previous render',
+      'Rendered fewer hooks than expected',
+    ],
+    explicacion: EXPLICACION_HOOKS,
+  },
+  {
+    alguna: ['Invalid hook call'],
+    explicacion: 'Un hook se está llamando fuera del cuerpo de un componente o de otro hook.',
+  },
+]
 
+function encaja(texto: string, regla: ReglaExplicacion) {
+  const contiene = (frase: string) => texto.includes(frase)
+  return 'todas' in regla ? regla.todas.every(contiene) : regla.alguna.some(contiene)
+}
+
+function explicarConDatos(texto: string): string | null {
   const referencia = texto.match(/(?:ReferenceError:\s*)?([A-Za-z_$][\w$]*) is not defined/)
   if (referencia) return `Usas «${referencia[1]}» sin haberlo declarado ni importado.`
 
@@ -56,4 +85,9 @@ export function explicarErrorReact(texto: string): string | null {
   }
 
   return null
+}
+
+export function explicarErrorReact(texto: string): string | null {
+  const regla = REGLAS_EXPLICACION.find((candidata) => encaja(texto, candidata))
+  return regla ? regla.explicacion : explicarConDatos(texto)
 }

@@ -5,6 +5,8 @@
 // en el campo `ts` de un bloque `editor-en-vivo`, nunca en el resto de
 // páginas. Ver specs/features/typescript-compilacion-en-vivo.md.
 
+import { cargarCompiladorEnVivo, type TsReal } from './cargarCompilador'
+
 const NOMBRE_ARCHIVO = 'archivo.ts'
 // El entorno no admite un archivo raíz con contenido vacío: createVirtual-
 // TypeScriptEnvironment lanza "File not found" con '' (verificado antes de
@@ -35,18 +37,6 @@ export interface ResultadoCompilacionTs {
   diagnosticos: DiagnosticoTs[]
 }
 
-// @typescript/vfs tipa TODA su superficie (createVirtualTypeScriptEnvironment,
-// knownLibFilesForCompilerOptions, VirtualTypeScriptEnvironment.languageService
-// y los Diagnostic que devuelve...) contra `typeof import('typescript')`.
-// Ese nombre resuelve ahora al alias @typescript/typescript6@6.0.2, cuya API
-// clásica es compatible con `typescript-en-vivo` (typescript@6.0.3), pero son
-// dos instalaciones y TypeScript les asigna identidades nominales distintas
-// por cómo se referencian a sí mismos sus .d.ts recursivos (Node/NodeArray,
-// etc.). Este único cast, justo al cargar el módulo, evita repetirlo en cada
-// llamada a @typescript/vfs; el build nativo de la 7 vive por separado en
-// `@typescript/native`.
-type TsReal = typeof import('typescript')
-
 export interface EntornoTypeScript {
   ts: TsReal
   entorno: import('@typescript/vfs').VirtualTypeScriptEnvironment
@@ -63,28 +53,7 @@ async function cargarLibPorFetch(nombre: string): Promise<string> {
 export async function crearEntornoTypeScript(
   cargarLib: (nombre: string) => Promise<string> = cargarLibPorFetch,
 ): Promise<EntornoTypeScript> {
-  const [tsModulo, vfs] = await Promise.all([
-    import('typescript-en-vivo'),
-    import('@typescript/vfs'),
-  ])
-  const ts = tsModulo as unknown as TsReal
-
-  // convertCompilerOptionsFromJson es la única vía soportada para pasar de
-  // nombres "amigables" (lib: ["DOM"]) a CompilerOptions ya resueltas
-  // (lib: ["lib.dom.d.ts"]) - construir CompilerOptions.lib a mano con los
-  // nombres cortos no funciona con createVirtualTypeScriptEnvironment
-  // (verificado antes de escribir este módulo).
-  const { options: opciones, errors } = ts.convertCompilerOptionsFromJson(OPCIONES_JSON, '/')
-  if (errors.length > 0) {
-    throw new Error('Opciones de compilador de TypeScript inválidas')
-  }
-
-  // knownLibFilesForCompilerOptions, en cambio, quiere los nombres CORTOS
-  // en minúscula - hace su propio match de prefijo internamente.
-  const nombresLib = vfs.knownLibFilesForCompilerOptions(
-    { target: ts.ScriptTarget.ES2020, lib: ['es2020', 'dom', 'dom.iterable'] },
-    ts,
-  )
+  const { ts, vfs, opciones, nombresLib } = await cargarCompiladorEnVivo(OPCIONES_JSON)
 
   const mapa = new Map<string, string>()
   await Promise.all(
