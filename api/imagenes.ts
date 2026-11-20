@@ -15,6 +15,10 @@ const EXTENSIONES_PERMITIDAS: Record<string, string> = {
 const TAMANO_MAXIMO_BYTES = 4 * 1024 * 1024
 const CLAVE_VALIDA = /^[0-9a-f]{64}\.(png|jpg|jpeg|webp|webm|mp4)$/
 
+type DatosDelete = { clave: string; leccionId?: string }
+type ImagenSubida = { bytes: Uint8Array; contentType: string; extension: string }
+type ClienteR2 = { s3: S3Client; bucketName: string }
+
 function empiezaCon(bytes: Uint8Array, firma: readonly number[], offset = 0): boolean {
   return firma.every((byte, indice) => bytes[offset + indice] === byte)
 }
@@ -41,11 +45,15 @@ function nombreFormato(contentType: string): string {
   return 'PNG'
 }
 
-function jsonError(mensaje: string, status: number): Response {
-  return new Response(JSON.stringify({ error: mensaje }), {
+function respuestaJson(cuerpo: Record<string, unknown>, status = 200): Response {
+  return new Response(JSON.stringify(cuerpo), {
     status,
     headers: { 'Content-Type': 'application/json' },
   })
+}
+
+function jsonError(mensaje: string, status: number): Response {
+  return respuestaJson({ error: mensaje }, status)
 }
 
 async function autenticarAdmin(
@@ -90,7 +98,7 @@ async function autenticarAdmin(
 
 async function leerDatosDelete(
   request: Request,
-): Promise<{ clave: string; leccionId?: string } | Response> {
+): Promise<DatosDelete | Response> {
   let body: unknown
   try {
     body = await request.json()
@@ -113,6 +121,103 @@ async function leerDatosDelete(
   return { clave, leccionId }
 }
 
+function crearClienteR2(): ClienteR2 | Response {
+  const accountId = process.env.R2_ACCOUNT_ID
+  const accessKeyId = process.env.R2_ACCESS_KEY_ID
+  const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY
+  const bucketName = process.env.R2_BUCKET_NAME
+  if (!accountId || !accessKeyId || !secretAccessKey || !bucketName) {
+    return jsonError('Configuración de R2 ausente', 500)
+  }
+
+  const s3 = new S3Client({
+    region: 'auto',
+    endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
+    credentials: { accessKeyId, secretAccessKey },
+  })
+  return { s3, bucketName }
+}
+
+async function borrarImagen(
+  supabase: ReturnType<typeof createClient>,
+  datosDelete: DatosDelete,
+): Promise<Response> {
+  const { data: lecciones, error: leccionesError } = await supabase
+    .from('lecciones')
+    .select('id')
+    .ilike('contenido', `%${datosDelete.clave}%`)
+
+  if (leccionesError || !lecciones) {
+    return jsonError('No se pudo comprobar si la imagen sigue en uso', 500)
+  }
+
+  const usadaEnOtraLeccion = lecciones.some(
+    ({ id }) => id !== datosDelete.leccionId,
+  )
+  if (usadaEnOtraLeccion) return respuestaJson({ borradoDeR2: false })
+
+  const r2 = crearClienteR2()
+  if (r2 instanceof Response) return r2
+  await r2.s3.send(
+    new DeleteObjectCommand({ Bucket: r2.bucketName, Key: datosDelete.clave }),
+  )
+
+  return respuestaJson({ borradoDeR2: true })
+}
+
+async function leerImagen(request: Request): Promise<ImagenSubida | Response> {
+  const contentType = request.headers.get('content-type') ?? ''
+  const extension = Object.hasOwn(EXTENSIONES_PERMITIDAS, contentType)
+    ? EXTENSIONES_PERMITIDAS[contentType]
+    : undefined
+  if (!extension) {
+    return jsonError(
+      'El Content-Type debe ser image/png, image/jpeg o image/webp',
+      400,
+    )
+  }
+
+  const bytes = new Uint8Array(await request.arrayBuffer())
+  if (bytes.byteLength === 0) return jsonError('El cuerpo de la petición está vacío', 400)
+  if (bytes.byteLength > TAMANO_MAXIMO_BYTES) {
+    // Vercel ya limita el cuerpo de cualquier función a 4.5 MB — este
+    // límite propio (4 MB) deja margen y da un mensaje claro en vez de
+    // que Vercel corte la petición con un 413 genérico antes de llegar
+    // aquí.
+    return jsonError('La imagen no puede superar 4 MB', 413)
+  }
+  if (!tieneFirmaValida(bytes, contentType)) {
+    return jsonError(
+      `El archivo no es una imagen ${nombreFormato(contentType)} válida`,
+      400,
+    )
+  }
+
+  return { bytes, contentType, extension }
+}
+
+async function subirImagen({ bytes, contentType, extension }: ImagenSubida): Promise<Response> {
+  const sha256 = createHash('sha256').update(bytes).digest('hex')
+  const clave = `${sha256}.${extension}`
+
+  const r2 = crearClienteR2()
+  if (r2 instanceof Response) return r2
+
+  // Subir con la misma clave (derivada del hash) dos veces es idempotente
+  // — mismo contenido, mismo objeto final — así que no hace falta
+  // comprobar antes si ya existe.
+  await r2.s3.send(
+    new PutObjectCommand({
+      Bucket: r2.bucketName,
+      Key: clave,
+      Body: bytes,
+      ContentType: contentType,
+    }),
+  )
+
+  return respuestaJson({ publicUrl: `https://www.techstudytracker.com/img/${clave}` })
+}
+
 export default {
   async fetch(request: Request): Promise<Response> {
     if (request.method !== 'POST' && request.method !== 'DELETE') {
@@ -126,108 +231,10 @@ export default {
     if ('respuesta' in autenticacion) return autenticacion.respuesta
     const { supabase } = autenticacion
 
-    if (datosDelete) {
-      const { data: lecciones, error: leccionesError } = await supabase
-        .from('lecciones')
-        .select('id')
-        .ilike('contenido', `%${datosDelete.clave}%`)
+    if (datosDelete) return borrarImagen(supabase, datosDelete)
 
-      if (leccionesError || !lecciones) {
-        return jsonError('No se pudo comprobar si la imagen sigue en uso', 500)
-      }
-
-      const usadaEnOtraLeccion = lecciones.some(
-        ({ id }) => id !== datosDelete.leccionId,
-      )
-      if (usadaEnOtraLeccion) {
-        return new Response(JSON.stringify({ borradoDeR2: false }), {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' },
-        })
-      }
-
-      const accountId = process.env.R2_ACCOUNT_ID
-      const accessKeyId = process.env.R2_ACCESS_KEY_ID
-      const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY
-      const bucketName = process.env.R2_BUCKET_NAME
-      if (!accountId || !accessKeyId || !secretAccessKey || !bucketName) {
-        return jsonError('Configuración de R2 ausente', 500)
-      }
-
-      const s3 = new S3Client({
-        region: 'auto',
-        endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
-        credentials: { accessKeyId, secretAccessKey },
-      })
-      await s3.send(
-        new DeleteObjectCommand({ Bucket: bucketName, Key: datosDelete.clave }),
-      )
-
-      return new Response(JSON.stringify({ borradoDeR2: true }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      })
-    }
-
-    const contentType = request.headers.get('content-type') ?? ''
-    const extension = Object.hasOwn(EXTENSIONES_PERMITIDAS, contentType)
-      ? EXTENSIONES_PERMITIDAS[contentType]
-      : undefined
-    if (!extension) {
-      return jsonError(
-        'El Content-Type debe ser image/png, image/jpeg o image/webp',
-        400,
-      )
-    }
-
-    const bytes = new Uint8Array(await request.arrayBuffer())
-    if (bytes.byteLength === 0) return jsonError('El cuerpo de la petición está vacío', 400)
-    if (bytes.byteLength > TAMANO_MAXIMO_BYTES) {
-      // Vercel ya limita el cuerpo de cualquier función a 4.5 MB — este
-      // límite propio (4 MB) deja margen y da un mensaje claro en vez de
-      // que Vercel corte la petición con un 413 genérico antes de llegar
-      // aquí.
-      return jsonError('La imagen no puede superar 4 MB', 413)
-    }
-    if (!tieneFirmaValida(bytes, contentType)) {
-      return jsonError(
-        `El archivo no es una imagen ${nombreFormato(contentType)} válida`,
-        400,
-      )
-    }
-
-    const sha256 = createHash('sha256').update(bytes).digest('hex')
-    const clave = `${sha256}.${extension}`
-
-    const accountId = process.env.R2_ACCOUNT_ID
-    const accessKeyId = process.env.R2_ACCESS_KEY_ID
-    const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY
-    const bucketName = process.env.R2_BUCKET_NAME
-    if (!accountId || !accessKeyId || !secretAccessKey || !bucketName) {
-      return jsonError('Configuración de R2 ausente', 500)
-    }
-
-    const s3 = new S3Client({
-      region: 'auto',
-      endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
-      credentials: { accessKeyId, secretAccessKey },
-    })
-
-    // Subir con la misma clave (derivada del hash) dos veces es idempotente
-    // — mismo contenido, mismo objeto final — así que no hace falta
-    // comprobar antes si ya existe.
-    await s3.send(
-      new PutObjectCommand({
-        Bucket: bucketName,
-        Key: clave,
-        Body: bytes,
-        ContentType: contentType,
-      }),
-    )
-
-    return new Response(
-      JSON.stringify({ publicUrl: `https://www.techstudytracker.com/img/${clave}` }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } },
-    )
+    const imagen = await leerImagen(request)
+    if (imagen instanceof Response) return imagen
+    return subirImagen(imagen)
   },
 }

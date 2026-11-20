@@ -158,6 +158,36 @@ describe('POST /api/imagenes', () => {
     expect(respuesta.status).toBe(413)
   })
 
+  it('acepta un archivo de exactamente 4 MB', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'admin-1' } }, error: null })
+    mockSingle.mockResolvedValue({ data: { role: 'admin' }, error: null })
+    mockSend.mockResolvedValue({})
+
+    const archivoLimite = new Uint8Array(4 * 1024 * 1024)
+    archivoLimite.set(PNG_VALIDO)
+    const respuesta = await handler.fetch(
+      crearPeticion(archivoLimite, { authorization: 'Bearer token-admin' }),
+    )
+
+    expect(respuesta.status).toBe(200)
+    expect(mockSend).toHaveBeenCalledTimes(1)
+  })
+
+  it('un usuario que no es admin no llega a subir nada a R2', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } }, error: null })
+    mockSingle.mockResolvedValue({ data: { role: 'user' }, error: null })
+
+    const respuesta = await handler.fetch(
+      crearPeticion(PNG_VALIDO, { authorization: 'Bearer token-user' }),
+    )
+
+    expect(respuesta.status).toBe(403)
+    await expect(respuesta.json()).resolves.toEqual({
+      error: 'Solo un admin puede gestionar imágenes',
+    })
+    expect(mockSend).not.toHaveBeenCalled()
+  })
+
   it.each([
     ['PNG', 'image/png'],
     ['JPEG', 'image/jpeg'],
@@ -243,6 +273,23 @@ describe('DELETE /api/imagenes', () => {
       expect(mockSend).not.toHaveBeenCalled()
     },
   )
+
+  it('rechaza un cuerpo que no es JSON antes de autenticar', async () => {
+    const respuesta = await handler.fetch(
+      new Request('https://techstudytracker.com/api/imagenes', {
+        method: 'DELETE',
+        headers: { authorization: 'Bearer token-admin' },
+        body: '{no es json',
+      }),
+    )
+
+    expect(respuesta.status).toBe(400)
+    await expect(respuesta.json()).resolves.toEqual({
+      error: 'El cuerpo debe ser JSON válido',
+    })
+    expect(mockGetUser).not.toHaveBeenCalled()
+    expect(mockSend).not.toHaveBeenCalled()
+  })
 
   it('no borra de R2 cuando otra lección usa la misma clave', async () => {
     autenticarComoAdmin()
