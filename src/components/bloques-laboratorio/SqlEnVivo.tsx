@@ -1,9 +1,10 @@
 import { sql } from '@codemirror/lang-sql'
 import { basicSetup, EditorView } from 'codemirror'
 import { Play, RotateCcw } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { ContenidoSqlEnVivo } from '@/components/bloques-laboratorio/ContenidoSqlEnVivo'
+import { useEditorCodeMirror } from '@/components/bloques-laboratorio/useEditorCodeMirror'
 import { Button } from '@/components/ui/button'
 import type { DatosSqlEnVivo } from '@/lib/laboratorio/schemas'
 import {
@@ -57,64 +58,17 @@ function crearTemaAplicacion(modoOscuro: boolean) {
   return EditorView.theme(estilosTemaAplicacion, { dark: modoOscuro })
 }
 
+function crearExtensionesSql(modoOscuro: boolean) {
+  return [basicSetup, sql(), crearTemaAplicacion(modoOscuro)]
+}
+
 function EditorSql({ valor, onChange }: { valor: string; onChange: (valor: string) => void }) {
-  const contenedorRef = useRef<HTMLDivElement>(null)
-  const vistaRef = useRef<EditorView | null>(null)
-  const onChangeRef = useRef(onChange)
-  const valorRef = useRef(valor)
-  const [modoOscuro, setModoOscuro] = useState(() =>
-    document.documentElement.classList.contains('dark'),
-  )
-
-  useEffect(() => {
-    onChangeRef.current = onChange
-  }, [onChange])
-
-  useEffect(() => {
-    valorRef.current = valor
-  }, [valor])
-
-  useEffect(() => {
-    const observador = new MutationObserver(() => {
-      setModoOscuro(document.documentElement.classList.contains('dark'))
-    })
-    observador.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
-    return () => observador.disconnect()
-  }, [])
-
-  useEffect(() => {
-    if (!contenedorRef.current) return
-
-    const vista = new EditorView({
-      doc: valorRef.current,
-      parent: contenedorRef.current,
-      extensions: [
-        basicSetup,
-        sql(),
-        crearTemaAplicacion(modoOscuro),
-        EditorView.contentAttributes.of({
-          'aria-label': 'Editor de consulta SQL',
-          'aria-multiline': 'true',
-          spellcheck: 'false',
-        }),
-        EditorView.updateListener.of((actualizacion) => {
-          if (actualizacion.docChanged) onChangeRef.current(actualizacion.state.doc.toString())
-        }),
-      ],
-    })
-    vistaRef.current = vista
-
-    return () => {
-      vista.destroy()
-      vistaRef.current = null
-    }
-  }, [modoOscuro])
-
-  useEffect(() => {
-    const vista = vistaRef.current
-    if (!vista || vista.state.doc.toString() === valor) return
-    vista.dispatch({ changes: { from: 0, to: vista.state.doc.length, insert: valor } })
-  }, [valor])
+  const contenedorRef = useEditorCodeMirror({
+    valor,
+    onChange,
+    etiqueta: 'Editor de consulta SQL',
+    crearExtensiones: crearExtensionesSql,
+  })
 
   return (
     <div
