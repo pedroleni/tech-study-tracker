@@ -4,13 +4,15 @@ const mockSend = vi.fn()
 vi.mock('@aws-sdk/client-s3', () => ({
   S3Client: vi.fn(() => ({ send: mockSend })),
   GetObjectCommand: vi.fn((input: unknown) => ({ __tipo: 'GetObjectCommand', input })),
+  HeadObjectCommand: vi.fn((input: unknown) => ({ __tipo: 'HeadObjectCommand', input })),
 }))
 
 const { default: handler } = await import('./imagenes-servir')
 
-function crearPeticion(clave: string) {
+function crearPeticion(clave: string, headers: Record<string, string> = {}) {
   return new Request(
     `https://techstudytracker.com/api/imagenes-servir?clave=${encodeURIComponent(clave)}`,
+    { headers },
   )
 }
 
@@ -58,5 +60,50 @@ describe('GET /img/:clave (vía /api/imagenes-servir)', () => {
     )
     const cuerpo = new Uint8Array(await respuesta.arrayBuffer())
     expect(cuerpo).toEqual(bytesReales)
+  })
+
+  it('sirve un rango válido con 206 y sus cabeceras', async () => {
+    const bytesParciales = new Uint8Array([137, 80])
+    mockSend.mockResolvedValue({
+      Body: { transformToByteArray: async () => bytesParciales },
+      ContentRange: 'bytes 0-1/4',
+      ContentLength: 2,
+    })
+
+    const respuesta = await handler.fetch(
+      crearPeticion(`${HASH_VALIDO}.mp4`, { range: 'bytes=0-1' }),
+    )
+
+    expect(respuesta.status).toBe(206)
+    expect(mockSend).toHaveBeenCalledWith({
+      __tipo: 'GetObjectCommand',
+      input: {
+        Bucket: 'techstudytracker-imagenes',
+        Key: `${HASH_VALIDO}.mp4`,
+        Range: 'bytes=0-1',
+      },
+    })
+    expect(respuesta.headers.get('content-type')).toBe('video/mp4')
+    expect(respuesta.headers.get('content-range')).toBe('bytes 0-1/4')
+    expect(respuesta.headers.get('content-length')).toBe('2')
+    expect(respuesta.headers.get('accept-ranges')).toBe('bytes')
+    expect(respuesta.headers.get('cache-control')).toBe(
+      'public, max-age=31536000, immutable',
+    )
+  })
+
+  it('responde 416 a un rango mal formado sin descargar el objeto', async () => {
+    mockSend.mockResolvedValue({ ContentLength: 10 })
+
+    const respuesta = await handler.fetch(
+      crearPeticion(`${HASH_VALIDO}.mp4`, { range: 'bytes=0-1,3-4' }),
+    )
+
+    expect(respuesta.status).toBe(416)
+    expect(respuesta.headers.get('content-range')).toBe('bytes */10')
+    expect(mockSend).toHaveBeenCalledTimes(1)
+    expect(mockSend).toHaveBeenCalledWith(
+      expect.objectContaining({ __tipo: 'HeadObjectCommand' }),
+    )
   })
 })
