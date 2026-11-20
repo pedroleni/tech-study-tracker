@@ -157,7 +157,9 @@ function revisarRoles(documento: Document, anotar: AnotarHtml) {
 
 function revisarTabindex(documento: Document, anotar: AnotarHtml) {
   for (const elemento of documento.querySelectorAll('[tabindex]')) {
-    if (Number(elemento.getAttribute('tabindex')) <= 0) continue
+    const orden = Number(elemento.getAttribute('tabindex'))
+    // Un tabindex que no es un número (NaN) tampoco avisa: solo los mayores que cero.
+    if (Number.isNaN(orden) || orden <= 0) continue
     anotar(elemento, {
       nivel: 'aviso',
       regla: 'a11y/tabindex-positivo',
