@@ -2,7 +2,7 @@ import { act, fireEvent, render, screen, waitFor, within } from '@testing-librar
 import { axe } from 'vitest-axe'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { DatosReactEnVivo } from '@/lib/laboratorio/schemas'
+import type { DatosReactEnVivo } from '@/lib/laboratorio/schemasReact'
 import codigoCompilado from '@/lib/react-kit/__fixtures__/compilador-app.compilado.jsx?raw'
 import codigoOriginal from '@/lib/react-kit/__fixtures__/compilador-app.jsx?raw'
 import {

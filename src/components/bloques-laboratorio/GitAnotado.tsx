@@ -1,8 +1,8 @@
 import { GitBranch } from 'lucide-react'
 import { useEffect, useId, useMemo, useState } from 'react'
 
-import { NotasAnotadas } from '@/components/bloques-laboratorio/NotasAnotadas'
 import { GrafoCommits } from '@/components/bloques-laboratorio/GrafoCommits'
+import { NotasAnotadas } from '@/components/bloques-laboratorio/NotasAnotadas'
 import { SalidaTerminal } from '@/components/bloques-laboratorio/SalidaTerminal'
 import type { DatosGitAnotado } from '@/lib/laboratorio/schemas'
 import {
@@ -89,7 +89,7 @@ export function GitAnotado({
 
       <NotasAnotadas
         anotaciones={anotacionesValidas}
-        activa={anotacionActiva}
+        indiceActivo={anotacionActiva}
         onActivar={setAnotacionActiva}
         idNota={idNota}
         etiqueta="Anotaciones del comando"

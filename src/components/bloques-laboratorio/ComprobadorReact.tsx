@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef } from 'react'
 
 import type { ResultadoComprobacion } from '@/components/bloques-laboratorio/ResultadosComprobaciones'
-import type { ComprobacionReact } from '@/lib/laboratorio/schemas'
+import type { ComprobacionReact } from '@/lib/laboratorio/schemasReact'
 import {
   CANAL_REACT_EN_VIVO,
   TIEMPO_MAXIMO_COMPROBACION_MS,

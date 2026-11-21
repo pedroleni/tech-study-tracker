@@ -10,7 +10,7 @@ import {
 } from '@/components/bloques-laboratorio/reactEnVivoAyudas'
 import { useEntradasConsola } from '@/components/bloques-laboratorio/useEntradasConsola'
 import { useRegistroAgrupado } from '@/components/bloques-laboratorio/useRegistroAgrupado'
-import type { DatosReactEnVivo } from '@/lib/laboratorio/schemas'
+import type { DatosReactEnVivo } from '@/lib/laboratorio/schemasReact'
 import type { MensajeArbol, MensajeReactEnVivo } from '@/lib/react-en-vivo/mensajes'
 
 const RED_POR_DEFECTO: AjustesRed = { latencia: 600, desordenar: false }

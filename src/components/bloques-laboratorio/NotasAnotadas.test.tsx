@@ -1,6 +1,8 @@
 import { fireEvent, render, renderHook, screen } from '@testing-library/react'
 import { useState } from 'react'
 import { describe, expect, it } from 'vitest'
+import { axe } from 'vitest-axe'
+import type { AxeMatchers } from 'vitest-axe/matchers'
 
 import { NotasAnotadas } from './NotasAnotadas'
 import { useAnotacionesConLinea } from './useAnotacionesConLinea'
@@ -29,17 +31,25 @@ describe('useAnotacionesConLinea', () => {
 })
 
 function Notas({ anotaciones }: { anotaciones: { fragmento: string; nota: string }[] }) {
-  const [activa, setActiva] = useState(0)
+  const [indiceActivo, setIndiceActivo] = useState(0)
   return (
     <NotasAnotadas
       anotaciones={anotaciones}
-      activa={activa}
-      onActivar={setActiva}
+      indiceActivo={indiceActivo}
+      onActivar={setIndiceActivo}
       idNota="nota"
       etiqueta="Anotaciones de prueba"
       color="teal"
     />
   )
+}
+
+function obtenerNotaControlada(boton: HTMLElement, container: HTMLElement) {
+  const idNota = boton.getAttribute('aria-controls')
+  if (!idNota) throw new Error('El botón de anotación no controla ninguna nota')
+  const nota = container.querySelector<HTMLElement>(`#${idNota}`)
+  if (!nota) throw new Error(`No existe la nota controlada «${idNota}»`)
+  return nota
 }
 
 describe('NotasAnotadas', () => {
@@ -48,8 +58,8 @@ describe('NotasAnotadas', () => {
     expect(container).toBeEmptyDOMElement()
   })
 
-  it('marca el botón pulsado y enseña su nota', () => {
-    render(
+  it('marca el botón pulsado y enseña su nota', async () => {
+    const { container } = render(
       <Notas
         anotaciones={[
           { fragmento: 'a', nota: 'Primera' },
@@ -58,7 +68,8 @@ describe('NotasAnotadas', () => {
       />,
     )
     expect(screen.getByLabelText('Anotaciones de prueba')).toBeInTheDocument()
-    expect(screen.getByText('Nota 1.').parentElement).toHaveTextContent('Nota 1. Primera')
+    const botonPrimera = screen.getByRole('button', { name: 'Ver anotación 1: Primera' })
+    expect(obtenerNotaControlada(botonPrimera, container)).toHaveTextContent('Nota 1. Primera')
 
     fireEvent.click(screen.getByRole('button', { name: 'Ver anotación 2: Segunda' }))
 
@@ -66,9 +77,12 @@ describe('NotasAnotadas', () => {
     expect(screen.getByRole('button', { name: 'Ver anotación 1: Primera' })).toHaveAttribute('aria-pressed', 'false')
     expect(screen.getByRole('button', { name: 'Ver anotación 2: Segunda' })).toHaveClass('bg-teal-500')
     expect(screen.getByRole('button', { name: 'Ver anotación 1: Primera' })).not.toHaveClass('bg-teal-500')
-    const nota = screen.getByText('Nota 2.').parentElement
+    const botonSegunda = screen.getByRole('button', { name: 'Ver anotación 2: Segunda' })
+    const nota = obtenerNotaControlada(botonSegunda, container)
     expect(nota).toHaveTextContent('Nota 2. Segunda')
     expect(nota).toHaveAttribute('id', 'nota')
     expect(nota).toHaveClass('border-teal-500', 'bg-teal-50')
+    const resultadoAccesibilidad = expect(await axe(container)) as unknown as AxeMatchers
+    resultadoAccesibilidad.toHaveNoViolations()
   })
 })
