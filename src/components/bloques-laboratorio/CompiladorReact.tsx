@@ -5,7 +5,7 @@ import { useEffect, useId, useMemo, useState } from 'react'
 import { EditorCodeMirror } from '@/components/bloques-laboratorio/EditorCodeMirror'
 import { CodigoResaltado } from '@/components/codigo'
 import { Button } from '@/components/ui/button'
-import type { DatosCompiladorReact } from '@/lib/laboratorio/schemas'
+import type { DatosCompiladorReact } from '@/lib/laboratorio/schemasReact'
 import {
   clienteReactKitCompartido,
   type ClienteReactKit,

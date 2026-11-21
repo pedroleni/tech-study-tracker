@@ -102,7 +102,7 @@ export function SqlAnotado({
 
       <NotasAnotadas
         anotaciones={anotacionesValidas}
-        activa={anotacionActiva}
+        indiceActivo={anotacionActiva}
         onActivar={setAnotacionActiva}
         idNota={idNota}
         etiqueta="Anotaciones de la consulta"

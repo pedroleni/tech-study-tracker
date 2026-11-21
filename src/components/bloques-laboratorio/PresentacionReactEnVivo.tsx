@@ -3,7 +3,7 @@ import type { useComprobacionReactEnVivo } from './useComprobacionReactEnVivo'
 import type { useEstadoReactEnVivo } from './useEstadoReactEnVivo'
 import { VistaReactEnVivo } from './VistaReactEnVivo'
 
-import type { ArchivoReact } from '@/lib/laboratorio/schemas'
+import type { ArchivoReact } from '@/lib/laboratorio/schemasReact'
 import { explicarErrorReact } from '@/lib/react-en-vivo/explicarError'
 
 const PESTANA_JS_GENERADO = 'JavaScript generado'
@@ -115,7 +115,7 @@ export function PresentacionReactEnVivo({
     ...(configuracion.mostrarJsGenerado ? [PESTANA_JS_GENERADO] : []),
   ]
   const archivoActivo = estado.archivos.find((archivo) => archivo.nombre === estado.pestana)
-  const comprobandoDeshabilitado =
+  const comprobarDeshabilitado =
     control.comprobacion.estado === 'comprobando' ||
     (configuracion.exigirTiposCorrectos && estado.tiposPendientes) ||
     (configuracion.exigirLintLimpio && estado.lintPendiente)
@@ -138,7 +138,7 @@ export function PresentacionReactEnVivo({
           configuracion.exigirTiposCorrectos ||
           configuracion.exigirLintLimpio,
         ),
-        comprobandoDeshabilitado,
+        comprobarDeshabilitado,
         etiquetaComprobar: etiquetaBotonComprobar(configuracion, estado),
         botonComprobarRef: control.botonComprobarRef,
         onComprobar: () => void control.comprobar(),

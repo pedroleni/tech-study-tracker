@@ -1,10 +1,8 @@
 import type { ComponentProps } from 'react'
 
+import { CabeceraReactEnVivo } from '@/components/bloques-laboratorio/CabeceraReactEnVivo'
 import { ComprobadorReact } from '@/components/bloques-laboratorio/ComprobadorReact'
-import {
-  CabeceraReactEnVivo,
-  PanelCodigoReactEnVivo,
-} from '@/components/bloques-laboratorio/EditorReactEnVivo'
+import { PanelCodigoReactEnVivo } from '@/components/bloques-laboratorio/EditorReactEnVivo'
 import {
   PanelesActividadReactEnVivo,
   PanelVistaPreviaReactEnVivo,

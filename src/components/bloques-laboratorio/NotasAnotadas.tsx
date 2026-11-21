@@ -31,14 +31,14 @@ export type ColorNotas = keyof typeof COLORES
 
 export function NotasAnotadas({
   anotaciones,
-  activa,
+  indiceActivo,
   onActivar,
   idNota,
   etiqueta,
   color,
 }: {
   anotaciones: readonly { fragmento: string; nota: string }[]
-  activa: number
+  indiceActivo: number
   onActivar: (indice: number) => void
   idNota: string
   etiqueta: string
@@ -56,13 +56,13 @@ export function NotasAnotadas({
             type="button"
             variant="outline"
             size="icon"
-            aria-pressed={indice === activa}
+            aria-pressed={indice === indiceActivo}
             aria-controls={idNota}
             aria-label={`Ver anotación ${indice + 1}: ${anotacion.nota}`}
             onClick={() => onActivar(indice)}
             className={cn(
               'size-11 touch-manipulation rounded-full transition-colors',
-              indice === activa && clases.boton,
+              indice === indiceActivo && clases.boton,
             )}
           >
             {indice + 1}
@@ -70,7 +70,7 @@ export function NotasAnotadas({
         ))}
       </div>
       <p
-        key={activa}
+        key={indiceActivo}
         id={idNota}
         aria-live="polite"
         className={cn(
@@ -78,7 +78,8 @@ export function NotasAnotadas({
           clases.nota,
         )}
       >
-        <span className="font-semibold">Nota {activa + 1}.</span> {anotaciones[activa]?.nota}
+        <span className="font-semibold">Nota {indiceActivo + 1}.</span>{' '}
+        {anotaciones[indiceActivo]?.nota}
       </p>
     </div>
   )

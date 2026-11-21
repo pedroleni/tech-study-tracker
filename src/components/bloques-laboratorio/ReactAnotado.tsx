@@ -1,55 +1,8 @@
-import { Atom } from 'lucide-react'
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
-
-import { ArbolDeRenders } from '@/components/bloques-laboratorio/ArbolDeRenders'
+import { VistaReactAnotado } from '@/components/bloques-laboratorio/VistaReactAnotado'
 import {
-  BarraDirecciones,
-  type AccionNavegador,
-} from '@/components/bloques-laboratorio/BarraDirecciones'
-import { ConsolaReact } from '@/components/bloques-laboratorio/ConsolaReact'
-import { PanelRed, type AjustesRed } from '@/components/bloques-laboratorio/PanelRed'
-import { RegistroEfectos } from '@/components/bloques-laboratorio/RegistroEfectos'
-import { RegistroRouter } from '@/components/bloques-laboratorio/RegistroRouter'
-import { useEntradasConsola } from '@/components/bloques-laboratorio/useEntradasConsola'
-import { useRegistroAgrupado } from '@/components/bloques-laboratorio/useRegistroAgrupado'
-import { VistaPreviaReact } from '@/components/bloques-laboratorio/VistaPreviaReact'
-import { CodigoResaltado } from '@/components/codigo'
-import { NotasAnotadas } from '@/components/bloques-laboratorio/NotasAnotadas'
-import { useAnotacionesConLinea } from '@/components/bloques-laboratorio/useAnotacionesConLinea'
-import type { DatosReactAnotado } from '@/lib/laboratorio/schemas'
-import type {
-  MensajeArbol,
-  MensajeEfecto,
-  MensajePeticion,
-  MensajeReactEnVivo,
-  MensajeRouterOperacion,
-} from '@/lib/react-en-vivo/mensajes'
-import { prepararDocumento } from '@/lib/react-en-vivo/preparar'
-
-const RED_POR_DEFECTO: AjustesRed = { latencia: 600, desordenar: false }
-
-function incorporarPeticion(actuales: MensajePeticion[], nueva: MensajePeticion) {
-  const posicion = actuales.findIndex((peticion) => peticion.id === nueva.id)
-  if (posicion === -1) return [...actuales, nueva].slice(-20)
-  return actuales.map((peticion, indice) => (indice === posicion ? nueva : peticion))
-}
-function incorporarPeticiones(actuales: MensajePeticion[], nuevas: MensajePeticion[]) {
-  return nuevas.reduce(incorporarPeticion, actuales)
-}
-const incorporarEfectos = (actuales: MensajeEfecto[], nuevos: MensajeEfecto[]) => [...actuales, ...nuevos]
-function incorporarOperaciones(
-  actuales: MensajeRouterOperacion[],
-  nuevas: MensajeRouterOperacion[],
-) {
-  // Un Map conserva el orden y sustituye en su sitio. Recortar en cada paso, y
-  // no al final del lote, evita copiar el array entero por cada id nuevo.
-  const porId = new Map(actuales.map((operacion) => [operacion.id, operacion]))
-  for (const nueva of nuevas) {
-    porId.set(nueva.id, nueva)
-    if (porId.size > 100) porId.delete(porId.keys().next().value!)
-  }
-  return [...porId.values()]
-}
+  type PropiedadesReactAnotado,
+  useEstadoReactAnotado,
+} from '@/components/bloques-laboratorio/useEstadoReactAnotado'
 
 export function ReactAnotado({
   titulo,
@@ -69,238 +22,34 @@ export function ReactAnotado({
   // Fuera del esquema de la lección, como en GitAnotado: solo para no
   // repetir el nombre de la región en la página de referencia.
   etiquetaSeccion = 'React anotado',
-}: Omit<DatosReactAnotado, 'mostrarArbol' | 'mostrarEfectos' | 'mostrarRouter' | 'barraDeDirecciones' | 'lenguaje'> & {
-  mostrarArbol?: boolean
-  mostrarEfectos?: boolean
-  mostrarRouter?: boolean
-  barraDeDirecciones?: boolean
-  lenguaje?: 'jsx' | 'tsx'
-  etiquetaSeccion?: string
-}) {
-  const idNota = useId()
-  const anotacionesValidas = useAnotacionesConLinea(anotaciones, codigo)
-  const [anotacionActiva, setAnotacionActiva] = useState(0)
-  const activa = anotacionesValidas[anotacionActiva]
-  const [srcDoc, setSrcDoc] = useState<string | null>(null)
-  const [ubicacion, setUbicacion] = useState<
-    Extract<MensajeReactEnVivo, { tipo: 'ubicacion' }> | null
-  >(null)
-  const urlActualRef = useRef<string | null>(null)
-  const [ordenNavegador, setOrdenNavegador] = useState<{
-    id: number
-    accion: AccionNavegador
-    url?: string
-  }>()
-  const siguienteOrdenNavegadorRef = useRef(0)
-  const [error, setError] = useState<string | null>(null)
-  const { entradas, recibirMensaje, limpiar } = useEntradasConsola()
-  const [arbol, setArbol] = useState<MensajeArbol | null>(null)
-  const { entradas: peticiones, recibir: recibirPeticion, limpiar: limpiarPeticiones } =
-    useRegistroAgrupado(20, incorporarPeticiones)
-  const { entradas: efectos, recibir: recibirEfecto, limpiar: limpiarEfectos } =
-    useRegistroAgrupado(200, incorporarEfectos)
-  const {
-    entradas: operacionesRouter,
-    recibir: recibirOperacionRouter,
-    limpiar: limpiarOperacionesRouter,
-  } = useRegistroAgrupado(100, incorporarOperaciones)
-  const [registroRouterLleno, setRegistroRouterLleno] = useState(false)
-  const [falloPendiente, setFalloPendiente] = useState(false)
-  const [fallosSolicitados, setFallosSolicitados] = useState(0)
-  const [redActual, setRedActual] = useState<AjustesRed>({
-    latencia: red?.latencia ?? RED_POR_DEFECTO.latencia,
-    desordenar: red?.desordenar ?? RED_POR_DEFECTO.desordenar,
+}: PropiedadesReactAnotado) {
+  const estado = useEstadoReactAnotado({
+    codigo,
+    css,
+    anotaciones,
+    strictMode,
+    mostrarArbol,
+    mostrarEfectos,
+    mostrarRouter,
+    api,
+    red,
+    urlInicial,
+    lenguaje,
   })
-  const redActualRef = useRef(redActual)
-  const cambiarRed = useCallback((nueva: AjustesRed) => {
-    redActualRef.current = nueva
-    setRedActual(nueva)
-  }, [])
-  const documentoMontadoRef = useRef(false)
-  const recibir = useCallback(
-    (mensaje: MensajeReactEnVivo) => {
-      recibirMensaje(mensaje)
-      if (mensaje.tipo === 'montado') documentoMontadoRef.current = true
-      if (mensaje.tipo === 'ubicacion') {
-        urlActualRef.current = mensaje.url
-        setUbicacion(mensaje)
-      }
-      if (mensaje.tipo === 'arbol' && documentoMontadoRef.current) setArbol(mensaje)
-      if (mensaje.tipo === 'peticion' && documentoMontadoRef.current) {
-        recibirPeticion(mensaje)
-        if (mensaje.codigo === 500) setFalloPendiente(false)
-      }
-      if (mensaje.tipo === 'efecto' && documentoMontadoRef.current) recibirEfecto(mensaje)
-      if (mensaje.tipo === 'router-operacion' && documentoMontadoRef.current) {
-        recibirOperacionRouter(mensaje)
-      }
-      if (mensaje.tipo === 'router-lleno') setRegistroRouterLleno(true)
-    },
-    [recibirEfecto, recibirMensaje, recibirOperacionRouter, recibirPeticion],
-  )
-
-  const claveApi = JSON.stringify(api)
-  const apiEstable = useMemo<Record<string, unknown[]> | undefined>(
-    () => (claveApi === undefined ? undefined : JSON.parse(claveApi)),
-    [claveApi],
-  )
-
-  useEffect(() => {
-    let cancelado = false
-    const archivos = [
-      { nombre: lenguaje === 'tsx' ? 'App.tsx' : 'App.jsx', codigo },
-      ...(css ? [{ nombre: 'estilos.css', codigo: css }] : []),
-    ]
-    void prepararDocumento(archivos, {
-      origen: window.location.origin,
-      strictMode,
-      conPruebas: false,
-      conArbol: mostrarArbol,
-      conEfectos: mostrarEfectos,
-      conRegistroRouter: mostrarRouter,
-      api: apiEstable,
-      red: redActualRef.current,
-      urlInicial: urlActualRef.current ?? urlInicial,
-    }).then((preparado) => {
-      if (cancelado) return
-      if (preparado.ok) {
-        documentoMontadoRef.current = false
-        setUbicacion(null)
-        setArbol(null)
-        limpiarPeticiones()
-        limpiarEfectos()
-        limpiarOperacionesRouter()
-        setRegistroRouterLleno(false)
-        setFalloPendiente(false)
-        limpiar()
-        setSrcDoc(preparado.srcDoc)
-      } else setError(preparado.error)
-    })
-    return () => {
-      cancelado = true
-    }
-  }, [apiEstable, codigo, css, strictMode, mostrarArbol, mostrarEfectos, mostrarRouter, limpiar, limpiarEfectos, limpiarOperacionesRouter, limpiarPeticiones, lenguaje, urlInicial])
-
-  const actuarEnNavegador = useCallback(
-    (accion: AccionNavegador, url?: string) => {
-      if (accion === 'recargar' || accion === 'ir') {
-        limpiar()
-        setArbol(null)
-        limpiarPeticiones()
-        limpiarEfectos()
-        limpiarOperacionesRouter()
-        setRegistroRouterLleno(false)
-        setFalloPendiente(false)
-      }
-      siguienteOrdenNavegadorRef.current += 1
-      setOrdenNavegador({ id: siguienteOrdenNavegadorRef.current, accion, ...(url ? { url } : {}) })
-    },
-    [limpiar, limpiarEfectos, limpiarOperacionesRouter, limpiarPeticiones],
-  )
 
   return (
-    <section
-      aria-label={etiquetaSeccion}
-      className="animate-in fade-in-0 slide-in-from-bottom-2 my-6 min-w-0 space-y-4 rounded-xl border bg-card p-4 shadow-sm duration-500 motion-reduce:animate-none sm:p-5"
-    >
-      <div className="flex items-start gap-3">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-sky-50 dark:bg-sky-950/40">
-          <Atom aria-hidden="true" className="size-4.75 text-sky-600 dark:text-sky-400" />
-        </div>
-        <div className="min-w-0 space-y-0.5">
-          <p className="text-[11px] font-bold tracking-wider text-sky-600 uppercase dark:text-sky-400">
-            React anotado
-          </p>
-          <h3 className="text-lg font-bold tracking-tight text-balance">
-            {titulo ?? 'Selecciona un número para destacar su línea y leer la nota'}
-          </h3>
-        </div>
-      </div>
-
-      <CodigoResaltado
-        codigo={codigo}
-        lenguaje={lenguaje}
-        numerarLineas
-        lineasDestacadas={activa ? [activa.linea] : []}
-        // Distinta de la de CodigoAnotado ("Código JSX anotado"): las dos
-        // pueden convivir en una lección y una región no debe repetir nombre.
-        etiqueta={
-          etiquetaSeccion === 'React anotado'
-            ? 'Código de React anotado'
-            : `${etiquetaSeccion}: código anotado`
-        }
-      />
-
-      <NotasAnotadas
-        anotaciones={anotacionesValidas}
-        activa={anotacionActiva}
-        onActivar={setAnotacionActiva}
-        idNota={idNota}
-        etiqueta="Anotaciones del código"
-        color="sky"
-      />
-
-      <div className="min-w-0 space-y-2">
-        <h4 className="text-sm font-semibold">Resultado real</h4>
-        {error && (
-          <p className="rounded-lg bg-red-50 p-3 font-mono text-sm break-words text-red-700 dark:bg-red-950/30 dark:text-red-400">
-            {error}
-          </p>
-        )}
-        {srcDoc === null && !error && (
-          <p className="text-sm text-muted-foreground">Preparando React…</p>
-        )}
-        {srcDoc !== null && (
-          <>
-            {barraDeDirecciones && ubicacion && (
-              <BarraDirecciones ubicacion={ubicacion} onAccion={actuarEnNavegador} />
-            )}
-            <VistaPreviaReact
-              srcDoc={srcDoc}
-              onMensaje={recibir}
-              red={api ? redActual : undefined}
-              fallosSolicitados={fallosSolicitados}
-              ordenNavegador={ordenNavegador}
-            />
-          </>
-        )}
-      </div>
-
-      {mostrarArbol && <ArbolDeRenders arbol={arbol} />}
-
-      {mostrarRouter && (
-        <RegistroRouter
-          operaciones={operacionesRouter}
-          lleno={registroRouterLleno}
-          soloDeclarativo={
-            ubicacion !== null &&
-            ['MemoryRouter', 'BrowserRouter', 'HashRouter'].includes(ubicacion.origen)
-          }
-          onLimpiar={() => {
-            limpiarOperacionesRouter()
-            setRegistroRouterLleno(false)
-          }}
-        />
-      )}
-
-      {api && (
-        <PanelRed
-          red={redActual}
-          peticiones={peticiones}
-          falloPendiente={falloPendiente}
-          onCambiar={cambiarRed}
-          onFallarSiguiente={() => {
-            setFalloPendiente(true)
-            setFallosSolicitados((cantidad) => cantidad + 1)
-          }}
-        />
-      )}
-
-      {mostrarEfectos && (
-        <RegistroEfectos entradas={efectos} onLimpiar={limpiarEfectos} />
-      )}
-
-      {mostrarConsola && <ConsolaReact entradas={entradas} onLimpiar={limpiar} />}
-    </section>
+    <VistaReactAnotado
+      titulo={titulo}
+      codigo={codigo}
+      lenguaje={lenguaje}
+      mostrarConsola={mostrarConsola}
+      mostrarArbol={mostrarArbol}
+      mostrarEfectos={mostrarEfectos}
+      mostrarRouter={mostrarRouter}
+      api={api}
+      barraDeDirecciones={barraDeDirecciones}
+      etiquetaSeccion={etiquetaSeccion}
+      estado={estado}
+    />
   )
 }

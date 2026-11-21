@@ -1,6 +1,6 @@
 import type { DiagnosticoPanelTs } from '@/components/bloques-laboratorio/PanelDiagnosticosTs'
 import type { FinComprobacion } from '@/components/bloques-laboratorio/ComprobadorReact'
-import type { DatosReactEnVivo } from '@/lib/laboratorio/schemas'
+import type { DatosReactEnVivo } from '@/lib/laboratorio/schemasReact'
 import type {
   MensajeEfecto,
   MensajePeticion,

@@ -1,7 +1,7 @@
 import { ListTree } from 'lucide-react'
 
 import { ArbolVisual, LeyendaArbol } from '@/components/bloques-laboratorio/ArbolVisual'
-import type { DatosArbolDeComponentes } from '@/lib/laboratorio/schemas'
+import type { DatosArbolDeComponentes } from '@/lib/laboratorio/schemasReact'
 
 // El mismo dibujo que el árbol de renders, pero escrito por el autor: para
 // diagramas que no salen de ejecutar código (dónde vive el estado, quién

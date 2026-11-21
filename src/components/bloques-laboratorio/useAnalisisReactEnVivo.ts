@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import type { ArchivoReact } from '@/lib/laboratorio/schemas'
+import type { ArchivoReact } from '@/lib/laboratorio/schemasReact'
 import { ESPERA_RECONSTRUIR_MS } from '@/lib/react-en-vivo/constantes'
 import type { SesionLint } from '@/lib/react-kit/cliente'
 
@@ -78,11 +78,10 @@ export function useAnalisisTiposReact(archivos: ArchivoReact[], usaTypeScript: b
 
 export function useAnalisisLintReact(
   archivos: ArchivoReact[],
-  revisionInicial: number,
   usaLint: boolean,
   sesionLint: SesionLint,
 ) {
-  const [revisionLint, setRevisionLint] = useState(revisionInicial)
+  const [revisionLint, setRevisionLint] = useState(0)
   const [resultadoLint, setResultadoLint] = useState<ResultadoLintBloque>({
     revision: -1,
     estado: 'listo',

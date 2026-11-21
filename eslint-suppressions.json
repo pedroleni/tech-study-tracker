@@ -1,10 +1,2 @@
 {
-  "src/components/bloques-laboratorio/ReactAnotado.tsx": {
-    "complexity": {
-      "count": 1
-    },
-    "max-lines-per-function": {
-      "count": 1
-    }
-  }
 }

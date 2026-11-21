@@ -9,7 +9,7 @@ import {
   type ResultadoLintBloque,
   type ResultadoTipos,
 } from '@/components/bloques-laboratorio/reactEnVivoAyudas'
-import type { ArchivoReact, DatosReactEnVivo } from '@/lib/laboratorio/schemas'
+import type { ArchivoReact, DatosReactEnVivo } from '@/lib/laboratorio/schemasReact'
 import {
   compilarArchivosReact,
   type AvisoCompiladorReact,

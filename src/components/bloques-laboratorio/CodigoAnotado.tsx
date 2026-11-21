@@ -51,7 +51,7 @@ export function CodigoAnotado({
 
       <NotasAnotadas
         anotaciones={anotacionesValidas}
-        activa={anotacionActiva}
+        indiceActivo={anotacionActiva}
         onActivar={setAnotacionActiva}
         idNota={idNota}
         etiqueta="Anotaciones del código"

@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import type { Dispatch, RefObject, SetStateAction } from 'react'
 
 import type { AjustesRed } from '@/components/bloques-laboratorio/PanelRed'
-import type { ArchivoReact } from '@/lib/laboratorio/schemas'
+import type { ArchivoReact } from '@/lib/laboratorio/schemasReact'
 import {
   compilarArchivosReact,
   type AvisoCompiladorReact,

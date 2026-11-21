@@ -4,7 +4,7 @@ import { useAnalisisLintReact, useAnalisisTiposReact } from './useAnalisisReactE
 import { useDocumentoReactEnVivo } from './useDocumentoReactEnVivo'
 import { useRegistroReactEnVivo } from './useRegistroReactEnVivo'
 
-import type { ArchivoReact, DatosReactEnVivo } from '@/lib/laboratorio/schemas'
+import type { ArchivoReact, DatosReactEnVivo } from '@/lib/laboratorio/schemasReact'
 import type { AvisoCompiladorReact } from '@/lib/react-en-vivo/compilar'
 import type { ClienteReactKit } from '@/lib/react-kit/cliente'
 
@@ -82,7 +82,7 @@ export function useEstadoReactEnVivo(configuracion: ConfiguracionEstado) {
   })
 
   const analisisTipos = useAnalisisTiposReact(archivos, usaTypeScript)
-  const analisisLint = useAnalisisLintReact(archivos, 0, usaLint, sesionLint)
+  const analisisLint = useAnalisisLintReact(archivos, usaLint, sesionLint)
 
   useEffect(
     () => () => {
