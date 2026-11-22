@@ -18,6 +18,8 @@ export function useLecciones(technologyId: string) {
     queryKey: queryKeys.leccionesForTechnology(user?.id ?? null, technologyId),
     queryFn: () => listLecciones(technologyId),
     enabled: !loading && Boolean(technologyId),
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
   })
 }
 
@@ -27,6 +29,8 @@ export function useProyectos() {
     queryKey: queryKeys.proyectos(user?.id ?? null),
     queryFn: listProyectos,
     enabled: !loading,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
   })
 }
 

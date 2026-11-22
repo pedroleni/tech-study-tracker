@@ -9,7 +9,7 @@ import { useAuth } from '@/lib/hooks/useAuth'
 import { useAddFavorite, useFavorites, useRemoveFavorite } from '@/lib/hooks/useFavorites'
 import { useMyProgress, useSetMyProgress } from '@/lib/hooks/useProgress'
 import { textoPlanoDeTitulo } from '@/lib/utils/tituloEnLinea'
-import type { Leccion, Status } from '@/types'
+import type { LeccionResumen, Status } from '@/types'
 
 function textoBotonFavorito(pending: boolean, favorite: boolean) {
   if (pending) return 'Guardando…'
@@ -80,7 +80,7 @@ export function ControlProgreso({
   leccionProgressById,
 }: {
   technologyId: string
-  lecciones: Leccion[]
+  lecciones: LeccionResumen[]
   publishedLeccionIds: string[]
   leccionProgressById: ReadonlyMap<string, Status>
 }) {

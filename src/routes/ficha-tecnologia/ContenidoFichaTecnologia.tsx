@@ -9,7 +9,7 @@ import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { ControlFavorito, ControlProgreso } from '@/routes/ficha-tecnologia/ControlesFichaTecnologia'
 import { LeccionesFichaTecnologia } from '@/routes/ficha-tecnologia/LeccionesFichaTecnologia'
-import type { Leccion, Resource, Status, Technology } from '@/types'
+import type { LeccionResumen, Resource, Status, Technology } from '@/types'
 
 function CabeceraFicha({
   technology,
@@ -149,7 +149,7 @@ export function ContenidoFichaTecnologia({
   onCambiarProgreso,
 }: {
   technology: Technology
-  lecciones: Leccion[]
+  lecciones: LeccionResumen[]
   safeResources: Resource[]
   isAdmin: boolean
   haySesion: boolean

@@ -46,7 +46,9 @@ export interface Leccion {
   updatedAt: string
 }
 
-export interface Proyecto extends Leccion {
+export type LeccionResumen = Omit<Leccion, 'contenido'>
+
+export interface Proyecto extends LeccionResumen {
   technology: Pick<Technology, 'id' | 'name' | 'icon' | 'status'>
 }
 
