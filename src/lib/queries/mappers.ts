@@ -3,6 +3,7 @@ import type {
   Comment,
   Favorite,
   Leccion,
+  LeccionResumen,
   Proyecto,
   Profile,
   Technology,
@@ -32,14 +33,13 @@ interface TechnologyRow {
   updated_at: string
 }
 
-interface LeccionRow {
+export interface LeccionResumenRow {
   id: string
   technology_id: string
   slug: string
   modulo: string | null
   titulo: string
   resumen: string
-  contenido: string
   orden: number
   status: Leccion['status']
   es_proyecto: boolean
@@ -47,7 +47,11 @@ interface LeccionRow {
   updated_at: string
 }
 
-export interface ProyectoRow extends LeccionRow {
+interface LeccionRow extends LeccionResumenRow {
+  contenido: string
+}
+
+export interface ProyectoRow extends LeccionResumenRow {
   technology: {
     id: string
     name: string
@@ -120,13 +124,19 @@ export function mapTechnology(row: TechnologyRow): Technology {
 
 export function mapLeccion(row: LeccionRow): Leccion {
   return {
+    ...mapLeccionResumen(row),
+    contenido: row.contenido,
+  }
+}
+
+export function mapLeccionResumen(row: LeccionResumenRow): LeccionResumen {
+  return {
     id: row.id,
     technologyId: row.technology_id,
     slug: row.slug,
     modulo: row.modulo,
     titulo: row.titulo,
     resumen: row.resumen,
-    contenido: row.contenido,
     orden: row.orden,
     status: row.status,
     esProyecto: row.es_proyecto,
@@ -137,7 +147,7 @@ export function mapLeccion(row: LeccionRow): Leccion {
 
 export function mapProyecto(row: ProyectoRow): Proyecto {
   return {
-    ...mapLeccion(row),
+    ...mapLeccionResumen(row),
     technology: row.technology,
   }
 }

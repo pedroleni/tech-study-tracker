@@ -6,7 +6,7 @@ import type { TechnologyBrandPresentation } from '@/components/technology/Techno
 import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { textoPlanoDeTitulo } from '@/lib/utils/tituloEnLinea'
-import type { Leccion, Status } from '@/types'
+import type { LeccionResumen, Status } from '@/types'
 
 // Mismos colores que StatusBadge — el select debe leerse como la misma
 // etiqueta de estado el resto de la app, no como un campo de formulario.
@@ -18,12 +18,12 @@ const leccionProgressPillClassName: Record<Status, string> = {
 
 interface GrupoDeLecciones {
   name: string | null
-  lecciones: Leccion[]
+  lecciones: LeccionResumen[]
 }
 
-function agruparLecciones(lecciones: Leccion[]): GrupoDeLecciones[] {
+function agruparLecciones(lecciones: LeccionResumen[]): GrupoDeLecciones[] {
   const withoutModule = lecciones.filter((leccion) => !leccion.modulo?.trim())
-  const modules = new Map<string, Leccion[]>()
+  const modules = new Map<string, LeccionResumen[]>()
 
   lecciones.forEach((leccion) => {
     const moduleName = leccion.modulo?.trim()
@@ -51,7 +51,7 @@ function FilaLeccion({
   progressPending,
   onCambiarProgreso,
 }: {
-  leccion: Leccion
+  leccion: LeccionResumen
   indice: number
   technologyId: string
   currentLeccionId?: string | null
@@ -253,7 +253,7 @@ export function LeccionesFichaTecnologia({
   pendingStatus,
   onCambiarProgreso,
 }: {
-  lecciones: Leccion[]
+  lecciones: LeccionResumen[]
   technologyId: string
   brand: TechnologyBrandPresentation
   currentLeccionId?: string | null

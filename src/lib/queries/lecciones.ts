@@ -1,8 +1,16 @@
 import { supabase } from '@/lib/supabaseClient'
-import type { Leccion, Proyecto } from '@/types'
+import type { Leccion, LeccionResumen, Proyecto } from '@/types'
 
-import { mapLeccion, mapProyecto } from './mappers'
-import type { LeccionPatch, NewLeccionInput, ProyectoRow } from './mappers'
+import { mapLeccion, mapLeccionResumen, mapProyecto } from './mappers'
+import type {
+  LeccionPatch,
+  LeccionResumenRow,
+  NewLeccionInput,
+  ProyectoRow,
+} from './mappers'
+
+export const LECCION_RESUMEN_COLUMNS =
+  'id, technology_id, slug, modulo, titulo, resumen, orden, status, es_proyecto, created_at, updated_at'
 
 export type LeccionLookup =
   | { id: string; technologyId?: never; slug?: never }
@@ -37,23 +45,27 @@ function toLeccionPatch(patch: LeccionPatch) {
 export async function listProyectos(): Promise<Proyecto[]> {
   const { data, error } = await supabase
     .from('lecciones')
-    .select('*, technology:technologies!inner(id, name, icon, status)')
+    .select(
+      `${LECCION_RESUMEN_COLUMNS}, technology:technologies!inner(id, name, icon, status)`,
+    )
     .eq('es_proyecto', true)
     .order('orden', { ascending: true })
     .order('created_at', { ascending: true })
   if (error) throw error
-  return (data as ProyectoRow[]).map(mapProyecto)
+  // Sin tipos Database generados, Supabase infiere el join muchos-a-uno como array.
+  // PostgREST devuelve aquí una sola tecnología por la FK de technology_id.
+  return (data as unknown as ProyectoRow[]).map(mapProyecto)
 }
 
-export async function listLecciones(technologyId: string): Promise<Leccion[]> {
+export async function listLecciones(technologyId: string): Promise<LeccionResumen[]> {
   const { data, error } = await supabase
     .from('lecciones')
-    .select()
+    .select(LECCION_RESUMEN_COLUMNS)
     .eq('technology_id', technologyId)
     .order('orden', { ascending: true })
     .order('created_at', { ascending: true })
   if (error) throw error
-  return data.map(mapLeccion)
+  return (data as LeccionResumenRow[]).map(mapLeccionResumen)
 }
 
 export async function getLeccion(lookup: LeccionLookup): Promise<Leccion | null> {

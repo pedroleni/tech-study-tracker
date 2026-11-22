@@ -18,5 +18,7 @@ export function useLeccion(lookup: LeccionLookup) {
     enabled:
       !loading &&
       (byId ? Boolean(lookup.id) : Boolean(lookup.technologyId && lookup.slug)),
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
   })
 }

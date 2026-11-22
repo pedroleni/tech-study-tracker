@@ -7,7 +7,14 @@ vi.mock('@/lib/supabaseClient', () => ({
 }))
 
 import type { NewLeccionInput } from './mappers'
-import { createLeccion, getLeccion, listLecciones, listProyectos, updateLeccion } from './lecciones'
+import {
+  createLeccion,
+  getLeccion,
+  LECCION_RESUMEN_COLUMNS,
+  listLecciones,
+  listProyectos,
+  updateLeccion,
+} from './lecciones'
 
 const leccionRow = {
   id: 'leccion-1',
@@ -39,6 +46,20 @@ const leccion = {
   updatedAt: '2026-08-14T08:00:00.000Z',
 }
 
+const leccionResumen = {
+  id: 'leccion-1',
+  technologyId: 'technology-1',
+  slug: 'fundamentos',
+  modulo: 'Introducción',
+  titulo: 'Fundamentos',
+  resumen: 'La base de HTML.',
+  orden: 10,
+  status: 'borrador' as const,
+  esProyecto: false,
+  createdAt: '2026-08-14T08:00:00.000Z',
+  updatedAt: '2026-08-14T08:00:00.000Z',
+}
+
 const newLeccion: NewLeccionInput = {
   technologyId: 'technology-1',
   slug: 'fundamentos',
@@ -60,8 +81,19 @@ describe('lesson queries', () => {
     const select = vi.fn().mockReturnValue({ eq })
     supabaseMock.from.mockReturnValue({ select })
 
-    await expect(listLecciones('technology-1')).resolves.toEqual([leccion])
+    const result = await listLecciones('technology-1')
+
+    expect(result).toEqual([leccionResumen])
+    expect(result[0]).not.toHaveProperty('contenido')
     expect(supabaseMock.from).toHaveBeenCalledWith('lecciones')
+    expect(select).toHaveBeenCalledWith(LECCION_RESUMEN_COLUMNS)
+    expect(LECCION_RESUMEN_COLUMNS).not.toContain('contenido')
+    expect(LECCION_RESUMEN_COLUMNS).toEqual(
+      expect.stringContaining('titulo'),
+    )
+    for (const column of ['resumen', 'modulo', 'orden', 'slug']) {
+      expect(LECCION_RESUMEN_COLUMNS).toContain(column)
+    }
     expect(eq).toHaveBeenCalledWith('technology_id', 'technology-1')
     expect(firstOrder).toHaveBeenCalledWith('orden', { ascending: true })
     expect(secondOrder).toHaveBeenCalledWith('created_at', { ascending: true })
@@ -77,6 +109,7 @@ describe('lesson queries', () => {
     await expect(
       getLeccion({ technologyId: 'technology-1', slug: 'fundamentos' }),
     ).resolves.toEqual(leccion)
+    expect(select).toHaveBeenCalledWith()
     expect(technologyEq).toHaveBeenCalledWith('technology_id', 'technology-1')
     expect(slugEq).toHaveBeenCalledWith('slug', 'fundamentos')
   })
@@ -148,16 +181,22 @@ describe('lesson queries', () => {
     const select = vi.fn().mockReturnValue({ eq })
     supabaseMock.from.mockReturnValue({ select })
 
-    await expect(listProyectos()).resolves.toEqual([
+    const result = await listProyectos()
+
+    expect(result).toEqual([
       {
-        ...leccion,
+        ...leccionResumen,
         esProyecto: true,
         technology: { id: 'technology-1', name: 'HTML', icon: 'html5', status: 'completado' },
       },
     ])
-    expect(select).toHaveBeenCalledWith(
-      '*, technology:technologies!inner(id, name, icon, status)',
-    )
+    expect(result[0]).not.toHaveProperty('contenido')
+    const selectedColumns = `${LECCION_RESUMEN_COLUMNS}, technology:technologies!inner(id, name, icon, status)`
+    expect(select).toHaveBeenCalledWith(selectedColumns)
+    expect(selectedColumns).not.toContain('contenido')
+    for (const column of ['titulo', 'resumen', 'modulo', 'orden', 'slug']) {
+      expect(selectedColumns).toContain(column)
+    }
     expect(eq).toHaveBeenCalledWith('es_proyecto', true)
   })
 

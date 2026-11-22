@@ -4,14 +4,15 @@ import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it } from 'vitest'
 
 import { BarraNavegacionLeccion } from '@/components/leccion/BarraNavegacionLeccion'
-import type { Leccion } from '@/types'
+import type { LeccionResumen } from '@/types'
 
-function leccion(datos: Partial<Leccion> & Pick<Leccion, 'id' | 'slug' | 'titulo' | 'orden'>): Leccion {
+function leccion(
+  datos: Partial<LeccionResumen> & Pick<LeccionResumen, 'id' | 'slug' | 'titulo' | 'orden'>,
+): LeccionResumen {
   return {
     technologyId: 'tec-1',
     modulo: null,
     resumen: '',
-    contenido: '',
     status: 'publicado',
     esProyecto: false,
     createdAt: '2026-01-01T00:00:00.000Z',

@@ -2,12 +2,12 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import { TituloEnLinea } from '@/components/content/TituloEnLinea'
-import type { Leccion } from '@/types'
+import type { LeccionResumen } from '@/types'
 
 export interface PropiedadesBarraNavegacionLeccion {
   technologyId: string
   leccionActualId: string
-  lecciones: Leccion[]
+  lecciones: LeccionResumen[]
 }
 
 export function BarraNavegacionLeccion({

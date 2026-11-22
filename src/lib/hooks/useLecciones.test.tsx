@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import type { QueryKey } from '@tanstack/react-query'
 import { act, renderHook, waitFor } from '@testing-library/react'
 import type { ReactElement, ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -8,6 +9,7 @@ const mocks = vi.hoisted(() => ({
   loading: false,
   isAdmin: true,
   listLecciones: vi.fn(),
+  listProyectos: vi.fn(),
   getLeccion: vi.fn(),
   createLeccion: vi.fn(),
   updateLeccion: vi.fn(),
@@ -21,6 +23,7 @@ vi.mock('@/lib/hooks/useProfile', () => ({
 }))
 vi.mock('@/lib/queries/lecciones', () => ({
   listLecciones: mocks.listLecciones,
+  listProyectos: mocks.listProyectos,
   getLeccion: mocks.getLeccion,
   createLeccion: mocks.createLeccion,
   updateLeccion: mocks.updateLeccion,
@@ -30,7 +33,12 @@ import type { NewLeccionInput } from '@/lib/queries/mappers'
 import { queryKeys } from '@/lib/queries/queryKeys'
 
 import { useLeccion } from './useLeccion'
-import { useCreateLeccion, useLecciones, useUpdateLeccion } from './useLecciones'
+import {
+  useCreateLeccion,
+  useLecciones,
+  useProyectos,
+  useUpdateLeccion,
+} from './useLecciones'
 
 const newLeccion: NewLeccionInput = {
   technologyId: 'technology-1',
@@ -55,6 +63,17 @@ function wrapperFor(client: QueryClient) {
   }
 }
 
+function expectPublicQueryCacheOptions(client: QueryClient, queryKey: QueryKey) {
+  const query = client.getQueryCache().find({ queryKey })
+  const options = query?.options as
+    | { staleTime?: number; refetchOnWindowFocus?: boolean }
+    | undefined
+
+  expect(query).toBeDefined()
+  expect(options?.staleTime).toBe(300000)
+  expect(options?.refetchOnWindowFocus).toBe(false)
+}
+
 describe('lesson hooks', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -62,6 +81,7 @@ describe('lesson hooks', () => {
     mocks.loading = false
     mocks.isAdmin = true
     mocks.listLecciones.mockResolvedValue([])
+    mocks.listProyectos.mockResolvedValue([])
     mocks.getLeccion.mockResolvedValue({ id: 'leccion-1' })
     mocks.createLeccion.mockResolvedValue({ id: 'leccion-1' })
     mocks.updateLeccion.mockResolvedValue({ id: 'leccion-1' })
@@ -75,9 +95,10 @@ describe('lesson hooks', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(mocks.listLecciones).toHaveBeenCalledWith('technology-1')
-    expect(
-      client.getQueryState(queryKeys.leccionesForTechnology('admin-1', 'technology-1')),
-    ).toBeDefined()
+    expectPublicQueryCacheOptions(
+      client,
+      queryKeys.leccionesForTechnology('admin-1', 'technology-1'),
+    )
   })
 
   it('keys a draft-capable lesson detail by the current viewer', async () => {
@@ -88,7 +109,18 @@ describe('lesson hooks', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(mocks.getLeccion).toHaveBeenCalledWith({ id: 'leccion-1' })
-    expect(client.getQueryState(queryKeys.leccionById('admin-1', 'leccion-1'))).toBeDefined()
+    expectPublicQueryCacheOptions(client, queryKeys.leccionById('admin-1', 'leccion-1'))
+  })
+
+  it('keeps public projects fresh for five minutes without focus refetches', async () => {
+    const client = createClient()
+    const { result } = renderHook(() => useProyectos(), {
+      wrapper: wrapperFor(client),
+    })
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+    expect(mocks.listProyectos).toHaveBeenCalledOnce()
+    expectPublicQueryCacheOptions(client, queryKeys.proyectos('admin-1'))
   })
 
   it('rejects admin mutations before querying when auth or role is missing', async () => {
